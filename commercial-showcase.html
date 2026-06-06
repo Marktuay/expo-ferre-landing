@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Blok-On | Building the Future of Construction</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed-variant": "#1d4683",
+                      "on-secondary-container": "#506c00",
+                      "surface-container": "#eeeeee",
+                      "on-tertiary-fixed-variant": "#004398",
+                      "error-container": "#ffdad6",
+                      "on-error": "#ffffff",
+                      "on-tertiary-container": "#6c9cff",
+                      "on-background": "#1a1c1c",
+                      "surface-container-high": "#e8e8e8",
+                      "secondary-fixed": "#c3f351",
+                      "on-tertiary-fixed": "#001a43",
+                      "surface-container-highest": "#e2e2e2",
+                      "secondary-fixed-dim": "#a8d636",
+                      "outline-variant": "#c3c6d2",
+                      "on-primary": "#ffffff",
+                      "tertiary": "#001e4d",
+                      "surface": "#f9f9f9",
+                      "on-error-container": "#93000a",
+                      "inverse-on-surface": "#f1f1f1",
+                      "error": "#ba1a1a",
+                      "surface-dim": "#dadada",
+                      "tertiary-fixed-dim": "#afc6ff",
+                      "secondary-container": "#c0f04f",
+                      "on-tertiary": "#ffffff",
+                      "primary-fixed-dim": "#acc7ff",
+                      "tertiary-fixed": "#d9e2ff",
+                      "on-secondary-fixed": "#151f00",
+                      "surface-variant": "#e2e2e2",
+                      "on-primary-container": "#7c9fe2",
+                      "on-surface-variant": "#434750",
+                      "inverse-surface": "#2f3131",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-fixed": "#001a40",
+                      "primary": "#001f49",
+                      "on-secondary-fixed-variant": "#394e00",
+                      "surface-container-low": "#f3f3f3",
+                      "surface-bright": "#f9f9f9",
+                      "on-secondary": "#ffffff",
+                      "primary-container": "#003471",
+                      "inverse-primary": "#acc7ff",
+                      "surface-tint": "#395e9d",
+                      "background": "#f9f9f9",
+                      "outline": "#747781",
+                      "tertiary-container": "#003276",
+                      "primary-fixed": "#d7e2ff",
+                      "on-surface": "#1a1c1c",
+                      "secondary": "#4c6700"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "md": "24px",
+                      "gutter": "24px",
+                      "lg": "48px",
+                      "sm": "16px",
+                      "margin": "32px",
+                      "base": "4px",
+                      "xl": "80px",
+                      "xs": "8px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "mono-label": ["Inter"],
+                      "display": ["Space Grotesk"],
+                      "body-lg": ["Inter"],
+                      "headline-md": ["Space Grotesk"],
+                      "headline-lg": ["Space Grotesk"],
+                      "label-caps": ["Inter"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "mono-label": ["13px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                      "display": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "headline-md": ["32px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "headline-lg": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "label-caps": ["12px", {"lineHeight": "1.5", "letterSpacing": "0.1em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+        .blueprint-grid {
+            background-image: radial-gradient(#c3c6d2 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-surface">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 transition-all duration-200 ease-in-out">
+<div class="flex justify-between items-center h-16 px-6 md:px-12 max-w-[1440px] mx-auto">
+<div class="text-xl font-bold tracking-tighter text-[#003471] dark:text-white font-display">
+                Blok-On
+            </div>
+<div class="hidden md:flex items-center space-x-8 font-['Space_Grotesk'] font-medium uppercase tracking-wider text-sm">
+<a class="text-[#003471] dark:text-blue-400 border-b-2 border-[#1261D1] pb-1" href="#">Home</a>
+<a class="text-gray-500 dark:text-gray-400 hover:text-[#003471] dark:hover:text-white transition-colors" href="#">Products</a>
+<a class="text-gray-500 dark:text-gray-400 hover:text-[#003471] dark:hover:text-white transition-colors" href="#">Services</a>
+<a class="text-gray-500 dark:text-gray-400 hover:text-[#003471] dark:hover:text-white transition-colors" href="#">Contact</a>
+</div>
+<button class="bg-[#001f49] text-white px-6 py-2 font-label-caps text-label-caps uppercase hover:bg-on-primary-fixed-variant transition-colors">
+                Get Started
+            </button>
+</div>
+</nav>
+<main class="pt-16">
+<!-- Hero Section -->
+<section class="relative overflow-hidden blueprint-grid border-b border-outline-variant">
+<div class="max-w-[1440px] mx-auto px-6 md:px-12 py-20 lg:py-32 grid lg:grid-cols-2 gap-16 items-center">
+<div class="z-10">
+<span class="inline-block px-3 py-1 bg-secondary-container text-on-secondary-container font-label-caps text-label-caps mb-6 uppercase tracking-widest">
+                        Structural Modernism
+                    </span>
+<h1 class="font-display text-display text-primary mb-8">
+                        Building the Future of Construction.
+                    </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mb-10">
+                        Precision-engineered solutions for modern architectural demands. We bridge the gap between physical durability and digital-first structural design.
+                    </p>
+<div class="flex flex-wrap gap-4">
+<button class="bg-secondary-container text-on-secondary-container font-label-caps text-label-caps px-8 py-4 uppercase border-b-2 border-on-secondary-fixed-variant hover:translate-y-[-2px] transition-transform">
+                            View Developments
+                        </button>
+<button class="border border-primary text-primary font-label-caps text-label-caps px-8 py-4 uppercase hover:bg-primary hover:text-white transition-all">
+                            Technical Specs
+                        </button>
+</div>
+</div>
+<div class="relative group">
+<div class="absolute -inset-4 border border-outline-variant -z-10 group-hover:inset-0 transition-all duration-300"></div>
+<img alt="Architectural Masterpiece" class="w-full aspect-[4/5] object-cover border border-outline" data-alt="Modern architectural building with sharp concrete lines, glass panels, and structural steel against a clear blue sky, minimalist industrial aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5DDfutFkGWCiUXnX3_OCUz1jkT4uuY80CXvtwfL6JzkzqZA7DYcimx-VBSZRbuayrOTE6xt6PJft6aagzJYHutmWdLUwMvAmzR55AVu3V8LaGjWhEuCuxGlj-ixPOWv2DbbI07uWlJW8dwVLbDZ9qwSdIKsl8Bc7zg97O4KyWDvISmq0ZUp2Nhme8FA12bnjd-zghZVtmIY8Wel1RAaMY9bGlkuAeMYfp-copL0hIrfMn_PMwOaCn9xk0i12Oz9dcudggdEH9r18"/>
+<div class="absolute bottom-0 right-0 bg-white p-6 border-l border-t border-outline-variant shadow-xl">
+<div class="font-mono-label text-mono-label text-primary">PROJECT_NODE_042</div>
+<div class="text-xs text-outline mt-1 font-body-md uppercase tracking-tighter">Status: Completed 2024</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Stats Section -->
+<section class="border-b border-outline-variant bg-surface">
+<div class="max-w-[1440px] mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-outline-variant">
+<div class="p-12 text-center">
+<div class="font-display text-headline-lg text-primary mb-2">124+</div>
+<div class="font-label-caps text-label-caps text-outline uppercase">Projects Completed</div>
+</div>
+<div class="p-12 text-center">
+<div class="font-display text-headline-lg text-primary mb-2">15</div>
+<div class="font-label-caps text-label-caps text-outline uppercase">Years in Business</div>
+</div>
+<div class="p-12 text-center">
+<div class="font-display text-headline-lg text-primary mb-2">08</div>
+<div class="font-label-caps text-label-caps text-outline uppercase">Design Awards</div>
+</div>
+<div class="p-12 text-center">
+<div class="font-display text-headline-lg text-primary mb-2">100%</div>
+<div class="font-label-caps text-label-caps text-outline uppercase">Safety Record</div>
+</div>
+</div>
+</section>
+<!-- Core Offerings (Bento Grid Style) -->
+<section class="py-24 max-w-[1440px] mx-auto px-6 md:px-12">
+<div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary mb-4 uppercase tracking-tight">Core Offerings</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-lg italic border-l-2 border-secondary pl-6">
+                        "Engineering perfection into every structural element, from the foundation to the final facade."
+                    </p>
+</div>
+<div class="font-label-caps text-label-caps text-outline uppercase tracking-widest pb-2">
+                    Solutions Catalog 2024
+                </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-0 border border-outline-variant">
+<!-- Viviendas -->
+<div class="group relative border-r border-outline-variant p-8 bg-white hover:bg-primary transition-colors duration-500 overflow-hidden min-h-[400px] flex flex-col">
+<div class="mb-auto">
+<span class="font-label-caps text-label-caps text-secondary mb-4 block group-hover:text-secondary-fixed transition-colors uppercase">Category 01</span>
+<h3 class="font-headline-md text-headline-md mb-4 group-hover:text-white transition-colors">Viviendas</h3>
+<p class="font-body-md text-body-md text-outline group-hover:text-white/70 transition-colors">
+                            High-end residential modular systems designed for durability and thermal efficiency.
+                        </p>
+</div>
+<div class="mt-8">
+<img alt="Viviendas" class="w-full aspect-video object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="Modern minimalist residential architecture with clean lines, large glass windows, and concrete textures in a serene landscape" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0mLyfHrXJz-2P5_8tihURP7VDhBza0zrDRVjMj01KeqvBW0wJeX98WAwt0ILCLfCcKfECw1sTAYt0BiYukjczKiEku44fL80udYCbKlaGIlw-g-eEshyMXP15xXSBRtqOOBWRAwlGP0iSB2V92jAhmZ7YM-EnZ-DQfmY4z_UpEzcGe_B9OLkgo_T1vA6m6W4bD5tC9zk5_hRmU5o0oOcrkif3kGbuflntp_FX4jSpGaODk19USJ9t-oQZVQ7ClRMoVM7Pf5G8Sz4"/>
+</div>
+<div class="absolute bottom-4 right-8 flex items-center gap-2 group-hover:text-white transition-colors">
+<span class="font-label-caps text-label-caps uppercase">Explore</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</div>
+</div>
+<!-- Muros -->
+<div class="group relative border-r border-outline-variant p-8 bg-white hover:bg-primary transition-colors duration-500 overflow-hidden min-h-[400px] flex flex-col">
+<div class="mb-auto">
+<span class="font-label-caps text-label-caps text-secondary mb-4 block group-hover:text-secondary-fixed transition-colors uppercase">Category 02</span>
+<h3 class="font-headline-md text-headline-md mb-4 group-hover:text-white transition-colors">Muros</h3>
+<p class="font-body-md text-body-md text-outline group-hover:text-white/70 transition-colors">
+                            Reinforced wall structures optimized for speed of assembly and structural integrity.
+                        </p>
+</div>
+<div class="mt-8">
+<img alt="Muros" class="w-full aspect-video object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="Close up of structural concrete wall with precise patterns and industrial finish, highlighting architectural texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB80vcM6pqY0z5_Dt10YsYPT2W6uW8IfoWvjgTB3cwVMZTSqVUgF0ooGACJOby5RhbT-4CxHyg8ydxuQT19-LAfY0nhRr8jsKT3TScKL3N1bAsEadwIP5ONRebec7RPcvqXlrrybQmrjuaP-x5whd7sKYmyNT9O3BaElTrqaTh_wN1zuqyHHjg-XfwTIPIxTWK4UGGqmJhmksfiZwcEZqSGUr1hl_CKjX4VzIqcEgxgMY5tlQPMq-ZQPCWCKTKx4YumDPlefWZ3b0U"/>
+</div>
+<div class="absolute bottom-4 right-8 flex items-center gap-2 group-hover:text-white transition-colors">
+<span class="font-label-caps text-label-caps uppercase">Explore</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</div>
+</div>
+<!-- Productos -->
+<div class="group relative p-8 bg-white hover:bg-primary transition-colors duration-500 overflow-hidden min-h-[400px] flex flex-col">
+<div class="mb-auto">
+<span class="font-label-caps text-label-caps text-secondary mb-4 block group-hover:text-secondary-fixed transition-colors uppercase">Category 03</span>
+<h3 class="font-headline-md text-headline-md mb-4 group-hover:text-white transition-colors">Productos</h3>
+<p class="font-body-md text-body-md text-outline group-hover:text-white/70 transition-colors">
+                            Individual structural components and proprietary tech for developers.
+                        </p>
+</div>
+<div class="mt-8">
+<img alt="Productos" class="w-full aspect-video object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="Industrial construction components arranged neatly, technical blueprint style photograph of metallic building parts" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3PXCQ6WESnM9yQ_U8adnVCUHqV5G6lD9YecNP0UUBZf0lfrmIgERcA88OD5zfhZdyfft9mDTm5-5gEj4JOq34St4jyl0F9QZGN9NfcrFEORhggoUXE-BSbsHkjXrf60th5jqVPnyeh__8B0AfE7SZEqwq9V6QLpy7xMg7qivR3TiNjK7JkuUovNe_ieTCyFsFRZ1b6hq8WcnM2O7al_J-uDFAtDtDCyRjKPCstwR15NjacogIjCVlK0uzhJUuj78qYz-2R9-Etso"/>
+</div>
+<div class="absolute bottom-4 right-8 flex items-center gap-2 group-hover:text-white transition-colors">
+<span class="font-label-caps text-label-caps uppercase">Explore</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Innovation / Latest News -->
+<section class="py-24 bg-white border-t border-outline-variant overflow-hidden">
+<div class="max-w-[1440px] mx-auto px-6 md:px-12 grid lg:grid-cols-12 gap-16">
+<div class="lg:col-span-5">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-8">Innovation <br/>&amp; Insights</h2>
+<div class="space-y-12">
+<div class="pb-8 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-outline uppercase block mb-2">March 12, 2024</span>
+<h4 class="font-headline-md text-headline-md text-primary hover:text-secondary cursor-pointer transition-colors mb-4">Adaptive Foundations: The New Standard</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Exploring how our new seismic-reactive modules are changing construction in high-activity zones.</p>
+</div>
+<div class="pb-8 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-outline uppercase block mb-2">Feb 28, 2024</span>
+<h4 class="font-headline-md text-headline-md text-primary hover:text-secondary cursor-pointer transition-colors mb-4">Carbon-Negative Concrete Tech</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Integrating sustainable manufacturing without compromising structural load-bearing capacity.</p>
+</div>
+</div>
+</div>
+<div class="lg:col-span-7 relative">
+<div class="grid grid-cols-2 gap-4 h-full">
+<div class="space-y-4">
+<img alt="Innovation Lab" class="w-full aspect-[3/4] object-cover border border-outline-variant" data-alt="Interior of a high-tech engineering laboratory with architectural models and digital screens showing structural analysis" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYTVkV2Msj7NyeK2EEFZZbZhT2HJqzmaFd2wXi3YgPqr0RcDVBbRNdumjwVHWSXvIIzLgma5HIYfx9Saac0l_SDn11Kj50WqrVXDJRKPASBUWyEsUaV2w-NM88h6mGRY9vg_0KPaXCzX7LNfKKCrrM-cox46c3kiYXA4N5EN6STczd2Cx-WBr16oEa-StNPXKlDFqAPW_78cqB9VvAm_EyelpPl_VrNEmUnx5x8zAGVcsiryi1Fb9zVZfAOroAHdDZThSMQLcmN9k"/>
+<div class="bg-secondary-container p-6">
+<span class="material-symbols-outlined text-on-secondary-container text-4xl mb-4">biotech</span>
+<div class="font-headline-md text-headline-md text-on-secondary-container">R&amp;D Center</div>
+<div class="text-xs text-on-secondary-container/70 uppercase tracking-widest mt-2">Zone_Alpha_01</div>
+</div>
+</div>
+<div class="pt-16 space-y-4">
+<div class="bg-primary p-6 h-40 flex items-end">
+<div class="font-label-caps text-label-caps text-white uppercase tracking-widest">Structural Analysis v4.2</div>
+</div>
+<img alt="Construction Site" class="w-full aspect-[3/4] object-cover border border-outline-variant" data-alt="Overhead view of a modern construction site with organized materials and steel framing under bright daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzOxt44H85lAGZACjfz7L8-9lyPNQl74PKOurGJ0vEFyyoyLxA_UX4iG76fOJT4V1cMA5EmUi2zA4cnn9pDDeXlwChvOXe9QvqEHgDYnbxEA9Xd3_0LluE4CaslXACA_ob4Pdoguiy64p9lBXYZQdILjE1tMxHTBW2MrCX18P2r-puzHpRmX33xOjMQX6sdpDidPVqdnXlIpC2Fm3tda2CFe71z7XsORGdmEnhaEkMLHESecP3WrbL-slEkM2FiIT2BbRkg-FDIHQ"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Newsletter / CTA -->
+<section class="bg-primary py-24 text-white">
+<div class="max-w-[1440px] mx-auto px-6 md:px-12 text-center">
+<h2 class="font-display text-headline-lg mb-8 uppercase tracking-tighter">Ready to Build Your Vision?</h2>
+<p class="font-body-lg text-body-lg text-white/70 max-w-2xl mx-auto mb-12 italic">
+                    "Structural integrity is not an option; it is the fundamental requirement of progress."
+                </p>
+<div class="flex flex-col md:flex-row gap-4 justify-center max-w-lg mx-auto">
+<input class="flex-1 bg-white/10 border border-white/20 px-6 py-4 font-label-caps text-label-caps uppercase placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-secondary focus:border-secondary" placeholder="ENTER YOUR WORK EMAIL" type="email"/>
+<button class="bg-secondary-container text-on-secondary-container px-10 py-4 font-label-caps text-label-caps uppercase hover:bg-secondary-fixed transition-colors">
+                        Connect
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+<div class="flex flex-col md:flex-row justify-between items-center py-12 px-6 md:px-12 max-w-[1440px] mx-auto gap-8 opacity-80 hover:opacity-100 transition-all duration-200">
+<div class="text-lg font-black text-[#003471] dark:text-white font-display">
+                Blok-On
+            </div>
+<div class="flex flex-wrap justify-center gap-8 font-['Space_Grotesk'] text-xs uppercase tracking-widest">
+<a class="text-gray-400 dark:text-gray-500 hover:text-[#a3e635] transition-colors" href="#">Viviendas</a>
+<a class="text-gray-400 dark:text-gray-500 hover:text-[#a3e635] transition-colors" href="#">Muros</a>
+<a class="text-gray-400 dark:text-gray-500 hover:text-[#a3e635] transition-colors" href="#">Privacy Policy</a>
+<a class="text-gray-400 dark:text-gray-500 hover:text-[#a3e635] transition-colors" href="#">Terms of Service</a>
+</div>
+<div class="font-['Space_Grotesk'] text-xs uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                © 2024 Blok-On Development. Built for Structural Modernism.
+            </div>
+</div>
+</footer>
+</body></html>
