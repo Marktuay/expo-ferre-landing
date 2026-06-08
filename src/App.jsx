@@ -6,6 +6,7 @@ import AdminPanel from './components/AdminPanel';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import ContactPage from './components/ContactPage';
+import StaffRegistration from './components/StaffRegistration';
 
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -409,7 +410,10 @@ export default function App() {
       )}
 
       {currentView === 'sponsorDashboard' && (
-        <SponsorDashboard onBack={() => setCurrentView('landing')} />
+        <SponsorDashboard 
+          onBack={() => setCurrentView('landing')} 
+          onStaffRegistration={() => setCurrentView('staffRegistration')}
+        />
       )}
 
       {currentView === 'adminPanel' && (
@@ -428,10 +432,14 @@ export default function App() {
         <ContactPage />
       )}
 
+      {currentView === 'staffRegistration' && (
+        <StaffRegistration />
+      )}
+
       {/* Footer */}
       <footer className="w-full bg-inverse-surface border-t-4 border-primary p-stack-lg space-y-stack-sm text-center relative z-10">
           <div className="font-headline-md text-headline-md text-primary font-bold">EXPO FERRE</div>
-          <div className="flex justify-center gap-8 mb-4">
+          <div className="flex justify-center gap-8 mb-4 flex-wrap">
             <button onClick={() => setCurrentView('privacyPolicy')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Políticas de Privacidad</button>
             <button onClick={() => setCurrentView('termsOfService')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Términos de Servicio</button>
             <a className="text-surface-variant hover:text-primary transition-colors font-body-md" href="#">Press Kit</a>

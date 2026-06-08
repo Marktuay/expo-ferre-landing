@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import SpeakerForm from './SpeakerForm';
 import InteractiveMap from './InteractiveMap';
 
-const SponsorDashboard = ({ onBack }) => {
+const SponsorDashboard = ({ onBack, onStaffRegistration }) => {
   const [activeForm, setActiveForm] = useState(null);
 
   const cardStyle = "bg-surface border border-outline-variant hover:hard-shadow transition-all p-6 rounded-5px flex flex-col md:flex-row justify-between items-center gap-4 group";
@@ -57,7 +57,7 @@ const SponsorDashboard = ({ onBack }) => {
                   <h3 className="font-headline-md text-headline-md text-secondary">Registro de staff</h3>
                   <p className="font-body-md text-body-md text-on-surface-variant">Con este registro llegarán las entradas al evento y los accesos a la app virtual.</p>
                 </div>
-                <button className={btnStyle}>COMPLETAR</button>
+                <button onClick={onStaffRegistration} className={btnStyle}>COMPLETAR</button>
               </div>
             </div>
           </section>
