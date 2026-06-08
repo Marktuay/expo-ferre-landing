@@ -5,6 +5,7 @@ import SponsorDashboard from './components/SponsorDashboard';
 import AdminPanel from './components/AdminPanel';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
+import ContactPage from './components/ContactPage';
 
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -69,7 +70,7 @@ export default function App() {
   return (
     <>
       <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'shadow-lg bg-background/90 backdrop-blur-md border-b border-outline-variant py-2' : 'bg-background py-4'} flex justify-between items-center px-margin-mobile md:px-margin-desktop`}>
-        <div className="flex items-center">
+        <div className="flex items-center cursor-pointer" onClick={() => setCurrentView('landing')}>
           <img src="/logo.svg" alt="Expo Ferre Logo" className="w-[150px] h-[100px] object-contain" />
         </div>
         <nav className="hidden md:flex items-center gap-8">
@@ -82,7 +83,7 @@ export default function App() {
           <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'awards', 100); }} className="flex items-center gap-1 transition-colors font-body-md text-on-background hover:text-primary active:text-primary">
             <span className="material-symbols-outlined text-[20px]">emoji_events</span> Premios
           </button>
-          <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'contact', 100); }} className="flex items-center gap-1 transition-colors font-body-md text-on-background hover:text-primary active:text-primary">
+          <button onClick={() => setCurrentView('contactPage')} className="flex items-center gap-1 transition-colors font-body-md text-on-background hover:text-primary active:text-primary">
             <span className="material-symbols-outlined text-[20px]">mail</span> Contacto
           </button>
         </nav>
@@ -423,16 +424,20 @@ export default function App() {
         <TermsOfService />
       )}
 
+      {currentView === 'contactPage' && (
+        <ContactPage />
+      )}
+
       {/* Footer */}
       <footer className="w-full bg-inverse-surface border-t-4 border-primary p-stack-lg space-y-stack-sm text-center relative z-10">
           <div className="font-headline-md text-headline-md text-primary font-bold">EXPO FERRE</div>
           <div className="flex justify-center gap-8 mb-4">
-            <button onClick={() => setCurrentView('privacyPolicy')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Privacy Policy</button>
-            <button onClick={() => setCurrentView('termsOfService')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Terms of Service</button>
+            <button onClick={() => setCurrentView('privacyPolicy')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Políticas de Privacidad</button>
+            <button onClick={() => setCurrentView('termsOfService')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Términos de Servicio</button>
             <a className="text-surface-variant hover:text-primary transition-colors font-body-md" href="#">Press Kit</a>
             <button onClick={() => setCurrentView('adminPanel')} className="text-surface-variant hover:text-primary transition-colors font-body-md opacity-30 hover:opacity-100">Intranet</button>
           </div>
-          <p className="font-body-md text-body-md text-surface-variant">© 2026 EXPO FERRE. ALL RIGHTS RESERVED.</p>
+          <p className="font-body-md text-body-md text-surface-variant">© 2026 EXPO FERRE. TODOS LOS DERECHOS RESERVADOS.</p>
         </footer>
 
       {/* BottomNavBar (Mobile only) */}
@@ -449,7 +454,7 @@ export default function App() {
           <span className="material-symbols-outlined transition-transform group-active:scale-110 group-hover:-translate-y-1">emoji_events</span>
           <span className="font-label-sm text-[10px] mt-1">Premios</span>
         </button>
-        <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'contact', 100); }} className="group flex flex-col items-center justify-center text-on-secondary/70 hover:text-primary transition-all active:scale-95 px-3 py-1">
+        <button onClick={() => setCurrentView('contactPage')} className="group flex flex-col items-center justify-center text-on-secondary/70 hover:text-primary transition-all active:scale-95 px-3 py-1">
           <span className="material-symbols-outlined transition-transform group-active:scale-110 group-hover:-translate-y-1">mail</span>
           <span className="font-label-sm text-[10px] mt-1">Contacto</span>
         </button>
