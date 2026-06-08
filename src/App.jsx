@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Briefcase, Users, Building2, UserCheck, LineChart, Target, Tag, ShoppingCart, Truck, ClipboardList, Archive, Plane, Cog } from 'lucide-react';
 import './index.css';
 import SponsorDashboard from './components/SponsorDashboard';
 import AdminPanel from './components/AdminPanel';
@@ -90,12 +91,16 @@ export default function App() {
         {/* Hero Section */}
         <section className="relative min-h-[90vh] flex items-center justify-center py-stack-lg px-margin-mobile overflow-hidden rounded-5px">
           <div className="absolute inset-0 z-0 overflow-hidden">
-            <img 
+            <video 
               className="w-full h-[130%] -top-[15%] absolute object-cover brightness-[0.4] will-change-transform" 
               style={{ transform: `translateY(${scrollY * 0.3}px)` }}
-              alt="Warehouse" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqYETC7cHNrtvt8G3DA13OzmlhOVAc6LA_Jh-YrbPZPy6mnVjZFTCIw_lA2svz8Sl6FGD1leRoT8Zu9D17u9IY-QPHqBLq34ZN8Ae-qAQEBSrs-eNwUWfecw7bPDrsGPlOmvvu3wNICXZkP6vJTy3api5h6kyoAjRv0iA9JjYCxYQJ-rQB3-8I8Svo7Yv-Z6WASoXiYUqpPZAWZ1DDxkUdld4GfZZtr37TCrcd0AmYSNQN2-oqSjDgjERjgikZL0YbwyM3tE4F8Zct" 
-            />
+              autoPlay 
+              loop 
+              muted 
+              playsInline
+            >
+              <source src="/hero-video.mp4" type="video/mp4" />
+            </video>
             <div className="absolute inset-0 bg-gradient-to-r from-inverse-surface/90 via-inverse-surface/50 to-transparent"></div>
           </div>
           <div className="relative z-10 container mx-auto grid grid-cols-1 lg:grid-cols-12 gap-stack-lg items-center mt-10">
@@ -117,8 +122,8 @@ export default function App() {
               </div>
             </div>
             <div className="lg:col-span-5">
-              <div className="bg-surface-container-lowest bg-opacity-50 backdrop-blur-md p-8 border border-outline-variant hard-shadow-orange rounded-5px">
-                <h2 className="font-headline-md text-headline-md text-on-background mb-6">REGISTRARSE</h2>
+              <div className="bg-[#d9d9d9]/80 backdrop-blur-sm p-8 border border-outline-variant hard-shadow-orange rounded-5px">
+                <h2 className="font-headline-md text-headline-md text-[#1e293b] mb-6">REGISTRARSE</h2>
                 <form className="space-y-4" onSubmit={handleRegister}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="group relative">
@@ -153,49 +158,108 @@ export default function App() {
                     )}
                     {formState === 'success' && (
                       <>
-                        <span className="material-symbols-outlined animate-bounce">check_circle</span> ¡REGISTRADO CON ÉXITO!
+                        <span className="material-symbols-outlined">check_circle</span> ¡REGISTRADO!
                       </>
                     )}
                   </button>
-                  <p className="text-center font-label-sm text-on-surface-variant opacity-70 mt-2">Acceso exclusivo para profesionales del sector.</p>
+                  <p className="text-center font-label-sm mt-4 text-[#52525b] font-medium tracking-wide">
+                    Acceso exclusivo para profesionales del sector.
+                  </p>
                 </form>
               </div>
             </div>
           </div>
         </section>
 
-        {/* What is Expo Ferre */}
-        <section className="py-stack-lg px-margin-mobile container mx-auto rounded-5px overflow-hidden">
-          <FadeIn direction="up">
-            <div className="max-w-3xl mb-stack-lg">
-              <h2 className="font-headline-lg text-headline-lg text-secondary border-l-4 border-primary pl-4 mb-4">¿QUÉ ES EXPO FERRE?</h2>
-              <p className="font-body-lg text-body-lg text-on-surface-variant">Expo Ferre 2026 es el epicentro de la industria ferretera, donde los principales proveedores, fabricantes y compradores se reúnen para forjar las alianzas que moverán el mercado el próximo año.</p>
-            </div>
-          </FadeIn>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter-md">
-            <FadeIn delay={100} direction="up">
-              <div className="p-8 bg-surface border border-outline-variant hover:hard-shadow transition-all group rounded-5px h-full">
-                <span className="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">hub</span>
-                <h3 className="font-headline-md text-headline-md text-secondary mb-2">NETWORKING</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Conecte directamente con tomadores de decisiones y amplíe su red de contactos estratégicos en el sector.</p>
-              </div>
-            </FadeIn>
-            <FadeIn delay={200} direction="up">
-              <div className="p-8 bg-surface border border-outline-variant hover:hard-shadow transition-all group rounded-5px h-full">
-                <span className="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">lightbulb</span>
-                <h3 className="font-headline-md text-headline-md text-secondary mb-2">INNOVACIÓN</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Descubra las últimas herramientas, materiales y tecnologías que están transformando la construcción moderna.</p>
-              </div>
-            </FadeIn>
-            <FadeIn delay={300} direction="up">
-              <div className="p-8 bg-surface border border-outline-variant hover:hard-shadow transition-all group rounded-5px h-full">
-                <span className="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">trending_up</span>
-                <h3 className="font-headline-md text-headline-md text-secondary mb-2">NEGOCIOS</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Acceda a ofertas exclusivas de feria y cierre contratos de suministro con precios preferenciales.</p>
+        {/* Patrocinadores (Sponsors) */}
+        <section className="py-12 bg-white text-center border-b border-gray-200">
+          <div className="container mx-auto px-margin-mobile">
+            <FadeIn direction="up">
+              <h2 className="font-headline-xl text-3xl md:text-5xl text-[#ff0000] font-black tracking-widest mb-10 uppercase">Patrocinan</h2>
+              <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+                {/* Example Logos */}
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center justify-center w-36 h-16 md:w-48 md:h-24 bg-gray-100 border border-gray-200 rounded-md grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 cursor-default">
+                    <span className="font-headline-sm text-gray-400 font-bold tracking-widest text-lg">LOGO {i}</span>
+                  </div>
+                ))}
               </div>
             </FadeIn>
           </div>
         </section>
+
+        {/* What is Expo Ferre */}
+        <section className="relative py-stack-lg px-margin-mobile overflow-hidden my-8">
+          <div className="absolute inset-0 z-0">
+            <img src="/hardware-store.png" alt="Hardware Store" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-surface/90 backdrop-blur-sm"></div>
+          </div>
+          <div className="container mx-auto relative z-10">
+            <FadeIn direction="up">
+              <div className="max-w-3xl mb-stack-lg">
+                <h2 className="font-headline-lg text-headline-lg text-secondary border-l-4 border-primary pl-4 mb-4">¿QUÉ ES EXPO FERRE?</h2>
+                <p className="font-body-lg text-body-lg text-on-surface-variant">Expo Ferre 2026 es el epicentro de la industria ferretera, donde los principales proveedores, fabricantes y compradores se reúnen para forjar las alianzas que moverán el mercado el próximo año.</p>
+              </div>
+            </FadeIn>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter-md">
+              <FadeIn delay={100} direction="up">
+                <div className="p-8 bg-surface/95 backdrop-blur border border-outline-variant hover:hard-shadow transition-all group rounded-5px h-full">
+                  <span className="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">hub</span>
+                  <h3 className="font-headline-md text-headline-md text-secondary mb-2">NETWORKING</h3>
+                  <p className="font-body-md text-body-md text-on-surface-variant">Conecte directamente con tomadores de decisiones y amplíe su red de contactos estratégicos en el sector.</p>
+                </div>
+              </FadeIn>
+              <FadeIn delay={200} direction="up">
+                <div className="p-8 bg-surface/95 backdrop-blur border border-outline-variant hover:hard-shadow transition-all group rounded-5px h-full">
+                  <span className="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">lightbulb</span>
+                  <h3 className="font-headline-md text-headline-md text-secondary mb-2">INNOVACIÓN</h3>
+                  <p className="font-body-md text-body-md text-on-surface-variant">Descubra las últimas herramientas, materiales y tecnologías que están transformando la construcción moderna.</p>
+                </div>
+              </FadeIn>
+              <FadeIn delay={300} direction="up">
+                <div className="p-8 bg-surface/95 backdrop-blur border border-outline-variant hover:hard-shadow transition-all group rounded-5px h-full">
+                  <span className="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">trending_up</span>
+                  <h3 className="font-headline-md text-headline-md text-secondary mb-2">NEGOCIOS</h3>
+                  <p className="font-body-md text-body-md text-on-surface-variant">Acceda a ofertas exclusivas de feria y cierre contratos de suministro con precios preferenciales.</p>
+                </div>
+              </FadeIn>
+            </div>
+          </div>
+        </section>
+
+        {/* Expected Audience */}
+        <section className="py-stack-lg px-margin-mobile container mx-auto">
+          <FadeIn direction="up">
+            <div className="bg-surface shadow-md p-0 overflow-hidden rounded-5px relative border border-outline-variant">
+              {/* Header */}
+              <div className="bg-[#f08a00] text-white inline-block px-8 py-3 font-headline-md text-headline-md mb-8 ml-6 mt-6" style={{ clipPath: 'polygon(0 0, 95% 0, 100% 100%, 0% 100%)' }}>
+                Audiencias esperada 300 personas
+              </div>
+              
+              {/* Lists */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-stack-lg px-10 pb-12">
+                <ul className="space-y-4 font-body-lg text-body-lg text-on-surface-variant">
+                  <li className="flex items-center gap-3"><Briefcase className="w-5 h-5 text-[#f08a00]" /> Dueños / Propietarios</li>
+                  <li className="flex items-center gap-3"><Users className="w-5 h-5 text-[#f08a00]" /> Socios fundadores</li>
+                  <li className="flex items-center gap-3"><Building2 className="w-5 h-5 text-[#f08a00]" /> Directores generales</li>
+                  <li className="flex items-center gap-3"><UserCheck className="w-5 h-5 text-[#f08a00]" /> Gerentes generales</li>
+                  <li className="flex items-center gap-3"><LineChart className="w-5 h-5 text-[#f08a00]" /> Gerentes comerciales</li>
+                  <li className="flex items-center gap-3"><Target className="w-5 h-5 text-[#f08a00]" /> Directores comerciales</li>
+                  <li className="flex items-center gap-3"><Tag className="w-5 h-5 text-[#f08a00]" /> Jefes de ventas</li>
+                </ul>
+                <ul className="space-y-4 font-body-lg text-body-lg text-on-surface-variant">
+                  <li className="flex items-center gap-3"><ShoppingCart className="w-5 h-5 text-[#f08a00]" /> Gerentes de compras</li>
+                  <li className="flex items-center gap-3"><Truck className="w-5 h-5 text-[#f08a00]" /> Jefes de abastecimiento</li>
+                  <li className="flex items-center gap-3"><ClipboardList className="w-5 h-5 text-[#f08a00]" /> Coordinadores de compras</li>
+                  <li className="flex items-center gap-3"><Archive className="w-5 h-5 text-[#f08a00]" /> Responsables de inventario</li>
+                  <li className="flex items-center gap-3"><Plane className="w-5 h-5 text-[#f08a00]" /> Encargados de importaciones</li>
+                  <li className="flex items-center gap-3"><Cog className="w-5 h-5 text-[#f08a00]" /> Gerentes de operaciones</li>
+                </ul>
+              </div>
+            </div>
+          </FadeIn>
+        </section>
+
 
         {/* Sponsorships */}
         <section className="py-stack-lg bg-inverse-surface text-surface px-margin-mobile rounded-5px">
@@ -314,16 +378,12 @@ export default function App() {
                 <span className="material-symbols-outlined">directions</span> COMO LLEGAR
               </button>
             </div>
-            <div className="h-64 md:h-96 bg-surface-container-highest border border-outline relative overflow-hidden rounded-5px">
-              <iframe 
-                className="w-full h-full grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
-                src="https://www.google.com/maps?q=4PVG+69+Managua&output=embed"
-                frameBorder="0"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                aria-hidden="false"
-                tabIndex="0"
-              ></iframe>
+            <div className="h-64 md:h-96 bg-surface-container-highest border border-outline relative overflow-hidden rounded-5px flex items-center justify-center p-4 bg-white">
+              <img 
+                className="w-full h-full object-contain hover:scale-105 transition-transform duration-500 cursor-pointer"
+                src="/mapa-expo-ferre.svg"
+                alt="Mapa de Selección del Espacio Corporativo"
+              />
             </div>
           </div>
         </section>
