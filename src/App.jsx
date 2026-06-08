@@ -68,7 +68,7 @@ export default function App() {
     <>
       <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'shadow-lg bg-background/90 backdrop-blur-md border-b border-outline-variant py-2' : 'bg-background py-4'} flex justify-between items-center px-margin-mobile md:px-margin-desktop`}>
         <div className="flex items-center">
-          <img src="/Expoferre.png" alt="Expo Ferre Logo" className="h-16 w-auto object-contain" />
+          <img src="/logo.svg" alt="Expo Ferre Logo" className="w-[150px] h-[100px] object-contain" />
         </div>
         <nav className="hidden md:flex items-center gap-8">
           <button onClick={() => setCurrentView('landing')} className="flex items-center gap-1 font-bold font-body-md transition-colors text-primary hover:text-primary-container active:text-primary">
@@ -387,12 +387,18 @@ export default function App() {
                 <span className="material-symbols-outlined">directions</span> COMO LLEGAR
               </button>
             </div>
-            <div className="h-64 md:h-96 bg-surface-container-highest border border-outline relative overflow-hidden rounded-5px flex items-center justify-center p-4 bg-white">
+            <div 
+              className="h-64 md:h-96 bg-surface-container-highest border border-outline relative overflow-hidden rounded-5px flex items-center justify-center p-4 bg-white cursor-pointer group"
+              onClick={() => setCurrentView('sponsorDashboard')}
+            >
               <img 
-                className="w-full h-full object-contain hover:scale-105 transition-transform duration-500 cursor-pointer"
+                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                 src="/mapa-expo-ferre.svg"
                 alt="Mapa de Selección del Espacio Corporativo"
               />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                <span className="bg-primary text-white px-4 py-2 rounded-md font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all">Ver Mapa Interactivo</span>
+              </div>
             </div>
           </div>
         </section>
