@@ -176,13 +176,20 @@ export default function App() {
           <div className="container mx-auto px-margin-mobile">
             <FadeIn direction="up">
               <h2 className="font-headline-xl text-3xl md:text-5xl text-[#ff0000] font-black tracking-widest mb-10 uppercase">Patrocinan</h2>
-              <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-                {/* Example Logos */}
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="flex items-center justify-center w-36 h-16 md:w-48 md:h-24 bg-gray-100 border border-gray-200 rounded-md grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 cursor-default">
-                    <span className="font-headline-sm text-gray-400 font-bold tracking-widest text-lg">LOGO {i}</span>
-                  </div>
-                ))}
+              <div className="overflow-hidden relative w-full flex items-center py-4">
+                {/* Fade edges */}
+                <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+                <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+                
+                {/* Animated Track */}
+                <div className="animate-scroll-logos gap-8 md:gap-16">
+                  {/* Example Logos (8 logos duplicated twice for infinite effect) */}
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8].map((i, index) => (
+                    <div key={index} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-24 bg-gray-100 border border-gray-200 rounded-md grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 cursor-default">
+                      <span className="font-headline-sm text-gray-400 font-bold tracking-widest text-lg">LOGO {i}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </FadeIn>
           </div>
@@ -190,8 +197,10 @@ export default function App() {
 
         {/* What is Expo Ferre */}
         <section className="relative py-stack-lg px-margin-mobile overflow-hidden my-8">
-          <div className="absolute inset-0 z-0">
-            <img src="/hardware-store.png" alt="Hardware Store" className="w-full h-full object-cover" />
+          <div 
+            className="absolute inset-0 z-0 bg-fixed bg-center bg-cover"
+            style={{ backgroundImage: "url('/hardware-store.png')" }}
+          >
             <div className="absolute inset-0 bg-surface/90 backdrop-blur-sm"></div>
           </div>
           <div className="container mx-auto relative z-10">
@@ -203,24 +212,24 @@ export default function App() {
             </FadeIn>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter-md">
               <FadeIn delay={100} direction="up">
-                <div className="p-8 bg-surface/95 backdrop-blur border border-outline-variant hover:hard-shadow transition-all group rounded-5px h-full">
-                  <span className="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">hub</span>
-                  <h3 className="font-headline-md text-headline-md text-secondary mb-2">NETWORKING</h3>
-                  <p className="font-body-md text-body-md text-on-surface-variant">Conecte directamente con tomadores de decisiones y amplíe su red de contactos estratégicos en el sector.</p>
+                <div className="p-8 bg-[#3B508C] border border-[#3B508C] hover:shadow-xl transition-all group rounded-5px h-full text-white">
+                  <span className="material-symbols-outlined text-4xl text-white mb-4 group-hover:scale-110 transition-transform">hub</span>
+                  <h3 className="font-headline-md text-headline-md text-white mb-2">NETWORKING</h3>
+                  <p className="font-body-md text-body-md text-white/90">Conecte directamente con tomadores de decisiones y amplíe su red de contactos estratégicos en el sector.</p>
                 </div>
               </FadeIn>
               <FadeIn delay={200} direction="up">
-                <div className="p-8 bg-surface/95 backdrop-blur border border-outline-variant hover:hard-shadow transition-all group rounded-5px h-full">
-                  <span className="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">lightbulb</span>
-                  <h3 className="font-headline-md text-headline-md text-secondary mb-2">INNOVACIÓN</h3>
-                  <p className="font-body-md text-body-md text-on-surface-variant">Descubra las últimas herramientas, materiales y tecnologías que están transformando la construcción moderna.</p>
+                <div className="p-8 bg-[#3B508C] border border-[#3B508C] hover:shadow-xl transition-all group rounded-5px h-full text-white">
+                  <span className="material-symbols-outlined text-4xl text-white mb-4 group-hover:scale-110 transition-transform">lightbulb</span>
+                  <h3 className="font-headline-md text-headline-md text-white mb-2">INNOVACIÓN</h3>
+                  <p className="font-body-md text-body-md text-white/90">Descubra las últimas herramientas, materiales y tecnologías que están transformando la construcción moderna.</p>
                 </div>
               </FadeIn>
               <FadeIn delay={300} direction="up">
-                <div className="p-8 bg-surface/95 backdrop-blur border border-outline-variant hover:hard-shadow transition-all group rounded-5px h-full">
-                  <span className="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">trending_up</span>
-                  <h3 className="font-headline-md text-headline-md text-secondary mb-2">NEGOCIOS</h3>
-                  <p className="font-body-md text-body-md text-on-surface-variant">Acceda a ofertas exclusivas de feria y cierre contratos de suministro con precios preferenciales.</p>
+                <div className="p-8 bg-[#3B508C] border border-[#3B508C] hover:shadow-xl transition-all group rounded-5px h-full text-white">
+                  <span className="material-symbols-outlined text-4xl text-white mb-4 group-hover:scale-110 transition-transform">trending_up</span>
+                  <h3 className="font-headline-md text-headline-md text-white mb-2">NEGOCIOS</h3>
+                  <p className="font-body-md text-body-md text-white/90">Acceda a ofertas exclusivas de feria y cierre contratos de suministro con precios preferenciales.</p>
                 </div>
               </FadeIn>
             </div>

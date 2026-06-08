@@ -13,3 +13,16 @@
     clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
 }
 .rounded-5px { border-radius: 5px !important; }
+
+@keyframes scroll-logos {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+.animate-scroll-logos {
+    animation: scroll-logos 25s linear infinite;
+    display: flex;
+    width: max-content;
+}
+.animate-scroll-logos:hover {
+    animation-play-state: paused;
+}
