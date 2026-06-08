@@ -3,6 +3,8 @@ import { Briefcase, Users, Building2, UserCheck, LineChart, Target, Tag, Shoppin
 import './index.css';
 import SponsorDashboard from './components/SponsorDashboard';
 import AdminPanel from './components/AdminPanel';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
 
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -413,12 +415,20 @@ export default function App() {
         <AdminPanel onBack={() => setCurrentView('landing')} />
       )}
 
+      {currentView === 'privacyPolicy' && (
+        <PrivacyPolicy />
+      )}
+
+      {currentView === 'termsOfService' && (
+        <TermsOfService />
+      )}
+
       {/* Footer */}
       <footer className="w-full bg-inverse-surface border-t-4 border-primary p-stack-lg space-y-stack-sm text-center relative z-10">
           <div className="font-headline-md text-headline-md text-primary font-bold">EXPO FERRE</div>
           <div className="flex justify-center gap-8 mb-4">
-            <a className="text-surface-variant hover:text-primary transition-colors font-body-md" href="#">Privacy Policy</a>
-            <a className="text-surface-variant hover:text-primary transition-colors font-body-md" href="#">Terms of Service</a>
+            <button onClick={() => setCurrentView('privacyPolicy')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Privacy Policy</button>
+            <button onClick={() => setCurrentView('termsOfService')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Terms of Service</button>
             <a className="text-surface-variant hover:text-primary transition-colors font-body-md" href="#">Press Kit</a>
             <button onClick={() => setCurrentView('adminPanel')} className="text-surface-variant hover:text-primary transition-colors font-body-md opacity-30 hover:opacity-100">Intranet</button>
           </div>
