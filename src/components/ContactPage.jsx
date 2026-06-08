@@ -21,10 +21,10 @@ const ContactPage = () => {
   };
 
   return (
-    <main className="pt-24 pb-20 md:pb-32 px-margin-mobile md:px-margin-desktop bg-background min-h-screen">
+    <main className="pt-36 pb-20 md:pb-32 px-margin-mobile md:px-margin-desktop bg-background min-h-screen">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Contáctanos</h1>
+          <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Contáctenos</h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
             ¿Tienes dudas sobre Expo Ferre 2026? Nuestro equipo está listo para ayudarte con información sobre patrocinios, espacios comerciales y asistencia general.
           </p>

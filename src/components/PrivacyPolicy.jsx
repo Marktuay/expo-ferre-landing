@@ -6,7 +6,7 @@ const PrivacyPolicy = () => {
   }, []);
 
   return (
-    <main className="pt-24 pb-20 md:pb-32 px-margin-mobile md:px-margin-desktop bg-background min-h-screen">
+    <main className="pt-36 pb-20 md:pb-32 px-margin-mobile md:px-margin-desktop bg-background min-h-screen">
       <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-lg shadow-sm border border-outline-variant">
         <h1 className="font-headline-lg text-headline-lg text-primary mb-6 border-b-4 border-secondary pb-4">Políticas de Privacidad</h1>
         
