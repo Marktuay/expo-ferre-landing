@@ -426,18 +426,46 @@ export default function App() {
                 <span className="material-symbols-outlined">directions</span> COMO LLEGAR
               </button>
             </div>
-            <div 
-              className="h-64 md:h-96 bg-surface-container-highest border border-outline relative overflow-hidden rounded-5px flex items-center justify-center p-4 bg-white cursor-pointer group"
-              onClick={() => setCurrentView('sponsorDashboard')}
-            >
-              <img 
-                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                src="/mapa-expo-ferre.svg"
-                alt="Mapa de Selección del Espacio Corporativo"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                <span className="bg-primary text-white px-4 py-2 rounded-md font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all">Ver Mapa Interactivo</span>
-              </div>
+            <div className="bg-[#d9d9d9]/80 backdrop-blur-sm p-8 border border-outline-variant hard-shadow-orange rounded-5px relative overflow-hidden shadow-2xl">
+              {formState === 'success' && (
+                <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center text-center p-8 z-10">
+                  <span className="material-symbols-outlined text-6xl text-[#16a34a] mb-4">check_circle</span>
+                  <h3 className="font-headline-lg text-2xl text-[#1e293b] font-bold mb-2">¡Preregistro Exitoso!</h3>
+                  <p className="text-[#475569]">Nos pondremos en contacto contigo pronto con más información.</p>
+                </div>
+              )}
+              <h2 className="font-headline-md text-headline-md text-[#1e293b] mb-6 font-bold">PREREGISTRO</h2>
+              <form onSubmit={handleRegister} className="space-y-4 text-left">
+                <div>
+                  <label className="block text-sm font-medium text-[#475569] mb-1">Nombre Completo</label>
+                  <input required type="text" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="Ej. Juan Pérez" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#475569] mb-1">Empresa</label>
+                  <input required type="text" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="Nombre de tu empresa" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#475569] mb-1">Email</label>
+                    <input required type="email" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="correo@ejemplo.com" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#475569] mb-1">Teléfono</label>
+                    <input required type="tel" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="+505 0000 0000" />
+                  </div>
+                </div>
+                <button 
+                  disabled={formState === 'submitting'}
+                  type="submit" 
+                  className="w-full mt-6 bg-[#f39200] hover:bg-[#d88000] text-white font-bold py-4 rounded-md shadow-md transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {formState === 'submitting' ? (
+                    <><span className="material-symbols-outlined animate-spin">refresh</span> PROCESANDO...</>
+                  ) : (
+                    <><span className="material-symbols-outlined">send</span> REGISTRARME AHORA</>
+                  )}
+                </button>
+              </form>
             </div>
           </div>
         </section>
