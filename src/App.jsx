@@ -103,10 +103,16 @@ export default function App() {
           </nav>
         </div>
         <div className="hidden lg:flex items-center gap-4">
-          <button className="bg-[#f39200] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg">
+          <button 
+            onClick={() => setCurrentView('sponsorDashboard')}
+            className="bg-[#f39200] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
+          >
             <span className="material-symbols-outlined text-[22px]">handshake</span> Quiero patrocinar
           </button>
-          <button className="bg-[#283474] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg">
+          <button 
+            onClick={() => { setCurrentView('landing'); setTimeout(() => document.getElementById('preregistro-form')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
+            className="bg-[#283474] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
+          >
             <span className="material-symbols-outlined text-[22px]">confirmation_number</span> Quiero asistir
           </button>
         </div>
@@ -426,7 +432,7 @@ export default function App() {
                 <span className="material-symbols-outlined">directions</span> COMO LLEGAR
               </button>
             </div>
-            <div className="bg-[#d9d9d9]/80 backdrop-blur-sm p-8 border border-outline-variant hard-shadow-orange rounded-5px relative overflow-hidden shadow-2xl">
+            <div id="preregistro-form" className="bg-[#d9d9d9]/80 backdrop-blur-sm p-8 border border-outline-variant hard-shadow-orange rounded-5px relative overflow-hidden shadow-2xl">
               {formState === 'success' && (
                 <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center text-center p-8 z-10">
                   <span className="material-symbols-outlined text-6xl text-[#16a34a] mb-4">check_circle</span>
