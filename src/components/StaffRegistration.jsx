@@ -66,44 +66,10 @@ const StaffRegistration = () => {
                     <label className="font-label-md text-on-surface font-bold">Teléfono móvil</label>
                     <input type="tel" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="+505 8000 0000" />
                   </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Edad <span className="text-error">*</span></label>
-                    <input required type="number" min="18" max="100" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Su edad" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Sexo <span className="text-error">*</span></label>
-                    <select required defaultValue="" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface">
-                      <option value="" disabled>Seleccione una opción...</option>
-                      <option value="masculino">Masculino</option>
-                      <option value="femenino">Femenino</option>
-                      <option value="otro">Otro</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Profesión</label>
-                    <input type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Ej. Arquitecto, Ingeniero" />
-                  </div>
+
                 </div>
               </div>
 
-              {/* Ubicación */}
-              <div className="space-y-4 pt-4">
-                <h3 className="font-headline-sm text-secondary border-b pb-2">Ubicación</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">País <span className="text-error">*</span></label>
-                    <input required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Ej. Nicaragua" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Ciudad <span className="text-error">*</span></label>
-                    <input required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Ej. Managua" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Municipio</label>
-                    <input type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Su municipio" />
-                  </div>
-                </div>
-              </div>
 
               {/* Datos Empresariales */}
               <div className="space-y-4 pt-4">

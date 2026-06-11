@@ -128,7 +128,7 @@ export default function InteractiveMap({ onBack }) {
   };
 
   return (
-    <div className="w-full bg-background rounded-5px border border-outline-variant overflow-hidden flex flex-col h-[70vh]">
+    <div className="w-full bg-background rounded-5px border border-outline-variant overflow-hidden flex flex-col h-full">
       {/* Cabecera del Mapa */}
       <div className="bg-surface-container border-b border-outline-variant p-4 flex items-center justify-between z-10 relative shadow-sm">
         <div className="flex items-center gap-4">
@@ -143,7 +143,7 @@ export default function InteractiveMap({ onBack }) {
               Plano de Exposición
             </h2>
             <p className="text-body-sm text-secondary">
-              Usa el scroll o pellizca para hacer zoom. Arrastra para moverte. Selecciona un stand disponible en verde.
+              Desliza para moverte por el plano. Haz clic o toca cualquier pin de color azul <span className="w-3 h-3 inline-block rounded-full bg-blue-500 border border-white/50 align-middle mx-1"></span> para iniciar tu reservación.
             </p>
             {clickCoords && (
               <p className="text-body-sm text-primary font-mono mt-1">
@@ -156,11 +156,11 @@ export default function InteractiveMap({ onBack }) {
         {/* Leyenda Visual */}
         <div className="hidden md:flex items-center gap-6 text-label-sm font-medium">
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-green-500 border border-white/50"></span>
+            <span className="w-3 h-3 rounded-full bg-blue-500 border border-white/50"></span>
             <span className="text-secondary">Disponible</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-orange-500 border border-white"></span>
+            <span className="w-3 h-3 rounded-full bg-red-500 border border-white"></span>
             <span className="text-secondary">Seleccionado</span>
           </div>
           <div className="flex items-center gap-2">
@@ -208,9 +208,9 @@ export default function InteractiveMap({ onBack }) {
                         onClick={() => handleStandClick(stand)}
                         className={`absolute flex items-center justify-center transition-all duration-300 rounded-full shadow-md cursor-pointer border-2 group hover:z-30 ${
                           isSelected 
-                            ? 'bg-orange-500 text-white border-white scale-125 z-20 shadow-lg' 
+                            ? 'bg-red-500 text-white border-white scale-125 z-20 shadow-lg' 
                             : stand.status === 'available'
-                              ? 'bg-green-500 text-white hover:bg-green-600 hover:scale-110 border-white/50 z-10'
+                              ? 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-110 border-white/50 z-10'
                               : 'bg-surface-variant text-secondary border-outline hover:opacity-100 opacity-80 z-0'
                         }`}
                         style={{
