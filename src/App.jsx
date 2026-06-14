@@ -85,20 +85,20 @@ export default function App() {
       <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'shadow-lg bg-[#2a2f40]/95 backdrop-blur-md border-b border-white/10 py-2' : 'bg-[#2a2f40] py-4'} flex justify-between items-center px-margin-mobile md:px-margin-desktop`}>
         <div className="flex items-center gap-12">
           <div className="flex items-center cursor-pointer bg-white p-2 rounded-md shadow-md transition-transform hover:scale-105" onClick={() => setCurrentView('landing')}>
-            <img src="/logo.svg" alt="Expo Ferre Logo" className="w-[200px] h-[100px] object-contain" />
+            <img src="/logo.svg" alt="Expo Ferre Logo" className="w-[220px] h-[110px] object-contain" />
           </div>
-          <nav className="hidden lg:flex items-center gap-8">
-            <button onClick={() => setCurrentView('landing')} className="flex items-center gap-1.5 font-bold text-lg transition-colors text-white hover:text-gray-200 active:text-gray-300">
-              <span className="material-symbols-outlined text-[24px]">home</span> Inicio
+          <nav className="hidden lg:flex items-center gap-4">
+            <button onClick={() => setCurrentView('landing')} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
+              <span className="material-symbols-outlined text-[22px]">home</span> Inicio
             </button>
-            <button onClick={() => setCurrentView('sponsorDashboard')} className="flex items-center gap-1.5 transition-colors text-lg font-semibold text-white hover:text-gray-200 active:text-gray-300">
-              <span className="material-symbols-outlined text-[24px]">military_tech</span> Patrocinadores
+            <button onClick={() => setCurrentView('sponsorDashboard')} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
+              <span className="material-symbols-outlined text-[22px]">military_tech</span> Patrocinadores
             </button>
-            <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'awards', 100); }} className="flex items-center gap-1.5 transition-colors text-lg font-semibold text-white hover:text-gray-200 active:text-gray-300">
-              <span className="material-symbols-outlined text-[24px]">emoji_events</span> Premios
+            <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'awards', 100); }} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
+              <span className="material-symbols-outlined text-[22px]">emoji_events</span> Premios
             </button>
-            <button onClick={() => setCurrentView('contactPage')} className="flex items-center gap-1.5 transition-colors text-lg font-semibold text-white hover:text-gray-200 active:text-gray-300">
-              <span className="material-symbols-outlined text-[24px]">mail</span> Contacto
+            <button onClick={() => setCurrentView('contactPage')} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
+              <span className="material-symbols-outlined text-[22px]">mail</span> Contacto
             </button>
           </nav>
         </div>
@@ -165,7 +165,7 @@ export default function App() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary-fixed-dim">location_on</span>
-                  <span className="font-label-sm">Crowne Plaza, Managua</span>
+                  <span className="font-label-sm">Centro de Convenciones Crowne Plaza</span>
                 </div>
               </div>
             </div>
