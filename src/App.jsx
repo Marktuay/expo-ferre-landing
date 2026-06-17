@@ -44,6 +44,7 @@ const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
 
 export default function App() {
   const [currentView, setCurrentView] = useState('landing');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [formState, setFormState] = useState('idle'); // 'idle', 'submitting', 'success'
@@ -102,26 +103,69 @@ export default function App() {
             </button>
           </nav>
         </div>
-        <div className="hidden lg:flex items-center gap-4">
+        <div className="flex items-center gap-4">
+          {/* Mobile Hamburger Button */}
           <button 
-            onClick={() => setCurrentView('sponsorDashboard')}
-            className="bg-[#f39200] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden text-white p-2 flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
+            aria-label="Toggle mobile menu"
           >
-            <span className="material-symbols-outlined text-[22px]">handshake</span> Quiero patrocinar
+            <span className="material-symbols-outlined text-[32px]">{isMobileMenuOpen ? 'close' : 'menu'}</span>
           </button>
-          <button 
-            onClick={() => { setCurrentView('landing'); setTimeout(() => document.getElementById('preregistro-form')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
-            className="bg-[#283474] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
-          >
-            <span className="material-symbols-outlined text-[22px]">confirmation_number</span> Quiero asistir
-          </button>
+
+          {/* Desktop Buttons */}
+          <div className="hidden lg:flex items-center gap-4">
+            <button 
+              onClick={() => setCurrentView('sponsorDashboard')}
+              className="bg-[#f39200] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
+            >
+              <span className="material-symbols-outlined text-[22px]">handshake</span> Quiero patrocinar
+            </button>
+            <button 
+              onClick={() => { setCurrentView('landing'); setTimeout(() => document.getElementById('preregistro-form')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
+              className="bg-[#283474] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
+            >
+              <span className="material-symbols-outlined text-[22px]">confirmation_number</span> Quiero asistir
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden absolute top-full left-0 w-full bg-[#2a2f40]/95 backdrop-blur-md border-b border-white/10 shadow-lg py-4 px-6 flex flex-col gap-3 max-h-[calc(100vh-80px)] overflow-y-auto">
+            <button onClick={() => { setCurrentView('landing'); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
+              <span className="material-symbols-outlined text-[24px]">home</span> Inicio
+            </button>
+            <button onClick={() => { setCurrentView('sponsorDashboard'); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
+              <span className="material-symbols-outlined text-[24px]">military_tech</span> Patrocinadores
+            </button>
+            <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'awards', 100); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
+              <span className="material-symbols-outlined text-[24px]">emoji_events</span> Premios
+            </button>
+            <button onClick={() => { setCurrentView('contactPage'); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
+              <span className="material-symbols-outlined text-[24px]">mail</span> Contacto
+            </button>
+            <hr className="border-white/10 my-2" />
+            <button 
+              onClick={() => { setCurrentView('sponsorDashboard'); setIsMobileMenuOpen(false); }}
+              className="bg-[#f39200] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
+            >
+              <span className="material-symbols-outlined">handshake</span> Quiero patrocinar
+            </button>
+            <button 
+              onClick={() => { setCurrentView('landing'); setTimeout(() => document.getElementById('preregistro-form')?.scrollIntoView({ behavior: 'smooth' }), 100); setIsMobileMenuOpen(false); }}
+              className="bg-[#283474] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
+            >
+              <span className="material-symbols-outlined">confirmation_number</span> Quiero asistir
+            </button>
+          </div>
+        )}
       </header>
 
       {currentView === 'landing' && (
-        <main className="pt-36 pb-20 md:pb-0">
+        <main className="pt-36">
         {/* Hero Section */}
-        <section className="relative min-h-[90vh] flex items-center justify-center py-stack-lg px-margin-mobile overflow-hidden rounded-5px">
+        <section className="relative min-h-[90vh] flex flex-col items-center justify-center py-stack-lg px-margin-mobile overflow-hidden rounded-5px">
           <div className="absolute inset-0 z-0 overflow-hidden">
             <img 
               src="/background-hero.jpeg"
@@ -133,19 +177,28 @@ export default function App() {
           </div>
 
           {/* Superimposed Sponsors Reel */}
-          <div className="absolute top-4 md:top-8 left-0 w-full z-20">
+          <div className="w-full z-20 mb-8 md:mb-12 shrink-0 mt-8">
             <div className="container mx-auto px-margin-mobile text-center">
               <FadeIn direction="up">
                 <h2 className="font-headline-xl text-2xl md:text-4xl text-white font-black tracking-widest mb-4 uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Patrocinan</h2>
                 <div className="overflow-hidden relative w-full flex items-center py-2">
                   <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-black/20 to-transparent z-10 pointer-events-none"></div>
                   <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-black/20 to-transparent z-10 pointer-events-none"></div>
-                  <div className="animate-scroll-logos gap-8 md:gap-16">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8].map((i, index) => (
-                      <div key={index} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 cursor-default shadow-lg">
-                        <span className="font-headline-sm text-white font-bold tracking-widest text-lg drop-shadow-md">LOGO {i}</span>
-                      </div>
-                    ))}
+                  <div className="animate-scroll-logos flex">
+                    <div className="flex gap-8 md:gap-16 pr-8 md:pr-16">
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((i, index) => (
+                        <div key={`first-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 cursor-default shadow-lg">
+                          <span className="font-headline-sm text-white font-bold tracking-widest text-lg drop-shadow-md">LOGO {i}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-8 md:gap-16 pr-8 md:pr-16">
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((i, index) => (
+                        <div key={`second-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 cursor-default shadow-lg">
+                          <span className="font-headline-sm text-white font-bold tracking-widest text-lg drop-shadow-md">LOGO {i}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </FadeIn>
@@ -530,25 +583,7 @@ export default function App() {
           <p className="font-body-md text-body-md text-surface-variant">© 2026 EXPO FERRE. TODOS LOS DERECHOS RESERVADOS.</p>
         </footer>
 
-      {/* BottomNavBar (Mobile only) */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 bg-secondary/90 backdrop-blur-md flex justify-around items-center h-[72px] px-2 shadow-[0_-4px_0_0_rgba(138,81,0,0.8)] border-t border-white/10 pb-safe">
-        <button onClick={() => setCurrentView('landing')} className={`group flex flex-col items-center justify-center transition-all active:scale-95 px-3 py-1 ${currentView === 'landing' ? 'text-primary' : 'text-on-secondary/70 hover:text-primary'}`}>
-          <span className="material-symbols-outlined transition-transform group-active:scale-110 group-hover:-translate-y-1">home</span>
-          <span className="font-label-sm text-[10px] mt-1 font-bold">Inicio</span>
-        </button>
-        <button onClick={() => setCurrentView('sponsorDashboard')} className={`group flex flex-col items-center justify-center transition-all active:scale-95 px-3 py-1 ${currentView === 'sponsorDashboard' ? 'text-primary' : 'text-on-secondary/70 hover:text-primary'}`}>
-          <span className="material-symbols-outlined transition-transform group-active:scale-110 group-hover:-translate-y-1">military_tech</span>
-          <span className="font-label-sm text-[10px] mt-1">Sponsors</span>
-        </button>
-        <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'awards', 100); }} className="group flex flex-col items-center justify-center text-on-secondary/70 hover:text-primary transition-all active:scale-95 px-3 py-1">
-          <span className="material-symbols-outlined transition-transform group-active:scale-110 group-hover:-translate-y-1">emoji_events</span>
-          <span className="font-label-sm text-[10px] mt-1">Premios</span>
-        </button>
-        <button onClick={() => setCurrentView('contactPage')} className="group flex flex-col items-center justify-center text-on-secondary/70 hover:text-primary transition-all active:scale-95 px-3 py-1">
-          <span className="material-symbols-outlined transition-transform group-active:scale-110 group-hover:-translate-y-1">mail</span>
-          <span className="font-label-sm text-[10px] mt-1">Contacto</span>
-        </button>
-      </nav>
+
     </>
   );
 }
