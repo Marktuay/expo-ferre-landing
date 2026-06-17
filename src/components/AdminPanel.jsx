@@ -3,29 +3,10 @@ import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/f
 import { db } from '../firebase';
 
 export default function AdminPanel({ onBack }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [reservedStands, setReservedStands] = useState([]);
   const [error, setError] = useState('');
 
-  // Credenciales maestras
-  const MASTER_USER = 'admin';
-  const MASTER_PASSWORD = 'ExpoFerre2026!';
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (username.toLowerCase() === MASTER_USER && password === MASTER_PASSWORD) {
-      setIsAuthenticated(true);
-      setError('');
-    } else {
-      setError('Usuario o contraseña incorrectos. Intenta de nuevo.');
-    }
-  };
-
   useEffect(() => {
-    if (!isAuthenticated) return;
-
     const q = query(collection(db, 'stands'), where('status', '==', 'reserved'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const standsData = snapshot.docs.map(doc => doc.data());
@@ -39,7 +20,7 @@ export default function AdminPanel({ onBack }) {
     });
 
     return () => unsubscribe();
-  }, [isAuthenticated]);
+  }, []);
 
   const handleRelease = async (standId) => {
     if (window.confirm(`¿Estás seguro de que deseas liberar el ${standId.replace('-', ' ').toUpperCase()}? Esto borrará los datos del cliente y el logo.`)) {
@@ -57,46 +38,8 @@ export default function AdminPanel({ onBack }) {
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="bg-surface border border-outline-variant rounded-xl p-8 max-w-sm w-full shadow-lg">
-          <div className="flex justify-center mb-6">
-            <span className="material-symbols-outlined text-5xl text-primary">lock</span>
-          </div>
-          <h2 className="text-headline-sm font-bold text-on-surface text-center mb-2">Acceso Administrador</h2>
-          <p className="text-body-md text-secondary text-center mb-6">Ingresa tus credenciales para ver las reservaciones.</p>
-          
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <input 
-              type="text" 
-              placeholder="Usuario" 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="px-4 py-3 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md"
-            />
-            <input 
-              type="password" 
-              placeholder="Contraseña" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="px-4 py-3 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md"
-            />
-            {error && <p className="text-red-500 text-label-sm text-center">{error}</p>}
-            <button type="submit" className="w-full py-3 bg-primary text-on-primary font-bold rounded-md hover:bg-primary/90 transition-colors">
-              Ingresar
-            </button>
-          </form>
-          <button onClick={onBack} className="mt-4 w-full py-2 text-secondary hover:text-primary transition-colors font-label-md">
-            Volver al inicio
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8">
+    <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
       <div className="max-w-7xl mx-auto">
         {/* Header del Panel */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -105,9 +48,28 @@ export default function AdminPanel({ onBack }) {
             <p className="text-body-lg text-secondary">Tienes {reservedStands.length} stands reservados actualmente.</p>
           </div>
           <div className="flex gap-4">
+            <button onClick={() => {
+              import('xlsx').then(XLSX => {
+                const dataToExport = reservedStands.map(stand => ({
+                  Stand: stand.name || stand.id,
+                  Tamaño: stand.size || '',
+                  Empresa: stand.reservationDetails?.empresa || 'Sin empresa',
+                  Contacto: stand.reservationDetails?.contacto || '',
+                  Email: stand.reservationDetails?.email || '',
+                  Teléfono: stand.reservationDetails?.telefono || ''
+                }));
+                const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Reservaciones");
+                XLSX.writeFile(workbook, "Reservaciones_Stands.xlsx");
+              });
+            }} className="px-5 py-2 bg-[#217346] text-white border border-[#217346] rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2">
+              <span className="material-symbols-outlined">download</span>
+              Exportar Excel
+            </button>
             <button onClick={onBack} className="px-5 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2">
               <span className="material-symbols-outlined">home</span>
-              Volver a la Web
+              Volver al menú
             </button>
             <button onClick={() => setIsAuthenticated(false)} className="px-5 py-2 bg-error text-on-error rounded-md hover:bg-error/90 transition-colors font-label-lg flex items-center gap-2">
               <span className="material-symbols-outlined">logout</span>

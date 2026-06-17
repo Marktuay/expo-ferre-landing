@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const ContactPage = () => {
   const [formState, setFormState] = useState('idle');
@@ -8,20 +10,38 @@ const ContactPage = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setFormState('submitting');
-    setTimeout(() => {
+    
+    const formData = new FormData(e.target);
+    const data = {
+      nombre: formData.get('nombre'),
+      empresa: formData.get('empresa'),
+      email: formData.get('email'),
+      telefono: formData.get('telefono'),
+      asunto: formData.get('asunto'),
+      mensaje: formData.get('mensaje'),
+      createdAt: serverTimestamp(),
+      status: 'pending'
+    };
+
+    try {
+      await addDoc(collection(db, 'contacts'), data);
       setFormState('success');
       setTimeout(() => {
         setFormState('idle');
         e.target.reset();
       }, 3000);
-    }, 1500);
+    } catch (error) {
+      console.error('Error enviando contacto:', error);
+      setFormState('idle');
+      alert('Hubo un error al enviar el mensaje. Intente de nuevo más tarde.');
+    }
   };
 
   return (
-    <main className="pt-36 pb-20 md:pb-32 px-margin-mobile md:px-margin-desktop bg-background min-h-screen">
+    <main className="pt-40 md:pt-48 pb-20 md:pb-32 px-margin-mobile md:px-margin-desktop bg-background min-h-screen">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Contáctenos</h1>
@@ -83,28 +103,28 @@ const ContactPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="font-label-md text-on-surface">Nombre Completo</label>
-                    <input required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Ej. Juan Pérez" />
+                    <input required name="nombre" type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Ej. Juan Pérez" />
                   </div>
                   <div className="space-y-1">
                     <label className="font-label-md text-on-surface">Empresa</label>
-                    <input required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Ej. Ferretería El Constructor" />
+                    <input required name="empresa" type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Ej. Ferretería El Constructor" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="font-label-md text-on-surface">Correo Electrónico</label>
-                    <input required type="email" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="juan@ejemplo.com" />
+                    <input required name="email" type="email" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="juan@ejemplo.com" />
                   </div>
                   <div className="space-y-1">
                     <label className="font-label-md text-on-surface">Teléfono</label>
-                    <input required type="tel" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="+505 8888-8888" />
+                    <input required name="telefono" type="tel" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="+505 8888-8888" />
                   </div>
                 </div>
 
                 <div className="space-y-1">
                   <label className="font-label-md text-on-surface">Asunto</label>
-                  <select className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface">
+                  <select name="asunto" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface">
                     <option>Información sobre Patrocinios</option>
                     <option>Reserva de Stands</option>
                     <option>Asistencia General</option>
@@ -115,7 +135,7 @@ const ContactPage = () => {
 
                 <div className="space-y-1">
                   <label className="font-label-md text-on-surface">Mensaje</label>
-                  <textarea required rows="4" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none" placeholder="Escribe tu consulta aquí..."></textarea>
+                  <textarea required name="mensaje" rows="4" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none" placeholder="Escribe tu consulta aquí..."></textarea>
                 </div>
 
                 <button 

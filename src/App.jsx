@@ -8,8 +8,17 @@ import TermsOfService from './components/TermsOfService';
 import ContactPage from './components/ContactPage';
 import StaffRegistration from './components/StaffRegistration';
 import AuthPage from './components/AuthPage';
-import { auth } from './firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { auth, db } from './firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { collection, addDoc, serverTimestamp, query, where, onSnapshot } from 'firebase/firestore';
+import AdminHub from './components/AdminHub';
+import AdminSponsorsHub from './components/AdminSponsorsHub';
+import AdminPreRegistrations from './components/AdminPreRegistrations';
+import AdminSponsors from './components/AdminSponsors';
+import AdminContact from './components/AdminContact';
+import AdminSpeakers from './components/AdminSpeakers';
+import AdminStaff from './components/AdminStaff';
+import InteractiveMap from './components/InteractiveMap';
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
   const domRef = useRef();
@@ -50,6 +59,34 @@ export default function App() {
   const [formState, setFormState] = useState('idle'); // 'idle', 'submitting', 'success'
   const [currentUser, setCurrentUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [sponsorLogos, setSponsorLogos] = useState([]);
+
+  useEffect(() => {
+    const q = query(collection(db, 'stands'), where('status', '==', 'reserved'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedLogos = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.logo) {
+          fetchedLogos.push(data.logo);
+        }
+      });
+      
+      let finalLogos = [];
+      // Start with the actual logos
+      finalLogos = [...fetchedLogos];
+      
+      // If we have less than 8, pad the rest with placeholders (represented by null)
+      while (finalLogos.length < 8) {
+        finalLogos.push(null);
+      }
+      
+      // If we somehow fetched more than 8 logos, that's fine, the reel will just be longer.
+      setSponsorLogos(finalLogos);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,16 +105,41 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  const handleRegister = (e) => {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setCurrentView('landing');
+      setIsMobileMenuOpen(false);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const handleRegister = async (e) => {
     e.preventDefault();
     setFormState('submitting');
-    setTimeout(() => {
+    
+    const formData = new FormData(e.target);
+    const data = {
+      name: formData.get('name'),
+      company: formData.get('company'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+      createdAt: serverTimestamp()
+    };
+
+    try {
+      await addDoc(collection(db, 'preregistrations'), data);
       setFormState('success');
       setTimeout(() => {
         setFormState('idle');
         e.target.reset();
       }, 3000);
-    }, 1500);
+    } catch (error) {
+      console.error('Error saving preregistration:', error);
+      setFormState('idle');
+      alert('Hubo un error al registrar. Intenta de nuevo.');
+    }
   };
 
 
@@ -92,41 +154,82 @@ export default function App() {
             <button onClick={() => setCurrentView('landing')} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
               <span className="material-symbols-outlined text-[22px]">home</span> Inicio
             </button>
-            <button onClick={() => setCurrentView('sponsorDashboard')} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
-              <span className="material-symbols-outlined text-[22px]">military_tech</span> Patrocinadores
-            </button>
             <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'awards', 100); }} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
               <span className="material-symbols-outlined text-[22px]">emoji_events</span> Premios
             </button>
             <button onClick={() => setCurrentView('contactPage')} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
               <span className="material-symbols-outlined text-[22px]">mail</span> Contacto
             </button>
+            <div className="w-px h-8 bg-white/20 mx-2"></div>
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          {/* Mobile Hamburger Button */}
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden text-white p-2 flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
-            aria-label="Toggle mobile menu"
+            className="lg:hidden text-white hover:bg-white/10 p-2 rounded-md transition-colors"
           >
             <span className="material-symbols-outlined text-[32px]">{isMobileMenuOpen ? 'close' : 'menu'}</span>
           </button>
-
-          {/* Desktop Buttons */}
+          
+          {/* Desktop Buttons (Right Side) */}
           <div className="hidden lg:flex items-center gap-4">
-            <button 
-              onClick={() => setCurrentView('sponsorDashboard')}
-              className="bg-[#f39200] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
-            >
-              <span className="material-symbols-outlined text-[22px]">handshake</span> Quiero patrocinar
-            </button>
-            <button 
-              onClick={() => { setCurrentView('landing'); setTimeout(() => document.getElementById('preregistro-form')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
-              className="bg-[#283474] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
-            >
-              <span className="material-symbols-outlined text-[22px]">confirmation_number</span> Quiero asistir
-            </button>
+            {currentView.startsWith('admin') ? (
+              isAdminAuthenticated ? (
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-end">
+                    <span className="text-xs text-gray-400">Administrador</span>
+                    <span className="text-sm font-bold text-white">Master</span>
+                  </div>
+                  <button 
+                    onClick={() => setCurrentView('adminHub')}
+                    className="bg-[#f39200] text-white font-bold py-2 px-4 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">dashboard</span> Mi Panel
+                  </button>
+                  <button 
+                    onClick={() => { setIsAdminAuthenticated(false); setCurrentView('landing'); }}
+                    className="bg-red-500/20 text-red-200 hover:bg-red-500 hover:text-white border border-red-500/50 font-bold py-2 px-4 rounded-md transition-all shadow-sm flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">logout</span> Salir
+                  </button>
+                </div>
+              ) : null
+            ) : (
+              currentUser ? (
+                <div className="flex items-center gap-4">
+                <div className="flex flex-col items-end">
+                  <span className="text-xs text-gray-400">Patrocinador</span>
+                  <span className="text-sm font-bold text-white">{currentUser.email}</span>
+                </div>
+                <button 
+                  onClick={() => setCurrentView('sponsorDashboard')}
+                  className="bg-[#f39200] text-white font-bold py-2 px-4 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[20px]">dashboard</span> Mi Panel
+                </button>
+                <button 
+                  onClick={handleLogout}
+                  className="bg-red-500/20 text-red-200 hover:bg-red-500 hover:text-white border border-red-500/50 font-bold py-2 px-4 rounded-md transition-all shadow-sm flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[20px]">logout</span> Salir
+                </button>
+              </div>
+            ) : (
+              <>
+                <button 
+                  onClick={() => setCurrentView('sponsorDashboard')}
+                  className="bg-[#f39200] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
+                >
+                  <span className="material-symbols-outlined text-[22px]">handshake</span> Quiero patrocinar
+                </button>
+                <button 
+                  onClick={() => { setCurrentView('landing'); setTimeout(() => document.getElementById('preregistro-form')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
+                  className="bg-[#283474] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
+                >
+                  <span className="material-symbols-outlined text-[22px]">confirmation_number</span> Quiero asistir
+                </button>
+              </>
+            ))}
           </div>
         </div>
 
@@ -146,18 +249,63 @@ export default function App() {
               <span className="material-symbols-outlined text-[24px]">mail</span> Contacto
             </button>
             <hr className="border-white/10 my-2" />
-            <button 
-              onClick={() => { setCurrentView('sponsorDashboard'); setIsMobileMenuOpen(false); }}
-              className="bg-[#f39200] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
-            >
-              <span className="material-symbols-outlined">handshake</span> Quiero patrocinar
-            </button>
-            <button 
-              onClick={() => { setCurrentView('landing'); setTimeout(() => document.getElementById('preregistro-form')?.scrollIntoView({ behavior: 'smooth' }), 100); setIsMobileMenuOpen(false); }}
-              className="bg-[#283474] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
-            >
-              <span className="material-symbols-outlined">confirmation_number</span> Quiero asistir
-            </button>
+            {currentView.startsWith('admin') ? (
+              isAdminAuthenticated ? (
+                <div className="flex flex-col gap-3">
+                  <div className="bg-white/5 py-2 px-4 rounded-md text-center">
+                    <span className="block text-xs text-gray-400">Sesión iniciada como</span>
+                    <span className="block text-sm font-bold text-white truncate">Administrador (Master)</span>
+                  </div>
+                  <button 
+                    onClick={() => { setCurrentView('adminHub'); setIsMobileMenuOpen(false); }}
+                    className="bg-[#f39200] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
+                  >
+                    <span className="material-symbols-outlined">dashboard</span> Mi Panel
+                  </button>
+                  <button 
+                    onClick={() => { setIsAdminAuthenticated(false); setCurrentView('landing'); setIsMobileMenuOpen(false); }}
+                    className="bg-red-500/20 text-red-200 border border-red-500/50 font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
+                  >
+                    <span className="material-symbols-outlined">logout</span> Salir
+                  </button>
+                </div>
+              ) : null
+            ) : (
+              currentUser ? (
+                <div className="flex flex-col gap-3">
+                <div className="bg-white/5 py-2 px-4 rounded-md text-center">
+                  <span className="block text-xs text-gray-400">Sesión iniciada como</span>
+                  <span className="block text-sm font-bold text-white truncate">{currentUser.email}</span>
+                </div>
+                <button 
+                  onClick={() => { setCurrentView('sponsorDashboard'); setIsMobileMenuOpen(false); }}
+                  className="bg-[#f39200] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
+                >
+                  <span className="material-symbols-outlined">dashboard</span> Mi Panel
+                </button>
+                <button 
+                  onClick={handleLogout}
+                  className="bg-red-500/20 text-red-200 border border-red-500/50 font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
+                >
+                  <span className="material-symbols-outlined">logout</span> Cerrar Sesión
+                </button>
+              </div>
+            ) : (
+              <>
+                <button 
+                  onClick={() => { setCurrentView('sponsorDashboard'); setIsMobileMenuOpen(false); }}
+                  className="bg-[#f39200] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
+                >
+                  <span className="material-symbols-outlined">handshake</span> Quiero patrocinar
+                </button>
+                <button 
+                  onClick={() => { setCurrentView('landing'); setTimeout(() => document.getElementById('preregistro-form')?.scrollIntoView({ behavior: 'smooth' }), 100); setIsMobileMenuOpen(false); }}
+                  className="bg-[#283474] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
+                >
+                  <span className="material-symbols-outlined">confirmation_number</span> Quiero asistir
+                </button>
+              </>
+            ))}
           </div>
         )}
       </header>
@@ -186,17 +334,29 @@ export default function App() {
                   <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-black/20 to-transparent z-10 pointer-events-none"></div>
                   <div className="animate-scroll-logos flex">
                     <div className="flex gap-8 md:gap-16 pr-8 md:pr-16">
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((i, index) => (
-                        <div key={`first-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 cursor-default shadow-lg">
-                          <span className="font-headline-sm text-white font-bold tracking-widest text-lg drop-shadow-md">LOGO {i}</span>
-                        </div>
+                      {sponsorLogos.map((logoUrl, index) => (
+                        logoUrl ? (
+                          <div key={`first-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 shadow-lg overflow-hidden p-2">
+                            <img src={logoUrl} alt={`Sponsor ${index}`} className="max-w-full max-h-full object-contain drop-shadow-md" />
+                          </div>
+                        ) : (
+                          <div key={`first-placeholder-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 cursor-default shadow-lg">
+                            <span className="font-headline-sm text-white font-bold tracking-widest text-lg drop-shadow-md">LOGO {index + 1}</span>
+                          </div>
+                        )
                       ))}
                     </div>
                     <div className="flex gap-8 md:gap-16 pr-8 md:pr-16">
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((i, index) => (
-                        <div key={`second-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 cursor-default shadow-lg">
-                          <span className="font-headline-sm text-white font-bold tracking-widest text-lg drop-shadow-md">LOGO {i}</span>
-                        </div>
+                      {sponsorLogos.map((logoUrl, index) => (
+                        logoUrl ? (
+                          <div key={`second-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 shadow-lg overflow-hidden p-2">
+                            <img src={logoUrl} alt={`Sponsor ${index}`} className="max-w-full max-h-full object-contain drop-shadow-md" />
+                          </div>
+                        ) : (
+                          <div key={`second-placeholder-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 cursor-default shadow-lg">
+                            <span className="font-headline-sm text-white font-bold tracking-widest text-lg drop-shadow-md">LOGO {index + 1}</span>
+                          </div>
+                        )
                       ))}
                     </div>
                   </div>
@@ -497,20 +657,20 @@ export default function App() {
               <form onSubmit={handleRegister} className="space-y-4 text-left">
                 <div>
                   <label className="block text-sm font-medium text-[#475569] mb-1">Nombre Completo</label>
-                  <input required type="text" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="Ej. Juan Pérez" />
+                  <input required name="name" type="text" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="Ej. Juan Pérez" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[#475569] mb-1">Empresa</label>
-                  <input required type="text" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="Nombre de tu empresa" />
+                  <input required name="company" type="text" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="Nombre de tu empresa" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-[#475569] mb-1">Email</label>
-                    <input required type="email" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="correo@ejemplo.com" />
+                    <input required name="email" type="email" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="correo@ejemplo.com" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[#475569] mb-1">Teléfono</label>
-                    <input required type="tel" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="+505 0000 0000" />
+                    <input required name="phone" type="tel" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="+505 0000 0000" />
                   </div>
                 </div>
                 <button 
@@ -532,8 +692,41 @@ export default function App() {
       )}
 
 
+      {currentView === 'adminHub' && (
+        <AdminHub 
+          onBack={() => setCurrentView('landing')} 
+          onNavigate={(view) => setCurrentView(view)} 
+          isAuthenticated={isAdminAuthenticated}
+          setIsAuthenticated={setIsAdminAuthenticated}
+        />
+      )}
+
+      {currentView === 'adminSponsorsHub' && (
+        <AdminSponsorsHub onBack={() => setCurrentView('adminHub')} onNavigate={(v) => setCurrentView(v)} />
+      )}
+
       {currentView === 'adminPanel' && (
-        <AdminPanel onBack={() => setCurrentView('landing')} />
+        <AdminPanel onBack={() => setCurrentView('adminSponsorsHub')} />
+      )}
+
+      {currentView === 'adminPreRegistrations' && (
+        <AdminPreRegistrations onBack={() => setCurrentView('adminHub')} />
+      )}
+
+      {currentView === 'adminContact' && (
+        <AdminContact onBack={() => setCurrentView('adminHub')} />
+      )}
+
+      {currentView === 'adminSponsors' && (
+        <AdminSponsors onBack={() => setCurrentView('adminSponsorsHub')} />
+      )}
+
+      {currentView === 'adminSpeakers' && (
+        <AdminSpeakers onBack={() => setCurrentView('adminSponsorsHub')} />
+      )}
+
+      {currentView === 'adminStaff' && (
+        <AdminStaff onBack={() => setCurrentView('adminSponsorsHub')} />
       )}
 
       {currentView === 'sponsorDashboard' && (
@@ -542,7 +735,8 @@ export default function App() {
         ) : currentUser ? (
           <SponsorDashboard 
             onBack={() => setCurrentView('landing')}
-            onStaffRegistration={() => setCurrentView('staffRegistration')} 
+            onStaffRegistration={() => setCurrentView('staffRegistration')}
+            onContact={() => setCurrentView('contactPage')}
           />
         ) : (
           <AuthPage onBack={() => setCurrentView('landing')} />
@@ -565,7 +759,7 @@ export default function App() {
         authLoading ? (
           <div className="min-h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-[#283474] border-t-transparent rounded-full animate-spin"></div></div>
         ) : currentUser ? (
-          <StaffRegistration />
+          <StaffRegistration onBack={() => setCurrentView(currentUser ? 'sponsorDashboard' : 'landing')} />
         ) : (
           <AuthPage onBack={() => setCurrentView('landing')} />
         )
@@ -578,7 +772,7 @@ export default function App() {
             <button onClick={() => setCurrentView('privacyPolicy')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Políticas de Privacidad</button>
             <button onClick={() => setCurrentView('termsOfService')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Términos de Servicio</button>
             <a className="text-surface-variant hover:text-primary transition-colors font-body-md" href="#">Press Kit</a>
-            <button onClick={() => setCurrentView('adminPanel')} className="text-surface-variant hover:text-primary transition-colors font-body-md opacity-30 hover:opacity-100">Intranet</button>
+            <button onClick={() => setCurrentView('adminHub')} className="text-surface-variant hover:text-primary transition-colors font-body-md opacity-30 hover:opacity-100">Intranet</button>
           </div>
           <p className="font-body-md text-body-md text-surface-variant">© 2026 EXPO FERRE. TODOS LOS DERECHOS RESERVADOS.</p>
         </footer>

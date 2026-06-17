@@ -58,7 +58,7 @@ export default function AuthPage({ onBack }) {
       } else if (err.code === 'auth/weak-password') {
         setError('La contraseña debe tener al menos 6 caracteres.');
       } else {
-        setError('Ocurrió un error. Inténtalo de nuevo.');
+        setError(`Error de Firebase: ${err.message} (${err.code})`);
       }
     } finally {
       setLoading(false);
