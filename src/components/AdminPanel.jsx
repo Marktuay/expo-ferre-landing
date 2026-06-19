@@ -1,11 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 
 export default function AdminPanel({ onBack }) {
   const [reservedStands, setReservedStands] = useState([]);
+  const [sponsors, setSponsors] = useState({});
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchSponsors = async () => {
+      try {
+        const q = query(collection(db, 'users'));
+        const snapshot = await getDocs(q);
+        const sponsorsMap = {};
+        snapshot.forEach(doc => {
+          if (doc.data().empresa) {
+            sponsorsMap[doc.id] = doc.data().empresa;
+          }
+        });
+        setSponsors(sponsorsMap);
+      } catch (err) {
+        console.error('Error fetching sponsors:', err);
+      }
+    };
+    fetchSponsors();
+  }, []);
 
   useEffect(() => {
     const q = query(collection(db, `${getEventBasePath()}/stands`), where('status', '==', 'reserved'));
@@ -54,7 +74,7 @@ export default function AdminPanel({ onBack }) {
                 const dataToExport = reservedStands.map(stand => ({
                   Stand: stand.name || stand.id,
                   Tamaño: stand.size || '',
-                  Empresa: stand.reservationDetails?.empresa || 'Sin empresa',
+                  Empresa: sponsors[stand.sponsorId] || stand.reservationDetails?.empresa || 'Sin empresa',
                   Contacto: stand.reservationDetails?.contacto || '',
                   Email: stand.reservationDetails?.email || '',
                   Teléfono: stand.reservationDetails?.telefono || ''
@@ -116,7 +136,7 @@ export default function AdminPanel({ onBack }) {
                         )}
                       </td>
                       <td className="p-4 font-medium">
-                        {stand.reservationDetails?.empresa || 'Sin empresa'}
+                        {sponsors[stand.sponsorId] || stand.reservationDetails?.empresa || 'Sin empresa'}
                       </td>
                       <td className="p-4">
                         <div>{stand.reservationDetails?.nombre} {stand.reservationDetails?.apellido}</div>
