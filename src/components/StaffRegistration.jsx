@@ -26,11 +26,11 @@ const StaffRegistration = ({ onBack }) => {
         apellido: formData.get('apellido'),
         email: formData.get('email'),
         telefono: formData.get('telefono'),
-        empresa: formData.get('empresa'),
-        tamanoEmpresa: formData.get('tamanoEmpresa'),
-        sector: formData.get('sector'),
-        tipoCargo: formData.get('tipoCargo'),
-        cargo: formData.get('cargo'),
+        empresa: formData.get('empresa') || '',
+        tamanoEmpresa: formData.get('tamanoEmpresa') || '',
+        sector: formData.get('sector') || '',
+        tipoCargo: formData.get('tipoCargo') || '',
+        cargo: formData.get('cargo') || '',
         createdAt: serverTimestamp(),
         sponsorId: user ? user.uid : null,
         sponsorEmail: user ? user.email : null
@@ -76,7 +76,7 @@ const StaffRegistration = ({ onBack }) => {
                 <p className="text-secondary mb-6">El código QR para la acreditación de su staff ha sido generado.</p>
                 
                 <div className="bg-surface-variant p-6 rounded-lg inline-block border border-outline mb-6">
-                  <QRCodeSVG value={registeredStaffId} size={180} level="M" />
+                  <QRCodeSVG value={registeredStaffId || 'loading'} size={180} level="M" />
                   <p className="mt-4 text-sm font-mono text-secondary">ID: {registeredStaffId}</p>
                 </div>
                 
