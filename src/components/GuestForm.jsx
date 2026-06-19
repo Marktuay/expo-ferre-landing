@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, Send } from 'lucide-react';
 import { db, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getEventBasePath } from '../config/eventConfig';
 
 const GuestForm = ({ onBack }) => {
   const [formState, setFormState] = useState('idle');
@@ -30,7 +31,7 @@ const GuestForm = ({ onBack }) => {
         createdAt: serverTimestamp()
       };
       
-      await addDoc(collection(db, 'guests'), data);
+      await addDoc(collection(db, `${getEventBasePath()}/guests`), data);
       
       setFormState('success');
       setTimeout(() => {

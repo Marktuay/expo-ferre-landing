@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getEventBasePath } from '../config/eventConfig';
 
 const ContactPage = () => {
   const [formState, setFormState] = useState('idle');
@@ -27,7 +28,7 @@ const ContactPage = () => {
     };
 
     try {
-      await addDoc(collection(db, 'contacts'), data);
+      await addDoc(collection(db, `${getEventBasePath()}/contacts`), data);
       setFormState('success');
       setTimeout(() => {
         setFormState('idle');

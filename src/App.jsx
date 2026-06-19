@@ -9,9 +9,11 @@ import ContactPage from './components/ContactPage';
 import StaffRegistration from './components/StaffRegistration';
 import AuthPage from './components/AuthPage';
 import { auth, db } from './firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp, query, where, onSnapshot } from 'firebase/firestore';
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot } from 'firebase/firestore';
+import { getEventBasePath } from './config/eventConfig';
 import { QRCodeSVG } from 'qrcode.react';
+import ScannerModule from './components/ScannerModule';
 import AdminHub from './components/AdminHub';
 import AdminSponsorsHub from './components/AdminSponsorsHub';
 import AdminPreRegistrations from './components/AdminPreRegistrations';
@@ -66,7 +68,7 @@ export default function App() {
   const [sponsorLogos, setSponsorLogos] = useState([]);
 
   useEffect(() => {
-    const q = query(collection(db, 'stands'), where('status', '==', 'reserved'));
+    const q = query(collection(db, `${getEventBasePath()}/stands`), where('status', '==', 'reserved'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetchedLogos = [];
       snapshot.forEach((doc) => {
@@ -132,7 +134,7 @@ export default function App() {
     };
 
     try {
-      const docRef = await addDoc(collection(db, 'preregistrations'), data);
+      const docRef = await addDoc(collection(db, `${getEventBasePath()}/preregistrations`), data);
       setQrValue(docRef.id);
       setFormState('success');
       e.target.reset();
@@ -748,6 +750,19 @@ export default function App() {
 
       {currentView === 'adminGuests' && (
         <AdminGuests onBack={() => setCurrentView('adminSponsorsHub')} />
+      )}
+
+      {currentView === 'escaner' && (
+        isAdminAuthenticated ? (
+          <ScannerModule onBack={() => setCurrentView('adminHub')} />
+        ) : (
+          <AdminHub 
+            onBack={() => setCurrentView('landing')} 
+            onNavigate={(view) => setCurrentView(view)} 
+            isAuthenticated={isAdminAuthenticated}
+            setIsAuthenticated={setIsAdminAuthenticated}
+          />
+        )
       )}
 
       {currentView === 'sponsorDashboard' && (

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getEventBasePath } from '../config/eventConfig';
 
 export default function AdminPanel({ onBack }) {
   const [reservedStands, setReservedStands] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const q = query(collection(db, 'stands'), where('status', '==', 'reserved'));
+    const q = query(collection(db, `${getEventBasePath()}/stands`), where('status', '==', 'reserved'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const standsData = snapshot.docs.map(doc => doc.data());
       // Ordenar por número de stand
@@ -23,9 +24,9 @@ export default function AdminPanel({ onBack }) {
   }, []);
 
   const handleRelease = async (standId) => {
-    if (window.confirm(`¿Estás seguro de que deseas liberar el ${standId.replace('-', ' ').toUpperCase()}? Esto borrará los datos del cliente y el logo.`)) {
+    if (window.confirm(`¿Estás seguro de que deseas liberar el stand ${standId}? Esta acción no se puede deshacer.`)) {
       try {
-        const standRef = doc(db, 'stands', standId);
+        const standRef = doc(db, `${getEventBasePath()}/stands`, standId);
         await updateDoc(standRef, {
           status: 'available',
           logo: null,

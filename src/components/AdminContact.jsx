@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getEventBasePath } from '../config/eventConfig';
 
 export default function AdminContact({ onBack }) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, 'contacts'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, `${getEventBasePath()}/contacts`), orderBy('createdAt', 'desc'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const results = [];

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { getEventBasePath } from '../config/eventConfig';
 
 export default function AdminSponsorDetails({ sponsor, onBack }) {
   const [guests, setGuests] = useState([]);
@@ -19,26 +20,26 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
 
     // We only query by sponsorId because we updated the logic. If necessary in the future, we could also query by sponsorEmail.
     
-    // Guests
-    const qGuests = query(collection(db, 'guests'), where('sponsorId', '==', sponsorId));
+    // Escuchar invitados
+    const qGuests = query(collection(db, `${getEventBasePath()}/guests`), where('sponsorId', '==', sponsorId));
     const unsubGuests = onSnapshot(qGuests, (snapshot) => {
       setGuests(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    // Staff
-    const qStaff = query(collection(db, 'staff'), where('sponsorId', '==', sponsorId));
+    // Escuchar staff
+    const qStaff = query(collection(db, `${getEventBasePath()}/staff`), where('sponsorId', '==', sponsorId));
     const unsubStaff = onSnapshot(qStaff, (snapshot) => {
       setStaff(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    // Speakers
-    const qSpeakers = query(collection(db, 'speakers'), where('sponsorId', '==', sponsorId));
+    // Escuchar conferencistas
+    const qSpeakers = query(collection(db, `${getEventBasePath()}/speakers`), where('sponsorId', '==', sponsorId));
     const unsubSpeakers = onSnapshot(qSpeakers, (snapshot) => {
       setSpeakers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    // Stands
-    const qStands = query(collection(db, 'stands'), where('sponsorId', '==', sponsorId));
+    // Escuchar stands
+    const qStands = query(collection(db, `${getEventBasePath()}/stands`), where('sponsorId', '==', sponsorId));
     const unsubStands = onSnapshot(qStands, (snapshot) => {
       setStands(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });

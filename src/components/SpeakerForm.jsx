@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Mic, Send } from 'lucide-react';
-import { db, auth } from '../firebase';
+import { db, storage, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getEventBasePath } from '../config/eventConfig';
 
 const SpeakerForm = ({ onClose }) => {
   const [formState, setFormState] = useState('idle');
@@ -41,7 +42,7 @@ const SpeakerForm = ({ onClose }) => {
         sponsorEmail: user ? user.email : null
       };
       
-      await addDoc(collection(db, 'speakers'), data);
+      await addDoc(collection(db, `${getEventBasePath()}/speakers`), data);
       
       setFormState('success');
       setTimeout(() => {

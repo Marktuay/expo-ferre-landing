@@ -3,6 +3,7 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, auth } from '../firebase';
+import { getEventBasePath } from '../config/eventConfig';
 
 // Stands mapeados directamente desde las coordenadas del archivo SVG original
 const initialStandsList = [
@@ -59,7 +60,7 @@ export default function InteractiveMap({ onBack }) {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'stands'), (snapshot) => {
+    const unsub = onSnapshot(collection(db, `${getEventBasePath()}/stands`), (snapshot) => {
       const standsData = snapshot.docs.map(doc => doc.data());
       
       if (standsData.length > 0) {
@@ -72,7 +73,7 @@ export default function InteractiveMap({ onBack }) {
       } else {
         // Inicializar stands en Firestore si está vacío
         initialStandsList.forEach(async (stand) => {
-          await setDoc(doc(db, 'stands', stand.id), stand);
+          await setDoc(doc(db, `${getEventBasePath()}/stands`, stand.id), stand);
         });
       }
     });
@@ -93,7 +94,7 @@ export default function InteractiveMap({ onBack }) {
   const handleReleaseStand = async () => {
     if (!selectedStand) return;
     try {
-      await updateDoc(doc(db, 'stands', selectedStand.id), {
+      await updateDoc(doc(db, `${getEventBasePath()}/stands`, selectedStand.id), {
         status: 'available',
         logo: null,
         reservationData: null,
@@ -394,7 +395,7 @@ export default function InteractiveMap({ onBack }) {
                   });
                 }
 
-                const standRef = doc(db, 'stands', reservedStandId);
+                const standRef = doc(db, `${getEventBasePath()}/stands`, reservedStandId);
                 const user = auth.currentUser;
                 await updateDoc(standRef, {
                   status: 'reserved',

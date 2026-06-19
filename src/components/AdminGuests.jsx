@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getEventBasePath } from '../config/eventConfig';
 import PrintableBadgeList from './PrintableBadgeList';
 
 export default function AdminGuests({ onBack }) {
@@ -9,7 +10,7 @@ export default function AdminGuests({ onBack }) {
   const [printItems, setPrintItems] = useState(null);
 
   useEffect(() => {
-    const q = query(collection(db, 'guests'));
+    const q = query(collection(db, `${getEventBasePath()}/guests`));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const results = [];

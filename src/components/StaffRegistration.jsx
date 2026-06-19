@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { UserCheck, Send } from 'lucide-react';
 import { db, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getEventBasePath } from '../config/eventConfig';
 
 const StaffRegistration = ({ onBack }) => {
   const [formState, setFormState] = useState('idle');
@@ -33,7 +34,7 @@ const StaffRegistration = ({ onBack }) => {
         sponsorEmail: user ? user.email : null
       };
       
-      await addDoc(collection(db, 'staff'), data);
+      await addDoc(collection(db, `${getEventBasePath()}/staff`), data);
       
       setFormState('success');
       setTimeout(() => {
