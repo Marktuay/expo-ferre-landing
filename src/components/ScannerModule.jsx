@@ -44,13 +44,15 @@ export default function ScannerModule({ onBack }) {
       scanner.pause(true);
 
       try {
-        const collectionsToSearch = ['guests', 'staff', 'speakers', 'preregistrations'];
+        const collectionsToSearch = ['guests', 'staff', 'speakers', 'preregistrations', 'users'];
         let foundData = null;
         let foundCollection = '';
 
         // Buscar en todas las subcolecciones posibles
         for (const coll of collectionsToSearch) {
-          const docRef = doc(db, `${getEventBasePath()}/${coll}`, decodedText);
+          // La colección de usuarios (Sponsors) está en la raíz, no dentro de events/2026/
+          const path = coll === 'users' ? coll : `${getEventBasePath()}/${coll}`;
+          const docRef = doc(db, path, decodedText);
           const docSnap = await getDoc(docRef);
 
           if (docSnap.exists()) {
@@ -65,7 +67,8 @@ export default function ScannerModule({ onBack }) {
 
           if (!alreadyCheckedIn) {
             // Marcar como "checkedIn" si es primera vez
-            const docRef = doc(db, `${getEventBasePath()}/${foundCollection}`, foundData.id);
+            const path = foundCollection === 'users' ? foundCollection : `${getEventBasePath()}/${foundCollection}`;
+            const docRef = doc(db, path, foundData.id);
             await updateDoc(docRef, {
               checkedIn: true,
               checkInTime: new Date().toISOString()
@@ -88,13 +91,15 @@ export default function ScannerModule({ onBack }) {
               guests: 'bg-[#f39200]',
               staff: 'bg-red-600',
               speakers: 'bg-purple-600',
-              preregistrations: 'bg-green-600'
+              preregistrations: 'bg-green-600',
+              users: 'bg-blue-600'
             };
             const typeLabels = {
               guests: 'INVITADO',
               staff: 'STAFF',
               speakers: 'CONFERENCISTA',
-              preregistrations: 'VISITANTE'
+              preregistrations: 'VISITANTE',
+              users: 'PATROCINADOR'
             };
 
             const itemToPrint = {
