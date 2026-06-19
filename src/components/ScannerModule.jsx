@@ -61,49 +61,60 @@ export default function ScannerModule({ onBack }) {
         }
 
         if (foundData) {
-          // Marcar como "checkedIn"
-          const docRef = doc(db, `${getEventBasePath()}/${foundCollection}`, foundData.id);
-          await updateDoc(docRef, {
-            checkedIn: true,
-            checkInTime: new Date().toISOString()
-          });
+          const alreadyCheckedIn = foundData.checkedIn === true;
+
+          if (!alreadyCheckedIn) {
+            // Marcar como "checkedIn" si es primera vez
+            const docRef = doc(db, `${getEventBasePath()}/${foundCollection}`, foundData.id);
+            await updateDoc(docRef, {
+              checkedIn: true,
+              checkInTime: new Date().toISOString()
+            });
+          }
 
           setScanResult({
             success: true,
-            message: `¡Asistencia registrada para ${foundData.nombre || foundData.name}!`,
+            warning: alreadyCheckedIn,
+            message: alreadyCheckedIn 
+              ? `¡Atención! Este QR ya fue escaneado anteriormente.` 
+              : `¡Asistencia registrada para ${foundData.nombre || foundData.name}!`,
             data: foundData,
             type: foundCollection
           });
 
-          // Preparar datos para imprimir
-          const typeColors = {
-            guests: 'bg-[#f39200]',
-            staff: 'bg-red-600',
-            speakers: 'bg-purple-600',
-            preregistrations: 'bg-green-600'
-          };
-          const typeLabels = {
-            guests: 'INVITADO',
-            staff: 'STAFF',
-            speakers: 'CONFERENCISTA',
-            preregistrations: 'VISITANTE'
-          };
+          if (!alreadyCheckedIn) {
+            // Preparar datos para imprimir automáticamente si es primera vez
+            const typeColors = {
+              guests: 'bg-[#f39200]',
+              staff: 'bg-red-600',
+              speakers: 'bg-purple-600',
+              preregistrations: 'bg-green-600'
+            };
+            const typeLabels = {
+              guests: 'INVITADO',
+              staff: 'STAFF',
+              speakers: 'CONFERENCISTA',
+              preregistrations: 'VISITANTE'
+            };
 
-          const itemToPrint = {
-            id: foundData.id,
-            nombre: foundData.nombre || foundData.name,
-            empresa: foundData.empresa || foundData.company || 'Expo Ferre',
-            roleLabel: typeLabels[foundCollection],
-            colorClass: typeColors[foundCollection]
-          };
-          
-          setPrintData([itemToPrint]);
+            const itemToPrint = {
+              id: foundData.id,
+              nombre: foundData.nombre || foundData.name,
+              empresa: foundData.empresa || foundData.company || 'Expo Ferre',
+              roleLabel: typeLabels[foundCollection],
+              colorClass: typeColors[foundCollection]
+            };
+            
+            setPrintData([itemToPrint]);
 
-          // Retomar escáner después de 3 segundos si queremos auto-continuar, o dejarlo en pausa hasta que el usuario decida.
-          setTimeout(() => {
-            scanner.resume();
-            setScanResult(null);
-          }, 4000);
+            // Retomar escáner automáticamente
+            setTimeout(() => {
+              if (scanner) scanner.resume();
+              setScanResult(null);
+            }, 4000);
+          } else {
+            // Dejar la advertencia en pantalla, proporcionar función de resume manual (se maneja en el JSX)
+          }
 
         } else {
           setError('Código QR no encontrado en ninguna base de datos del evento actual.');
@@ -169,15 +180,53 @@ export default function ScannerModule({ onBack }) {
           )}
 
           {scanResult && scanResult.success && (
-            <div className="mt-6 p-4 bg-green-100 text-green-800 rounded-md border border-green-200">
+            <div className={`mt-6 p-4 rounded-md border ${scanResult.warning ? 'bg-yellow-100 text-yellow-800 border-yellow-300' : 'bg-green-100 text-green-800 border-green-200'}`}>
               <h3 className="text-xl font-bold text-center mb-2">{scanResult.message}</h3>
               <div className="text-center">
                 <p className="font-medium">{scanResult.data.nombre || scanResult.data.name}</p>
                 <p className="text-sm opacity-80">{scanResult.data.empresa || scanResult.data.company}</p>
-                <p className="text-xs uppercase mt-2 px-2 py-1 bg-green-200 rounded-full inline-block">
+                {scanResult.warning && scanResult.data.checkInTime && (
+                  <p className="text-sm mt-2 font-medium text-yellow-900">
+                    Hora de registro original: {new Date(scanResult.data.checkInTime).toLocaleTimeString()}
+                  </p>
+                )}
+                <p className={`text-xs uppercase mt-3 px-2 py-1 rounded-full inline-block ${scanResult.warning ? 'bg-yellow-200 text-yellow-900' : 'bg-green-200'}`}>
                   {scanResult.type}
                 </p>
               </div>
+              
+              {scanResult.warning && (
+                <div className="mt-4 flex justify-center gap-3">
+                  <button 
+                    onClick={() => {
+                      // Función para obligar a imprimir de nuevo si lo desean
+                      const typeColors = { guests: 'bg-[#f39200]', staff: 'bg-red-600', speakers: 'bg-purple-600', preregistrations: 'bg-green-600' };
+                      const typeLabels = { guests: 'INVITADO', staff: 'STAFF', speakers: 'CONFERENCISTA', preregistrations: 'VISITANTE' };
+                      setPrintData([{
+                        id: scanResult.data.id,
+                        nombre: scanResult.data.nombre || scanResult.data.name,
+                        empresa: scanResult.data.empresa || scanResult.data.company || 'Expo Ferre',
+                        roleLabel: typeLabels[scanResult.type],
+                        colorClass: typeColors[scanResult.type]
+                      }]);
+                    }}
+                    className="px-4 py-2 bg-white text-yellow-800 border border-yellow-400 rounded-md shadow-sm hover:bg-yellow-50 text-sm font-bold"
+                  >
+                    Re-imprimir Gafete
+                  </button>
+                  <button 
+                    onClick={() => {
+                      // Para reanudar el escaneo
+                      const html5QrCode = window.__html5QrcodeScanner; // Workaround para reanudar desde fuera si no tenemos ref
+                      // Pero podemos simplemente forzar re-render o usar window location
+                      window.location.reload(); 
+                    }}
+                    className="px-4 py-2 bg-yellow-600 text-white rounded-md shadow-sm hover:bg-yellow-700 text-sm font-bold"
+                  >
+                    Continuar Escaneando
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
