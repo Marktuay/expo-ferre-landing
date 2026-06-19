@@ -45,7 +45,8 @@ export default function AuthPage({ onBack }) {
           empresa,
           empleados,
           createdAt: serverTimestamp(),
-          role: 'sponsor'
+          role: 'sponsor',
+          status: 'pending'
         });
       }
       // On success, App.jsx's onAuthStateChanged will detect the user and re-render.

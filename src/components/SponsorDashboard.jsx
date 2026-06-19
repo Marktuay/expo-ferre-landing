@@ -7,8 +7,10 @@ import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { QRCodeSVG } from 'qrcode.react';
 
-const SponsorDashboard = ({ onBack, onStaffRegistration, onContact }) => {
+const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) => {
   const [activeForm, setActiveForm] = useState(null);
+  
+  const isApproved = userData?.status === 'approved' || !userData?.status; // Fallback to approved if no status field (old accounts)
 
   const handleLogout = async () => {
     try {
@@ -21,6 +23,7 @@ const SponsorDashboard = ({ onBack, onStaffRegistration, onContact }) => {
 
   const cardStyle = "bg-surface border border-outline-variant hover:hard-shadow transition-all p-6 md:p-8 rounded-5px flex flex-col justify-between gap-6 group h-full";
   const btnStyle = "w-full bg-primary-container text-on-primary-container font-bold py-3 px-8 rounded-5px hover:brightness-110 active:scale-95 transition-all text-center";
+  const disabledBtnStyle = "w-full bg-surface-variant text-on-surface-variant font-bold py-3 px-8 rounded-5px cursor-not-allowed opacity-60 text-center";
 
   if (activeForm === 'speaker') {
     return <SpeakerForm onClose={() => setActiveForm(null)} />;
@@ -50,6 +53,18 @@ const SponsorDashboard = ({ onBack, onStaffRegistration, onContact }) => {
             </div>
           )}
         </div>
+
+        {!isApproved && (
+          <div className="bg-[#FFF3CD] border-l-4 border-[#FFC107] p-4 mb-8 text-[#856404] rounded-r-md">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="material-symbols-outlined">pending_actions</span>
+              <h4 className="font-bold">Cuenta en Revisión</h4>
+            </div>
+            <p className="text-sm">
+              Tu cuenta de patrocinador está pendiente de validación administrativa. Algunas funcionalidades (registro de invitados, staff y conferencias) estarán deshabilitadas hasta que se confirme tu participación y/o pago.
+            </p>
+          </div>
+        )}
 
         <div className="space-y-16">
           {/* MI ACTIVIDAD */}
@@ -83,7 +98,7 @@ const SponsorDashboard = ({ onBack, onStaffRegistration, onContact }) => {
                   <h3 className="font-headline-md text-headline-md text-secondary flex items-center gap-2"><span className="material-symbols-outlined text-primary text-3xl">groups</span> LISTA DE INVITADOS</h3>
                   <p className="font-body-md text-body-md text-on-surface-variant">Completa el registro de tus invitados VIP para el evento.</p>
                 </div>
-                <button onClick={() => setActiveForm('guest')} className={btnStyle}>COMPLETAR</button>
+                <button onClick={() => isApproved && setActiveForm('guest')} className={isApproved ? btnStyle : disabledBtnStyle} disabled={!isApproved}>COMPLETAR</button>
               </div>
 
               <div className={cardStyle}>
@@ -91,7 +106,7 @@ const SponsorDashboard = ({ onBack, onStaffRegistration, onContact }) => {
                   <h3 className="font-headline-md text-headline-md text-secondary flex items-center gap-2"><span className="material-symbols-outlined text-primary text-3xl">mic</span> INFORMACIÓN DE CONFERENCIAS</h3>
                   <p className="font-body-md text-body-md text-on-surface-variant">Gestiona tus conferencias presenciales y virtuales.</p>
                 </div>
-                <button onClick={() => setActiveForm('speaker')} className={btnStyle}>COMPLETAR</button>
+                <button onClick={() => isApproved && setActiveForm('speaker')} className={isApproved ? btnStyle : disabledBtnStyle} disabled={!isApproved}>COMPLETAR</button>
               </div>
 
               <div className={cardStyle}>
@@ -99,7 +114,7 @@ const SponsorDashboard = ({ onBack, onStaffRegistration, onContact }) => {
                   <h3 className="font-headline-md text-headline-md text-secondary flex items-center gap-2"><span className="material-symbols-outlined text-primary text-3xl">badge</span> ACREDITACIÓN STAFF</h3>
                   <p className="font-body-md text-body-md text-on-surface-variant">Con este registro llegarán las entradas al evento y los accesos a la app virtual.</p>
                 </div>
-                <button onClick={onStaffRegistration} className={btnStyle}>COMPLETAR</button>
+                <button onClick={(e) => { if(!isApproved){ e.preventDefault(); } else { onStaffRegistration(); } }} className={isApproved ? btnStyle : disabledBtnStyle} disabled={!isApproved}>COMPLETAR</button>
               </div>
             </div>
           </section>

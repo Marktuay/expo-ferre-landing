@@ -806,6 +806,7 @@ export default function App() {
           <div className="min-h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-[#283474] border-t-transparent rounded-full animate-spin"></div></div>
         ) : currentUser ? (
           <SponsorDashboard 
+            userData={currentUserData}
             onBack={() => setCurrentView('landing')}
             onStaffRegistration={() => setCurrentView('staffRegistration')}
             onContact={() => setCurrentView('contactPage')}

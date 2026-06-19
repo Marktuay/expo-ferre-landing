@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 
 export default function AdminSponsorDetails({ sponsor, onBack }) {
@@ -82,11 +82,40 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
             <div className="bg-primary text-on-primary inline-block px-3 py-1 font-label-sm text-label-xs uppercase tracking-widest clip-industrial mb-2">VISTA 360 DEL PATROCINADOR</div>
             <h1 className="font-headline-md text-headline-md text-secondary flex items-center gap-2">
               {sponsor.empresa}
+              {sponsor.status === 'pending' ? (
+                <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-yellow-400 align-middle ml-2">Pendiente</span>
+              ) : (
+                <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-green-400 align-middle ml-2">Aprobado</span>
+              )}
             </h1>
             <p className="text-on-surface-variant">
               <strong>Contacto:</strong> {sponsor.nombre} {sponsor.apellido} | <strong>Email:</strong> {sponsor.correo} | <strong>Teléfono:</strong> {sponsor.telefono}
             </p>
           </div>
+          {sponsor.status === 'pending' && (
+            <div className="flex shrink-0">
+              <button 
+                onClick={async () => {
+                  if(window.confirm('¿Deseas aprobar a este patrocinador? Se habilitarán todas sus funcionalidades.')){
+                    try {
+                      await updateDoc(doc(db, 'users', sponsor.id), { status: 'approved' });
+                      // Note: state updates in parent will re-render this via onSnapshot but 'sponsor' prop is static from parent unless passed dynamically.
+                      // The parent 'AdminSponsors' has a snapshot, but selectedSponsor is static. For immediate feedback we could call onBack, or let the parent handle it.
+                      alert('Patrocinador aprobado exitosamente. Vuelve a la lista para ver los cambios reflejados.');
+                      onBack();
+                    } catch(e) {
+                      console.error('Error approving:', e);
+                      alert('Hubo un error.');
+                    }
+                  }
+                }}
+                className="px-5 py-2 bg-green-600 text-white border border-green-700 rounded-md hover:bg-green-700 transition-colors font-label-lg flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined">check_circle</span>
+                Aprobar Cuenta
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="space-y-12">

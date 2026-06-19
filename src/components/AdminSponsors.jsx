@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import AdminSponsorDetails from './AdminSponsorDetails';
 import PrintableBadgeList from './PrintableBadgeList';
@@ -103,6 +103,7 @@ export default function AdminSponsors({ onBack }) {
                   <th className="p-4 font-bold text-on-surface">Email</th>
                   <th className="p-4 font-bold text-on-surface">Teléfono</th>
                   <th className="p-4 font-bold text-on-surface">Empleados</th>
+                  <th className="p-4 font-bold text-on-surface">Estado</th>
                   <th className="p-4 font-bold text-on-surface">Fecha</th>
                   <th className="p-4 font-bold text-on-surface text-center">Acciones</th>
                 </tr>
@@ -110,13 +111,13 @@ export default function AdminSponsors({ onBack }) {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="7" className="p-8 text-center text-secondary">
+                    <td colSpan="8" className="p-8 text-center text-secondary">
                       Cargando datos...
                     </td>
                   </tr>
                 ) : sponsors.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="p-8 text-center text-secondary">
+                    <td colSpan="8" className="p-8 text-center text-secondary">
                       No hay patrocinadores registrados.
                     </td>
                   </tr>
@@ -128,6 +129,13 @@ export default function AdminSponsors({ onBack }) {
                       <td className="p-4 text-secondary">{sponsor.correo}</td>
                       <td className="p-4 text-secondary">{sponsor.telefono}</td>
                       <td className="p-4 text-secondary">{sponsor.empleados || 'N/A'}</td>
+                      <td className="p-4">
+                        {(!sponsor.status || sponsor.status === 'approved') ? (
+                          <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-green-400">Aprobado</span>
+                        ) : (
+                          <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-yellow-400">Pendiente</span>
+                        )}
+                      </td>
                       <td className="p-4 text-secondary">
                         {sponsor.createdAt.toLocaleDateString('es-ES', {
                           day: '2-digit',
@@ -138,6 +146,24 @@ export default function AdminSponsors({ onBack }) {
                         })}
                       </td>
                       <td className="p-4 flex gap-2 justify-center">
+                        {sponsor.status === 'pending' && (
+                          <button 
+                            onClick={async () => {
+                              if(window.confirm('¿Deseas aprobar a este patrocinador? Se habilitarán todas sus funcionalidades.')){
+                                try {
+                                  await updateDoc(doc(db, 'users', sponsor.id), { status: 'approved' });
+                                } catch(e) {
+                                  console.error('Error approving sponsor:', e);
+                                  alert('Hubo un error al aprobar.');
+                                }
+                              }
+                            }}
+                            className="p-2 text-green-600 hover:bg-green-100 rounded-full transition-colors"
+                            title="Aprobar Patrocinador"
+                          >
+                            <span className="material-symbols-outlined">check_circle</span>
+                          </button>
+                        )}
                         <button 
                           onClick={() => setPrintItems([sponsor])}
                           className="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors"
@@ -148,8 +174,9 @@ export default function AdminSponsors({ onBack }) {
                         <button 
                           onClick={() => setSelectedSponsor(sponsor)}
                           className="px-3 py-1 bg-surface-variant text-secondary border border-outline-variant rounded-md hover:bg-outline-variant transition-colors text-sm font-medium"
+                          title="Ver Detalles"
                         >
-                          Ver Detalles
+                          Detalles
                         </button>
                       </td>
                     </tr>
