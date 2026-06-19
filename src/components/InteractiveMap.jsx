@@ -267,12 +267,19 @@ export default function InteractiveMap({ onBack }) {
               >
                 LIBERAR STAND
               </button>
-            ) : (
+            ) : selectedStand.status === 'available' ? (
               <button 
                 onClick={() => setIsReservationModalOpen(true)}
                 className="w-full md:w-auto px-8 py-3 bg-primary-container text-on-primary-container rounded-5px font-label-lg font-bold tracking-wide hover:bg-[#F2B04A] transition-colors hard-shadow"
               >
                 RESERVAR ESTE STAND
+              </button>
+            ) : (
+              <button 
+                disabled
+                className="w-full md:w-auto px-8 py-3 bg-surface-variant text-secondary rounded-5px font-label-lg font-bold tracking-wide opacity-50 cursor-not-allowed"
+              >
+                STAND NO DISPONIBLE
               </button>
             )}
           </div>
