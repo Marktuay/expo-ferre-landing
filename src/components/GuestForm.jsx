@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Send } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { db, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 
 const GuestForm = ({ onBack }) => {
   const [formState, setFormState] = useState('idle');
+  const [registeredGuestId, setRegisteredGuestId] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -31,13 +33,10 @@ const GuestForm = ({ onBack }) => {
         createdAt: serverTimestamp()
       };
       
-      await addDoc(collection(db, `${getEventBasePath()}/guests`), data);
+      const docRef = await addDoc(collection(db, `${getEventBasePath()}/guests`), data);
       
+      setRegisteredGuestId(docRef.id);
       setFormState('success');
-      setTimeout(() => {
-        setFormState('idle');
-        onBack();
-      }, 3000);
     } catch (error) {
       console.error('Error saving guest:', error);
       setFormState('idle');
@@ -65,13 +64,36 @@ const GuestForm = ({ onBack }) => {
 
         <div className="bg-white p-8 md:p-12 rounded-lg shadow-sm border border-outline-variant">
           {formState === 'success' ? (
-            <div className="bg-green-50 text-green-800 p-8 rounded-lg border border-green-200 text-center flex flex-col items-center gap-4">
+            <div className="bg-white p-8 rounded-lg border border-outline-variant text-center flex flex-col items-center gap-6">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600">
                 <span className="material-symbols-outlined text-4xl">check_circle</span>
               </div>
               <div>
-                <h3 className="font-bold text-xl mb-2">¡Invitado registrado!</h3>
-                <p>Sus datos han sido guardados correctamente.</p>
+                <h3 className="font-bold text-2xl mb-2 text-primary">¡Invitado registrado con éxito!</h3>
+                <p className="text-secondary mb-6">El código QR para el acceso de su invitado ha sido generado.</p>
+                
+                <div className="bg-surface-variant p-6 rounded-lg inline-block border border-outline mb-6">
+                  <QRCodeSVG value={registeredGuestId} size={180} level="M" />
+                  <p className="mt-4 text-sm font-mono text-secondary">ID: {registeredGuestId}</p>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
+                  <button 
+                    onClick={() => {
+                      setFormState('idle');
+                      setRegisteredGuestId(null);
+                    }}
+                    className="px-6 py-3 bg-surface border border-outline-variant rounded-md text-primary font-bold hover:bg-surface-variant transition-colors"
+                  >
+                    Registrar Otro Invitado
+                  </button>
+                  <button 
+                    onClick={onBack}
+                    className="px-6 py-3 bg-primary text-on-primary rounded-md font-bold hover:bg-primary-container hover:text-on-primary-container transition-colors"
+                  >
+                    Volver al Panel
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
