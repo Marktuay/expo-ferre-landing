@@ -67,7 +67,7 @@ const SponsorDashboard = ({ onBack, onStaffRegistration, onContact }) => {
 
           {/* PRESENCIAL SECTION */}
           <section>
-            <h2 className="font-headline-lg text-headline-lg text-primary border-l-4 border-secondary pl-4 mb-8">FORMATO PRESENCIAL</h2>
+            <h2 className="font-headline-lg text-headline-lg text-primary border-l-4 border-secondary pl-4 mb-8">GESTIÓN DE PARTICIPACIÓN</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className={cardStyle}>
