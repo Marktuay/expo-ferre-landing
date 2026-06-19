@@ -127,53 +127,7 @@ const StaffRegistration = ({ onBack }) => {
               </div>
 
 
-              {/* Datos Empresariales */}
-              <div className="space-y-4 pt-4">
-                <h3 className="font-headline-sm text-secondary border-b pb-2">Datos Empresariales</h3>
-                <div className="grid grid-cols-1 gap-6">
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Empresa u Organización <span className="text-error">*</span></label>
-                    <input name="empresa" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Nombre de la empresa u organización" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Tamaño de empresa</label>
-                    <select name="tamanoEmpresa" defaultValue="" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface">
-                      <option value="" disabled>Seleccione...</option>
-                      <option value="1-10">1 a 10 empleados</option>
-                      <option value="11-50">11 a 50 empleados</option>
-                      <option value="51-200">51 a 200 empleados</option>
-                      <option value="201+">Más de 200 empleados</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Sector</label>
-                    <select name="sector" defaultValue="" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface">
-                      <option value="" disabled>Seleccione...</option>
-                      <option value="construccion">Construcción</option>
-                      <option value="ferreteria">Ferretería</option>
-                      <option value="manufactura">Manufactura</option>
-                      <option value="importacion">Importación / Exportación</option>
-                      <option value="otro">Otro</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Tipo de cargo</label>
-                    <select name="tipoCargo" defaultValue="" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface">
-                      <option value="" disabled>Seleccione...</option>
-                      <option value="directivo">Directivo / Gerencial</option>
-                      <option value="operativo">Operativo / Técnico</option>
-                      <option value="ventas">Ventas / Comercial</option>
-                      <option value="independiente">Independiente</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Cargo que desempeña <span className="text-error">*</span></label>
-                    <input name="cargo" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Ej. Gerente de Ventas" />
-                  </div>
-                </div>
-              </div>
+
 
               <div className="pt-6 border-t border-outline-variant flex justify-end">
                 <button 
