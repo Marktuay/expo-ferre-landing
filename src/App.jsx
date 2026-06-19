@@ -10,7 +10,7 @@ import StaffRegistration from './components/StaffRegistration';
 import AuthPage from './components/AuthPage';
 import { auth, db } from './firebase';
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { getEventBasePath } from './config/eventConfig';
 import { QRCodeSVG } from 'qrcode.react';
 import ScannerModule from './components/ScannerModule';
@@ -64,6 +64,7 @@ export default function App() {
   const [formState, setFormState] = useState('idle'); // 'idle', 'submitting', 'success'
   const [qrValue, setQrValue] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [currentUserData, setCurrentUserData] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [adminUser, setAdminUser] = useState(null);
   const [sponsorLogos, setSponsorLogos] = useState([]);
@@ -104,8 +105,24 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      if (user) {
+        try {
+          const docRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setCurrentUserData(docSnap.data());
+          } else {
+            setCurrentUserData(null);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setCurrentUserData(null);
+        }
+      } else {
+        setCurrentUserData(null);
+      }
       setAuthLoading(false);
     });
     return () => unsubscribe();
@@ -202,8 +219,15 @@ export default function App() {
               currentUser ? (
                 <div className="flex items-center gap-4">
                 <div className="flex flex-col items-end">
-                  <span className="text-xs text-gray-400">Patrocinador</span>
-                  <span className="text-sm font-bold text-white">{currentUser.email}</span>
+                  <span className="text-[10px] text-gray-400">Patrocinador</span>
+                  {currentUserData ? (
+                    <>
+                      <span className="text-sm font-bold text-white leading-tight">{currentUserData.empresa}</span>
+                      <span className="text-[11px] text-gray-300 leading-tight">{currentUserData.nombre} {currentUserData.apellido}</span>
+                    </>
+                  ) : (
+                    <span className="text-sm font-bold text-white">{currentUser.email}</span>
+                  )}
                 </div>
                 <button 
                   onClick={() => setCurrentView('sponsorDashboard')}
@@ -278,8 +302,15 @@ export default function App() {
               currentUser ? (
                 <div className="flex flex-col gap-3">
                 <div className="bg-white/5 py-2 px-4 rounded-md text-center">
-                  <span className="block text-xs text-gray-400">Sesión iniciada como</span>
-                  <span className="block text-sm font-bold text-white truncate">{currentUser.email}</span>
+                  <span className="block text-[10px] text-gray-400">Patrocinador</span>
+                  {currentUserData ? (
+                    <>
+                      <span className="block text-sm font-bold text-white truncate leading-tight">{currentUserData.empresa}</span>
+                      <span className="block text-[11px] text-gray-300 truncate leading-tight">{currentUserData.nombre} {currentUserData.apellido}</span>
+                    </>
+                  ) : (
+                    <span className="block text-sm font-bold text-white truncate">{currentUser.email}</span>
+                  )}
                 </div>
                 <button 
                   onClick={() => { setCurrentView('sponsorDashboard'); setIsMobileMenuOpen(false); }}
