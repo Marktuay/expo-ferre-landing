@@ -22,6 +22,7 @@ import AdminContact from './components/AdminContact';
 import AdminSpeakers from './components/AdminSpeakers';
 import AdminStaff from './components/AdminStaff';
 import AdminGuests from './components/AdminGuests';
+import AdminUsers from './components/AdminUsers';
 import InteractiveMap from './components/InteractiveMap';
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -64,7 +65,7 @@ export default function App() {
   const [qrValue, setQrValue] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [adminUser, setAdminUser] = useState(null);
   const [sponsorLogos, setSponsorLogos] = useState([]);
 
   useEffect(() => {
@@ -177,11 +178,11 @@ export default function App() {
           {/* Desktop Buttons (Right Side) */}
           <div className="hidden lg:flex items-center gap-4">
             {currentView.startsWith('admin') ? (
-              isAdminAuthenticated ? (
+              adminUser ? (
                 <div className="flex items-center gap-4">
                   <div className="flex flex-col items-end">
                     <span className="text-xs text-gray-400">Administrador</span>
-                    <span className="text-sm font-bold text-white">Master</span>
+                    <span className="text-sm font-bold text-white">{adminUser.username}</span>
                   </div>
                   <button 
                     onClick={() => setCurrentView('adminHub')}
@@ -190,7 +191,7 @@ export default function App() {
                     <span className="material-symbols-outlined text-[20px]">dashboard</span> Mi Panel
                   </button>
                   <button 
-                    onClick={() => { setIsAdminAuthenticated(false); setCurrentView('landing'); }}
+                    onClick={() => { setAdminUser(null); setCurrentView('landing'); }}
                     className="bg-red-500/20 text-red-200 hover:bg-red-500 hover:text-white border border-red-500/50 font-bold py-2 px-4 rounded-md transition-all shadow-sm flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined text-[20px]">logout</span> Salir
@@ -253,11 +254,11 @@ export default function App() {
             </button>
             <hr className="border-white/10 my-2" />
             {currentView.startsWith('admin') ? (
-              isAdminAuthenticated ? (
+              adminUser ? (
                 <div className="flex flex-col gap-3">
                   <div className="bg-white/5 py-2 px-4 rounded-md text-center">
                     <span className="block text-xs text-gray-400">Sesión iniciada como</span>
-                    <span className="block text-sm font-bold text-white truncate">Administrador (Master)</span>
+                    <span className="block text-sm font-bold text-white truncate">{adminUser.username}</span>
                   </div>
                   <button 
                     onClick={() => { setCurrentView('adminHub'); setIsMobileMenuOpen(false); }}
@@ -266,7 +267,7 @@ export default function App() {
                     <span className="material-symbols-outlined">dashboard</span> Mi Panel
                   </button>
                   <button 
-                    onClick={() => { setIsAdminAuthenticated(false); setCurrentView('landing'); setIsMobileMenuOpen(false); }}
+                    onClick={() => { setAdminUser(null); setCurrentView('landing'); setIsMobileMenuOpen(false); }}
                     className="bg-red-500/20 text-red-200 border border-red-500/50 font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
                   >
                     <span className="material-symbols-outlined">logout</span> Salir
@@ -715,8 +716,8 @@ export default function App() {
         <AdminHub 
           onBack={() => setCurrentView('landing')} 
           onNavigate={(view) => setCurrentView(view)} 
-          isAuthenticated={isAdminAuthenticated}
-          setIsAuthenticated={setIsAdminAuthenticated}
+          adminUser={adminUser}
+          setAdminUser={setAdminUser}
         />
       )}
 
@@ -752,15 +753,19 @@ export default function App() {
         <AdminGuests onBack={() => setCurrentView('adminSponsorsHub')} />
       )}
 
+      {currentView === 'adminUsers' && (
+        <AdminUsers onBack={() => setCurrentView('adminHub')} />
+      )}
+
       {currentView === 'escaner' && (
-        isAdminAuthenticated ? (
+        adminUser ? (
           <ScannerModule onBack={() => setCurrentView('adminHub')} />
         ) : (
           <AdminHub 
             onBack={() => setCurrentView('landing')} 
             onNavigate={(view) => setCurrentView(view)} 
-            isAuthenticated={isAdminAuthenticated}
-            setIsAuthenticated={setIsAdminAuthenticated}
+            adminUser={adminUser}
+            setAdminUser={setAdminUser}
           />
         )
       )}
