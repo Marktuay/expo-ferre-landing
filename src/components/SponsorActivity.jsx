@@ -104,11 +104,7 @@ export default function SponsorActivity({ onBack }) {
                       </div>
                       <p className="text-sm text-secondary"><strong>Tamaño:</strong> {stand.size}</p>
                       <p className="text-sm text-secondary"><strong>Precio:</strong> {stand.price}</p>
-                      {stand.reservationDetails && (
-                        <p className="text-sm text-secondary truncate" title={stand.reservationDetails.empresa}>
-                          <strong>Empresa:</strong> {stand.reservationDetails.empresa}
-                        </p>
-                      )}
+
                       {stand.logo && (
                         <div className="mt-2 w-12 h-12 rounded-full overflow-hidden border-2 border-primary absolute bottom-4 right-4 bg-white">
                           <img src={stand.logo} alt="Logo stand" className="w-full h-full object-cover" />
