@@ -1,0 +1,137 @@
+import React, { useState, useEffect } from 'react';
+import { Users, Send } from 'lucide-react';
+import { db, auth } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+const GuestForm = ({ onBack }) => {
+  const [formState, setFormState] = useState('idle');
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setFormState('submitting');
+    
+    try {
+      const formData = new FormData(e.target);
+      const user = auth.currentUser;
+      
+      const data = {
+        sponsorId: user ? user.uid : 'unknown',
+        sponsorEmail: user ? user.email : 'unknown',
+        nombre: formData.get('nombre'),
+        telefono: formData.get('telefono'),
+        empresa: formData.get('empresa'),
+        cargo: formData.get('cargo'),
+        empleados: formData.get('empleados'),
+        email: formData.get('email'),
+        createdAt: serverTimestamp()
+      };
+      
+      await addDoc(collection(db, 'guests'), data);
+      
+      setFormState('success');
+      setTimeout(() => {
+        setFormState('idle');
+        onBack();
+      }, 3000);
+    } catch (error) {
+      console.error('Error saving guest:', error);
+      setFormState('idle');
+      alert('Hubo un error al guardar los datos. Intente nuevamente.');
+    }
+  };
+
+  return (
+    <main className="pt-40 md:pt-48 pb-20 md:pb-32 px-margin-mobile md:px-margin-desktop bg-background min-h-screen">
+      <div className="max-w-3xl mx-auto">
+        <button 
+          onClick={onBack}
+          className="mb-6 flex items-center gap-2 text-primary hover:text-primary-container font-bold transition-colors"
+        >
+          <span className="material-symbols-outlined">arrow_back</span> Volver
+        </button>
+        <div className="text-center mb-10">
+          <h1 className="font-headline-lg text-headline-lg text-primary mb-4 flex items-center justify-center gap-3">
+            <Users size={36} /> Registro de Invitados
+          </h1>
+          <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">
+            Por favor, complete el siguiente formulario para registrar a sus invitados VIP para Expo Ferre 2026.
+          </p>
+        </div>
+
+        <div className="bg-white p-8 md:p-12 rounded-lg shadow-sm border border-outline-variant">
+          {formState === 'success' ? (
+            <div className="bg-green-50 text-green-800 p-8 rounded-lg border border-green-200 text-center flex flex-col items-center gap-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                <span className="material-symbols-outlined text-4xl">check_circle</span>
+              </div>
+              <div>
+                <h3 className="font-bold text-xl mb-2">¡Invitado registrado!</h3>
+                <p>Sus datos han sido guardados correctamente.</p>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              
+              <div className="space-y-4">
+                <h3 className="font-headline-sm text-secondary border-b pb-2">Datos del Invitado</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="font-label-md text-on-surface font-bold">Nombre Completo <span className="text-error">*</span></label>
+                    <input name="nombre" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Nombre completo" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-on-surface font-bold">Número de Celular <span className="text-error">*</span></label>
+                    <input name="telefono" required type="tel" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="+505 8000 0000" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-on-surface font-bold">Correo Electrónico <span className="text-error">*</span></label>
+                    <input name="email" required type="email" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="correo@ejemplo.com" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-on-surface font-bold">Empresa <span className="text-error">*</span></label>
+                    <input name="empresa" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Nombre de la empresa" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-on-surface font-bold">Cargo <span className="text-error">*</span></label>
+                    <input name="cargo" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Puesto o Cargo" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-on-surface font-bold">Cantidad de Empleados <span className="text-error">*</span></label>
+                    <select name="empleados" required className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface">
+                      <option value="">Seleccione una opción</option>
+                      <option value="1 a 10 empleados">1 a 10 empleados</option>
+                      <option value="11 a 50 empleados">11 a 50 empleados</option>
+                      <option value="51 a 200 empleados">51 a 200 empleados</option>
+                      <option value="201 a 500 empleados">201 a 500 empleados</option>
+                      <option value="Más de 500 empleados">Más de 500 empleados</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6">
+                <button 
+                  type="submit" 
+                  disabled={formState === 'submitting'}
+                  className="w-full md:w-auto px-8 py-4 bg-primary text-on-primary font-bold rounded-md hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {formState === 'submitting' ? 'Guardando...' : (
+                    <>
+                      <Send size={20} /> Guardar Invitado
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+};
+
+export default GuestForm;

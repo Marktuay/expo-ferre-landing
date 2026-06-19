@@ -11,6 +11,7 @@ import AuthPage from './components/AuthPage';
 import { auth, db } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, addDoc, serverTimestamp, query, where, onSnapshot } from 'firebase/firestore';
+import { QRCodeSVG } from 'qrcode.react';
 import AdminHub from './components/AdminHub';
 import AdminSponsorsHub from './components/AdminSponsorsHub';
 import AdminPreRegistrations from './components/AdminPreRegistrations';
@@ -18,6 +19,7 @@ import AdminSponsors from './components/AdminSponsors';
 import AdminContact from './components/AdminContact';
 import AdminSpeakers from './components/AdminSpeakers';
 import AdminStaff from './components/AdminStaff';
+import AdminGuests from './components/AdminGuests';
 import InteractiveMap from './components/InteractiveMap';
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -57,6 +59,7 @@ export default function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [formState, setFormState] = useState('idle'); // 'idle', 'submitting', 'success'
+  const [qrValue, setQrValue] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -129,12 +132,10 @@ export default function App() {
     };
 
     try {
-      await addDoc(collection(db, 'preregistrations'), data);
+      const docRef = await addDoc(collection(db, 'preregistrations'), data);
+      setQrValue(docRef.id);
       setFormState('success');
-      setTimeout(() => {
-        setFormState('idle');
-        e.target.reset();
-      }, 3000);
+      e.target.reset();
     } catch (error) {
       console.error('Error saving preregistration:', error);
       setFormState('idle');
@@ -647,10 +648,26 @@ export default function App() {
             </div>
             <div id="preregistro-form" className="bg-[#d9d9d9]/80 backdrop-blur-sm p-8 border border-outline-variant hard-shadow-orange rounded-5px relative overflow-hidden shadow-2xl">
               {formState === 'success' && (
-                <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center text-center p-8 z-10">
-                  <span className="material-symbols-outlined text-6xl text-[#16a34a] mb-4">check_circle</span>
+                <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center text-center p-8 z-10 overflow-y-auto">
+                  <span className="material-symbols-outlined text-6xl text-[#16a34a] mb-2">check_circle</span>
                   <h3 className="font-headline-lg text-2xl text-[#1e293b] font-bold mb-2">¡Preregistro Exitoso!</h3>
-                  <p className="text-[#475569]">Nos pondremos en contacto contigo pronto con más información.</p>
+                  <p className="text-[#475569] mb-6">Guarda este código QR para tu acceso al evento.</p>
+                  
+                  {qrValue && (
+                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6">
+                      <QRCodeSVG value={qrValue} size={150} level="M" />
+                    </div>
+                  )}
+
+                  <button 
+                    onClick={() => {
+                      setFormState('idle');
+                      setQrValue(null);
+                    }}
+                    className="px-6 py-2 bg-[#f39200] hover:bg-[#d88000] text-white font-bold rounded-md shadow-md transition-all active:scale-95"
+                  >
+                    Cerrar
+                  </button>
                 </div>
               )}
               <h2 className="font-headline-md text-headline-md text-[#1e293b] mb-6 font-bold">PREREGISTRO</h2>
@@ -727,6 +744,10 @@ export default function App() {
 
       {currentView === 'adminStaff' && (
         <AdminStaff onBack={() => setCurrentView('adminSponsorsHub')} />
+      )}
+
+      {currentView === 'adminGuests' && (
+        <AdminGuests onBack={() => setCurrentView('adminSponsorsHub')} />
       )}
 
       {currentView === 'sponsorDashboard' && (

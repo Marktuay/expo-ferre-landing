@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserCheck, Send } from 'lucide-react';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const StaffRegistration = ({ onBack }) => {
@@ -16,6 +16,7 @@ const StaffRegistration = ({ onBack }) => {
     
     try {
       const formData = new FormData(e.target);
+      const user = auth.currentUser;
       
       const data = {
         nombre: formData.get('nombre'),
@@ -27,7 +28,9 @@ const StaffRegistration = ({ onBack }) => {
         sector: formData.get('sector'),
         tipoCargo: formData.get('tipoCargo'),
         cargo: formData.get('cargo'),
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        sponsorId: user ? user.uid : null,
+        sponsorEmail: user ? user.email : null
       };
       
       await addDoc(collection(db, 'staff'), data);

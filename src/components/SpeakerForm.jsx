@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mic, Send } from 'lucide-react';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const SpeakerForm = ({ onClose }) => {
@@ -16,6 +16,7 @@ const SpeakerForm = ({ onClose }) => {
     
     try {
       const formData = new FormData(e.target);
+      const user = auth.currentUser;
       
       const formatos = [];
       const checkboxes = e.target.querySelectorAll('input[type="checkbox"]:checked');
@@ -35,7 +36,9 @@ const SpeakerForm = ({ onClose }) => {
         titulo: formData.get('titulo'),
         resumen: formData.get('resumen'),
         autorizaCompartir: formData.get('auth'),
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        sponsorId: user ? user.uid : null,
+        sponsorEmail: user ? user.email : null
       };
       
       await addDoc(collection(db, 'speakers'), data);

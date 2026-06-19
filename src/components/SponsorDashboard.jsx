@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import SpeakerForm from './SpeakerForm';
+import GuestForm from './GuestForm';
 import InteractiveMap from './InteractiveMap';
+import SponsorActivity from './SponsorActivity';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
+import { QRCodeSVG } from 'qrcode.react';
 
 const SponsorDashboard = ({ onBack, onStaffRegistration, onContact }) => {
   const [activeForm, setActiveForm] = useState(null);
@@ -23,6 +26,14 @@ const SponsorDashboard = ({ onBack, onStaffRegistration, onContact }) => {
     return <SpeakerForm onClose={() => setActiveForm(null)} />;
   }
 
+  if (activeForm === 'guest') {
+    return <GuestForm onBack={() => setActiveForm(null)} />;
+  }
+
+  if (activeForm === 'activity') {
+    return <SponsorActivity onBack={() => setActiveForm(null)} />;
+  }
+
   return (
     <div className="min-h-screen bg-background text-on-background relative overflow-x-hidden pt-40 md:pt-48 pb-20">
       <div className="relative z-10 container mx-auto px-margin-mobile md:px-margin-desktop max-w-5xl">
@@ -31,9 +42,29 @@ const SponsorDashboard = ({ onBack, onStaffRegistration, onContact }) => {
             <div className="bg-primary text-on-primary inline-block px-4 py-1 font-label-sm text-label-sm uppercase tracking-widest clip-industrial mb-4">ÁREA PRIVADA</div>
             <h1 className="font-headline-xl text-headline-xl md:text-5xl text-secondary">PANEL DE PATROCINADORES</h1>
           </div>
+          
+          {auth.currentUser && (
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-outline-variant flex flex-col items-center gap-2">
+              <QRCodeSVG value={auth.currentUser.uid} size={100} level="M" />
+              <span className="font-label-sm text-on-surface-variant">Mi Código QR</span>
+            </div>
+          )}
         </div>
 
         <div className="space-y-16">
+          {/* MI ACTIVIDAD */}
+          <section>
+            <div className="bg-surface border-2 border-primary hover:hard-shadow transition-all p-6 md:p-8 rounded-5px flex flex-col md:flex-row justify-between items-center gap-6 group mb-8">
+              <div>
+                <h3 className="font-headline-md text-headline-md text-primary flex items-center gap-2"><span className="material-symbols-outlined text-3xl">dashboard</span> MI ACTIVIDAD Y REGISTROS</h3>
+                <p className="font-body-md text-body-md text-on-surface-variant mt-2">Revisa todos los invitados, staff, conferencias y stands que has registrado como patrocinador.</p>
+              </div>
+              <button onClick={() => setActiveForm('activity')} className="bg-primary text-on-primary font-bold py-3 px-8 rounded-5px hover:brightness-110 active:scale-95 transition-all whitespace-nowrap">
+                VER MI ACTIVIDAD
+              </button>
+            </div>
+          </section>
+
           {/* PRESENCIAL SECTION */}
           <section>
             <h2 className="font-headline-lg text-headline-lg text-primary border-l-4 border-secondary pl-4 mb-8">FORMATO PRESENCIAL</h2>
@@ -50,9 +81,9 @@ const SponsorDashboard = ({ onBack, onStaffRegistration, onContact }) => {
               <div className={cardStyle}>
                 <div>
                   <h3 className="font-headline-md text-headline-md text-secondary flex items-center gap-2"><span className="material-symbols-outlined text-primary text-3xl">groups</span> LISTA DE INVITADOS</h3>
-                  <p className="font-body-md text-body-md text-on-surface-variant">Descarga el documento y compártelo con el ejecutivo a cargo de tu cuenta.</p>
+                  <p className="font-body-md text-body-md text-on-surface-variant">Completa el registro de tus invitados VIP para el evento.</p>
                 </div>
-                <button onClick={() => alert("El documento estará disponible próximamente.")} className={btnStyle}>DESCARGAR</button>
+                <button onClick={() => setActiveForm('guest')} className={btnStyle}>COMPLETAR</button>
               </div>
 
               <div className={cardStyle}>

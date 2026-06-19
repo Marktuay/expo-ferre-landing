@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import PrintableBadgeList from './PrintableBadgeList';
 
 export default function AdminStaff({ onBack }) {
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [printItems, setPrintItems] = useState(null);
 
   useEffect(() => {
     const q = query(collection(db, 'staff'));
@@ -30,6 +32,17 @@ export default function AdminStaff({ onBack }) {
     return () => unsubscribe();
   }, []);
 
+  if (printItems) {
+    return (
+      <PrintableBadgeList 
+        items={printItems} 
+        roleLabel="Staff"
+        colorClass="border-green-600 text-green-600"
+        onClose={() => setPrintItems(null)} 
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
       <div className="max-w-6xl mx-auto">
@@ -39,6 +52,14 @@ export default function AdminStaff({ onBack }) {
             <p className="text-body-lg text-secondary">Registro de personal staff y acreditaciones.</p>
           </div>
           <div className="flex gap-4">
+            <button 
+              onClick={() => setPrintItems(staffList)}
+              disabled={staffList.length === 0}
+              className="px-5 py-2 bg-primary text-on-primary border border-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span className="material-symbols-outlined">print</span>
+              Imprimir Todos
+            </button>
             <button onClick={() => {
               import('xlsx').then(XLSX => {
                 const dataToExport = staffList.map(s => ({
@@ -79,18 +100,19 @@ export default function AdminStaff({ onBack }) {
                   <th className="p-4 font-bold text-on-surface">Cargo</th>
                   <th className="p-4 font-bold text-on-surface">Sector</th>
                   <th className="p-4 font-bold text-on-surface">Fecha</th>
+                  <th className="p-4 font-bold text-on-surface text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="7" className="p-8 text-center text-secondary">
+                    <td colSpan="8" className="p-8 text-center text-secondary">
                       Cargando datos...
                     </td>
                   </tr>
                 ) : staffList.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="p-8 text-center text-secondary">
+                    <td colSpan="8" className="p-8 text-center text-secondary">
                       No hay staff registrado.
                     </td>
                   </tr>
@@ -104,6 +126,15 @@ export default function AdminStaff({ onBack }) {
                       <td className="p-4 text-secondary">{staff.cargo}</td>
                       <td className="p-4 text-secondary">{staff.sector}</td>
                       <td className="p-4 text-secondary">{staff.createdAt.toLocaleDateString()}</td>
+                      <td className="p-4 text-center">
+                        <button 
+                          onClick={() => setPrintItems([staff])}
+                          className="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors"
+                          title="Imprimir Gafete"
+                        >
+                          <span className="material-symbols-outlined">print</span>
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../firebase';
+import { db, storage, auth } from '../firebase';
 
 // Stands mapeados directamente desde las coordenadas del archivo SVG original
 const initialStandsList = [
@@ -395,10 +395,13 @@ export default function InteractiveMap({ onBack }) {
                 }
 
                 const standRef = doc(db, 'stands', reservedStandId);
+                const user = auth.currentUser;
                 await updateDoc(standRef, {
                   status: 'reserved',
                   ...(logoDataUrl && { logo: logoDataUrl }),
-                  reservationDetails: reservationData
+                  reservationDetails: reservationData,
+                  sponsorId: user ? user.uid : null,
+                  sponsorEmail: user ? user.email : null
                 });
 
                 alert('¡Stand reservado y actualizado con éxito!');

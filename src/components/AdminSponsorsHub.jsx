@@ -17,7 +17,7 @@ export default function AdminSponsorsHub({ onBack, onNavigate }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <button 
             onClick={() => onNavigate('adminSponsors')}
             className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group"
@@ -67,6 +67,19 @@ export default function AdminSponsorsHub({ onBack, onNavigate }) {
             <div>
               <h3 className="text-xl font-bold text-on-surface mb-2">Staff</h3>
               <p className="text-secondary text-sm">Personal acreditado para el evento.</p>
+            </div>
+          </button>
+
+          <button 
+            onClick={() => onNavigate('adminGuests')}
+            className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group"
+          >
+            <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+              <span className="material-symbols-outlined text-3xl">groups</span>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-on-surface mb-2">Invitados</h3>
+              <p className="text-secondary text-sm">Lista de invitados VIP de patrocinadores.</p>
             </div>
           </button>
         </div>
