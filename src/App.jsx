@@ -143,20 +143,31 @@ export default function App() {
     setFormState('submitting');
     
     const formData = new FormData(e.target);
+    const position = formData.get('position');
+    const employees = formData.get('employees');
+    
+    const isApproved = (position === 'Propietario' || position === 'Gerente General') && employees !== '1 a 10';
+    const status = isApproved ? 'approved' : 'pending';
+
     const data = {
       name: formData.get('name'),
       company: formData.get('company'),
       email: formData.get('email'),
       phone: formData.get('phone'),
-      employees: formData.get('employees'),
-      position: formData.get('position'),
+      employees,
+      position,
+      status,
       createdAt: serverTimestamp()
     };
 
     try {
       const docRef = await addDoc(collection(db, `${getEventBasePath()}/preregistrations`), data);
-      setQrValue(docRef.id);
-      setFormState('success');
+      if (isApproved) {
+        setQrValue(docRef.id);
+        setFormState('success');
+      } else {
+        setFormState('pending_approval');
+      }
       e.target.reset();
     } catch (error) {
       console.error('Error saving preregistration:', error);
@@ -695,6 +706,23 @@ export default function App() {
                     </div>
                   )}
 
+                  <button 
+                    onClick={() => {
+                      setFormState('idle');
+                      setQrValue(null);
+                    }}
+                    className="px-6 py-2 bg-[#f39200] hover:bg-[#d88000] text-white font-bold rounded-md shadow-md transition-all active:scale-95"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              )}
+              {formState === 'pending_approval' && (
+                <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center text-center p-8 z-10 overflow-y-auto">
+                  <span className="material-symbols-outlined text-6xl text-[#f39200] mb-2">hourglass_empty</span>
+                  <h3 className="font-headline-lg text-2xl text-[#1e293b] font-bold mb-2">Preregistro Recibido</h3>
+                  <p className="text-[#475569] mb-6">Tu solicitud está en revisión por la administración. Te notificaremos una vez sea aprobada para entregarte tu acceso.</p>
+                  
                   <button 
                     onClick={() => {
                       setFormState('idle');

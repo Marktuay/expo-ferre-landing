@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 
@@ -29,6 +29,16 @@ export default function AdminPreRegistrations({ onBack }) {
     return () => unsubscribe();
   }, []);
 
+  const handleApprove = async (id) => {
+    try {
+      const ref = doc(db, `${getEventBasePath()}/preregistrations`, id);
+      await updateDoc(ref, { status: 'approved' });
+    } catch (error) {
+      console.error('Error approving preregistration:', error);
+      alert('Error al aprobar.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
       <div className="max-w-6xl mx-auto">
@@ -47,7 +57,8 @@ export default function AdminPreRegistrations({ onBack }) {
                   Email: reg.email || '',
                   Teléfono: reg.phone || '',
                   Empleados: reg.employees || '',
-                  Puesto: reg.position || ''
+                  Puesto: reg.position || '',
+                  Estado: reg.status === 'approved' ? 'Aprobado' : 'Pendiente'
                 }));
                 const worksheet = XLSX.utils.json_to_sheet(dataToExport);
                 const workbook = XLSX.utils.book_new();
@@ -76,19 +87,21 @@ export default function AdminPreRegistrations({ onBack }) {
                   <th className="p-4 font-bold text-on-surface">Teléfono</th>
                   <th className="p-4 font-bold text-on-surface">Empleados</th>
                   <th className="p-4 font-bold text-on-surface">Puesto</th>
+                  <th className="p-4 font-bold text-on-surface">Estado</th>
                   <th className="p-4 font-bold text-on-surface">Fecha</th>
+                  <th className="p-4 font-bold text-on-surface text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="7" className="p-8 text-center text-secondary">
+                    <td colSpan="9" className="p-8 text-center text-secondary">
                       Cargando datos...
                     </td>
                   </tr>
                 ) : registrations.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="p-8 text-center text-secondary">
+                    <td colSpan="9" className="p-8 text-center text-secondary">
                       No hay preregistros todavía.
                     </td>
                   </tr>
@@ -101,14 +114,24 @@ export default function AdminPreRegistrations({ onBack }) {
                       <td className="p-4 text-secondary">{reg.phone}</td>
                       <td className="p-4 text-secondary">{reg.employees || 'N/A'}</td>
                       <td className="p-4 text-secondary">{reg.position || 'N/A'}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${reg.status === 'approved' ? 'bg-[#16a34a]/10 text-[#16a34a]' : 'bg-[#f39200]/10 text-[#f39200]'}`}>
+                          {reg.status === 'approved' ? 'APROBADO' : 'PENDIENTE'}
+                        </span>
+                      </td>
                       <td className="p-4 text-secondary">
                         {reg.createdAt.toLocaleDateString('es-ES', {
                           day: '2-digit',
                           month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
+                          year: 'numeric'
                         })}
+                      </td>
+                      <td className="p-4 text-center">
+                        {reg.status !== 'approved' && (
+                          <button onClick={() => handleApprove(reg.id)} className="text-[#16a34a] hover:bg-[#16a34a]/10 p-2 rounded-full transition-colors" title="Aprobar">
+                            <span className="material-symbols-outlined">check_circle</span>
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))
