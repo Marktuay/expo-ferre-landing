@@ -678,7 +678,7 @@ export default function App() {
                   <span className="material-symbols-outlined text-primary-fixed text-3xl">event</span>
                   <div>
                     <p className="font-headline-md text-headline-md text-white">Sábado 17 de Octubre, 2026</p>
-                    <p className="font-body-md text-surface-variant">08:00 AM - 06:00 PM (Horario corrido)</p>
+                    <p className="font-body-md text-surface-variant">Registro 7:30am | Inicia 8:00am a 5:00pm | Finalizando con Cóctel</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
