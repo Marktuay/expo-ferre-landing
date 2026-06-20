@@ -174,7 +174,7 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
 
           {(adminUser.role === 'admin' || adminUser.role === 'tech_staff') && (
             <button 
-              onClick={() => onNavigate('escaner')}
+              onClick={() => onNavigate('adminCheckIn')}
               className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group ${adminUser.role === 'admin' ? 'md:col-span-2' : 'md:col-span-3'}`}
             >
               <div className="w-16 h-16 bg-[#f39200]/10 text-[#f39200] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">

@@ -24,6 +24,7 @@ import AdminStaff from './components/AdminStaff';
 import AdminGuests from './components/AdminGuests';
 import AdminUsers from './components/AdminUsers';
 import InteractiveMap from './components/InteractiveMap';
+import AdminCheckIn from './components/AdminCheckIn';
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
   const domRef = useRef();
@@ -808,6 +809,10 @@ export default function App() {
           adminUser={adminUser}
           setAdminUser={setAdminUser}
         />
+      )}
+
+      {currentView === 'adminCheckIn' && (
+        <AdminCheckIn onBack={() => setCurrentView('adminHub')} />
       )}
 
       {currentView === 'adminSponsorsHub' && (
