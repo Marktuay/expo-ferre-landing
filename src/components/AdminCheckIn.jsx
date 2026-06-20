@@ -59,7 +59,29 @@ export default function AdminCheckIn({ onBack }) {
     scanner.render(onScanSuccess, onScanFailure);
     scannerRef.current = scanner;
 
+    // Improve accessibility of the injected html5-qrcode UI
+    const observer = new MutationObserver(() => {
+      const scanTypeLink = document.getElementById('html5-qrcode-anchor-scan-type-change');
+      if (scanTypeLink && !scanTypeLink.hasAttribute('role')) {
+        scanTypeLink.setAttribute('role', 'button');
+        scanTypeLink.tabIndex = 0;
+        // Make sure it can be activated via keyboard
+        scanTypeLink.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            scanTypeLink.click();
+          }
+        });
+      }
+    });
+
+    const readerNode = document.getElementById('reader');
+    if (readerNode) {
+      observer.observe(readerNode, { childList: true, subtree: true });
+    }
+
     return () => {
+      observer.disconnect();
       scanner.clear().catch(error => console.error("Failed to clear scanner", error));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

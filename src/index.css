@@ -26,3 +26,42 @@
 .animate-scroll-logos:hover {
     animation-play-state: paused;
 }
+
+/* Scanner UI Accessibility & Styling */
+#reader button {
+    background-color: #0A2E5C !important; /* primary */
+    color: #ffffff !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    margin: 10px 5px !important;
+    font-size: 16px !important;
+    transition: opacity 0.2s !important;
+    font-family: inherit !important;
+}
+
+#reader button:hover {
+    opacity: 0.9 !important;
+}
+
+#reader a {
+    display: inline-block !important;
+    background-color: #f3f4f6 !important; /* gray-100 */
+    color: #1f2937 !important; /* gray-800 */
+    text-decoration: none !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    border: 1px solid #d1d5db !important;
+    font-weight: 600 !important;
+    margin: 10px 5px !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s !important;
+    font-family: inherit !important;
+}
+
+#reader a:hover {
+    background-color: #e5e7eb !important; /* gray-200 */
+}
