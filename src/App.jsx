@@ -729,7 +729,16 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-[#475569] mb-1">Cantidad de empleados</label>
-                    <input required name="employees" type="number" min="1" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="Ej. 10" />
+                    <select required name="employees" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800">
+                      <option value="">Selecciona una opción</option>
+                      <option value="1 a 10">1 a 10</option>
+                      <option value="11 a 20">11 a 20</option>
+                      <option value="21 a 50">21 a 50</option>
+                      <option value="51 a 100">51 a 100</option>
+                      <option value="101 a 200">101 a 200</option>
+                      <option value="201 a 300">201 a 300</option>
+                      <option value="Más de 300">Más de 300</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[#475569] mb-1">Puesto</label>
