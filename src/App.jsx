@@ -163,6 +163,47 @@ export default function App() {
 
     try {
       const docRef = await addDoc(collection(db, `${getEventBasePath()}/preregistrations`), data);
+      
+      // Enviar correo al usuario
+      await addDoc(collection(db, 'mail'), {
+        to: data.email,
+        message: {
+          subject: 'Registro a ExpoFerre 2026',
+          html: `
+            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #0d47a1;">¡Hola ${data.name}!</h2>
+              <p>Hemos recibido tu solicitud de preregistro para <strong>ExpoFerre 2026</strong>.</p>
+              <p><strong>Estatus:</strong> ${isApproved ? '<span style="color: green;">Aprobado</span>' : '<span style="color: orange;">En revisión</span>'}</p>
+              ${isApproved 
+                ? `<p>Tu código de acceso QR estará asociado a este registro. Por favor guarda este correo.</p>` 
+                : '<p>Te notificaremos pronto cuando la administración haya revisado y aprobado tu registro.</p>'}
+              <br/>
+              <p>Saludos cordiales,<br/><strong>El equipo de ExpoFerre</strong></p>
+            </div>
+          `
+        }
+      });
+
+      // Enviar copia al administrador
+      await addDoc(collection(db, 'mail'), {
+        to: 'admin@rinsa.red',
+        message: {
+          subject: `Nuevo Preregistro: ${data.name} - ExpoFerre`,
+          html: `
+            <div style="font-family: Arial, sans-serif; color: #333;">
+              <h2 style="color: #0d47a1;">Nuevo Preregistro en el Sistema</h2>
+              <ul>
+                <li><strong>Nombre:</strong> ${data.name}</li>
+                <li><strong>Empresa:</strong> ${data.company}</li>
+                <li><strong>Puesto:</strong> ${data.position}</li>
+                <li><strong>Cantidad de Empleados:</strong> ${data.employees}</li>
+                <li><strong>Estatus Automático:</strong> ${isApproved ? 'Aprobado' : 'Pendiente (Requiere aprobación)'}</li>
+              </ul>
+            </div>
+          `
+        }
+      });
+
       if (isApproved) {
         setQrValue(docRef.id);
         setFormState('success');
