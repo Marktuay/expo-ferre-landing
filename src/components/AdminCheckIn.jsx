@@ -204,10 +204,16 @@ export default function AdminCheckIn({ onBack }) {
             <h1 className="text-headline-md font-bold text-on-surface">Control de Asistencia</h1>
             <p className="text-body-lg text-secondary">Escanee códigos QR en puerta o búsquelos manualmente para validar su entrada.</p>
           </div>
-          <button onClick={onBack} className="px-5 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2">
-            <span className="material-symbols-outlined">arrow_back</span>
-            Volver al Menú
-          </button>
+          <div className="flex gap-4">
+            <button onClick={() => onBack('adminAttendanceReport')} className="px-5 py-2 bg-white text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors font-label-lg flex items-center gap-2">
+              <span className="material-symbols-outlined">table_chart</span>
+              Ver Reporte Detallado
+            </button>
+            <button onClick={() => onBack('adminHub')} className="px-5 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2">
+              <span className="material-symbols-outlined">arrow_back</span>
+              Volver al Menú
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

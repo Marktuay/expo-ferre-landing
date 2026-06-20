@@ -23,8 +23,8 @@ import AdminSpeakers from './components/AdminSpeakers';
 import AdminStaff from './components/AdminStaff';
 import AdminGuests from './components/AdminGuests';
 import AdminUsers from './components/AdminUsers';
-import InteractiveMap from './components/InteractiveMap';
 import AdminCheckIn from './components/AdminCheckIn';
+import AdminAttendanceReport from './components/AdminAttendanceReport';
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
   const domRef = useRef();
@@ -812,7 +812,11 @@ export default function App() {
       )}
 
       {currentView === 'adminCheckIn' && (
-        <AdminCheckIn onBack={() => setCurrentView('adminHub')} />
+        <AdminCheckIn onBack={(view) => setCurrentView(view || 'adminHub')} />
+      )}
+
+      {currentView === 'adminAttendanceReport' && (
+        <AdminAttendanceReport onBack={() => setCurrentView('adminHub')} />
       )}
 
       {currentView === 'adminSponsorsHub' && (

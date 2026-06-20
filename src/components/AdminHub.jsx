@@ -173,18 +173,33 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
           )}
 
           {(adminUser.role === 'admin' || adminUser.role === 'tech_staff') && (
-            <button 
-              onClick={() => onNavigate('adminCheckIn')}
-              className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group ${adminUser.role === 'admin' ? 'md:col-span-2' : 'md:col-span-3'}`}
-            >
-              <div className="w-16 h-16 bg-[#f39200]/10 text-[#f39200] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="material-symbols-outlined text-3xl">qr_code_scanner</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-on-surface mb-2">Escáner de Acceso (QR)</h3>
-                <p className="text-secondary text-sm">Registra la asistencia en puerta y detona la impresión rápida de gafetes.</p>
-              </div>
-            </button>
+            <>
+              <button 
+                onClick={() => onNavigate('adminCheckIn')}
+                className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group ${adminUser.role === 'admin' ? 'md:col-span-1' : 'md:col-span-1'}`}
+              >
+                <div className="w-16 h-16 bg-[#f39200]/10 text-[#f39200] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">qr_code_scanner</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface mb-2">Escáner de Acceso (QR)</h3>
+                  <p className="text-secondary text-sm">Registra la asistencia en puerta y detona la impresión rápida de gafetes.</p>
+                </div>
+              </button>
+
+              <button 
+                onClick={() => onNavigate('adminAttendanceReport')}
+                className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group ${adminUser.role === 'admin' ? 'md:col-span-1' : 'md:col-span-2'}`}
+              >
+                <div className="w-16 h-16 bg-green-500/10 text-green-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">table_chart</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface mb-2">Reporte de Asistencia</h3>
+                  <p className="text-secondary text-sm">Visualiza métricas y exporta la lista de asistentes consolidados a Excel.</p>
+                </div>
+              </button>
+            </>
           )}
         </div>
       </div>
