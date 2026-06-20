@@ -45,7 +45,9 @@ export default function AdminPreRegistrations({ onBack }) {
                   Nombre: reg.name || '',
                   Empresa: reg.company || '',
                   Email: reg.email || '',
-                  Teléfono: reg.phone || ''
+                  Teléfono: reg.phone || '',
+                  Empleados: reg.employees || '',
+                  Puesto: reg.position || ''
                 }));
                 const worksheet = XLSX.utils.json_to_sheet(dataToExport);
                 const workbook = XLSX.utils.book_new();
@@ -72,19 +74,21 @@ export default function AdminPreRegistrations({ onBack }) {
                   <th className="p-4 font-bold text-on-surface">Empresa</th>
                   <th className="p-4 font-bold text-on-surface">Email</th>
                   <th className="p-4 font-bold text-on-surface">Teléfono</th>
+                  <th className="p-4 font-bold text-on-surface">Empleados</th>
+                  <th className="p-4 font-bold text-on-surface">Puesto</th>
                   <th className="p-4 font-bold text-on-surface">Fecha</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="5" className="p-8 text-center text-secondary">
+                    <td colSpan="7" className="p-8 text-center text-secondary">
                       Cargando datos...
                     </td>
                   </tr>
                 ) : registrations.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="p-8 text-center text-secondary">
+                    <td colSpan="7" className="p-8 text-center text-secondary">
                       No hay preregistros todavía.
                     </td>
                   </tr>
@@ -95,6 +99,8 @@ export default function AdminPreRegistrations({ onBack }) {
                       <td className="p-4 text-secondary">{reg.company}</td>
                       <td className="p-4 text-secondary">{reg.email}</td>
                       <td className="p-4 text-secondary">{reg.phone}</td>
+                      <td className="p-4 text-secondary">{reg.employees || 'N/A'}</td>
+                      <td className="p-4 text-secondary">{reg.position || 'N/A'}</td>
                       <td className="p-4 text-secondary">
                         {reg.createdAt.toLocaleDateString('es-ES', {
                           day: '2-digit',

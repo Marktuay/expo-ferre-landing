@@ -148,6 +148,8 @@ export default function App() {
       company: formData.get('company'),
       email: formData.get('email'),
       phone: formData.get('phone'),
+      employees: formData.get('employees'),
+      position: formData.get('position'),
       createdAt: serverTimestamp()
     };
 
@@ -722,6 +724,25 @@ export default function App() {
                   <div>
                     <label className="block text-sm font-medium text-[#475569] mb-1">Teléfono</label>
                     <input required name="phone" type="tel" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="+505 0000 0000" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#475569] mb-1">Cantidad de empleados</label>
+                    <input required name="employees" type="number" min="1" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800" placeholder="Ej. 10" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#475569] mb-1">Puesto</label>
+                    <select required name="position" className="w-full px-4 py-3 rounded-md border border-[#cbd5e1] focus:ring-2 focus:ring-[#f39200] focus:border-[#f39200] transition-colors bg-white/90 text-gray-800">
+                      <option value="">Selecciona tu puesto</option>
+                      <option value="Propietario">Propietario</option>
+                      <option value="Gerente General">Gerente General</option>
+                      <option value="Administración y Finanzas">Administración y Finanzas</option>
+                      <option value="Compras">Compras</option>
+                      <option value="Ventas">Ventas</option>
+                      <option value="Bodega e Inventario">Bodega e Inventario</option>
+                      <option value="Logística">Logística</option>
+                    </select>
                   </div>
                 </div>
                 <button 
