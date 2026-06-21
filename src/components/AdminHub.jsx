@@ -169,6 +169,19 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
                   <p className="text-secondary text-sm">Crea accesos para el staff técnico y administra privilegios.</p>
                 </div>
               </button>
+
+              <button 
+                onClick={() => onNavigate('adminMarketingReport')}
+                className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group md:col-span-1"
+              >
+                <div className="w-16 h-16 bg-purple-500/10 text-purple-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">campaign</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface mb-2">Reporte de Marketing</h3>
+                  <p className="text-secondary text-sm">Control de campañas (UTMs) y origen de leads.</p>
+                </div>
+              </button>
             </>
           )}
 

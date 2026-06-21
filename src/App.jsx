@@ -25,6 +25,8 @@ import AdminGuests from './components/AdminGuests';
 import AdminUsers from './components/AdminUsers';
 import AdminCheckIn from './components/AdminCheckIn';
 import AdminAttendanceReport from './components/AdminAttendanceReport';
+import AdminMarketingReport from './components/AdminMarketingReport';
+
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
   const domRef = useRef();
@@ -150,6 +152,12 @@ export default function App() {
     const isApproved = (position === 'Propietario' || position === 'Gerente General') && employees !== '1 a 10';
     const status = isApproved ? 'approved' : 'pending';
 
+    // Capturar UTMs
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmSource = urlParams.get('utm_source') || 'Organico';
+    const utmMedium = urlParams.get('utm_medium') || '';
+    const utmCampaign = urlParams.get('utm_campaign') || '';
+
     const data = {
       name: formData.get('name'),
       company: formData.get('company'),
@@ -158,6 +166,9 @@ export default function App() {
       employees,
       position,
       status,
+      utm_source: utmSource,
+      utm_medium: utmMedium,
+      utm_campaign: utmCampaign,
       createdAt: serverTimestamp()
     };
 
@@ -858,6 +869,10 @@ export default function App() {
 
       {currentView === 'adminAttendanceReport' && (
         <AdminAttendanceReport onBack={() => setCurrentView('adminHub')} />
+      )}
+
+      {currentView === 'adminMarketingReport' && (
+        <AdminMarketingReport onBack={() => setCurrentView('adminHub')} />
       )}
 
       {currentView === 'adminSponsorsHub' && (
