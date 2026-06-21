@@ -30,6 +30,7 @@ export default function AdminMarketingReport({ onBack }) {
             id: doc.id,
             name: d.name || `${d.firstName || ''} ${d.lastName || ''}`.trim() || 'Sin Nombre',
             email: d.email || 'N/A',
+            phone: d.phone || '-',
             source,
             medium,
             campaign,
@@ -64,6 +65,7 @@ export default function AdminMarketingReport({ onBack }) {
     const exportData = data.map(item => ({
       Nombre: item.name,
       Email: item.email,
+      Teléfono: item.phone,
       Origen: item.source,
       Medio: item.medium,
       Campaña: item.campaign,
@@ -143,6 +145,7 @@ export default function AdminMarketingReport({ onBack }) {
                     <tr className="bg-surface-variant border-b border-outline-variant">
                       <th className="p-4 font-label-lg text-on-surface">Nombre</th>
                       <th className="p-4 font-label-lg text-on-surface">Email</th>
+                      <th className="p-4 font-label-lg text-on-surface">Teléfono</th>
                       <th className="p-4 font-label-lg text-on-surface">Origen (Source)</th>
                       <th className="p-4 font-label-lg text-on-surface">Medio (Medium)</th>
                       <th className="p-4 font-label-lg text-on-surface">Campaña</th>
@@ -152,7 +155,7 @@ export default function AdminMarketingReport({ onBack }) {
                   <tbody>
                     {data.length === 0 ? (
                       <tr>
-                        <td colSpan="6" className="p-8 text-center text-secondary">
+                        <td colSpan="7" className="p-8 text-center text-secondary">
                           No hay leads registrados todavía.
                         </td>
                       </tr>
@@ -161,6 +164,7 @@ export default function AdminMarketingReport({ onBack }) {
                         <tr key={item.id} className="border-b border-outline-variant hover:bg-[#F5F5F7]/50 transition-colors">
                           <td className="p-4 font-body-md text-on-surface">{item.name}</td>
                           <td className="p-4 font-body-md text-secondary">{item.email}</td>
+                          <td className="p-4 font-body-md text-secondary">{item.phone}</td>
                           <td className="p-4">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               item.source.toLowerCase().includes('instagram') ? 'bg-pink-100 text-pink-800' :
