@@ -47,7 +47,7 @@ const initialStandsList = [
   { id: 'stand-38', x: '56.88%', y: '66.52%', name: 'Stand 38', status: 'available', price: '$1,500 USD', size: '3x3 mts' }
 ];
 
-export default function InteractiveMap({ onBack }) {
+export default function InteractiveMap({ onBack, isAdminMode = false }) {
   const [stands, setStands] = useState(initialStandsList);
   const [selectedStand, setSelectedStand] = useState(null);
   const [clickCoords, setClickCoords] = useState(null);
@@ -56,7 +56,7 @@ export default function InteractiveMap({ onBack }) {
   const [reservedStandId, setReservedStandId] = useState(null);
   const [reservationData, setReservationData] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(isAdminMode);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
 
   useEffect(() => {

@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
+import InteractiveMap from './InteractiveMap';
 
 export default function AdminPanel({ onBack }) {
   const [reservedStands, setReservedStands] = useState([]);
   const [sponsors, setSponsors] = useState({});
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('list');
 
   useEffect(() => {
     const fetchSponsors = async () => {
@@ -99,9 +101,25 @@ export default function AdminPanel({ onBack }) {
           </div>
         </div>
 
-        {/* Tabla de Registros */}
-        <div className="bg-surface border border-outline-variant rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+        {/* Tabs de navegación */}
+        <div className="flex gap-4 mb-6 border-b border-outline-variant">
+          <button 
+            onClick={() => setActiveTab('list')} 
+            className={`pb-2 px-4 font-bold text-label-lg transition-colors ${activeTab === 'list' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'}`}
+          >
+            Lista de Stands
+          </button>
+          <button 
+            onClick={() => setActiveTab('map')} 
+            className={`pb-2 px-4 font-bold text-label-lg transition-colors ${activeTab === 'map' ? 'border-b-2 border-primary text-primary' : 'text-secondary hover:text-on-surface'}`}
+          >
+            Mapa Interactivo
+          </button>
+        </div>
+
+        {activeTab === 'list' ? (
+          <div className="bg-surface border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container border-b border-outline-variant text-label-md text-secondary">
@@ -159,6 +177,11 @@ export default function AdminPanel({ onBack }) {
             </table>
           </div>
         </div>
+        ) : (
+          <div className="h-[75vh] w-full bg-surface rounded-xl shadow-sm overflow-hidden border border-outline-variant">
+            <InteractiveMap onBack={() => setActiveTab('list')} isAdminMode={true} />
+          </div>
+        )}
       </div>
     </div>
   );
