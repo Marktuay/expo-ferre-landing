@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 
@@ -29,10 +29,41 @@ export default function AdminPreRegistrations({ onBack }) {
     return () => unsubscribe();
   }, []);
 
-  const handleApprove = async (id) => {
+  const handleApprove = async (reg) => {
+    if (!window.confirm(`¿Estás seguro de que deseas aprobar el registro de ${reg.name}?`)) return;
+
     try {
-      const ref = doc(db, `${getEventBasePath()}/preregistrations`, id);
+      const ref = doc(db, `${getEventBasePath()}/preregistrations`, reg.id);
       await updateDoc(ref, { status: 'approved' });
+
+      // Enviar correo de confirmación con código QR
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${reg.id}&margin=10`;
+      
+      await addDoc(collection(db, 'mail'), {
+        to: reg.email,
+        message: {
+          subject: '¡Registro Aprobado! - ExpoFerre 2026',
+          html: `
+            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #16a34a;">¡Felicidades ${reg.name}!</h2>
+              <p>Tu preregistro para <strong>ExpoFerre 2026</strong> ha sido revisado y <strong>aprobado</strong> exitosamente.</p>
+              
+              <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 10px;">
+                <p style="margin-bottom: 15px; font-weight: bold; color: #0d47a1;">Tu Código de Acceso QR</p>
+                <img src="${qrUrl}" alt="Código QR de Acceso" style="display: block; margin: 0 auto; width: 250px; height: 250px; border: 1px solid #e5e7eb; border-radius: 8px;"/>
+                <p style="margin-top: 15px; font-size: 14px; color: #6b7280;">Muestra este código desde tu celular en los kioscos de entrada para imprimir tu gafete.</p>
+              </div>
+
+              <p>Te esperamos con los brazos abiertos en el mejor evento ferretero del año.</p>
+              <br/>
+              <p>Saludos cordiales,</p>
+              <p><strong>El equipo de ExpoFerre</strong></p>
+            </div>
+          `
+        }
+      });
+      
+      alert('Registro aprobado y correo enviado exitosamente.');
     } catch (error) {
       console.error('Error approving preregistration:', error);
       alert('Error al aprobar.');
@@ -128,7 +159,7 @@ export default function AdminPreRegistrations({ onBack }) {
                       </td>
                       <td className="p-4 text-center">
                         {reg.status !== 'approved' && (
-                          <button onClick={() => handleApprove(reg.id)} className="text-[#16a34a] hover:bg-[#16a34a]/10 p-2 rounded-full transition-colors" title="Aprobar">
+                          <button onClick={() => handleApprove(reg)} className="text-[#16a34a] hover:bg-[#16a34a]/10 p-2 rounded-full transition-colors" title="Aprobar">
                             <span className="material-symbols-outlined">check_circle</span>
                           </button>
                         )}
