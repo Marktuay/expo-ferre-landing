@@ -82,7 +82,7 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
   }, []);
 
   const handleStandClick = (stand) => {
-    if (stand.status === 'available' || isAdmin) {
+    if (stand.status === 'available' || isAdmin || (auth.currentUser && stand.sponsorId === auth.currentUser.uid)) {
       if (selectedStand?.id === stand.id) {
         setSelectedStand(null);
       } else {
@@ -202,6 +202,7 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
                   {/* Capa Interactiva: Iteramos sobre los stands para crear "hotspots" clicables */}
                   {stands.map((stand) => {
                     const isSelected = selectedStand?.id === stand.id;
+                    const isMine = auth.currentUser && stand.sponsorId === auth.currentUser.uid;
                     
                     return (
                       <button
@@ -212,7 +213,9 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
                             ? 'bg-red-500 text-white border-white scale-125 z-20 shadow-lg' 
                             : stand.status === 'available'
                               ? 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-110 border-white/50 z-10'
-                              : 'bg-surface-variant text-secondary border-outline hover:opacity-100 opacity-80 z-0'
+                              : isMine
+                                ? 'bg-green-500 text-white hover:bg-green-600 hover:scale-110 border-white/50 z-10'
+                                : 'bg-surface-variant text-secondary border-outline hover:opacity-100 opacity-80 z-0'
                         }`}
                         style={{
                           left: stand.x,
@@ -229,7 +232,7 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
                         {/* Tooltip */}
                         <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-inverse-surface text-surface px-3 py-1.5 rounded-md text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
                           <span className="font-bold block">{stand.name}</span>
-                          <span className="block text-surface-variant text-[10px]">{stand.status === 'available' ? 'Disponible' : 'Reservado'}</span>
+                          <span className="block text-surface-variant text-[10px]">{stand.status === 'available' ? 'Disponible' : isMine ? 'Mi Stand' : 'Reservado'}</span>
                           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-inverse-surface rotate-45"></div>
                         </div>
                       </button>
