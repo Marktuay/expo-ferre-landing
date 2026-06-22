@@ -274,6 +274,17 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
               >
                 RESERVAR ESTE STAND
               </button>
+            ) : selectedStand.sponsorId && auth.currentUser?.uid && selectedStand.sponsorId === auth.currentUser.uid ? (
+              <button 
+                onClick={() => {
+                  setReservedStandId(selectedStand.id);
+                  setReservationData(null);
+                  setIsUploadLogoModalOpen(true);
+                }}
+                className="w-full md:w-auto px-8 py-3 bg-primary-container text-on-primary-container rounded-5px font-label-lg font-bold tracking-wide hover:bg-[#F2B04A] transition-colors hard-shadow"
+              >
+                SUBIR/ACTUALIZAR LOGO
+              </button>
             ) : (
               <button 
                 disabled
@@ -361,61 +372,84 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
               setIsUploading(true);
               const file = e.target.logoFile.files[0];
               
+              if (file && !file.type.match(/(image\/png|image\/svg\+xml)/)) {
+                alert('Formato inválido. Por favor, sube una imagen en formato PNG o SVG con fondo transparente.');
+                setIsUploading(false);
+                return;
+              }
+
               try {
                 let logoDataUrl = null;
                 if (file) {
-                  // Comprimir la imagen y convertirla a Base64 para guardarla directo en la base de datos
-                  logoDataUrl = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                      const img = new Image();
-                      img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 250;
-                        const MAX_HEIGHT = 250;
-                        let width = img.width;
-                        let height = img.height;
+                  if (file.type === 'image/svg+xml') {
+                    // Guardar SVG directamente como texto para no perder calidad
+                    logoDataUrl = await new Promise((resolve, reject) => {
+                      const reader = new FileReader();
+                      reader.onload = (e) => resolve(e.target.result);
+                      reader.onerror = reject;
+                      reader.readAsDataURL(file);
+                    });
+                  } else {
+                    // Comprimir PNG manteniendo la transparencia
+                    logoDataUrl = await new Promise((resolve, reject) => {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                          const canvas = document.createElement('canvas');
+                          const MAX_WIDTH = 250;
+                          const MAX_HEIGHT = 250;
+                          let width = img.width;
+                          let height = img.height;
 
-                        if (width > height) {
-                          if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
+                          if (width > height) {
+                            if (width > MAX_WIDTH) {
+                              height *= MAX_WIDTH / width;
+                              width = MAX_WIDTH;
+                            }
+                          } else {
+                            if (height > MAX_HEIGHT) {
+                              width *= MAX_HEIGHT / height;
+                              height = MAX_HEIGHT;
+                            }
                           }
-                        } else {
-                          if (height > MAX_HEIGHT) {
-                            width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT;
-                          }
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        // Reducir calidad al 70% para ahorrar espacio
-                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                          canvas.width = width;
+                          canvas.height = height;
+                          const ctx = canvas.getContext('2d');
+                          ctx.drawImage(img, 0, 0, width, height);
+                          // Usar image/png en lugar de jpeg para no poner un fondo negro
+                          resolve(canvas.toDataURL('image/png'));
+                        };
+                        img.onerror = reject;
+                        img.src = event.target.result;
                       };
-                      img.onerror = reject;
-                      img.src = event.target.result;
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                  });
+                      reader.onerror = reject;
+                      reader.readAsDataURL(file);
+                    });
+                  }
                 }
 
                 const standRef = doc(db, `${getEventBasePath()}/stands`, reservedStandId);
                 const user = auth.currentUser;
-                await updateDoc(standRef, {
-                  status: 'reserved',
-                  ...(logoDataUrl && { logo: logoDataUrl }),
-                  reservationDetails: reservationData,
-                  sponsorId: user ? user.uid : null,
-                  sponsorEmail: user ? user.email : null
-                });
+                
+                const updatePayload = {};
+                if (logoDataUrl) updatePayload.logo = logoDataUrl;
+                
+                if (reservationData) {
+                  updatePayload.status = 'reserved';
+                  updatePayload.reservationDetails = reservationData;
+                  updatePayload.sponsorId = user ? user.uid : null;
+                  updatePayload.sponsorEmail = user ? user.email : null;
+                }
 
-                alert('¡Stand reservado y actualizado con éxito!');
+                if (Object.keys(updatePayload).length > 0) {
+                  await updateDoc(standRef, updatePayload);
+                }
+
+                alert(reservationData ? '¡Stand reservado y logotipo guardado con éxito!' : '¡Logotipo actualizado con éxito!');
               } catch (error) {
-                console.error("Error al reservar:", error);
-                alert('Hubo un error al procesar tu reserva. Asegúrate de haber subido una imagen válida.');
+                console.error("Error al guardar:", error);
+                alert('Hubo un error al guardar. Asegúrate de haber subido una imagen válida.');
               } finally {
                 setIsUploading(false);
                 setIsUploadLogoModalOpen(false);
@@ -424,16 +458,22 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
                 setReservationData(null);
               }
             }}>
-              <p className="text-body-md text-secondary mb-2">
-                Sube el logotipo de tu empresa. Este logo reemplazará el número del stand en el plano interactivo para que tu marca destaque.
-              </p>
+              <div className="bg-blue-50 border border-blue-200 p-4 rounded-md mb-2 text-sm text-blue-900">
+                <p className="font-bold mb-2 flex items-center gap-1"><span className="material-symbols-outlined text-sm">info</span> Guía de Logotipo</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Formato obligatorio: <strong>PNG o SVG</strong>.</li>
+                  <li>El archivo <strong>debe tener fondo transparente</strong>.</li>
+                  <li>Proporción recomendada: <strong>2.4:1</strong> (Ancho x Alto).</li>
+                </ul>
+              </div>
               
               <div className="flex flex-col gap-2">
-                <label className="text-label-md font-medium text-on-surface">Logotipo (Imagen)</label>
+                <label className="text-label-md font-medium text-on-surface">Seleccionar Archivo</label>
                 <input 
                   type="file" 
                   name="logoFile"
-                  accept="image/*"
+                  accept=".png, .svg, image/png, image/svg+xml"
+                  required
                   className="block w-full text-sm text-secondary
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-md file:border-0
