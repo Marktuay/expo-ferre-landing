@@ -70,7 +70,7 @@ const ContactPage = () => {
               </div>
               <div>
                 <h3 className="font-headline-sm text-headline-sm text-secondary mb-1">Correo Electrónico</h3>
-                <p className="font-body-md text-on-surface-variant">info@expoferre.com<br/>ventas@expoferre.com</p>
+                <p className="font-body-md text-on-surface-variant">karen.torres@rinsa.red</p>
               </div>
             </div>
 
