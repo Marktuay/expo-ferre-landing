@@ -470,7 +470,7 @@ export default function App() {
               <FadeIn>
                 <div className="bg-[#f39200] text-white inline-block px-4 py-1 font-label-sm text-label-sm uppercase tracking-widest clip-industrial mb-4">CONSTRUYENDO EL FUTURO</div>
                 <h1 className="font-headline-xl text-headline-xl lg:text-7xl leading-tight text-white drop-shadow-lg">IMPULSANDO Y CONECTANDO LA INDUSTRIA FERRETERA</h1>
-                <p className="font-body-lg text-body-lg max-w-xl opacity-90 mt-4 text-surface-container-lowest drop-shadow-md">Únete al evento líder de hardware y construcción en la región. Innovación, networking y negocios en un solo lugar.</p>
+                <p className="font-body-lg text-body-lg max-w-xl opacity-90 mt-4 text-surface-container-lowest drop-shadow-md">Más que una feria, somos la plataforma que reúne a los principales actores del sector ferretero para fomentar la innovación, fortalecer relaciones comerciales y generar nuevas oportunidades de negocio que impulsan el crecimiento de la industria.</p>
               </FadeIn>
               <div className="flex gap-4 pt-4">
                 <div className="flex items-center gap-2">
@@ -492,7 +492,7 @@ export default function App() {
                   muted 
                   playsInline
                 >
-                  <source src="/hero-video.mp4" type="video/mp4" />
+                  <source src="/puedes_generar_s_de_video_.mp4" type="video/mp4" />
                 </video>
               </div>
             </div>
@@ -514,10 +514,10 @@ export default function App() {
               <FadeIn direction="up">
                 <div className="space-y-6 text-lg text-gray-700 bg-white p-8 md:p-10 rounded-xl shadow-sm border border-gray-100 w-full">
                   <p className="font-medium text-xl text-[#283474] leading-relaxed">
-                    <strong className="font-black">EXPO FERRE</strong> nace como la primera plataforma especializada del sector ferretero en Nicaragua, para crear Negocios, fortalecer, conectar y modernizar la industria a través de un espacio de alto nivel enfocado en negocios, innovación y relaciones estratégicas.
+                    <strong className="font-black">EXPO FERRE</strong> nace como la primera plataforma especializada del sector ferretero en Nicaragua para crear negocios, fortalecer, conectar y modernizar la industria a través de un espacio de alto nivel enfocado en la innovación, el comercio y las relaciones estratégicas.
                   </p>
                   <p className="leading-relaxed">
-                    El evento reunirá en un solo lugar a los principales tomadores de decisión del canal ferretero: <strong className="text-gray-900 font-bold">propietarios de ferreterías, gerentes generales, gerentes de compras, distribuidores, importadores, cadenas ferreteras, marcas líderes y proveedores especializados</strong> de Nicaragua y Centroamérica.
+                    El evento reunirá en un solo lugar a los principales tomadores de decisiones del canal ferretero: <strong className="text-gray-900 font-bold">propietarios de ferreterías, gerentes generales, gerentes de compras, distribuidores, importadores, cadenas ferreteras, marcas líderes y proveedores especializados</strong> de Nicaragua y Centroamérica.
                   </p>
                   <p className="leading-relaxed">
                     <strong className="font-black text-[#283474]">EXPO FERRE</strong> impulsará oportunidades reales de posicionamiento, expansión comercial, generación de alianzas y conexión directa entre marcas y compradores estratégicos del sector.
@@ -526,29 +526,39 @@ export default function App() {
               </FadeIn>
 
               <FadeIn direction="up" delay={100}>
-                <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-                  <div className="bg-[#f39200] text-white py-3 px-8 inline-block self-start mb-6 rounded-br-xl">
+                <div className="w-full rounded-xl shadow-sm border border-outline-variant overflow-hidden flex flex-col relative">
+                  <div className="absolute inset-0 z-0 overflow-hidden rounded-xl">
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center brightness-[0.4]" 
+                      style={{ 
+                        backgroundImage: "url('/Gemini_Generated_Image_z9fv1yz9fv1yz9fv.png')"
+                      }}
+                    ></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-inverse-surface/90 via-inverse-surface/50 to-transparent"></div>
+                  </div>
+                  
+                  <div className="bg-[#f39200] text-white py-3 px-8 inline-block self-start mb-6 rounded-br-xl relative z-10">
                     <h3 className="font-headline-sm text-xl font-bold">Con enfoque en:</h3>
                   </div>
-                  <ul className="px-8 md:px-10 pb-8 space-y-4 text-gray-700 font-medium text-lg flex-grow">
+                  <ul className="px-8 md:px-10 pb-8 space-y-4 text-white font-medium text-lg flex-grow relative z-10 drop-shadow-md">
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">trending_up</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">trending_up</span>
                       <span>Tendencias del sector</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">inventory_2</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">inventory_2</span>
                       <span>Nuevos productos</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">handshake</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">handshake</span>
                       <span>Networking B2B</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">school</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">school</span>
                       <span>Capacitación comercial y técnica</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">storefront</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">storefront</span>
                       <span>Generar negocios en la industria</span>
                     </li>
                   </ul>
@@ -556,28 +566,34 @@ export default function App() {
               </FadeIn>
 
               <FadeIn direction="up" delay={200}>
-                <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative flex flex-col">
-                  <div className="bg-[#f39200] text-white py-4 px-8">
+                <div className="w-full rounded-xl shadow-sm border border-outline-variant overflow-hidden flex flex-col relative">
+                  <div className="absolute inset-0 z-0 overflow-hidden rounded-xl">
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center brightness-[0.4]" 
+                      style={{ 
+                        backgroundImage: "url('/Gemini_Generated_Image_uj81j1uj81j1uj81.png')"
+                      }}
+                    ></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-inverse-surface/90 via-inverse-surface/50 to-transparent"></div>
+                  </div>
+                  
+                  <div className="bg-[#f39200] text-white py-3 px-8 inline-block self-start mb-6 rounded-br-xl relative z-10">
                     <h3 className="font-headline-lg text-2xl font-bold flex items-center gap-3">
                       <span className="material-symbols-outlined text-3xl">groups</span> Audiencia esperada: 300 personas
                     </h3>
                   </div>
-                  <div className="p-8 md:px-10 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3 text-base text-gray-700 font-medium flex-grow bg-gradient-to-br from-white to-gray-50">
+                  <div className="p-8 md:px-10 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3 text-base text-white font-medium flex-grow relative z-10 drop-shadow-md">
                     <ul className="space-y-3">
                       <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Dueños / Propietarios</li>
-                      <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Socios fundadores</li>
-                      <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Directores generales</li>
+                      <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Socios / fundadores</li>
                       <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Gerentes generales</li>
                       <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Gerentes comerciales</li>
-                      <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Directores comerciales</li>
                       <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Jefes de ventas</li>
                     </ul>
                     <ul className="space-y-3">
-                      <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Gerentes de compras</li>
+                      <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Gerentes / coordinador de compras</li>
                       <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Jefes de abastecimiento</li>
-                      <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Coordinadores de compras</li>
                       <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Responsables de inventario</li>
-                      <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Encargados de importaciones</li>
                       <li className="flex items-start gap-2"><span className="material-symbols-outlined text-[#f39200] text-xl mt-0.5">check_circle</span> Gerentes de operaciones</li>
                     </ul>
                   </div>
@@ -585,41 +601,51 @@ export default function App() {
               </FadeIn>
 
               <FadeIn direction="up" delay={300}>
-                <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-                  <div className="bg-[#f39200] text-white py-3 px-8 inline-block self-start mb-6 rounded-br-xl">
+                <div className="w-full rounded-xl shadow-sm border border-outline-variant overflow-hidden flex flex-col relative">
+                  <div className="absolute inset-0 z-0 overflow-hidden rounded-xl">
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center brightness-[0.4]" 
+                      style={{ 
+                        backgroundImage: "url('/Gemini_Generated_Image_97vehf97vehf97ve.png')"
+                      }}
+                    ></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-inverse-surface/90 via-inverse-surface/50 to-transparent"></div>
+                  </div>
+
+                  <div className="bg-[#f39200] text-white py-3 px-8 inline-block self-start mb-6 rounded-br-xl relative z-10">
                     <h3 className="font-headline-sm text-xl font-bold">Temas / Tracks Temáticos:</h3>
                   </div>
-                  <ul className="px-8 md:px-10 pb-8 space-y-4 text-gray-700 font-medium text-lg flex-grow grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-0">
+                  <ul className="px-8 md:px-10 pb-8 space-y-4 text-white font-medium text-lg flex-grow grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-0 relative z-10 drop-shadow-md">
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">lightbulb</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">lightbulb</span>
                       <span>Tendencias y Materiales Innovadores</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">devices</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">devices</span>
                       <span>Transformación digital</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">psychology</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">psychology</span>
                       <span>Inteligencia artificial para negocios</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">campaign</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">campaign</span>
                       <span>Ventas y marketing</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">inventory</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">inventory</span>
                       <span>Manejo de Inventarios</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">store</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">store</span>
                       <span>Retail ferretero</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">support_agent</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">support_agent</span>
                       <span>Servicio al cliente</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#283474] text-2xl mt-0.5">payments</span>
+                      <span className="material-symbols-outlined text-[#f39200] text-2xl mt-0.5">payments</span>
                       <span>Financiamiento</span>
                     </li>
                   </ul>
