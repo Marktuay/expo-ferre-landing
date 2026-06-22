@@ -73,27 +73,16 @@ export default function App() {
   const [sponsorLogos, setSponsorLogos] = useState([]);
 
   useEffect(() => {
-    const q = query(collection(db, `${getEventBasePath()}/stands`), where('status', '==', 'reserved'));
+    const q = query(collection(db, `${getEventBasePath()}/stands`), where('status', 'in', ['reserved', 'sold']));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetchedLogos = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.logo) {
+        if (data.logo && typeof data.logo === 'string' && data.logo.trim().length > 10) {
           fetchedLogos.push(data.logo);
         }
       });
-      
-      let finalLogos = [];
-      // Start with the actual logos
-      finalLogos = [...fetchedLogos];
-      
-      // If we have less than 8, pad the rest with placeholders (represented by null)
-      while (finalLogos.length < 8) {
-        finalLogos.push(null);
-      }
-      
-      // If we somehow fetched more than 8 logos, that's fine, the reel will just be longer.
-      setSponsorLogos(finalLogos);
+      setSponsorLogos(fetchedLogos);
     });
     return () => unsubscribe();
   }, []);
@@ -426,45 +415,35 @@ export default function App() {
           </div>
 
           {/* Superimposed Sponsors Reel */}
-          <div className="w-full z-20 mb-8 md:mb-12 shrink-0 mt-8">
-            <div className="container mx-auto px-margin-mobile text-center">
-              <FadeIn direction="up">
-                <h2 className="font-headline-xl text-2xl md:text-4xl text-white font-black tracking-widest mb-4 uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Patrocinan</h2>
-                <div className="overflow-hidden relative w-full flex items-center py-2">
-                  <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-black/20 to-transparent z-10 pointer-events-none"></div>
-                  <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-black/20 to-transparent z-10 pointer-events-none"></div>
-                  <div className="animate-scroll-logos flex">
-                    <div className="flex gap-8 md:gap-16 pr-8 md:pr-16">
-                      {sponsorLogos.map((logoUrl, index) => (
-                        logoUrl ? (
+          {sponsorLogos.length > 0 && (
+            <div className="w-full z-20 mb-8 md:mb-12 shrink-0 mt-8">
+              <div className="container mx-auto px-margin-mobile text-center">
+                <FadeIn direction="up">
+                  <h2 className="font-headline-xl text-2xl md:text-4xl text-white font-black tracking-widest mb-4 uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Patrocinan</h2>
+                  <div className="overflow-hidden relative w-full flex items-center py-2">
+                    <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-black/20 to-transparent z-10 pointer-events-none"></div>
+                    <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-black/20 to-transparent z-10 pointer-events-none"></div>
+                    <div className="animate-scroll-logos flex">
+                      <div className="flex gap-8 md:gap-16 pr-8 md:pr-16">
+                        {sponsorLogos.map((logoUrl, index) => (
                           <div key={`first-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 shadow-lg overflow-hidden p-2">
                             <img src={logoUrl} alt={`Sponsor ${index}`} className="max-w-full max-h-full object-contain drop-shadow-md" />
                           </div>
-                        ) : (
-                          <div key={`first-placeholder-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 cursor-default shadow-lg">
-                            <span className="font-headline-sm text-white font-bold tracking-widest text-lg drop-shadow-md">LOGO {index + 1}</span>
-                          </div>
-                        )
-                      ))}
-                    </div>
-                    <div className="flex gap-8 md:gap-16 pr-8 md:pr-16">
-                      {sponsorLogos.map((logoUrl, index) => (
-                        logoUrl ? (
+                        ))}
+                      </div>
+                      <div className="flex gap-8 md:gap-16 pr-8 md:pr-16">
+                        {sponsorLogos.map((logoUrl, index) => (
                           <div key={`second-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 shadow-lg overflow-hidden p-2">
                             <img src={logoUrl} alt={`Sponsor ${index}`} className="max-w-full max-h-full object-contain drop-shadow-md" />
                           </div>
-                        ) : (
-                          <div key={`second-placeholder-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 cursor-default shadow-lg">
-                            <span className="font-headline-sm text-white font-bold tracking-widest text-lg drop-shadow-md">LOGO {index + 1}</span>
-                          </div>
-                        )
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </FadeIn>
+                </FadeIn>
+              </div>
             </div>
-          </div>
+          )}
           <div className="relative z-10 container mx-auto grid grid-cols-1 lg:grid-cols-12 gap-stack-lg items-center mt-10">
             <div className="lg:col-span-7 text-white space-y-stack-sm">
               <FadeIn>
