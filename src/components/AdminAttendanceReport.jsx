@@ -152,6 +152,39 @@ export default function AdminAttendanceReport({ onBack }) {
 
   const categories = ['ALL', 'Preregistro (General)', 'Patrocinador', 'Staff Técnico', 'Conferencista', 'Invitado Especial'];
 
+  // --- KPI & Heatmap Calculations ---
+  const totalRegistered = data.length;
+  const totalCheckedIn = data.filter(d => d.checkedIn).length;
+  const noShowRate = totalRegistered > 0 ? (((totalRegistered - totalCheckedIn) / totalRegistered) * 100).toFixed(1) : 0;
+
+  const checkInHours = new Array(24).fill(0);
+  data.forEach(d => {
+    if (d.checkedIn && d.checkInTime) {
+      checkInHours[d.checkInTime.getHours()]++;
+    }
+  });
+
+  let startHour = 24;
+  let endHour = 0;
+  checkInHours.forEach((count, i) => {
+    if (count > 0) {
+      if (i < startHour) startHour = i;
+      if (i > endHour) endHour = i;
+    }
+  });
+  if (startHour > endHour) { startHour = 8; endHour = 18; }
+
+  const activeHours = [];
+  const maxCount = Math.max(...checkInHours, 1);
+
+  for (let i = startHour; i <= endHour; i++) {
+    activeHours.push({
+      hourStr: `${i.toString().padStart(2, '0')}:00`,
+      count: checkInHours[i],
+      heightPct: (checkInHours[i] / maxCount) * 100
+    });
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
       <div className="max-w-7xl mx-auto">
@@ -175,7 +208,52 @@ export default function AdminAttendanceReport({ onBack }) {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md border border-outline-variant overflow-hidden flex flex-col h-[calc(100vh-250px)] min-h-[500px]">
+        {/* Dashboard KPIs */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Funnel Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-outline-variant p-6 flex flex-col justify-center">
+            <h3 className="text-secondary font-bold mb-4 flex items-center gap-2"><span className="material-symbols-outlined">filter_alt</span> Embudo de Asistencia</h3>
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-center">
+                <p className="text-4xl font-black text-[#283474]">{totalRegistered}</p>
+                <p className="text-sm text-gray-500 uppercase tracking-wide">Registros Totales</p>
+              </div>
+              <span className="material-symbols-outlined text-gray-300 text-4xl">arrow_right_alt</span>
+              <div className="text-center">
+                <p className="text-4xl font-black text-green-600">{totalCheckedIn}</p>
+                <p className="text-sm text-gray-500 uppercase tracking-wide">Asistencia Real</p>
+              </div>
+            </div>
+            <div className="bg-red-50 border border-red-100 rounded-md p-3 flex justify-between items-center">
+              <span className="text-red-800 font-medium text-sm">Tasa de Abandono (No-Show):</span>
+              <span className="text-red-600 font-bold text-lg">{noShowRate}%</span>
+            </div>
+          </div>
+
+          {/* Heatmap Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-outline-variant p-6 lg:col-span-2">
+            <h3 className="text-secondary font-bold mb-4 flex items-center gap-2"><span className="material-symbols-outlined">bar_chart</span> Picos de Tráfico (Check-ins por Hora)</h3>
+            <div className="flex items-end gap-2 h-32 mt-4 px-2 overflow-x-auto pb-2">
+              {activeHours.map((hr, idx) => (
+                <div key={idx} className="flex flex-col items-center flex-1 min-w-[40px] group relative">
+                  {/* Tooltip */}
+                  <div className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-gray-800 text-white text-xs py-1 px-2 rounded pointer-events-none transition-opacity whitespace-nowrap z-10">
+                    {hr.count} accesos
+                  </div>
+                  {/* Bar */}
+                  <div 
+                    className="w-full bg-[#f39200] rounded-t-sm transition-all duration-500 hover:bg-[#d68000]"
+                    style={{ height: `${Math.max(hr.heightPct, 2)}%` }} // At least 2% to show a tiny bar
+                  ></div>
+                  {/* Label */}
+                  <span className="text-[10px] text-gray-500 mt-2">{hr.hourStr}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md border border-outline-variant overflow-hidden flex flex-col h-[calc(100vh-450px)] min-h-[500px]">
           
           {/* Controls Bar */}
           <div className="p-4 border-b border-outline-variant bg-surface-variant/20 flex flex-col md:flex-row gap-4 items-center">

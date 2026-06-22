@@ -28,7 +28,7 @@
 }
 
 /* Scanner UI Accessibility & Styling */
-#reader button {
+#reader button, #sponsor-reader button {
     background-color: #0A2E5C !important; /* primary */
     color: #ffffff !important;
     padding: 12px 24px !important;
@@ -42,11 +42,11 @@
     font-family: inherit !important;
 }
 
-#reader button:hover {
+#reader button:hover, #sponsor-reader button:hover {
     opacity: 0.9 !important;
 }
 
-#reader a {
+#reader a, #sponsor-reader a {
     display: inline-block !important;
     background-color: #f3f4f6 !important; /* gray-100 */
     color: #1f2937 !important; /* gray-800 */
@@ -62,6 +62,6 @@
     font-family: inherit !important;
 }
 
-#reader a:hover {
+#reader a:hover, #sponsor-reader a:hover {
     background-color: #e5e7eb !important; /* gray-200 */
 }

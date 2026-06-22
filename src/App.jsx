@@ -16,6 +16,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import ScannerModule from './components/ScannerModule';
 import AdminHub from './components/AdminHub';
 import AdminSponsorsHub from './components/AdminSponsorsHub';
+import AdminGlobalLeads from './components/AdminGlobalLeads';
 import AdminPreRegistrations from './components/AdminPreRegistrations';
 import AdminSponsors from './components/AdminSponsors';
 import AdminContact from './components/AdminContact';
@@ -903,13 +904,17 @@ export default function App() {
       )}
 
       {currentView === 'adminSponsorsHub' && (
-        <AdminSponsorsHub onBack={() => setCurrentView('adminHub')} onNavigate={(v) => setCurrentView(v)} />
+        <AdminSponsorsHub onBack={() => setCurrentView('adminHub')} onNavigate={(v) => setCurrentView(v)} adminUser={adminUser} />
       )}
 
       {currentView === 'adminPanel' && (
         <AdminPanel onBack={() => setCurrentView('adminSponsorsHub')} />
       )}
 
+
+      {currentView === 'adminGlobalLeads' && (
+        <AdminGlobalLeads onBack={() => setCurrentView('adminSponsorsHub')} />
+      )}
       {currentView === 'adminPreRegistrations' && (
         <AdminPreRegistrations onBack={() => setCurrentView('adminHub')} />
       )}

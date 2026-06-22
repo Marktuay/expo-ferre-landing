@@ -6,7 +6,7 @@ import { db, storage, auth } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 
 // Stands mapeados directamente desde las coordenadas del archivo SVG original
-const initialStandsList = [
+export const initialStandsList = [
   { id: 'stand-1', x: '67.71%', y: '56.10%', name: 'Stand 1', status: 'available', price: '$1,500 USD', size: '3x3 mts' },
   { id: 'stand-2', x: '67.72%', y: '49.68%', name: 'Stand 2', status: 'available', price: '$1,500 USD', size: '3x3 mts' },
   { id: 'stand-3', x: '67.77%', y: '42.84%', name: 'Stand 3', status: 'available', price: '$1,500 USD', size: '3x3 mts' },

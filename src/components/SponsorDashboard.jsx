@@ -3,6 +3,7 @@ import SpeakerForm from './SpeakerForm';
 import GuestForm from './GuestForm';
 import InteractiveMap from './InteractiveMap';
 import SponsorActivity from './SponsorActivity';
+import SponsorScanner from './SponsorScanner';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { QRCodeSVG } from 'qrcode.react';
@@ -37,6 +38,10 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
     return <SponsorActivity onBack={() => setActiveForm(null)} />;
   }
 
+  if (activeForm === 'scanner') {
+    return <SponsorScanner onBack={() => setActiveForm(null)} />;
+  }
+
   return (
     <div className="min-h-screen bg-background text-on-background relative overflow-x-hidden pt-40 md:pt-48 pb-20">
       <div className="relative z-10 container mx-auto px-margin-mobile md:px-margin-desktop max-w-5xl">
@@ -67,16 +72,28 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
         )}
 
         <div className="space-y-16">
-          {/* MI ACTIVIDAD */}
+          {/* MI ACTIVIDAD Y LEADS */}
           <section>
-            <div className="bg-surface border-2 border-primary hover:hard-shadow transition-all p-6 md:p-8 rounded-5px flex flex-col md:flex-row justify-between items-center gap-6 group mb-8">
-              <div>
-                <h3 className="font-headline-md text-headline-md text-primary flex items-center gap-2"><span className="material-symbols-outlined text-3xl">dashboard</span> MI ACTIVIDAD Y REGISTROS</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant mt-2">Revisa todos los invitados, staff, conferencias y stands que has registrado como patrocinador.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-surface border-2 border-primary hover:hard-shadow transition-all p-6 md:p-8 rounded-5px flex flex-col justify-between items-start gap-6 group">
+                <div>
+                  <h3 className="font-headline-md text-headline-md text-primary flex items-center gap-2"><span className="material-symbols-outlined text-3xl">dashboard</span> MI ACTIVIDAD</h3>
+                  <p className="font-body-md text-body-md text-on-surface-variant mt-2">Revisa todos los invitados, staff y stands que has registrado, y visualiza tus leads.</p>
+                </div>
+                <button onClick={() => setActiveForm('activity')} className="bg-primary text-on-primary font-bold py-3 px-8 rounded-5px hover:brightness-110 active:scale-95 transition-all w-full md:w-auto">
+                  VER MI ACTIVIDAD
+                </button>
               </div>
-              <button onClick={() => setActiveForm('activity')} className="bg-primary text-on-primary font-bold py-3 px-8 rounded-5px hover:brightness-110 active:scale-95 transition-all whitespace-nowrap">
-                VER MI ACTIVIDAD
-              </button>
+
+              <div className="bg-[#f39200]/10 border-2 border-[#f39200] hover:hard-shadow transition-all p-6 md:p-8 rounded-5px flex flex-col justify-between items-start gap-6 group">
+                <div>
+                  <h3 className="font-headline-md text-headline-md text-[#f39200] flex items-center gap-2"><span className="material-symbols-outlined text-3xl">qr_code_scanner</span> CAPTURA DE LEADS</h3>
+                  <p className="font-body-md text-body-md text-[#f39200]/80 mt-2">Escanea el gafete de los visitantes en tu stand para obtener sus datos de contacto al instante.</p>
+                </div>
+                <button onClick={() => setActiveForm('scanner')} className="bg-[#f39200] text-white font-bold py-3 px-8 rounded-5px hover:brightness-110 active:scale-95 transition-all w-full md:w-auto">
+                  ABRIR ESCÁNER
+                </button>
+              </div>
             </div>
           </section>
 

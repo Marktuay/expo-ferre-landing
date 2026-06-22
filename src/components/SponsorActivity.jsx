@@ -2,46 +2,50 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
+import * as XLSX from 'xlsx';
 
 export default function SponsorActivity({ onBack }) {
   const [guests, setGuests] = useState([]);
   const [staff, setStaff] = useState([]);
   const [speakers, setSpeakers] = useState([]);
   const [stands, setStands] = useState([]);
+  const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     window.scrollTo(0, 0);
     const user = auth.currentUser;
     if (!user) return;
 
-    // We can use sponsorId or sponsorEmail
     const sponsorId = user.uid;
 
-    // Escuchar invitados
     const qGuests = query(collection(db, `${getEventBasePath()}/guests`), where('sponsorId', '==', sponsorId));
     const unsubGuests = onSnapshot(qGuests, (snapshot) => {
       setGuests(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    // Escuchar staff
     const qStaff = query(collection(db, `${getEventBasePath()}/staff`), where('sponsorId', '==', sponsorId));
     const unsubStaff = onSnapshot(qStaff, (snapshot) => {
       setStaff(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    // Escuchar conferencistas
     const qSpeakers = query(collection(db, `${getEventBasePath()}/speakers`), where('sponsorId', '==', sponsorId));
     const unsubSpeakers = onSnapshot(qSpeakers, (snapshot) => {
       setSpeakers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    // Escuchar stands
     const qStands = query(collection(db, `${getEventBasePath()}/stands`), where('sponsorId', '==', sponsorId));
     const unsubStands = onSnapshot(qStands, (snapshot) => {
       setStands(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    // Set loading false after a small delay
+    const qLeads = query(collection(db, `${getEventBasePath()}/sponsors/${sponsorId}/leads`));
+    const unsubLeads = onSnapshot(qLeads, (snapshot) => {
+      setLeads(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => {
+        if(a.capturedAt && b.capturedAt) return b.capturedAt.toMillis() - a.capturedAt.toMillis();
+        return 0;
+      }));
+    });
+
     const timer = setTimeout(() => setLoading(false), 800);
 
     return () => {
@@ -49,9 +53,25 @@ export default function SponsorActivity({ onBack }) {
       unsubStaff();
       unsubSpeakers();
       unsubStands();
+      unsubLeads();
       clearTimeout(timer);
     };
   }, []);
+
+  const exportLeadsToExcel = () => {
+    const wsData = leads.map(lead => ({
+      'Nombre': lead.name,
+      'Empresa': lead.company,
+      'Correo Electrónico': lead.email,
+      'Teléfono': lead.phone,
+      'Fecha de Captura': lead.capturedAt ? lead.capturedAt.toDate().toLocaleString('es-ES') : 'N/A'
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Prospectos");
+    XLSX.writeFile(wb, "Leads_ExpoFerre_2026.xlsx");
+  };
 
   if (loading) {
     return (
@@ -85,6 +105,54 @@ export default function SponsorActivity({ onBack }) {
         </div>
 
         <div className="space-y-12">
+          {/* LEADS */}
+          <section className="bg-surface rounded-lg shadow-sm border border-outline-variant overflow-hidden">
+            <div className="bg-[#f39200]/10 px-6 py-4 border-b border-outline-variant flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-[#f39200] text-2xl">qr_code_scanner</span>
+                <h2 className="font-headline-sm font-bold text-secondary">Mis Prospectos (Leads) ({leads.length})</h2>
+              </div>
+              <button 
+                onClick={exportLeadsToExcel}
+                disabled={leads.length === 0}
+                className="bg-[#283474] text-white px-4 py-2 rounded-md font-bold text-sm flex items-center gap-2 hover:bg-opacity-90 disabled:opacity-50 transition-all"
+              >
+                <span className="material-symbols-outlined text-[18px]">download</span> Exportar Excel
+              </button>
+            </div>
+            <div className="p-6">
+              {leads.length === 0 ? (
+                <p className="text-on-surface-variant italic">No tienes prospectos capturados aún. Utiliza el escáner en tu panel principal.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-gray-600">
+                    <thead className="bg-gray-50 text-gray-700 uppercase font-bold border-b">
+                      <tr>
+                        <th className="px-4 py-3">Nombre</th>
+                        <th className="px-4 py-3">Empresa</th>
+                        <th className="px-4 py-3">Contacto</th>
+                        <th className="px-4 py-3">Fecha de Captura</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {leads.map(lead => (
+                        <tr key={lead.id} className="border-b last:border-0 hover:bg-gray-50">
+                          <td className="px-4 py-3 font-medium text-gray-900">{lead.name}</td>
+                          <td className="px-4 py-3">{lead.company || '-'}</td>
+                          <td className="px-4 py-3">
+                            {lead.email && <div>{lead.email}</div>}
+                            {lead.phone && <div>{lead.phone}</div>}
+                          </td>
+                          <td className="px-4 py-3">{lead.capturedAt ? lead.capturedAt.toDate().toLocaleString('es-ES') : '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
+
           {/* STANDS */}
           <section className="bg-surface rounded-lg shadow-sm border border-outline-variant overflow-hidden">
             <div className="bg-surface-variant px-6 py-4 border-b border-outline-variant flex items-center gap-3">
