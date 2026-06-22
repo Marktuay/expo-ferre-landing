@@ -1,15 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, onSnapshot } from 'firebase/firestore';
+import { collection, query, onSnapshot, getDocs, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import PrintableBadgeList from './PrintableBadgeList';
 
 export default function AdminGuests({ onBack }) {
   const [guestsList, setGuestsList] = useState([]);
+  const [sponsorsMap, setSponsorsMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [printItems, setPrintItems] = useState(null);
 
   useEffect(() => {
+    const fetchSponsors = async () => {
+      try {
+        const qSponsors = query(collection(db, 'users'), where('role', '==', 'sponsor'));
+        const snap = await getDocs(qSponsors);
+        const map = {};
+        snap.forEach(doc => {
+          map[doc.id] = doc.data().companyName || doc.data().name || 'Patrocinador Desconocido';
+        });
+        setSponsorsMap(map);
+      } catch (err) {
+        console.error("Error fetching sponsors", err);
+      }
+    };
+    fetchSponsors();
+
     const q = query(collection(db, `${getEventBasePath()}/guests`));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -71,6 +87,7 @@ export default function AdminGuests({ onBack }) {
                   Empresa: g.empresa || '',
                   Cargo: g.cargo || '',
                   'Cantidad de Empleados': g.empleados || '',
+                  'Patrocinador (Nombre)': sponsorsMap[g.sponsorId] || 'Desconocido',
                   'Patrocinador (Email)': g.sponsorEmail || 'Desconocido',
                   SponsorID: g.sponsorId || ''
                 }));
@@ -101,6 +118,7 @@ export default function AdminGuests({ onBack }) {
                   <th className="p-4 font-bold text-on-surface">Empresa</th>
                   <th className="p-4 font-bold text-on-surface">Cargo</th>
                   <th className="p-4 font-bold text-on-surface">Empleados</th>
+                  <th className="p-4 font-bold text-on-surface">Patrocinador</th>
                   <th className="p-4 font-bold text-on-surface">Registrado Por</th>
                   <th className="p-4 font-bold text-on-surface">Fecha</th>
                   <th className="p-4 font-bold text-on-surface text-center">Acciones</th>
@@ -109,13 +127,13 @@ export default function AdminGuests({ onBack }) {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="9" className="p-8 text-center text-secondary">
+                    <td colSpan="10" className="p-8 text-center text-secondary">
                       Cargando datos...
                     </td>
                   </tr>
                 ) : guestsList.length === 0 ? (
                   <tr>
-                    <td colSpan="9" className="p-8 text-center text-secondary">
+                    <td colSpan="10" className="p-8 text-center text-secondary">
                       No hay invitados registrados.
                     </td>
                   </tr>
@@ -128,6 +146,7 @@ export default function AdminGuests({ onBack }) {
                       <td className="p-4 text-secondary">{guest.empresa}</td>
                       <td className="p-4 text-secondary">{guest.cargo}</td>
                       <td className="p-4 text-secondary">{guest.empleados}</td>
+                      <td className="p-4 text-secondary font-bold text-sm text-primary">{sponsorsMap[guest.sponsorId] || 'Desconocido'}</td>
                       <td className="p-4 text-secondary text-sm font-bold">{guest.sponsorEmail || 'N/A'}</td>
                       <td className="p-4 text-secondary">{guest.createdAt.toLocaleDateString()}</td>
                       <td className="p-4 text-center">

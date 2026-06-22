@@ -1,15 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, onSnapshot } from 'firebase/firestore';
+import { collection, query, onSnapshot, getDocs, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import PrintableBadgeList from './PrintableBadgeList';
 
 export default function AdminStaff({ onBack }) {
   const [staffList, setStaffList] = useState([]);
+  const [sponsorsMap, setSponsorsMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [printItems, setPrintItems] = useState(null);
 
   useEffect(() => {
+    const fetchSponsors = async () => {
+      try {
+        const qSponsors = query(collection(db, 'users'), where('role', '==', 'sponsor'));
+        const snap = await getDocs(qSponsors);
+        const map = {};
+        snap.forEach(doc => {
+          map[doc.id] = doc.data().companyName || doc.data().name || 'Patrocinador Desconocido';
+        });
+        setSponsorsMap(map);
+      } catch (err) {
+        console.error("Error fetching sponsors", err);
+      }
+    };
+    fetchSponsors();
+
     const q = query(collection(db, `${getEventBasePath()}/staff`));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -65,6 +81,7 @@ export default function AdminStaff({ onBack }) {
               import('xlsx').then(XLSX => {
                 const dataToExport = staffList.map(s => ({
                   Fecha: s.createdAt.toLocaleDateString() + ' ' + s.createdAt.toLocaleTimeString(),
+                  Patrocinador: sponsorsMap[s.sponsorId] || 'No asignado',
                   Nombre: `${s.nombre || ''} ${s.apellido || ''}`.trim(),
                   Email: s.email || '',
                   Teléfono: s.telefono || '',
@@ -95,6 +112,7 @@ export default function AdminStaff({ onBack }) {
               <thead>
                 <tr className="bg-surface-variant/30 border-b border-outline-variant">
                   <th className="p-4 font-bold text-on-surface">Nombre</th>
+                  <th className="p-4 font-bold text-on-surface">Patrocinador</th>
                   <th className="p-4 font-bold text-on-surface">Email</th>
                   <th className="p-4 font-bold text-on-surface">Teléfono</th>
                   <th className="p-4 font-bold text-on-surface">Empresa</th>
@@ -107,13 +125,13 @@ export default function AdminStaff({ onBack }) {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="8" className="p-8 text-center text-secondary">
+                    <td colSpan="9" className="p-8 text-center text-secondary">
                       Cargando datos...
                     </td>
                   </tr>
                 ) : staffList.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="p-8 text-center text-secondary">
+                    <td colSpan="9" className="p-8 text-center text-secondary">
                       No hay staff registrado.
                     </td>
                   </tr>
@@ -121,6 +139,7 @@ export default function AdminStaff({ onBack }) {
                   staffList.map((staff) => (
                     <tr key={staff.id} className="border-b border-outline-variant hover:bg-surface-variant/10 transition-colors">
                       <td className="p-4 text-on-surface font-medium">{`${staff.nombre || ''} ${staff.apellido || ''}`.trim()}</td>
+                      <td className="p-4 text-secondary">{sponsorsMap[staff.sponsorId] || 'No asignado'}</td>
                       <td className="p-4 text-secondary">{staff.email}</td>
                       <td className="p-4 text-secondary">{staff.telefono}</td>
                       <td className="p-4 text-secondary">{staff.empresa}</td>
