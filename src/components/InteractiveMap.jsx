@@ -487,7 +487,19 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
               </div>
 
               <div className="mt-6 flex justify-end gap-3 pt-2 border-t border-outline-variant">
-                <button disabled={isUploading} type="submit" className="px-5 py-2 bg-primary-container text-on-primary-container rounded-md font-label-lg font-bold hover:bg-[#F2B04A] transition-colors hard-shadow w-full disabled:opacity-50">
+                <button 
+                  type="button" 
+                  disabled={isUploading}
+                  onClick={() => setIsUploadLogoModalOpen(false)} 
+                  className="px-5 py-2 rounded-md font-label-lg font-medium text-secondary hover:bg-surface-variant transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  disabled={isUploading} 
+                  type="submit" 
+                  className="px-5 py-2 bg-primary-container text-on-primary-container rounded-md font-label-lg font-bold hover:bg-[#F2B04A] transition-colors hard-shadow disabled:opacity-50"
+                >
                   {isUploading ? 'Guardando...' : 'Guardar y Finalizar'}
                 </button>
               </div>
