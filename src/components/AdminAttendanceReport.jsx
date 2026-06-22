@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
-import * as XLSX from 'xlsx';
-
 export default function AdminAttendanceReport({ onBack }) {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -143,11 +141,12 @@ export default function AdminAttendanceReport({ onBack }) {
       'Estado': item.checkedIn ? 'Asistió' : 'Pendiente',
       'Hora de Check-in': item.checkInTime ? item.checkInTime.toLocaleString('es-ES') : 'N/A'
     }));
-
-    const ws = XLSX.utils.json_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Asistencia");
-    XLSX.writeFile(wb, "Reporte_Asistencia_ExpoFerre.xlsx");
+    import('xlsx').then(XLSX => {
+      const ws = XLSX.utils.json_to_sheet(wsData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Asistencia");
+      XLSX.writeFile(wb, "Reporte_Asistencia_ExpoFerre.xlsx");
+    });
   };
 
   const categories = ['ALL', 'Preregistro (General)', 'Patrocinador', 'Staff Técnico', 'Conferencista', 'Invitado Especial'];

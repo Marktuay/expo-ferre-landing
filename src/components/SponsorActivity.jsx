@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
-import * as XLSX from 'xlsx';
-
 export default function SponsorActivity({ onBack }) {
   const [guests, setGuests] = useState([]);
   const [staff, setStaff] = useState([]);
@@ -66,11 +64,12 @@ export default function SponsorActivity({ onBack }) {
       'Teléfono': lead.phone,
       'Fecha de Captura': lead.capturedAt ? lead.capturedAt.toDate().toLocaleString('es-ES') : 'N/A'
     }));
-
-    const ws = XLSX.utils.json_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Prospectos");
-    XLSX.writeFile(wb, "Leads_ExpoFerre_2026.xlsx");
+    import('xlsx').then(XLSX => {
+      const ws = XLSX.utils.json_to_sheet(wsData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Prospectos");
+      XLSX.writeFile(wb, "Leads_ExpoFerre_2026.xlsx");
+    });
   };
 
   if (loading) {

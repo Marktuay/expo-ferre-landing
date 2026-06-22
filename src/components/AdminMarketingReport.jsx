@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
-import * as XLSX from 'xlsx';
-
 export default function AdminMarketingReport({ onBack }) {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,11 +69,12 @@ export default function AdminMarketingReport({ onBack }) {
       Campaña: item.campaign,
       'Fecha Registro': item.createdAt.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' })
     }));
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Marketing_Leads");
-    XLSX.writeFile(workbook, "Reporte_Marketing_ExpoFerre.xlsx");
+    import('xlsx').then(XLSX => {
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Marketing_Leads");
+      XLSX.writeFile(workbook, "Reporte_Marketing_ExpoFerre.xlsx");
+    });
   };
 
   return (

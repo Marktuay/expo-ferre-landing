@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
-import * as XLSX from 'xlsx';
-
 export default function AdminGlobalLeads({ onBack }) {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,11 +61,12 @@ export default function AdminGlobalLeads({ onBack }) {
       Empresa: l.empresa || '',
       Cargo: l.cargo || '',
       Notas: l.notes || ''
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Leads Globales");
-    XLSX.writeFile(workbook, "LeadsGlobales.xlsx");
+    }));    import('xlsx').then(XLSX => {
+      const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Leads Globales");
+      XLSX.writeFile(workbook, "LeadsGlobales.xlsx");
+    });
   };
 
   return (
