@@ -14,7 +14,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ### 1. Landing Page (Pública)
 - Cuenta regresiva dinámica para el evento.
 - Información del evento y mapa estático.
-- **Formulario de Preregistro:** Permite a los visitantes registrarse (guarda en la colección `preregistrations`). Al enviar, la pantalla muestra un **Código QR** generado automáticamente con el ID del documento en Firebase.
+- **Formulario de Preregistro:** Permite a los visitantes registrarse (guarda en la colección `preregistrations` con estatus `pending`). Al registrarse, capturan sus datos de contacto y esperan aprobación.
 
 ### 2. Panel de Patrocinadores (Acceso Privado)
 - **Autenticación:** Login y Registro propio para patrocinadores.
@@ -28,14 +28,15 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ### 3. Panel de Administración (Intranet)
 - Menú principal con tarjetas tipo "Hub" para navegar.
 - **Módulos:**
-  - **Preregistros:** Tabla con todos los visitantes inscritos.
+  - **Preregistros:** Tabla con visitantes inscritos. **Lógica de Aprobación implementada:** Al aprobar (`status: 'approved'`), se dispara la lógica para enviar un correo electrónico al visitante adjuntando su Código QR.
   - **Contacto:** Tabla de mensajes de contacto de la landing.
+  - **Reporte de Marketing (Leads):** Panel con reportería de UTMs (campañas de Instagram, Facebook, LinkedIn), listando prospectos con datos completos como Email y Teléfono.
   - **Hub de Patrocinadores (Submenú):** Agrupa 4 secciones:
     1. *Directorio:* Lista de patrocinadores registrados (`users`).
-    2. *Reservaciones:* Stands reservados.
+    2. *Reservaciones:* Panel con dos pestañas (Lista de stands reservados y **Mapa Interactivo** para administrar reservas y ocupación gráficamente).
     3. *Conferencias:* Charlas propuestas.
     4. *Staff:* Personal acreditado por los patrocinadores.
-- **Exportación:** Todas las tablas de administración tienen la capacidad de exportar sus datos a archivos Excel (`.xlsx`).
+- **Exportación:** Todas las tablas de administración tienen la capacidad de exportar sus datos a archivos Excel (`.xlsx`), incluyendo las últimas adiciones de campos (ej. Teléfono en Leads).
 
 ---
 
@@ -44,7 +45,6 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ### 1. Integración de WhatsApp API (Gateway Open Source)
 - **Objetivo:** Enviar un mensaje automatizado con el código QR y los detalles logísticos del evento cada vez que alguien se registre.
 - **Estado:** En pausa a la espera de que el cliente adquiera y configure una Máquina Virtual (Google Cloud `e2-medium` recomendada) con el número de WhatsApp usando un API como *Evolution API* o *Baileys*.
-- **Desarrollo Necesario:** Una vez configurado el servidor, se deberá crear un webhook o usar Firebase Cloud Functions para hacer peticiones POST hacia el servidor de WhatsApp tras una inserción exitosa en Firestore.
 
 ### 2. Escáner QR para el Staff (Control de Acceso / Check-In)
 - **Objetivo:** Permitir que los administradores y el staff abran la cámara de su celular desde el "Admin Hub" para escanear el Código QR de los asistentes en la puerta.
@@ -58,4 +58,4 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Objetivo:** Sustituir el botón actual que dice "Próximamente" por un formulario o mecanismo de subida de CSV donde los patrocinadores declaren a sus invitados VIP.
 
 ---
-*Última actualización: 17 de Junio de 2026*
+*Última actualización: 22 de Junio de 2026*
