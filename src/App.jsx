@@ -60,7 +60,14 @@ const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
 };
 
 export default function App() {
-  const [currentView, setCurrentView] = useState('landing');
+  const [currentView, setCurrentView] = useState(() => {
+    return localStorage.getItem('expoFerre_currentView') || 'landing';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('expoFerre_currentView', currentView);
+  }, [currentView]);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
