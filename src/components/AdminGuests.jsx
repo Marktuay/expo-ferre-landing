@@ -17,7 +17,7 @@ export default function AdminGuests({ onBack }) {
         const snap = await getDocs(qSponsors);
         const map = {};
         snap.forEach(doc => {
-          map[doc.id] = doc.data().companyName || doc.data().name || 'Patrocinador Desconocido';
+          map[doc.id] = doc.data().empresa || doc.data().nombre || 'Patrocinador Desconocido';
         });
         setSponsorsMap(map);
       } catch (err) {
