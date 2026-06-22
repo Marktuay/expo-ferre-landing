@@ -76,7 +76,22 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [currentUserData, setCurrentUserData] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [adminUser, setAdminUser] = useState(null);
+  const [adminUser, setAdminUser] = useState(() => {
+    try {
+      const savedAdmin = localStorage.getItem('expoFerre_adminUser');
+      return savedAdmin ? JSON.parse(savedAdmin) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    if (adminUser) {
+      localStorage.setItem('expoFerre_adminUser', JSON.stringify(adminUser));
+    } else {
+      localStorage.removeItem('expoFerre_adminUser');
+    }
+  }, [adminUser]);
   const [sponsorLogos, setSponsorLogos] = useState([]);
 
   useEffect(() => {
