@@ -466,7 +466,7 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
                 <ul className="list-disc pl-5 space-y-1">
                   <li>Formato obligatorio: <strong>PNG o SVG</strong>.</li>
                   <li>El archivo <strong>debe tener fondo transparente</strong>.</li>
-                  <li>Proporción recomendada: <strong>2.4:1</strong> (Ancho x Alto).</li>
+                  <li>Medida ideal: <strong>576 x 240 píxeles</strong> (Ancho x Alto).</li>
                 </ul>
               </div>
               
