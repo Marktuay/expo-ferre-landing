@@ -1,16 +1,58 @@
-# React + Vite
+# ExpoFerre 2026 - Plataforma de Acreditación y Leads
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Plataforma oficial de gestión, acreditación y captura de leads para **ExpoFerre Nicaragua 2026**. Desarrollada como una aplicación web progresiva (PWA) rápida y escalable, enfocada en la experiencia tanto de los administradores del evento como de los patrocinadores.
 
-Currently, two official plugins are available:
+## 🚀 Características Principales
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### Para Administradores del Evento
+- **Control Total (Admin Hub):** Dashboard centralizado para monitorear el pulso de la expo.
+- **Gestión de Patrocinadores:** Creación y asignación de perfiles para patrocinadores.
+- **Reporte Global de Leads:** Vista unificada de todos los prospectos capturados por todos los patrocinadores, con trazabilidad de origen (quién lo escaneó).
+- **Acreditaciones Consolidadas:** Gestión e impresión de gafetes unificada para Staff y VIPs de todos los patrocinadores.
+- **Reporte de Marketing & Asistencia:** Métricas detalladas exportables sobre registros en la landing page y check-in físico en el evento.
 
-## React Compiler
+### Para Patrocinadores
+- **Dashboard Privado:** Portal exclusivo para gestionar la presencia de su marca en el evento.
+- **Registro de Staff e Invitados:** Formularios de registro para personal de stand e invitados VIP.
+- **Escáner Integrado (Captura de Leads):** Herramienta móvil en el navegador para escanear los gafetes (códigos QR) de los asistentes, agregar notas personalizadas y convertirlos en prospectos comerciales.
+- **Exportación Directa:** Descarga del histórico de leads a Excel (`.xlsx`) en un clic.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Para Asistentes
+- **Landing Page Optimizada:** Sitio web rápido con toda la información del evento (agenda, expositores, mapa del sitio).
+- **Pre-registro:** Formulario público para asegurar su acceso y recibir su código QR de entrada.
 
-## Expanding the ESLint configuration
+## 💻 Stack Tecnológico
+- **Frontend:** React + Vite
+- **Estilos:** Tailwind CSS (con utilidades avanzadas para diseño responsive y dark mode)
+- **Base de Datos & Auth:** Firebase (Firestore & Firebase Authentication)
+- **Optimización Web (SEO):** Implementación técnica con `robots.txt`, `sitemap.xml` y meta-etiquetas Open Graph listas para la indexación en motores de búsqueda (Google Search Console).
+- **Exportación de Datos:** Carga dinámica (`import()`) de librería `xlsx` para garantizar tiempos rápidos de carga (Code-Splitting).
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## ⚙️ Desarrollo Local
+
+1. Clona el repositorio:
+```bash
+git clone https://github.com/Marktuay/expo-ferre-landing.git
+cd expo-ferre-landing
+```
+
+2. Instala las dependencias:
+```bash
+npm install
+```
+
+3. Inicia el servidor de desarrollo:
+```bash
+npm run dev
+```
+
+4. Para construir la versión de producción (Build):
+```bash
+npm run build
+```
+
+## 📈 Despliegue y SEO
+El proyecto está configurado y optimizado para producción. La exportación de los sitemaps y el rastreo de Googlebot están apuntados al dominio oficial de la expo: `https://expoferrenicaragua.com/`.
+
+---
+*Desarrollado para la mejora continua del ecosistema y de los eventos B2B en la industria ferretera.*
