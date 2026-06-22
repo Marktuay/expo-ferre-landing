@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Bloquear directorios o rutas privadas si las hubiere
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /sponsor-dashboard
+
+Sitemap: https://expoferrenicaragua.com/sitemap.xml
