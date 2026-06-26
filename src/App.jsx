@@ -724,7 +724,7 @@ export default function App() {
         </section>
 
         {/* Awards */}
-        <section className="py-stack-lg px-margin-mobile container mx-auto overflow-hidden rounded-5px">
+        <section id="awards" className="py-stack-lg px-margin-mobile container mx-auto overflow-hidden rounded-5px">
           <div className="flex flex-col md:flex-row justify-between items-end mb-stack-lg gap-4">
             <div>
               <h2 className="font-headline-lg text-headline-lg text-secondary">PREMIOS A LA EXCELENCIA</h2>
