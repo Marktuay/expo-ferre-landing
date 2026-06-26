@@ -72,6 +72,18 @@ export default function App() {
     localStorage.setItem('expoFerre_currentView', currentView);
   }, [currentView]);
 
+  useEffect(() => {
+    if (currentView === 'landing' && window.location.hash) {
+      const id = window.location.hash.substring(1);
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 500);
+    }
+  }, [currentView]);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
