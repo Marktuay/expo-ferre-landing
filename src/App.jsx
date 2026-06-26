@@ -62,6 +62,9 @@ const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
 
 export default function App() {
   const [currentView, setCurrentView] = useState(() => {
+    if (window.location.hash) {
+      return 'landing';
+    }
     return localStorage.getItem('expoFerre_currentView') || 'landing';
   });
 
