@@ -15,6 +15,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - Cuenta regresiva dinámica para el evento.
 - Información del evento y mapa estático.
 - **Formulario de Preregistro:** Permite a los visitantes registrarse (guarda en la colección `preregistrations` con estatus `pending`). Al registrarse, capturan sus datos de contacto y esperan aprobación.
+- **SEO Técnico:** Archivos `robots.txt`, `sitemap.xml` y Meta Tags configurados para indexación en Google.
+- **Optimización para Campañas (RRSS):** Soporte para anclaje automático (`#preregistro-form` y `#awards`) con *smooth scroll* garantizado y corrección de persistencia de vista de administrador para evitar redirecciones erróneas a clientes nuevos.
 
 ### 2. Panel de Patrocinadores (Acceso Privado)
 - **Autenticación:** Login y Registro propio para patrocinadores.
@@ -58,4 +60,4 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Objetivo:** Sustituir el botón actual que dice "Próximamente" por un formulario o mecanismo de subida de CSV donde los patrocinadores declaren a sus invitados VIP.
 
 ---
-*Última actualización: 22 de Junio de 2026*
+*Última actualización: 26 de Junio de 2026*
