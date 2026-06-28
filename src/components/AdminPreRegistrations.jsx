@@ -121,6 +121,19 @@ export default function AdminPreRegistrations({ onBack }) {
     }
   };
 
+  const handleNoShow = async (reg) => {
+    if (!window.confirm(`¿Estás seguro de marcar a ${reg.name} como "No Asistió"? Esto invalidará su QR.`)) return;
+
+    try {
+      const ref = doc(db, `${getEventBasePath()}/preregistrations`, reg.id);
+      await updateDoc(ref, { status: 'no_show' });
+      alert('Registro marcado como No Asistió.');
+    } catch (error) {
+      console.error('Error marking as no show:', error);
+      alert('Error al actualizar el estado.');
+    }
+  };
+
   const filteredRegistrations = registrations.filter(reg => {
     const term = searchTerm.toLowerCase();
     const nameMatch = reg.name?.toLowerCase().includes(term);
@@ -163,7 +176,7 @@ export default function AdminPreRegistrations({ onBack }) {
                   Teléfono: reg.phone || '',
                   Empleados: reg.employees || '',
                   Puesto: reg.position || '',
-                  Estado: reg.status === 'approved' ? 'Aprobado' : 'Pendiente'
+                  Estado: reg.status === 'approved' ? 'Aprobado' : reg.status === 'no_show' ? 'No Asistió' : 'Pendiente'
                 }));
                 const worksheet = XLSX.utils.json_to_sheet(dataToExport);
                 const workbook = XLSX.utils.book_new();
@@ -220,8 +233,13 @@ export default function AdminPreRegistrations({ onBack }) {
                       <td className="p-4 text-secondary whitespace-nowrap">{reg.employees || 'N/A'}</td>
                       <td className="p-4 text-secondary whitespace-nowrap">{reg.position || 'N/A'}</td>
                       <td className="p-4 whitespace-nowrap text-center">
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${reg.status === 'approved' ? 'bg-[#16a34a]/10 text-[#16a34a]' : 'bg-[#f39200]/10 text-[#f39200]'}`}>
-                          {reg.status === 'approved' ? 'APROBADO' : 'PENDIENTE'}
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                          reg.status === 'approved' ? 'bg-[#16a34a]/10 text-[#16a34a]' : 
+                          reg.status === 'no_show' ? 'bg-[#4b5563]/10 text-[#4b5563]' :
+                          'bg-[#f39200]/10 text-[#f39200]'
+                        }`}>
+                          {reg.status === 'approved' ? 'APROBADO' : 
+                           reg.status === 'no_show' ? 'NO ASISTIÓ' : 'PENDIENTE'}
                         </span>
                       </td>
                       <td className="p-4 text-secondary whitespace-nowrap">
@@ -233,15 +251,20 @@ export default function AdminPreRegistrations({ onBack }) {
                       </td>
                       <td className="p-4 text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
-                          {reg.status !== 'approved' && (
+                          {reg.status !== 'approved' && reg.status !== 'no_show' && (
                             <button onClick={() => handleApprove(reg)} className="text-[#16a34a] hover:bg-[#16a34a]/10 p-2 rounded-full transition-colors" title="Aprobar">
                               <span className="material-symbols-outlined">check_circle</span>
                             </button>
                           )}
                           {reg.status === 'approved' && (
-                            <button onClick={() => handleResendQR(reg)} className="text-[#0d47a1] hover:bg-[#0d47a1]/10 p-2 rounded-full transition-colors" title="Reenviar Código QR">
-                              <span className="material-symbols-outlined">mail</span>
-                            </button>
+                            <>
+                              <button onClick={() => handleResendQR(reg)} className="text-[#0d47a1] hover:bg-[#0d47a1]/10 p-2 rounded-full transition-colors" title="Reenviar Código QR">
+                                <span className="material-symbols-outlined">mail</span>
+                              </button>
+                              <button onClick={() => handleNoShow(reg)} className="text-[#4b5563] hover:bg-[#4b5563]/10 p-2 rounded-full transition-colors" title="Marcar como No Asistió">
+                                <span className="material-symbols-outlined">person_off</span>
+                              </button>
+                            </>
                           )}
                           <button onClick={() => handleDelete(reg)} className="text-[#ef4444] hover:bg-[#ef4444]/10 p-2 rounded-full transition-colors" title="Eliminar">
                             <span className="material-symbols-outlined">delete</span>
