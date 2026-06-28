@@ -16,6 +16,11 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **SEO Técnico:** Archivos `robots.txt`, `sitemap.xml` y Meta Tags configurados para indexación en Google.
 - **Optimización para Campañas (RRSS):** Soporte para anclaje automático (`#preregistro-form` y `#awards`) con *smooth scroll* garantizado y corrección de persistencia de vista de administrador para evitar redirecciones erróneas a clientes nuevos.
 
+## 🐛 Troubleshooting y Problemas Conocidos
+**Problema:** Los assets estáticos (como imágenes) no se actualizan en producción o arrojan error a pesar de haber hecho `git pull` y `npm run build` en la VM.
+**Causa:** Cloudflare guarda una caché muy agresiva (`Cf-Cache-Status: HIT`) de los archivos, por lo que sirve versiones antiguas o páginas de error `404/index.html` cacheadas previamente.
+**Solución Rápida:** Renombrar el archivo de la imagen (ej: `logo.jpeg` a `logo-v2.jpeg`) y actualizar la ruta en el código de React. Esto fuerza a la CDN y a los navegadores a solicitar el nuevo archivo saltándose toda la caché.
+
 ### 2. Panel de Patrocinadores (Acceso Privado)
 - **Autenticación:** Login y Registro propio para patrocinadores.
 - **Dashboard:**
