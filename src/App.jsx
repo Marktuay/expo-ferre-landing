@@ -87,6 +87,15 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
+  const [toastMessage, setToastMessage] = useState(null);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
   const [formState, setFormState] = useState('idle'); // 'idle', 'submitting', 'success'
   const [qrValue, setQrValue] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
@@ -338,7 +347,7 @@ export default function App() {
             ) : (
               <>
                 <button 
-                  onClick={() => alert('¡Próximamente!')}
+                  onClick={() => showToast('¡Próximamente!')}
                   className="bg-[#f39200] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
                 >
                   <span className="material-symbols-outlined text-[22px]">calendar_month</span> Agenda
@@ -427,7 +436,7 @@ export default function App() {
             ) : (
               <>
                 <button 
-                  onClick={() => { alert('¡Próximamente!'); setIsMobileMenuOpen(false); }}
+                  onClick={() => { showToast('¡Próximamente!'); setIsMobileMenuOpen(false); }}
                   className="bg-[#f39200] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
                 >
                   <span className="material-symbols-outlined">calendar_month</span> Agenda
@@ -1032,6 +1041,12 @@ export default function App() {
           <p className="font-body-md text-body-md text-surface-variant">© 2026 EXPO FERRE. TODOS LOS DERECHOS RESERVADOS.</p>
         </footer>
 
+      {/* Global Toast */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 bg-[#f39200] text-white px-6 py-4 rounded-md shadow-2xl font-bold flex items-center gap-3 z-[9999] animate-in slide-in-from-bottom-5 duration-300">
+          <span className="material-symbols-outlined">info</span> {toastMessage}
+        </div>
+      )}
 
     </>
   );
