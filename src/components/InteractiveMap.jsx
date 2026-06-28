@@ -477,9 +477,9 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
               <div className="bg-blue-50 border border-blue-200 p-4 rounded-md mb-2 text-sm text-blue-900">
                 <p className="font-bold mb-2 flex items-center gap-1"><span className="material-symbols-outlined text-sm">info</span> Guía de Logotipo</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>Formato obligatorio: <strong>PNG o SVG</strong>.</li>
-                  <li>El archivo <strong>debe tener fondo transparente</strong>.</li>
-                  <li>Medida ideal: <strong>576 x 240 píxeles</strong> (Ancho x Alto).</li>
+                  <li>Formatos permitidos: <strong>JPG, JPEG, PNG o SVG</strong>.</li>
+                  <li>El archivo <strong>debe tener fondo transparente</strong> (recomendado).</li>
+                  <li>Medidas (Ancho x Alto): <strong>Mínimos 200x57 px</strong> | <strong>Máximos 400x250 px</strong>.</li>
                 </ul>
               </div>
               
@@ -488,7 +488,7 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
                 <input 
                   type="file" 
                   name="logoFile"
-                  accept=".png, .svg, image/png, image/svg+xml"
+                  accept=".jpg, .jpeg, .png, .svg, image/jpeg, image/png, image/svg+xml"
                   required
                   className="block w-full text-sm text-secondary
                     file:mr-4 file:py-2 file:px-4
