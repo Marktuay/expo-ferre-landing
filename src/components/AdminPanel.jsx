@@ -63,7 +63,7 @@ export default function AdminPanel({ onBack }) {
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1920px] mx-auto w-full">
         {/* Header del Panel */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
