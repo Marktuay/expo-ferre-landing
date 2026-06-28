@@ -178,7 +178,7 @@ export default function AdminPanel({ onBack }) {
           </div>
         </div>
         ) : (
-          <div className="h-[75vh] w-full bg-surface rounded-xl shadow-sm overflow-hidden border border-outline-variant">
+          <div className="h-[90vh] min-h-[700px] w-full bg-surface rounded-xl shadow-sm overflow-hidden border border-outline-variant">
             <InteractiveMap onBack={() => setActiveTab('list')} isAdminMode={true} />
           </div>
         )}

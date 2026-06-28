@@ -58,6 +58,12 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
   const [isUploading, setIsUploading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(isAdminMode);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, `${getEventBasePath()}/stands`), (snapshot) => {
@@ -101,10 +107,10 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
         reservedBy: null
       });
       setSelectedStand(null);
-      alert('Stand liberado exitosamente');
+      showToast('Stand liberado exitosamente');
     } catch (error) {
       console.error('Error al liberar stand:', error);
-      alert('Error al liberar el stand');
+      showToast('Error al liberar el stand');
     }
   };
 
@@ -114,9 +120,9 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
     if (fd.get('password') === 'admin123') {
       setIsAdmin(true);
       setIsAdminModalOpen(false);
-      alert('Modo Administrador activado');
+      showToast('Modo Administrador activado');
     } else {
-      alert('Contraseña incorrecta');
+      showToast('Contraseña incorrecta');
     }
   };
 
@@ -174,7 +180,7 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
       {/* Contenedor del Mapa con Zoom */}
       <div className="flex-1 bg-[#F5F5F7] relative overflow-hidden cursor-move">
         <TransformWrapper
-          initialScale={1}
+          initialScale={1.3}
           minScale={0.5}
           maxScale={4}
           centerOnInit={true}
@@ -462,10 +468,10 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
                   await updateDoc(standRef, updatePayload);
                 }
 
-                alert(reservationData ? '¡Stand reservado y logotipo guardado con éxito!' : '¡Logotipo actualizado con éxito!');
+                showToast(reservationData ? '¡Stand reservado y logotipo guardado con éxito!' : '¡Logotipo actualizado con éxito!');
               } catch (error) {
                 console.error("Error al guardar:", error);
-                alert('Hubo un error al guardar. Asegúrate de haber subido una imagen válida.');
+                showToast('Hubo un error al guardar. Asegúrate de haber subido una imagen válida.');
               } finally {
                 setIsUploading(false);
                 setIsUploadLogoModalOpen(false);
@@ -561,6 +567,14 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
       {clickCoords && (
         <div className="absolute bottom-4 left-4 bg-black/80 text-white px-3 py-1.5 rounded-md z-50 font-mono text-sm pointer-events-none shadow-lg">
           Copiar: X: '{clickCoords.x}%', Y: '{clickCoords.y}%'
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] bg-inverse-surface text-surface px-6 py-3 rounded-full shadow-2xl border border-outline-variant flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-300">
+          <span className="material-symbols-outlined text-green-400">check_circle</span>
+          <span className="font-medium text-sm">{toastMessage}</span>
         </div>
       )}
     </div>
