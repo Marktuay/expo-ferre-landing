@@ -3,12 +3,14 @@ import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/f
 import { db } from '../firebase';
 import AdminSponsorDetails from './AdminSponsorDetails';
 import PrintableBadgeList from './PrintableBadgeList';
+import CreateSponsorModal from './CreateSponsorModal';
 
 export default function AdminSponsors({ onBack }) {
   const [sponsors, setSponsors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSponsor, setSelectedSponsor] = useState(null);
   const [printItems, setPrintItems] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     const q = query(collection(db, 'users'), where('role', '==', 'sponsor'));
@@ -59,6 +61,13 @@ export default function AdminSponsors({ onBack }) {
             <p className="text-body-lg text-secondary">Empresas que han creado una cuenta de patrocinador.</p>
           </div>
           <div className="flex gap-4">
+            <button 
+              onClick={() => setShowCreateModal(true)}
+              className="px-5 py-2 bg-secondary text-white border border-secondary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined">person_add</span>
+              Crear Patrocinador
+            </button>
             <button 
               onClick={() => setPrintItems(sponsors)}
               disabled={sponsors.length === 0}
@@ -193,6 +202,10 @@ export default function AdminSponsors({ onBack }) {
           </div>
         </div>
       </div>
+      
+      {showCreateModal && (
+        <CreateSponsorModal onClose={() => setShowCreateModal(false)} />
+      )}
     </div>
   );
 }
