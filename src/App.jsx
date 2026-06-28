@@ -338,6 +338,12 @@ export default function App() {
             ) : (
               <>
                 <button 
+                  onClick={() => alert('¡Próximamente!')}
+                  className="bg-[#f39200] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
+                >
+                  <span className="material-symbols-outlined text-[22px]">calendar_month</span> Agenda
+                </button>
+                <button 
                   onClick={() => setCurrentView('sponsorDashboard')}
                   className="bg-[#f39200] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
                 >
@@ -345,7 +351,7 @@ export default function App() {
                 </button>
                 <button 
                   onClick={() => { setCurrentView('landing'); setTimeout(() => document.getElementById('preregistro-form')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
-                  className="bg-[#283474] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
+                  className="bg-[#f39200] text-white font-bold py-2.5 px-6 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2 text-lg"
                 >
                   <span className="material-symbols-outlined text-[22px]">confirmation_number</span> Quiero asistir
                 </button>
@@ -421,6 +427,12 @@ export default function App() {
             ) : (
               <>
                 <button 
+                  onClick={() => { alert('¡Próximamente!'); setIsMobileMenuOpen(false); }}
+                  className="bg-[#f39200] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
+                >
+                  <span className="material-symbols-outlined">calendar_month</span> Agenda
+                </button>
+                <button 
                   onClick={() => { setCurrentView('sponsorDashboard'); setIsMobileMenuOpen(false); }}
                   className="bg-[#f39200] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
                 >
@@ -428,7 +440,7 @@ export default function App() {
                 </button>
                 <button 
                   onClick={() => { setCurrentView('landing'); setTimeout(() => document.getElementById('preregistro-form')?.scrollIntoView({ behavior: 'smooth' }), 100); setIsMobileMenuOpen(false); }}
-                  className="bg-[#283474] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
+                  className="bg-[#f39200] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
                 >
                   <span className="material-symbols-outlined">confirmation_number</span> Quiero asistir
                 </button>
