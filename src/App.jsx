@@ -1062,7 +1062,6 @@ export default function App() {
             <div className="flex justify-center gap-8 mb-4 flex-wrap">
               <button onClick={() => setCurrentView('privacyPolicy')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Políticas de Privacidad</button>
               <button onClick={() => setCurrentView('termsOfService')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Términos de Servicio</button>
-              <a className="text-surface-variant hover:text-primary transition-colors font-body-md" href="#">Press Kit</a>
               <button onClick={() => setCurrentView('adminHub')} className="text-surface-variant hover:text-primary transition-colors font-body-md opacity-30 hover:opacity-100">Intranet</button>
             </div>
             <p className="font-body-md text-body-md text-surface-variant">© 2026 EXPO FERRE. TODOS LOS DERECHOS RESERVADOS.</p>
