@@ -1049,16 +1049,28 @@ export default function App() {
       )}
 
       {/* Footer */}
-      <footer className="w-full bg-inverse-surface border-t-4 border-primary p-stack-lg space-y-stack-sm text-center relative z-10">
-          <div className="font-headline-md text-headline-md text-primary font-bold">EXPO FERRE</div>
-          <div className="flex justify-center gap-8 mb-4 flex-wrap">
-            <button onClick={() => setCurrentView('privacyPolicy')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Políticas de Privacidad</button>
-            <button onClick={() => setCurrentView('termsOfService')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Términos de Servicio</button>
-            <a className="text-surface-variant hover:text-primary transition-colors font-body-md" href="#">Press Kit</a>
-            <button onClick={() => setCurrentView('adminHub')} className="text-surface-variant hover:text-primary transition-colors font-body-md opacity-30 hover:opacity-100">Intranet</button>
+      <footer className="w-full bg-inverse-surface border-t-4 border-primary p-stack-lg relative z-10">
+        <div className="container mx-auto relative flex flex-col md:flex-row items-center justify-center w-full">
+          
+          <div className="flex flex-col items-center space-y-stack-sm w-full">
+            <div className="font-headline-md text-headline-md text-primary font-bold">EXPO FERRE</div>
+            <div className="flex justify-center gap-8 mb-4 flex-wrap">
+              <button onClick={() => setCurrentView('privacyPolicy')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Políticas de Privacidad</button>
+              <button onClick={() => setCurrentView('termsOfService')} className="text-surface-variant hover:text-primary transition-colors font-body-md">Términos de Servicio</button>
+              <a className="text-surface-variant hover:text-primary transition-colors font-body-md" href="#">Press Kit</a>
+              <button onClick={() => setCurrentView('adminHub')} className="text-surface-variant hover:text-primary transition-colors font-body-md opacity-30 hover:opacity-100">Intranet</button>
+            </div>
+            <p className="font-body-md text-body-md text-surface-variant">© 2026 EXPO FERRE. TODOS LOS DERECHOS RESERVADOS.</p>
           </div>
-          <p className="font-body-md text-body-md text-surface-variant">© 2026 EXPO FERRE. TODOS LOS DERECHOS RESERVADOS.</p>
-        </footer>
+
+          {/* Logo Right Side */}
+          <div className="md:absolute right-0 top-1/2 md:-translate-y-1/2 flex flex-col items-center md:items-end mt-8 md:mt-0">
+            <p className="text-surface-variant text-[10px] mb-2 uppercase tracking-widest font-bold">powered for</p>
+            <img src="/logorinsa.jpeg" alt="Powered for" className="h-16 object-contain rounded" />
+          </div>
+
+        </div>
+      </footer>
 
     </>
   );
