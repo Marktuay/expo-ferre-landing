@@ -1066,7 +1066,7 @@ export default function App() {
           {/* Logo Right Side */}
           <div className="md:absolute right-0 top-1/2 md:-translate-y-1/2 flex flex-col items-center md:items-end mt-8 md:mt-0">
             <p className="text-surface-variant text-[10px] mb-2 uppercase tracking-widest font-bold">powered for</p>
-            <img src="/logorinsa.jpeg" alt="Powered for" className="h-16 object-contain rounded" />
+            <img src="/logorinsa-v2.jpeg" alt="Powered for" className="h-16 object-contain rounded" />
           </div>
 
         </div>
