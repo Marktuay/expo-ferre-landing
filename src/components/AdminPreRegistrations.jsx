@@ -83,6 +83,43 @@ export default function AdminPreRegistrations({ onBack }) {
     }
   };
 
+  const handleResendQR = async (reg) => {
+    if (!window.confirm(`¿Deseas reenviar el código QR al correo de ${reg.name} (${reg.email})?`)) return;
+
+    try {
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${reg.id}&margin=10`;
+      
+      await addDoc(collection(db, 'mail'), {
+        to: reg.email,
+        message: {
+          subject: 'Recuperación de Acceso - ExpoFerre 2026',
+          html: `
+            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #0d47a1;">¡Hola ${reg.name}!</h2>
+              <p>Te enviamos nuevamente tu código de acceso para <strong>ExpoFerre 2026</strong> a petición tuya o de la administración.</p>
+              
+              <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 10px;">
+                <p style="margin-bottom: 15px; font-weight: bold; color: #0d47a1;">Tu Código de Acceso QR</p>
+                <img src="${qrUrl}" alt="Código QR de Acceso" style="display: block; margin: 0 auto; width: 250px; height: 250px; border: 1px solid #e5e7eb; border-radius: 8px;"/>
+                <p style="margin-top: 15px; font-size: 14px; color: #6b7280;">Muestra este código desde tu celular en los kioscos de entrada para imprimir tu gafete.</p>
+              </div>
+
+              <p>Te esperamos con los brazos abiertos en el mejor evento ferretero del año.</p>
+              <br/>
+              <p>Saludos cordiales,</p>
+              <p><strong>El equipo de ExpoFerre</strong></p>
+            </div>
+          `
+        }
+      });
+      
+      alert('Código QR reenviado exitosamente al correo.');
+    } catch (error) {
+      console.error('Error resending QR:', error);
+      alert('Error al reenviar el correo.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
       <div className="w-full max-w-[1400px] mx-auto">
@@ -175,6 +212,11 @@ export default function AdminPreRegistrations({ onBack }) {
                           {reg.status !== 'approved' && (
                             <button onClick={() => handleApprove(reg)} className="text-[#16a34a] hover:bg-[#16a34a]/10 p-2 rounded-full transition-colors" title="Aprobar">
                               <span className="material-symbols-outlined">check_circle</span>
+                            </button>
+                          )}
+                          {reg.status === 'approved' && (
+                            <button onClick={() => handleResendQR(reg)} className="text-[#0d47a1] hover:bg-[#0d47a1]/10 p-2 rounded-full transition-colors" title="Reenviar Código QR">
+                              <span className="material-symbols-outlined">mail</span>
                             </button>
                           )}
                           <button onClick={() => handleDelete(reg)} className="text-[#ef4444] hover:bg-[#ef4444]/10 p-2 rounded-full transition-colors" title="Eliminar">
