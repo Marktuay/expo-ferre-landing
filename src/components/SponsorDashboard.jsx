@@ -59,19 +59,24 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
           )}
         </div>
 
-        {!isApproved && (
-          <div className="bg-[#FFF3CD] border-l-4 border-[#FFC107] p-4 mb-8 text-[#856404] rounded-r-md">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="material-symbols-outlined">pending_actions</span>
-              <h4 className="font-bold">Cuenta en Revisión</h4>
-            </div>
-            <p className="text-sm">
-              Tu cuenta de patrocinador está pendiente de validación administrativa. Algunas funcionalidades (registro de invitados, staff y conferencias) estarán deshabilitadas hasta que se confirme tu participación y/o pago.
-            </p>
-          </div>
-        )}
+        </div>
 
-        <div className="space-y-16">
+        {!isApproved ? (
+          <div className="bg-[#FFF3CD] border-l-4 border-[#FFC107] p-8 mt-12 text-[#856404] rounded-r-md shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="material-symbols-outlined text-4xl">pending_actions</span>
+              <h4 className="font-bold text-2xl">Cuenta en Revisión</h4>
+            </div>
+            <p className="text-lg mb-6">
+              Tu cuenta de patrocinador está pendiente de validación administrativa. Deberás esperar a que un administrador confirme tu participación o pago para poder acceder a las herramientas (Reserva de stand, gafetes, escáner, etc.).
+            </p>
+            <button onClick={handleLogout} className="bg-[#856404] text-white px-6 py-2 rounded-md hover:bg-[#664d03] transition-colors font-bold flex items-center gap-2">
+              <span className="material-symbols-outlined">logout</span>
+              Cerrar Sesión
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-16 mt-8">
           {/* MI ACTIVIDAD Y LEADS */}
           <section>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -135,14 +140,13 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
               </div>
             </div>
           </section>
-
-
         </div>
+        )}
       </div>
 
       {activeForm === 'map' && (
         <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md p-4 md:p-8 overflow-hidden flex flex-col animate-in fade-in duration-300">
-          <InteractiveMap onBack={() => setActiveForm(null)} />
+          <InteractiveMap onBack={() => setActiveForm(null)} sponsorData={userData} />
         </div>
       )}
     </div>

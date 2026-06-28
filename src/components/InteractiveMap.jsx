@@ -47,7 +47,7 @@ export const initialStandsList = [
   { id: 'stand-38', x: '56.88%', y: '66.52%', name: 'Stand 38', status: 'available', price: '$1,500 USD', size: '3x3 mts' }
 ];
 
-export default function InteractiveMap({ onBack, isAdminMode = false }) {
+export default function InteractiveMap({ onBack, isAdminMode = false, sponsorData }) {
   const [stands, setStands] = useState(initialStandsList);
   const [selectedStand, setSelectedStand] = useState(null);
   const [clickCoords, setClickCoords] = useState(null);
@@ -291,10 +291,26 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
               </button>
             ) : selectedStand.status === 'available' ? (
               <button 
-                onClick={() => setIsReservationModalOpen(true)}
+                onClick={() => {
+                  if (sponsorData) {
+                    // Auto-fill and skip the form
+                    setReservationData({
+                      nombre: sponsorData.nombre,
+                      apellido: sponsorData.apellido,
+                      correo: sponsorData.correo,
+                      telefono: sponsorData.telefono,
+                      empresa: sponsorData.empresa
+                    });
+                    setReservedStandId(selectedStand.id);
+                    setIsUploadLogoModalOpen(true);
+                  } else {
+                    // Normal flow for public / admin manual entry
+                    setIsReservationModalOpen(true);
+                  }
+                }}
                 className="w-full md:w-auto px-8 py-3 bg-primary-container text-on-primary-container rounded-5px font-label-lg font-bold tracking-wide hover:bg-[#F2B04A] transition-colors hard-shadow"
               >
-                RESERVAR ESTE STAND
+                {sponsorData ? 'CONFIRMAR Y SUBIR LOGO' : 'RESERVAR ESTE STAND'}
               </button>
             ) : selectedStand.sponsorId && auth.currentUser?.uid && selectedStand.sponsorId === auth.currentUser.uid ? (
               <button 
