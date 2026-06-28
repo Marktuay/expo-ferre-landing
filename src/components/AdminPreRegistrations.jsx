@@ -85,7 +85,7 @@ export default function AdminPreRegistrations({ onBack }) {
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
-      <div className="max-w-6xl mx-auto">
+      <div className="w-full max-w-[1400px] mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <h1 className="text-headline-md font-bold text-on-surface">Preregistros</h1>
@@ -125,15 +125,15 @@ export default function AdminPreRegistrations({ onBack }) {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-variant/30 border-b border-outline-variant">
-                  <th className="p-4 font-bold text-on-surface">Nombre</th>
-                  <th className="p-4 font-bold text-on-surface">Empresa</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Nombre</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Empresa</th>
                   <th className="p-4 font-bold text-on-surface">Email</th>
-                  <th className="p-4 font-bold text-on-surface">Teléfono</th>
-                  <th className="p-4 font-bold text-on-surface">Empleados</th>
-                  <th className="p-4 font-bold text-on-surface">Puesto</th>
-                  <th className="p-4 font-bold text-on-surface">Estado</th>
-                  <th className="p-4 font-bold text-on-surface">Fecha</th>
-                  <th className="p-4 font-bold text-on-surface text-center">Acciones</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Teléfono</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Empleados</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Puesto</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap text-center">Estado</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Fecha</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -152,25 +152,25 @@ export default function AdminPreRegistrations({ onBack }) {
                 ) : (
                   registrations.map((reg) => (
                     <tr key={reg.id} className="border-b border-outline-variant hover:bg-surface-variant/10 transition-colors">
-                      <td className="p-4 text-on-surface font-medium">{reg.name}</td>
-                      <td className="p-4 text-secondary">{reg.company}</td>
+                      <td className="p-4 text-on-surface font-medium whitespace-nowrap">{reg.name}</td>
+                      <td className="p-4 text-secondary whitespace-nowrap">{reg.company}</td>
                       <td className="p-4 text-secondary">{reg.email}</td>
-                      <td className="p-4 text-secondary">{reg.phone}</td>
-                      <td className="p-4 text-secondary">{reg.employees || 'N/A'}</td>
-                      <td className="p-4 text-secondary">{reg.position || 'N/A'}</td>
-                      <td className="p-4">
+                      <td className="p-4 text-secondary whitespace-nowrap">{reg.phone}</td>
+                      <td className="p-4 text-secondary whitespace-nowrap">{reg.employees || 'N/A'}</td>
+                      <td className="p-4 text-secondary whitespace-nowrap">{reg.position || 'N/A'}</td>
+                      <td className="p-4 whitespace-nowrap text-center">
                         <span className={`px-2 py-1 rounded-full text-xs font-bold ${reg.status === 'approved' ? 'bg-[#16a34a]/10 text-[#16a34a]' : 'bg-[#f39200]/10 text-[#f39200]'}`}>
                           {reg.status === 'approved' ? 'APROBADO' : 'PENDIENTE'}
                         </span>
                       </td>
-                      <td className="p-4 text-secondary">
+                      <td className="p-4 text-secondary whitespace-nowrap">
                         {reg.createdAt.toLocaleDateString('es-ES', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric'
                         })}
                       </td>
-                      <td className="p-4 text-center">
+                      <td className="p-4 text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
                           {reg.status !== 'approved' && (
                             <button onClick={() => handleApprove(reg)} className="text-[#16a34a] hover:bg-[#16a34a]/10 p-2 rounded-full transition-colors" title="Aprobar">
