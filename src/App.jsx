@@ -494,17 +494,17 @@ export default function App() {
                     <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-black/20 to-transparent z-10 pointer-events-none"></div>
                     <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-black/20 to-transparent z-10 pointer-events-none"></div>
                     <div className="animate-scroll-logos flex">
-                      <div className="flex gap-8 md:gap-16 pr-8 md:pr-16">
+                      <div className="flex gap-8 md:gap-16 pr-8 md:pr-16 items-center">
                         {sponsorLogos.map((logoUrl, index) => (
-                          <div key={`first-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 shadow-lg overflow-hidden p-2">
-                            <img src={logoUrl} alt={`Sponsor ${index}`} className="max-w-full max-h-full object-contain drop-shadow-md" />
+                          <div key={`first-${index}`} className="flex-shrink-0 flex items-center justify-center min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 shadow-lg overflow-hidden p-4">
+                            <img src={logoUrl} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
                           </div>
                         ))}
                       </div>
-                      <div className="flex gap-8 md:gap-16 pr-8 md:pr-16">
+                      <div className="flex gap-8 md:gap-16 pr-8 md:pr-16 items-center">
                         {sponsorLogos.map((logoUrl, index) => (
-                          <div key={`second-${index}`} className="flex-shrink-0 flex items-center justify-center w-36 h-16 md:w-48 md:h-20 bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 shadow-lg overflow-hidden p-2">
-                            <img src={logoUrl} alt={`Sponsor ${index}`} className="max-w-full max-h-full object-contain drop-shadow-md" />
+                          <div key={`second-${index}`} className="flex-shrink-0 flex items-center justify-center min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] bg-white/10 backdrop-blur-md border border-white/30 rounded-md transition-all hover:bg-white/20 shadow-lg overflow-hidden p-4">
+                            <img src={logoUrl} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
                           </div>
                         ))}
                       </div>
