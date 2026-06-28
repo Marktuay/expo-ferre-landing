@@ -490,26 +490,36 @@ export default function App() {
               <div className="container mx-auto px-margin-mobile text-center">
                 <FadeIn direction="up">
                   <h2 className="font-headline-xl text-2xl md:text-4xl text-white font-black tracking-widest mb-4 uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Patrocinan</h2>
-                  <div className="overflow-hidden relative w-full flex items-center py-2">
-                    <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-black/20 to-transparent z-10 pointer-events-none"></div>
-                    <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-black/20 to-transparent z-10 pointer-events-none"></div>
-                    <div className="animate-scroll-logos flex">
-                      <div className="flex gap-8 md:gap-16 pr-8 md:pr-16 items-center">
-                        {sponsorLogos.map((logoUrl, index) => (
-                          <div key={`first-${index}`} className="flex-shrink-0 flex items-center justify-center min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] transition-all overflow-hidden p-4">
-                            <img src={logoUrl} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
-                          </div>
-                        ))}
-                      </div>
-                      <div className="flex gap-8 md:gap-16 pr-8 md:pr-16 items-center">
-                        {sponsorLogos.map((logoUrl, index) => (
-                          <div key={`second-${index}`} className="flex-shrink-0 flex items-center justify-center min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] transition-all overflow-hidden p-4">
-                            <img src={logoUrl} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
-                          </div>
-                        ))}
+                  {sponsorLogos.length < 5 ? (
+                    <div className="flex justify-center items-center gap-8 md:gap-16 py-4 flex-wrap">
+                      {sponsorLogos.map((logoUrl, index) => (
+                        <div key={`single-${index}`} className="flex-shrink-0 flex items-center justify-center min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] transition-all overflow-hidden p-4">
+                          <img src={logoUrl} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="overflow-hidden relative w-full flex items-center py-2">
+                      <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-black/20 to-transparent z-10 pointer-events-none"></div>
+                      <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-black/20 to-transparent z-10 pointer-events-none"></div>
+                      <div className="animate-scroll-logos flex">
+                        <div className="flex gap-8 md:gap-16 pr-8 md:pr-16 items-center">
+                          {sponsorLogos.map((logoUrl, index) => (
+                            <div key={`first-${index}`} className="flex-shrink-0 flex items-center justify-center min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] transition-all overflow-hidden p-4">
+                              <img src={logoUrl} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex gap-8 md:gap-16 pr-8 md:pr-16 items-center">
+                          {sponsorLogos.map((logoUrl, index) => (
+                            <div key={`second-${index}`} className="flex-shrink-0 flex items-center justify-center min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] transition-all overflow-hidden p-4">
+                              <img src={logoUrl} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </FadeIn>
               </div>
             </div>
