@@ -51,7 +51,7 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
             <h1 className="font-headline-xl text-headline-xl md:text-5xl text-secondary">PANEL DE PATROCINADORES</h1>
           </div>
           
-          {auth.currentUser && (
+          {auth.currentUser && isApproved && (
             <div className="bg-white p-4 rounded-lg shadow-sm border border-outline-variant flex flex-col items-center gap-2">
               <QRCodeSVG value={auth.currentUser.uid} size={100} level="M" />
               <span className="font-label-sm text-on-surface-variant">Mi Código QR</span>
