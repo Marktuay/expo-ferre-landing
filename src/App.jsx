@@ -832,9 +832,7 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              <button className="mt-8 px-8 py-3 bg-white text-inverse-surface font-bold hover:bg-primary-fixed transition-all flex items-center gap-2 rounded-5px">
-                <span className="material-symbols-outlined">directions</span> COMO LLEGAR
-              </button>
+
             </div>
             <div id="preregistro-form" className="bg-[#d9d9d9]/80 backdrop-blur-sm p-8 border border-outline-variant hard-shadow-orange rounded-5px relative overflow-hidden shadow-2xl">
               {formState === 'success' && (
