@@ -41,6 +41,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   - **Reporte de Marketing (Leads):** Panel con reportería de UTMs (campañas de Instagram, Facebook, LinkedIn), listando prospectos con datos completos como Email y Teléfono.
   - **Hub de Patrocinadores (Submenú):** Agrupa 4 secciones:
     1. *Directorio:* Lista de patrocinadores registrados (`users`).
+       - **Creación Manual:** El equipo puede registrar patrocinadores directamente. Esto utiliza una instancia secundaria temporal de Firebase Auth para no perder la sesión activa del administrador.
+       - **Notificaciones (Trigger Email):** Al crear o aprobar a un patrocinador, el sistema inyecta un documento en la colección `mail` para que la extensión "Trigger Email" envíe el correo de forma automática y silenciosa.
     2. *Reservaciones:* Panel con dos pestañas (Lista de stands reservados y **Mapa Interactivo** para administrar reservas y ocupación gráficamente).
     3. *Conferencias:* Charlas propuestas.
     4. *Staff:* Personal acreditado por los patrocinadores.
