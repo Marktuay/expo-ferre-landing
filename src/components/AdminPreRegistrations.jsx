@@ -5,6 +5,7 @@ import { getEventBasePath } from '../config/eventConfig';
 
 export default function AdminPreRegistrations({ onBack }) {
   const [registrations, setRegistrations] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -120,18 +121,41 @@ export default function AdminPreRegistrations({ onBack }) {
     }
   };
 
+  const filteredRegistrations = registrations.filter(reg => {
+    const term = searchTerm.toLowerCase();
+    const nameMatch = reg.name?.toLowerCase().includes(term);
+    const emailMatch = reg.email?.toLowerCase().includes(term);
+    const phoneMatch = reg.phone?.toLowerCase().includes(term);
+    const companyMatch = reg.company?.toLowerCase().includes(term);
+    return nameMatch || emailMatch || phoneMatch || companyMatch;
+  });
+
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
       <div className="w-full max-w-[1400px] mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
+          <div className="flex-shrink-0">
             <h1 className="text-headline-md font-bold text-on-surface">Preregistros</h1>
             <p className="text-body-lg text-secondary">Personas que han completado el formulario de preregistro.</p>
           </div>
-          <div className="flex gap-4">
+          
+          <div className="w-full md:flex-1 md:max-w-md">
+            <div className="relative">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary">search</span>
+              <input 
+                type="text" 
+                placeholder="Buscar por nombre, correo, teléfono o empresa..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-white rounded-full border border-outline-variant focus:border-[#0d47a1] focus:ring-1 focus:ring-[#0d47a1] outline-none transition-shadow shadow-sm"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-shrink-0 gap-4">
             <button onClick={() => {
               import('xlsx').then(XLSX => {
-                const dataToExport = registrations.map(reg => ({
+                const dataToExport = filteredRegistrations.map(reg => ({
                   Fecha: reg.createdAt.toLocaleDateString() + ' ' + reg.createdAt.toLocaleTimeString(),
                   Nombre: reg.name || '',
                   Empresa: reg.company || '',
@@ -180,14 +204,14 @@ export default function AdminPreRegistrations({ onBack }) {
                       Cargando datos...
                     </td>
                   </tr>
-                ) : registrations.length === 0 ? (
+                ) : filteredRegistrations.length === 0 ? (
                   <tr>
                     <td colSpan="9" className="p-8 text-center text-secondary">
-                      No hay preregistros todavía.
+                      No se encontraron resultados para "{searchTerm}".
                     </td>
                   </tr>
                 ) : (
-                  registrations.map((reg) => (
+                  filteredRegistrations.map((reg) => (
                     <tr key={reg.id} className="border-b border-outline-variant hover:bg-surface-variant/10 transition-colors">
                       <td className="p-4 text-on-surface font-medium whitespace-nowrap">{reg.name}</td>
                       <td className="p-4 text-secondary whitespace-nowrap">{reg.company}</td>
