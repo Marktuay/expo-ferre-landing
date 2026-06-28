@@ -51,7 +51,7 @@ export default function CreateSponsorModal({ onClose }) {
           telefono: formData.telefono,
           correo: formData.correo,
           role: 'sponsor',
-          status: 'pendiente', // Automatically set to pendiente based on user request
+          status: 'pending', // Automatically set to pending based on user request
           createdAt: serverTimestamp()
         });
 

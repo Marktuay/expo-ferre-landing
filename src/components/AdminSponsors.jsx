@@ -155,7 +155,7 @@ export default function AdminSponsors({ onBack }) {
                         })}
                       </td>
                       <td className="p-4 flex gap-2 justify-center">
-                        {sponsor.status === 'pending' && (
+                        {(sponsor.status === 'pending' || sponsor.status === 'pendiente') && (
                           <button 
                             onClick={async () => {
                               if(window.confirm('¿Deseas aprobar a este patrocinador? Se habilitarán todas sus funcionalidades y se preparará un correo para avisarle.')){
