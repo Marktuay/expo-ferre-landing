@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 
@@ -67,6 +67,17 @@ export default function AdminPreRegistrations({ onBack }) {
     } catch (error) {
       console.error('Error approving preregistration:', error);
       alert('Error al aprobar.');
+    }
+  const handleDelete = async (reg) => {
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar permanentemente el registro de ${reg.name}?`)) return;
+
+    try {
+      const ref = doc(db, `${getEventBasePath()}/preregistrations`, reg.id);
+      await deleteDoc(ref);
+      alert('Registro eliminado exitosamente.');
+    } catch (error) {
+      console.error('Error deleting preregistration:', error);
+      alert('Error al eliminar.');
     }
   };
 
@@ -158,11 +169,16 @@ export default function AdminPreRegistrations({ onBack }) {
                         })}
                       </td>
                       <td className="p-4 text-center">
-                        {reg.status !== 'approved' && (
-                          <button onClick={() => handleApprove(reg)} className="text-[#16a34a] hover:bg-[#16a34a]/10 p-2 rounded-full transition-colors" title="Aprobar">
-                            <span className="material-symbols-outlined">check_circle</span>
+                        <div className="flex items-center justify-center gap-2">
+                          {reg.status !== 'approved' && (
+                            <button onClick={() => handleApprove(reg)} className="text-[#16a34a] hover:bg-[#16a34a]/10 p-2 rounded-full transition-colors" title="Aprobar">
+                              <span className="material-symbols-outlined">check_circle</span>
+                            </button>
+                          )}
+                          <button onClick={() => handleDelete(reg)} className="text-[#ef4444] hover:bg-[#ef4444]/10 p-2 rounded-full transition-colors" title="Eliminar">
+                            <span className="material-symbols-outlined">delete</span>
                           </button>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   ))

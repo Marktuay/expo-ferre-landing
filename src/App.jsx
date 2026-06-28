@@ -185,8 +185,7 @@ export default function App() {
     const position = formData.get('position');
     const employees = formData.get('employees');
     
-    const isApproved = (position === 'Propietario' || position === 'Gerente General') && employees !== '1 a 10';
-    const status = isApproved ? 'approved' : 'pending';
+    const status = 'pending';
 
     // Capturar UTMs
     const urlParams = new URLSearchParams(window.location.search);
@@ -220,10 +219,8 @@ export default function App() {
             <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #0d47a1;">¡Hola ${data.name}!</h2>
               <p>Hemos recibido tu solicitud de preregistro para <strong>ExpoFerre 2026</strong>.</p>
-              <p><strong>Estatus:</strong> ${isApproved ? '<span style="color: green;">Aprobado</span>' : '<span style="color: orange;">En revisión</span>'}</p>
-              ${isApproved 
-                ? `<p>Tu código de acceso QR estará asociado a este registro. Por favor guarda este correo.</p>` 
-                : '<p>Te notificaremos pronto cuando la administración haya revisado y aprobado tu registro.</p>'}
+              <p><strong>Estatus:</strong> <span style="color: orange;">En revisión</span></p>
+              <p>Te notificaremos pronto mediante un correo automático cuando la administración haya revisado y aprobado tu registro, incluyendo tu código QR de acceso.</p>
               <br/>
               <p>Saludos cordiales,<br/><strong>El equipo de ExpoFerre</strong></p>
             </div>
@@ -244,7 +241,7 @@ export default function App() {
                 <li><strong>Empresa:</strong> ${data.company}</li>
                 <li><strong>Puesto:</strong> ${data.position}</li>
                 <li><strong>Cantidad de Empleados:</strong> ${data.employees}</li>
-                <li><strong>Estatus Automático:</strong> ${isApproved ? 'Aprobado' : 'Pendiente (Requiere aprobación)'}</li>
+                <li><strong>Estatus Automático:</strong> Pendiente (Requiere aprobación)</li>
               </ul>
             </div>
           `
