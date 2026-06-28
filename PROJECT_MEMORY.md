@@ -38,6 +38,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. *Reservaciones:* Panel con dos pestañas (Lista de stands reservados y **Mapa Interactivo** para administrar reservas y ocupación gráficamente).
     3. *Conferencias:* Charlas propuestas.
     4. *Staff:* Personal acreditado por los patrocinadores.
+  - **Check-In (Escáner QR):** Módulo funcional utilizando la cámara del dispositivo para escanear Códigos QR, buscar asistentes en la base de datos y registrar su asistencia en tiempo real con estadísticas.
 - **Exportación:** Todas las tablas de administración tienen la capacidad de exportar sus datos a archivos Excel (`.xlsx`), incluyendo las últimas adiciones de campos (ej. Teléfono en Leads).
 
 ---
@@ -48,15 +49,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Objetivo:** Enviar un mensaje automatizado con el código QR y los detalles logísticos del evento cada vez que alguien se registre.
 - **Estado:** En pausa a la espera de que el cliente adquiera y configure una Máquina Virtual (Google Cloud `e2-medium` recomendada) con el número de WhatsApp usando un API como *Evolution API* o *Baileys*.
 
-### 2. Escáner QR para el Staff (Control de Acceso / Check-In)
-- **Objetivo:** Permitir que los administradores y el staff abran la cámara de su celular desde el "Admin Hub" para escanear el Código QR de los asistentes en la puerta.
-- **Flujo:** 
-  1. Escanear QR.
-  2. Buscar ID en colecciones `preregistrations` y `users`.
-  3. Mostrar detalles en pantalla.
-  4. Botón de **"Check-in"** para marcar `asistencia: true` y guardar el `timestamp` de ingreso.
-
-### 3. Lista de Invitados (Panel de Patrocinadores)
+### 2. Lista de Invitados (Panel de Patrocinadores)
 - **Objetivo:** Sustituir el botón actual que dice "Próximamente" por un formulario o mecanismo de subida de CSV donde los patrocinadores declaren a sus invitados VIP.
 
 ---
