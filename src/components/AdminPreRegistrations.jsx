@@ -199,8 +199,8 @@ export default function AdminPreRegistrations({ onBack }) {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-variant/30 border-b border-outline-variant">
-                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Nombre</th>
-                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Empresa</th>
+                  <th className="p-4 font-bold text-on-surface">Nombre</th>
+                  <th className="p-4 font-bold text-on-surface">Empresa</th>
                   <th className="p-4 font-bold text-on-surface">Email</th>
                   <th className="p-4 font-bold text-on-surface whitespace-nowrap">Teléfono</th>
                   <th className="p-4 font-bold text-on-surface whitespace-nowrap">Empleados</th>
@@ -226,9 +226,9 @@ export default function AdminPreRegistrations({ onBack }) {
                 ) : (
                   filteredRegistrations.map((reg) => (
                     <tr key={reg.id} className="border-b border-outline-variant hover:bg-surface-variant/10 transition-colors">
-                      <td className="p-4 text-on-surface font-medium whitespace-nowrap">{reg.name}</td>
-                      <td className="p-4 text-secondary whitespace-nowrap">{reg.company}</td>
-                      <td className="p-4 text-secondary">{reg.email}</td>
+                      <td className="p-4 text-on-surface font-medium">{reg.name}</td>
+                      <td className="p-4 text-secondary">{reg.company}</td>
+                      <td className="p-4 text-secondary break-all">{reg.email}</td>
                       <td className="p-4 text-secondary whitespace-nowrap">{reg.phone}</td>
                       <td className="p-4 text-secondary whitespace-nowrap">{reg.employees || 'N/A'}</td>
                       <td className="p-4 text-secondary whitespace-nowrap">{reg.position || 'N/A'}</td>
