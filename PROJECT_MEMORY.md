@@ -34,7 +34,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ### 3. Panel de Administración (Intranet)
 - Menú principal con tarjetas tipo "Hub" para navegar.
 - **Módulos:**
-  - **Preregistros:** Tabla con visitantes inscritos. **Lógica de Aprobación implementada:** Al aprobar (`status: 'approved'`), se dispara la lógica para enviar un correo electrónico al visitante adjuntando su Código QR.
+  - **Preregistros:** Tabla de visitantes inscritos con buscador en tiempo real (por nombre, empresa, email y teléfono). 
+    - **Gestión:** Al aprobar (`status: 'approved'`), envía el Código QR por correo. Cuenta con un botón para **Reenviar el Código QR** a los ya aprobados.
+    - **Control de Asistencia / Suplencias:** Si alguien transfiere su invitación o no asiste, se puede marcar como **No Asistió** (`status: 'no_show'`) para anular ese registro sin eliminarlo, exigiendo un nuevo registro in-situ para la nueva persona. La exportación a Excel respeta los filtros aplicados en pantalla.
   - **Contacto:** Tabla de mensajes de contacto de la landing.
   - **Reporte de Marketing (Leads):** Panel con reportería de UTMs (campañas de Instagram, Facebook, LinkedIn), listando prospectos con datos completos como Email y Teléfono.
   - **Hub de Patrocinadores (Submenú):** Agrupa 4 secciones:
