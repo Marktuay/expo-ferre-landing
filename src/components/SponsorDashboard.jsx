@@ -58,7 +58,6 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
             </div>
           )}
         </div>
-
         </div>
 
         {!isApproved ? (
