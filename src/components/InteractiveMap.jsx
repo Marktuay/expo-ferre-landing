@@ -478,7 +478,6 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
                 <p className="font-bold mb-2 flex items-center gap-1"><span className="material-symbols-outlined text-sm">info</span> Guía de Logotipo</p>
                 <ul className="list-disc pl-5 space-y-1">
                   <li>Formatos permitidos: <strong>JPG, JPEG, PNG o SVG</strong>.</li>
-                  <li>El archivo <strong>debe tener fondo transparente</strong> (recomendado).</li>
                   <li>Medidas (Ancho x Alto): <strong>Mínimos 200x57 px</strong> | <strong>Máximos 400x250 px</strong>.</li>
                 </ul>
               </div>
