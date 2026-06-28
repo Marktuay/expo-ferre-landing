@@ -68,6 +68,8 @@ export default function AdminPreRegistrations({ onBack }) {
       console.error('Error approving preregistration:', error);
       alert('Error al aprobar.');
     }
+  };
+
   const handleDelete = async (reg) => {
     if (!window.confirm(`¿Estás seguro de que deseas eliminar permanentemente el registro de ${reg.name}?`)) return;
 
