@@ -56,6 +56,16 @@ export default function CreateSponsorModal({ onClose }) {
         });
 
         setSuccess(true);
+        
+        // Preparar y abrir el correo automatizado a través de mailto
+        const subject = encodeURIComponent('Bienvenido a Expo Ferre - Cuenta de Patrocinador Creada');
+        const body = encodeURIComponent(`Hola ${formData.nombre},\n\nTu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido creada exitosamente.\n\nPor los momentos, tu cuenta se encuentra en estado "Pendiente de Aprobación". Te notificaremos por este medio una vez que tu cuenta haya sido aprobada para que puedas ingresar.\n\nTus credenciales de acceso serán:\nCorreo: ${formData.correo}\nContraseña: ${formData.password}\n\n¡Gracias por ser parte de Expo Ferre!`);
+        
+        // Usamos setTimeout para asegurar que se vea el mensaje de éxito antes de abrir el cliente de correo
+        setTimeout(() => {
+          window.location.href = `mailto:${formData.correo}?subject=${subject}&body=${body}`;
+        }, 500);
+
         setTimeout(() => {
           onClose();
         }, 2000);
