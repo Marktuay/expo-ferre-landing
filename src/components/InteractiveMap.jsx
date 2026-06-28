@@ -220,20 +220,33 @@ export default function InteractiveMap({ onBack, isAdminMode = false }) {
                         style={{
                           left: stand.x,
                           top: stand.y,
-                          width: stand.logo ? '36px' : '16px',
-                          height: stand.logo ? '36px' : '16px',
-                          transform: stand.logo ? 'translate(-50%, -50%)' : 'translate(calc(-50% + 22px), calc(-50% + 22px))',
+                          width: '24px',
+                          height: '24px',
+                          transform: 'translate(-50%, -50%)',
                         }}
                       >
-                        {stand.logo && (
-                          <img src={stand.logo} alt={stand.name} className="w-full h-full object-cover rounded-full" />
-                        )}
+                        {stand.logo ? (
+                          <span className="material-symbols-outlined text-[14px]">storefront</span>
+                        ) : null}
                         
-                        {/* Tooltip */}
-                        <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-inverse-surface text-surface px-3 py-1.5 rounded-md text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
-                          <span className="font-bold block">{stand.name}</span>
-                          <span className="block text-surface-variant text-[10px]">{stand.status === 'available' ? 'Disponible' : isMine ? 'Mi Stand' : 'Reservado'}</span>
-                          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-inverse-surface rotate-45"></div>
+                        {/* Tooltip Flotante */}
+                        <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-surface text-on-surface p-3 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-all pointer-events-none shadow-xl border border-outline-variant flex flex-col items-center gap-2 z-50">
+                          {stand.logo && (
+                            <div className="bg-white p-2 rounded-md border border-outline-variant w-max">
+                              <img 
+                                src={stand.logo} 
+                                alt={stand.name} 
+                                className="min-w-[200px] min-h-[57px] max-w-[400px] max-h-[250px] object-contain" 
+                              />
+                            </div>
+                          )}
+                          <div className="text-center w-max">
+                            <span className="font-bold block text-primary">{stand.name}</span>
+                            <span className="block text-secondary text-xs">
+                              {stand.status === 'available' ? 'Disponible' : isMine ? 'Mi Stand' : 'Reservado'}
+                            </span>
+                          </div>
+                          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-surface border-b border-r border-outline-variant rotate-45"></div>
                         </div>
                       </button>
                     );
