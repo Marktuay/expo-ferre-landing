@@ -53,6 +53,7 @@ export default function CreateSponsorModal({ onClose }) {
           role: 'sponsor',
           status: 'pending', // Automatically set to pending based on user request
           createdAt: serverTimestamp()
+        });
         setSuccess(true);
         
         // Agregar documento a la colección 'mail' para que la extensión "Trigger Email" envíe el correo
