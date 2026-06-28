@@ -58,7 +58,6 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
             </div>
           )}
         </div>
-        </div>
 
         {!isApproved ? (
           <div className="bg-[#FFF3CD] border-l-4 border-[#FFC107] p-8 mt-12 text-[#856404] rounded-r-md shadow-sm">
