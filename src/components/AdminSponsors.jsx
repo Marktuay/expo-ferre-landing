@@ -162,10 +162,15 @@ export default function AdminSponsors({ onBack }) {
                                 try {
                                   await updateDoc(doc(db, 'users', sponsor.id), { status: 'approved' });
                                   
-                                  // Generar y abrir el correo automatizado a través de mailto
-                                  const subject = encodeURIComponent('¡Tu cuenta de Patrocinador en Expo Ferre ha sido aprobada!');
-                                  const body = encodeURIComponent(`Hola ${sponsor.nombre || 'Patrocinador'},\n\nNos complace informarte que tu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido aprobada.\n\nYa puedes iniciar sesión en la plataforma para:\n- Reservar tu Stand en el Plano Interactivo.\n- Registrar a tu Staff y tus Invitados.\n- Utilizar el escáner de Gafetes (Leads).\n\nIngresa aquí: https://expoferre.com (o tu enlace correspondiente).\n\n¡Gracias por ser parte de Expo Ferre!`);
-                                  window.location.href = `mailto:${sponsor.correo}?subject=${subject}&body=${body}`;
+                                  // Generar el correo automatizado a través de la colección mail
+                                  await setDoc(doc(collection(db, 'mail')), {
+                                    to: sponsor.correo,
+                                    message: {
+                                      subject: '¡Tu cuenta de Patrocinador en Expo Ferre ha sido aprobada!',
+                                      text: `Hola ${sponsor.nombre || 'Patrocinador'},\n\nNos complace informarte que tu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido aprobada.\n\nYa puedes iniciar sesión en la plataforma para:\n- Reservar tu Stand en el Plano Interactivo.\n- Registrar a tu Staff y tus Invitados.\n- Utilizar el escáner de Gafetes (Leads).\n\nIngresa aquí: https://expoferre.com (o tu enlace correspondiente).\n\n¡Gracias por ser parte de Expo Ferre!`,
+                                      html: `<h3>Hola ${sponsor.nombre || 'Patrocinador'},</h3><p>Nos complace informarte que tu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido aprobada.</p><p>Ya puedes iniciar sesión en la plataforma para:</p><ul><li>Reservar tu Stand en el Plano Interactivo.</li><li>Registrar a tu Staff y tus Invitados.</li><li>Utilizar el escáner de Gafetes (Leads).</li></ul><p>Ingresa aquí: <a href="https://expoferre.com">https://expoferre.com</a></p><p>¡Gracias por ser parte de Expo Ferre!</p>`
+                                    }
+                                  });
                                   
                                 } catch(e) {
                                   console.error('Error approving sponsor:', e);

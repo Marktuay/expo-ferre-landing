@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db, firebaseConfig } from '../firebase';
 
 export default function CreateSponsorModal({ onClose }) {
@@ -53,18 +53,17 @@ export default function CreateSponsorModal({ onClose }) {
           role: 'sponsor',
           status: 'pending', // Automatically set to pending based on user request
           createdAt: serverTimestamp()
-        });
-
         setSuccess(true);
         
-        // Preparar y abrir el correo automatizado a través de mailto
-        const subject = encodeURIComponent('Bienvenido a Expo Ferre - Cuenta de Patrocinador Creada');
-        const body = encodeURIComponent(`Hola ${formData.nombre},\n\nTu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido creada exitosamente.\n\nPor los momentos, tu cuenta se encuentra en estado "Pendiente de Aprobación". Te notificaremos por este medio una vez que tu cuenta haya sido aprobada para que puedas ingresar.\n\nTus credenciales de acceso serán:\nCorreo: ${formData.correo}\nContraseña: ${formData.password}\n\n¡Gracias por ser parte de Expo Ferre!`);
-        
-        // Usamos setTimeout para asegurar que se vea el mensaje de éxito antes de abrir el cliente de correo
-        setTimeout(() => {
-          window.location.href = `mailto:${formData.correo}?subject=${subject}&body=${body}`;
-        }, 500);
+        // Agregar documento a la colección 'mail' para que la extensión "Trigger Email" envíe el correo
+        await setDoc(doc(collection(db, 'mail')), {
+          to: formData.correo,
+          message: {
+            subject: 'Bienvenido a Expo Ferre - Cuenta de Patrocinador Creada',
+            text: `Hola ${formData.nombre},\n\nTu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido creada exitosamente.\n\nPor los momentos, tu cuenta se encuentra en estado "Pendiente de Aprobación". Te notificaremos por este medio una vez que tu cuenta haya sido aprobada para que puedas ingresar.\n\nTus credenciales de acceso serán:\nCorreo: ${formData.correo}\nContraseña: ${formData.password}\n\n¡Gracias por ser parte de Expo Ferre!`,
+            html: `<h3>Hola ${formData.nombre},</h3><p>Tu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido creada exitosamente.</p><p>Por los momentos, tu cuenta se encuentra en estado <strong>"Pendiente de Aprobación"</strong>. Te notificaremos por este medio una vez que tu cuenta haya sido aprobada para que puedas ingresar.</p><p>Tus credenciales de acceso serán:</p><ul><li><strong>Correo:</strong> ${formData.correo}</li><li><strong>Contraseña:</strong> ${formData.password}</li></ul><p>¡Gracias por ser parte de Expo Ferre!</p>`
+          }
+        });
 
         setTimeout(() => {
           onClose();
