@@ -572,15 +572,15 @@ export default function App() {
             <div className="flex flex-col gap-8 mb-8">
               <FadeIn direction="up">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="space-y-6 text-lg text-gray-700 bg-white p-8 md:p-10 rounded-xl shadow-sm border border-gray-100 w-full flex flex-col justify-center">
-                    <p className="font-medium text-xl text-[#283474] leading-relaxed">
+                  <div className="space-y-6 text-lg text-[#283474] font-medium bg-white p-8 md:p-10 rounded-xl shadow-sm border border-gray-100 w-full flex flex-col justify-center">
+                    <p className="leading-relaxed">
                       <strong className="font-black">EXPO FERRE</strong> nace como la primera plataforma especializada del sector ferretero en Nicaragua para crear negocios, fortalecer, conectar y modernizar la industria a través de un espacio de alto nivel enfocado en la innovación, el comercio y las relaciones estratégicas.
                     </p>
                     <p className="leading-relaxed">
-                      El evento reunirá en un solo lugar a los principales tomadores de decisiones del canal ferretero: <strong className="text-gray-900 font-bold">propietarios de ferreterías, gerentes generales, gerentes de compras, distribuidores, importadores, cadenas ferreteras, marcas líderes y proveedores especializados</strong> de Nicaragua y Centroamérica.
+                      El evento reunirá en un solo lugar a los principales tomadores de decisiones del canal ferretero: <strong className="font-black">propietarios de ferreterías, gerentes generales, gerentes de compras, distribuidores, importadores, cadenas ferreteras, marcas líderes y proveedores especializados</strong> de Nicaragua y Centroamérica.
                     </p>
                     <p className="leading-relaxed">
-                      <strong className="font-black text-[#283474]">EXPO FERRE</strong> impulsará oportunidades reales de posicionamiento, expansión comercial, generación de alianzas y conexión directa entre marcas y compradores estratégicos del sector.
+                      <strong className="font-black">EXPO FERRE</strong> impulsará oportunidades reales de posicionamiento, expansión comercial, generación de alianzas y conexión directa entre marcas y compradores estratégicos del sector.
                     </p>
                   </div>
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex items-center justify-center p-2">
