@@ -73,7 +73,7 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
         // Fusionar coordenadas locales con los datos de Firebase para permitir ajustes de diseño sin tocar BD
         const mergedStands = standsData.map(dbStand => {
           const initial = initialStandsList.find(s => s.id === dbStand.id);
-          return initial ? { ...dbStand, x: initial.x, y: initial.y } : dbStand;
+          return initial ? { ...dbStand, x: initial.x, y: initial.y, price: initial.price, size: initial.size } : dbStand;
         });
         setStands(mergedStands);
       } else {
