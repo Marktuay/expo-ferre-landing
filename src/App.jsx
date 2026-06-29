@@ -828,7 +828,7 @@ export default function App() {
                   <span className="material-symbols-outlined text-primary-fixed text-3xl">meeting_room</span>
                   <div>
                     <p className="font-headline-md text-headline-md text-white">Centro de Convenciones Crowne Plaza</p>
-                    <p className="font-body-md text-surface-variant">Managua, Nicaragua. Salones Bristol y Lieden.</p>
+                    <p className="font-body-md text-surface-variant">Managua, Nicaragua.</p>
                   </div>
                 </div>
               </div>
