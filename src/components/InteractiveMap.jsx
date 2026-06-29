@@ -7,7 +7,7 @@ import { getEventBasePath } from '../config/eventConfig';
 
 // Stands mapeados directamente desde las coordenadas del archivo SVG original
 export const initialStandsList = [
-  { id: 'stand-1', x: '67.71%', y: '56.10%', name: 'Stand 1', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-1', x: '67.71%', y: '56.10%', name: 'Stand 1', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
   { id: 'stand-2', x: '67.72%', y: '49.68%', name: 'Stand 2', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
   { id: 'stand-3', x: '67.77%', y: '42.84%', name: 'Stand 3', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
   { id: 'stand-4', x: '67.71%', y: '36.39%', name: 'Stand 4', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
@@ -44,7 +44,7 @@ export const initialStandsList = [
   { id: 'stand-35', x: '64.09%', y: '75.56%', name: 'Stand 35', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
   { id: 'stand-36', x: '68.78%', y: '75.56%', name: 'Stand 36', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
   { id: 'stand-37', x: '61.14%', y: '66.53%', name: 'Stand 37', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-38', x: '56.88%', y: '66.52%', name: 'Stand 38', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' }
+  { id: 'stand-38', x: '56.88%', y: '66.52%', name: 'Stand 38', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' }
 ];
 
 export default function InteractiveMap({ onBack, isAdminMode = false, sponsorData }) {
