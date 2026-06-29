@@ -67,3 +67,64 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Correos Automáticos:** Integración con Firebase *Trigger Email* (insertando documentos en la colección `mail`) para envíos silenciosos y automatizados de credenciales y avisos de aprobación.
 - **Panel de Administración (Optimizaciones):** Se amplió el contenedor del directorio de patrocinadores (`AdminSponsors.jsx`) a 95% de la pantalla para evitar cortes de texto en tablas largas (scroll horizontal). Se agregaron filtros de búsqueda en tiempo real, gestión de "No_Show", reenvío de códigos QR y borrado de registros en el panel de Preregistros.
 - **Solución de Caché:** Se implementaron técnicas de versionado de archivos para bypass de la caché estricta de Cloudflare en producción.
+
+---
+
+## 🗺️ Radiografía del Sistema (Mapa de Archivos y Componentes)
+
+Para facilitar la navegación y el mantenimiento del código por parte de futuros desarrolladores o agentes de IA, aquí se detalla la estructura principal del proyecto (`/src`):
+
+### 🌐 Archivos Raíz (`/src/`)
+- `App.jsx`: Contiene el enrutador principal (`react-router-dom`), la lógica de la **Landing Page pública** completa (Hero, Información, Ubicación, CTA) y el layout global.
+- `App.css` y `index.css`: Archivos de configuración de estilos globales y variables de Tailwind CSS.
+- `main.jsx`: Punto de entrada de la aplicación React.
+- `firebase.js`: Configuración del SDK de Firebase e inicialización de servicios (Firestore, Auth, Storage).
+
+### 🛠️ Carpeta de Componentes (`/src/components/`)
+Se divide en 4 grandes grupos lógicos:
+
+#### 1️⃣ Panel de Administración (Super Admin)
+Todos los componentes que inician con `Admin...`. Son accesibles sólo por administradores y staff (`role === 'admin'`).
+- **`AdminPanel.jsx`**: Layout base y menú de navegación del administrador.
+- **`AdminHub.jsx`**: Dashboard general con las métricas principales y KPIs del evento.
+- **Patrocinadores:**
+  - `AdminSponsorsHub.jsx`: Contenedor de las pestañas de patrocinadores.
+  - `AdminSponsors.jsx`: Tabla directorio de los patrocinadores registrados (aprobación y control de correos `mail`).
+  - `AdminSponsorDetails.jsx`: Vista detallada de las actividades y leads capturados por un patrocinador específico.
+- **Asistentes y Registros:**
+  - `AdminPreRegistrations.jsx`: Gestión de todos los usuarios públicos pre-registrados al evento.
+  - `AdminCheckIn.jsx`: Módulo para que el staff de puerta valide y escanee QRs en la entrada del evento.
+  - `AdminGuests.jsx`: Gestión de asistentes invitados de cortesía (por patrocinadores).
+- **Gestión Interna y de Contenidos:**
+  - `AdminSpeakers.jsx`: Configuración de conferencistas y agenda (CRUD).
+  - `AdminStaff.jsx`: Alta y gestión del equipo de staff/operaciones.
+  - `AdminUsers.jsx`: Vista genérica o base de usuarios.
+- **Reportes y Analíticas:**
+  - `AdminAttendanceReport.jsx`: Reportes detallados de asistencia.
+  - `AdminMarketingReport.jsx`: Métricas de marketing y leads a nivel global.
+  - `AdminGlobalLeads.jsx`: Visión maestra de todos los leads capturados.
+  - `AdminContact.jsx`: Mensajes recibidos a través de la página de contacto.
+
+#### 2️⃣ Panel Privado del Patrocinador
+Componentes accesibles únicamente por usuarios que han sido aprobados con rol de patrocinador.
+- **`SponsorDashboard.jsx`**: Layout base y navegación privada del patrocinador.
+- **`InteractiveMap.jsx`**: Mapa interactivo tipo "Canvas" para reservar y ubicar stands.
+- **`SponsorScanner.jsx`**: Escáner de QR que utiliza la cámara del dispositivo para capturar Leads en su propio stand.
+- **`SponsorActivity.jsx`**: Tabla de los leads capturados, estadísticas propias y exportación a Excel.
+- **Formularios de Alta (Sub-cuentas):**
+  - `StaffRegistration.jsx`: El patrocinador da de alta a los miembros de su equipo para que le ayuden a escanear.
+  - `GuestForm.jsx`: El patrocinador genera entradas de cortesía.
+  - `SpeakerForm.jsx`: Solicitud para proponer una charla o conferencista.
+
+#### 3️⃣ Utilidades y Módulos Compartidos
+Piezas de interfaz que se reciclan en distintas partes de la aplicación.
+- **`ScannerModule.jsx`**: Lógica core e interfaz gráfica de lector de códigos de barras / QR (usado en `AdminCheckIn` y `SponsorScanner`).
+- **`CreateSponsorModal.jsx`**: Formulario modal para dar de alta manualmente a nuevos patrocinadores.
+- **`BadgeTemplate.jsx` y `PrintableBadgeList.jsx`**: Componentes ocultos para renderizar y enviar las gafetes/credenciales a impresión física.
+
+#### 4️⃣ Páginas Públicas y Estáticas
+- **`AuthPage.jsx`**: Interfaz de Login y Registro de patrocinadores.
+- **`ContactPage.jsx`**: Formulario para envíar solicitudes e inquietudes (Landing).
+- **`PrivacyPolicy.jsx`** y **`TermsOfService.jsx`**: Documentos legales.
+
+---
