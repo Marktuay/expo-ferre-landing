@@ -57,6 +57,11 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Objetivo:** Enviar un mensaje automatizado con el código QR y los detalles logísticos del evento cada vez que alguien se registre.
 - **Estado:** En pausa a la espera de que el cliente adquiera y configure una Máquina Virtual (Google Cloud `e2-medium` recomendada) con el número de WhatsApp usando un API como *Evolution API* o *Baileys*.
 
+### 2. Cuentas Demo de Patrocinadores (Auto-destruibles)
+- **Objetivo:** Permitir la creación de cuentas "Demo" desde el modal administrativo de patrocinadores para hacer demostraciones de venta a prospectos.
+- **Mecanismo propuesto:** Añadir un flag `isDemo: true` al crearlas. Requerirá implementar un script de limpieza (cron job en la VM o Firebase Cloud Functions) que analice la base de datos y borre a los usuarios del sistema Auth y sus documentos en Firestore si tienen más de 1 hora de haber sido creados.
+- **Estado:** En pausa. Plan de implementación redactado.
+
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
