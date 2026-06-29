@@ -11,7 +11,7 @@ export const initialStandsList = [
   { id: 'stand-2', x: '67.72%', y: '49.68%', name: 'Stand 2', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
   { id: 'stand-3', x: '67.77%', y: '42.84%', name: 'Stand 3', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
   { id: 'stand-4', x: '67.71%', y: '36.39%', name: 'Stand 4', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-5', x: '67.71%', y: '29.79%', name: 'Stand 5', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-5', x: '67.71%', y: '29.79%', name: 'Stand 5', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
   { id: 'stand-6', x: '61.50%', y: '28.23%', name: 'Stand 6', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
   { id: 'stand-7', x: '62.85%', y: '34.14%', name: 'Stand 7', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
   { id: 'stand-8', x: '62.89%', y: '38.96%', name: 'Stand 8', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
