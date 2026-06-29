@@ -117,8 +117,8 @@ export default function AdminMarketingReport({ onBack }) {
         ) : (
           <>
             {/* Tarjetas de Resumen (Stats) */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-surface p-6 rounded-2xl shadow-sm border border-outline-variant">
+            <div className="flex flex-wrap gap-4 mb-8">
+              <div className="bg-surface p-6 rounded-2xl shadow-sm border border-outline-variant flex-1 min-w-[160px]">
                 <h3 className="text-label-lg text-secondary mb-2">Total de Leads</h3>
                 <p className="text-display-sm font-bold text-primary">{data.length}</p>
               </div>
@@ -127,9 +127,9 @@ export default function AdminMarketingReport({ onBack }) {
               {Object.entries(sourceStats)
                 .sort((a, b) => b[1] - a[1]) // Ordenar de mayor a menor
                 .map(([source, count]) => (
-                <div key={source} className="bg-surface p-6 rounded-2xl shadow-sm border border-outline-variant">
-                  <h3 className="text-label-lg text-secondary mb-2 truncate" title={source}>
-                    Origen: {source}
+                <div key={source} className="bg-surface p-6 rounded-2xl shadow-sm border border-outline-variant flex-1 min-w-[160px]">
+                  <h3 className="text-label-lg text-secondary mb-2 truncate capitalize" title={source}>
+                    {source === 'Organico' ? 'Orgánico' : source}
                   </h3>
                   <p className="text-display-sm font-bold text-on-surface">{count}</p>
                 </div>
