@@ -225,7 +225,7 @@ export default function App() {
       const snapshot = await getDocs(q);
       
       if (!snapshot.empty) {
-        alert("Este correo ya ha sido registrado. Te notificaremos pronto cuando se apruebe tu acceso.");
+        showToast("Este correo ya está registrado. Te notificaremos pronto.");
         setFormState('idle');
         return;
       }
