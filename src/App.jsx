@@ -215,6 +215,21 @@ export default function App() {
     };
 
     try {
+      const userEmail = data.email.trim().toLowerCase();
+      
+      // Verificar si el correo ya existe
+      const q = query(
+        collection(db, `${getEventBasePath()}/preregistrations`),
+        where('email', '==', userEmail)
+      );
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        alert("Este correo ya ha sido registrado. Te notificaremos pronto cuando se apruebe tu acceso.");
+        setFormState('idle');
+        return;
+      }
+
       const docRef = await addDoc(collection(db, `${getEventBasePath()}/preregistrations`), data);
       
       // Enviar correo al usuario
