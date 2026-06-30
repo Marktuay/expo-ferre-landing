@@ -405,73 +405,81 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
               <h3 className="font-headline-sm font-bold text-on-surface">Personaliza tu Stand</h3>
             </div>
             
-            <form className="p-6 flex flex-col gap-4 bg-surface" onSubmit={async (e) => {
+            <form className="p-6 flex flex-col gap-4 bg-surface max-h-[80vh] overflow-y-auto" onSubmit={async (e) => {
               e.preventDefault();
               setIsUploading(true);
-              const file = e.target.logoFile.files[0];
+              const mainFile = e.target.logoFile.files[0];
+              const addFiles = [
+                e.target.addLogo1?.files[0],
+                e.target.addLogo2?.files[0],
+                e.target.addLogo3?.files[0],
+              ].filter(Boolean);
+
+              const checkFileType = (file) => file && !file.type.match(/(image\/(jpeg|jpg|png|svg\+xml))/i);
               
-              if (file && !file.type.match(/(image\/png|image\/svg\+xml)/)) {
-                alert('Formato inválido. Por favor, sube una imagen en formato PNG o SVG con fondo transparente.');
+              if (checkFileType(mainFile) || addFiles.some(checkFileType)) {
+                alert('Formato inválido. Por favor, sube imágenes en formato JPG, PNG o SVG.');
                 setIsUploading(false);
                 return;
               }
 
-              try {
-                let logoDataUrl = null;
-                if (file) {
-                  if (file.type === 'image/svg+xml') {
-                    // Guardar SVG directamente como texto para no perder calidad
-                    logoDataUrl = await new Promise((resolve, reject) => {
-                      const reader = new FileReader();
-                      reader.onload = (e) => resolve(e.target.result);
-                      reader.onerror = reject;
-                      reader.readAsDataURL(file);
-                    });
-                  } else {
-                    // Comprimir PNG manteniendo la transparencia
-                    logoDataUrl = await new Promise((resolve, reject) => {
-                      const reader = new FileReader();
-                      reader.onload = (event) => {
-                        const img = new Image();
-                        img.onload = () => {
-                          const canvas = document.createElement('canvas');
-                          const MAX_WIDTH = 250;
-                          const MAX_HEIGHT = 250;
-                          let width = img.width;
-                          let height = img.height;
+              const processImageFile = async (file) => {
+                if (!file) return null;
+                if (file.type === 'image/svg+xml') {
+                  return await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => resolve(ev.target.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                  });
+                } else {
+                  return await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      const img = new Image();
+                      img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 250;
+                        const MAX_HEIGHT = 250;
+                        let width = img.width;
+                        let height = img.height;
 
-                          if (width > height) {
-                            if (width > MAX_WIDTH) {
-                              height *= MAX_WIDTH / width;
-                              width = MAX_WIDTH;
-                            }
-                          } else {
-                            if (height > MAX_HEIGHT) {
-                              width *= MAX_HEIGHT / height;
-                              height = MAX_HEIGHT;
-                            }
+                        if (width > height) {
+                          if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
                           }
-                          canvas.width = width;
-                          canvas.height = height;
-                          const ctx = canvas.getContext('2d');
-                          ctx.drawImage(img, 0, 0, width, height);
-                          // Usar image/png en lugar de jpeg para no poner un fondo negro
-                          resolve(canvas.toDataURL('image/png'));
-                        };
-                        img.onerror = reject;
-                        img.src = event.target.result;
+                        } else {
+                          if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                          }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/png'));
                       };
-                      reader.onerror = reject;
-                      reader.readAsDataURL(file);
-                    });
-                  }
+                      img.onerror = reject;
+                      img.src = event.target.result;
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                  });
                 }
+              };
+
+              try {
+                const mainLogoDataUrl = await processImageFile(mainFile);
+                const additionalLogosDataUrl = await Promise.all(addFiles.map(processImageFile));
 
                 const standRef = doc(db, `${getEventBasePath()}/stands`, reservedStandId);
                 const user = auth.currentUser;
                 
                 const updatePayload = {};
-                if (logoDataUrl) updatePayload.logo = logoDataUrl;
+                if (mainLogoDataUrl) updatePayload.logo = mainLogoDataUrl;
+                if (additionalLogosDataUrl.length > 0) updatePayload.additionalLogos = additionalLogosDataUrl;
                 
                 if (reservationData) {
                   updatePayload.status = 'reserved';
@@ -484,10 +492,10 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
                   await updateDoc(standRef, updatePayload);
                 }
 
-                showToast(reservationData ? '¡Stand reservado y logotipo guardado con éxito!' : '¡Logotipo actualizado con éxito!');
+                showToast(reservationData ? '¡Stand reservado y logotipos guardados con éxito!' : '¡Logotipos actualizados con éxito!');
               } catch (error) {
                 console.error("Error al guardar:", error);
-                showToast('Hubo un error al guardar. Asegúrate de haber subido una imagen válida.');
+                showToast('Hubo un error al guardar. Asegúrate de haber subido imágenes válidas.');
               } finally {
                 setIsUploading(false);
                 setIsUploadLogoModalOpen(false);
@@ -497,26 +505,64 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
               }
             }}>
               <div className="bg-blue-50 border border-blue-200 p-4 rounded-md mb-2 text-sm text-blue-900">
-                <p className="font-bold mb-2 flex items-center gap-1"><span className="material-symbols-outlined text-sm">info</span> Guía de Logotipo</p>
+                <p className="font-bold mb-2 flex items-center gap-1"><span className="material-symbols-outlined text-sm">info</span> Guía de Logotipos</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>Formatos permitidos: <strong>JPG, JPEG, PNG o SVG</strong>.</li>
-                  <li>Medidas (Ancho x Alto): <strong>Mínimos 200x57 px</strong> | <strong>Máximos 400x250 px</strong>.</li>
+                  <li>Formatos permitidos: <strong>JPG, PNG o SVG</strong>.</li>
+                  <li>Las imágenes se optimizarán automáticamente para no sobrecargar el sistema.</li>
+                  <li>El primer logo aparecerá en el mapa y en el carrusel. Los adicionales solo en el carrusel.</li>
                 </ul>
               </div>
               
-              <div className="flex flex-col gap-2">
-                <label className="text-label-md font-medium text-on-surface">Seleccionar Archivo</label>
+              <div className="flex flex-col gap-2 border-b border-outline-variant pb-4 mb-2">
+                <label className="text-label-md font-bold text-on-surface">Logo Principal (Mapa y Carrusel) <span className="text-red-500">*</span></label>
                 <input 
                   type="file" 
                   name="logoFile"
                   accept=".jpg, .jpeg, .png, .svg, image/jpeg, image/png, image/svg+xml"
-                  required
+                  required={!reservationData} // Required if it's new reservation, optional if just updating (though currently always required). Better keep it required to ensure map logo.
                   className="block w-full text-sm text-secondary
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-md file:border-0
                     file:text-sm file:font-semibold
                     file:bg-primary-container file:text-on-primary-container
                     hover:file:bg-[#F2B04A] hover:file:cursor-pointer transition-colors" 
+                />
+              </div>
+
+              <div className="flex flex-col gap-2 mb-2">
+                <label className="text-label-md font-medium text-on-surface">Marcas Adicionales (Opcional - Solo Carrusel)</label>
+                <input 
+                  type="file" 
+                  name="addLogo1"
+                  accept=".jpg, .jpeg, .png, .svg, image/jpeg, image/png, image/svg+xml"
+                  className="block w-full text-sm text-secondary
+                    file:mr-4 file:py-1 file:px-3
+                    file:rounded-md file:border-0
+                    file:text-xs file:font-medium
+                    file:bg-surface-variant file:text-on-surface-variant
+                    hover:file:bg-outline-variant hover:file:cursor-pointer transition-colors" 
+                />
+                <input 
+                  type="file" 
+                  name="addLogo2"
+                  accept=".jpg, .jpeg, .png, .svg, image/jpeg, image/png, image/svg+xml"
+                  className="block w-full text-sm text-secondary
+                    file:mr-4 file:py-1 file:px-3
+                    file:rounded-md file:border-0
+                    file:text-xs file:font-medium
+                    file:bg-surface-variant file:text-on-surface-variant
+                    hover:file:bg-outline-variant hover:file:cursor-pointer transition-colors" 
+                />
+                <input 
+                  type="file" 
+                  name="addLogo3"
+                  accept=".jpg, .jpeg, .png, .svg, image/jpeg, image/png, image/svg+xml"
+                  className="block w-full text-sm text-secondary
+                    file:mr-4 file:py-1 file:px-3
+                    file:rounded-md file:border-0
+                    file:text-xs file:font-medium
+                    file:bg-surface-variant file:text-on-surface-variant
+                    hover:file:bg-outline-variant hover:file:cursor-pointer transition-colors" 
                 />
               </div>
 

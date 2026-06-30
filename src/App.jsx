@@ -128,6 +128,13 @@ export default function App() {
         if (data.logo && typeof data.logo === 'string' && data.logo.trim().length > 10) {
           fetchedLogos.push(data.logo);
         }
+        if (data.additionalLogos && Array.isArray(data.additionalLogos)) {
+          data.additionalLogos.forEach(addLogo => {
+            if (addLogo && typeof addLogo === 'string' && addLogo.trim().length > 10) {
+              fetchedLogos.push(addLogo);
+            }
+          });
+        }
       });
       setSponsorLogos(fetchedLogos);
     });
