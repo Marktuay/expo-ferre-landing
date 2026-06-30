@@ -65,9 +65,12 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 29 de Junio de 2026**
+**Última actualización: 30 de Junio de 2026**
 
-- **UI / Landing Page:** Se actualizó el video principal (Hero) a `video2expoferre.mp4`, se rediseñó la sección de información dividiéndola en dos columnas con el mapa interactivo ampliado, y se eliminó información desactualizada de los salones.
+- **Logos Múltiples por Patrocinador (Marcas Adicionales):** Se modificó la arquitectura de la base de datos y el panel de patrocinadores (`InteractiveMap.jsx`) para permitir que los patrocinadores suban hasta 4 logos. El primer logo (obligatorio) se guarda en la variable `logo` y se renderiza en el mapa interactivo y en el carrusel de la página pública. Los logos adicionales (opcionales) se guardan en el array `additionalLogos` y se inyectan dinámicamente justo después del logo principal de forma exclusiva en el Reel infinito (`App.jsx`).
+
+**Cambios Anteriores (29 de Junio de 2026):**
+- **UI / Landing Page:** Se actualizó el video principal (Hero) a `video2expoferre.mp4`, se rediseñó la sección de información dividiéndola en dos columnas con el mapa interactivo ampliado, y se eliminó información desactualizada de los salones. Además, se unificó la tipografía de todos los párrafos introductorios.
 - **Mapa Interactivo (Stands):** Sincronización 100% de categorías (Plata, Oro, Diamante), precios y dimensiones contra el plano vectorial SVG real. Se corrigió la lógica en `InteractiveMap.jsx` para forzar a usar las propiedades locales sobreescribiendo valores cacheados u obsoletos persistentes en la base de datos de Firestore.
 - **Patrocinadores:** Se implementó el flujo completo de creación manual de cuentas por parte de administración y su posterior aprobación. El QR del patrocinador ahora está oculto hasta su aprobación.
 - **Correos Automáticos:** Integración con Firebase *Trigger Email* (insertando documentos en la colección `mail`) para envíos silenciosos y automatizados de credenciales y avisos de aprobación.
