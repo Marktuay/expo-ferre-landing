@@ -573,7 +573,7 @@ export default function App() {
                   muted 
                   playsInline
                 >
-                  <source src="/video2expoferre.mp4" type="video/mp4" />
+                  <source src="/video3expoferre.mp4" type="video/mp4" />
                 </video>
               </div>
             </div>
