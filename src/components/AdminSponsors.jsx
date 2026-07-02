@@ -171,6 +171,7 @@ export default function AdminSponsors({ onBack }) {
                                 try {
                                   await setDoc(doc(collection(db, 'mail')), {
                                     to: sponsor.correo,
+                                    bcc: 'admin@expoferrenicaragua.com', // Copia oculta al administrador
                                     message: {
                                       subject: '¡Tu cuenta de Patrocinador en Expo Ferre ha sido aprobada!',
                                       text: `Hola ${sponsor.nombre || 'Patrocinador'},\n\nNos complace informarte que tu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido aprobada.\n\nYa puedes iniciar sesión en la plataforma para:\n- Reservar tu Stand en el Plano Interactivo.\n- Registrar a tu Staff y tus Invitados.\n- Utilizar el escáner de Gafetes (Leads).\n\nIngresa aquí: https://expoferre.com (o tu enlace correspondiente).\n\n¡Gracias por ser parte de Expo Ferre!`,
