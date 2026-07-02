@@ -208,18 +208,16 @@ export default function AdminUsers({ onBack }) {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-outline-variant/50 hover:bg-surface-variant/20 transition-colors bg-primary/5">
-                      <td className="py-3 px-4 font-bold text-on-surface">admin (Master)</td>
-                      <td className="py-3 px-4 text-on-surface-variant font-mono text-sm">*******</td>
-                      <td className="py-3 px-4">
-                        <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs font-bold uppercase">
-                          Super Admin
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <span className="text-xs text-secondary italic">Inmodificable</span>
-                      </td>
-                    </tr>
+                    <tr className="border-b border-outline-variant bg-surface-variant/20">
+                    <td className="py-3 px-4 font-bold">karen.torres@rinsa.red (Master)</td>
+                    <td className="py-3 px-4 text-secondary">*******</td>
+                    <td className="py-3 px-4">
+                      <span className="px-2 py-1 bg-[#D2B48C] text-[#8B4513] rounded text-xs font-bold uppercase tracking-wider">Super Admin</span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-secondary italic text-xs">
+                      Inmodificable
+                    </td>
+                  </tr>
                     {users.map(user => (
                       <tr key={user.id} className="border-b border-outline-variant/50 hover:bg-surface-variant/20 transition-colors">
                         <td className="py-3 px-4 font-medium text-on-surface">{user.username}</td>
