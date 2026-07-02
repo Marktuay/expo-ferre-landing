@@ -1,17 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SpeakerForm from './SpeakerForm';
 import GuestForm from './GuestForm';
 import InteractiveMap from './InteractiveMap';
 import SponsorActivity from './SponsorActivity';
 import SponsorScanner from './SponsorScanner';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { QRCodeSVG } from 'qrcode.react';
 
 const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) => {
   const [activeForm, setActiveForm] = useState(null);
+  const lastActivityRef = useRef(Date.now());
   
   const isApproved = userData?.status === 'approved' || !userData?.status; // Fallback to approved if no status field (old accounts)
+
+  useEffect(() => {
+    const handleActivity = () => {
+      lastActivityRef.current = Date.now();
+    };
+
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+    window.addEventListener('click', handleActivity);
+
+    // Initial update
+    if (auth.currentUser && isApproved) {
+      try {
+        updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          lastActive: serverTimestamp()
+        }).catch(e => console.error("Error updating initial lastActive", e));
+      } catch (e) {
+        console.error("Error updating initial lastActive", e);
+      }
+    }
+
+    const interval = setInterval(async () => {
+      const now = Date.now();
+      const inactiveTime = now - lastActivityRef.current;
+      
+      if (inactiveTime > 10 * 60 * 1000) {
+        handleLogout();
+        return;
+      }
+
+      if (auth.currentUser && isApproved) {
+        try {
+          await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+            lastActive: serverTimestamp()
+          });
+        } catch (e) {
+          console.error("Error updating lastActive", e);
+        }
+      }
+    }, 60 * 1000);
+
+    return () => {
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      window.removeEventListener('click', handleActivity);
+      clearInterval(interval);
+    };
+  }, [isApproved]);
 
   const handleLogout = async () => {
     try {

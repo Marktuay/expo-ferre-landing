@@ -133,7 +133,16 @@ export default function AdminSponsors({ onBack }) {
                 ) : (
                   sponsors.map((sponsor) => (
                     <tr key={sponsor.id} className="border-b border-outline-variant hover:bg-surface-variant/10 transition-colors">
-                      <td className="p-4 text-on-surface font-medium">{`${sponsor.nombre || ''} ${sponsor.apellido || ''}`.trim()}</td>
+                      <td className="p-4 text-on-surface font-medium">
+                        <div className="flex items-center gap-2">
+                          {sponsor.lastActive && (Date.now() - sponsor.lastActive.toMillis() < 5 * 60 * 1000) ? (
+                            <span className="w-2.5 h-2.5 bg-green-500 rounded-full shrink-0" title="En línea"></span>
+                          ) : (
+                            <span className="w-2.5 h-2.5 bg-gray-300 rounded-full shrink-0" title="Desconectado"></span>
+                          )}
+                          {`${sponsor.nombre || ''} ${sponsor.apellido || ''}`.trim() || 'Sin Nombre'}
+                        </div>
+                      </td>
                       <td className="p-4 text-secondary">{sponsor.empresa}</td>
                       <td className="p-4 text-secondary">{sponsor.correo}</td>
                       <td className="p-4 text-secondary">{sponsor.telefono}</td>
