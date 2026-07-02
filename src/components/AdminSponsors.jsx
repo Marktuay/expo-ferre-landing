@@ -159,10 +159,16 @@ export default function AdminSponsors({ onBack }) {
                           <button 
                             onClick={async () => {
                               if(window.confirm('¿Deseas aprobar a este patrocinador? Se habilitarán todas sus funcionalidades y se preparará un correo para avisarle.')){
+                              try {
                                 try {
                                   await updateDoc(doc(db, 'users', sponsor.id), { status: 'approved' });
-                                  
-                                  // Generar el correo automatizado a través de la colección mail
+                                } catch (e1) {
+                                  console.error('Error in updateDoc:', e1);
+                                  throw new Error('Fallo al actualizar el estado del usuario en Firestore. ' + e1.message);
+                                }
+                                
+                                // Generar el correo automatizado a través de la colección mail
+                                try {
                                   await setDoc(doc(collection(db, 'mail')), {
                                     to: sponsor.correo,
                                     message: {
@@ -171,11 +177,15 @@ export default function AdminSponsors({ onBack }) {
                                       html: `<h3>Hola ${sponsor.nombre || 'Patrocinador'},</h3><p>Nos complace informarte que tu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido aprobada.</p><p>Ya puedes iniciar sesión en la plataforma para:</p><ul><li>Reservar tu Stand en el Plano Interactivo.</li><li>Registrar a tu Staff y tus Invitados.</li><li>Utilizar el escáner de Gafetes (Leads).</li></ul><p>Ingresa aquí: <a href="https://expoferre.com">https://expoferre.com</a></p><p>¡Gracias por ser parte de Expo Ferre!</p>`
                                     }
                                   });
-                                  
-                                } catch(e) {
-                                  console.error('Error approving sponsor:', e);
-                                  alert('Hubo un error al aprobar.');
+                                } catch (e2) {
+                                  console.error('Error in setDoc (mail):', e2);
+                                  throw new Error('Fallo al crear el correo en la colección mail. ' + e2.message);
                                 }
+                                
+                              } catch(e) {
+                                console.error('Error approving sponsor:', e);
+                                alert('Hubo un error al aprobar: ' + e.message);
+                              }
                               }
                             }}
                             className="p-2 text-green-600 hover:bg-green-100 rounded-full transition-colors"
