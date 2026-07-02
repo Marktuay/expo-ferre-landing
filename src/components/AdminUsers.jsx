@@ -209,7 +209,10 @@ export default function AdminUsers({ onBack }) {
                   </thead>
                   <tbody>
                   <tr className="border-b border-outline-variant bg-surface-variant/20">
-                    <td className="py-3 px-4 font-bold">marktuay@gmail.com (Master)</td>
+                    <td className="py-3 px-4 font-bold flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-green-500" title="En línea"></span>
+                      <span>marktuay@gmail.com (Master)</span>
+                    </td>
                     <td className="py-3 px-4 text-secondary">*******</td>
                     <td className="py-3 px-4">
                       <span className="px-2 py-1 bg-[#D2B48C] text-[#8B4513] rounded text-xs font-bold uppercase tracking-wider">Super Admin</span>
@@ -218,9 +221,14 @@ export default function AdminUsers({ onBack }) {
                       Inmodificable
                     </td>
                   </tr>
-                    {users.map(user => (
+                    {users.map(user => {
+                      const isOnline = user.lastActive && (Date.now() - user.lastActive.toMillis() < 5 * 60 * 1000);
+                      return (
                       <tr key={user.id} className="border-b border-outline-variant/50 hover:bg-surface-variant/20 transition-colors">
-                        <td className="py-3 px-4 font-medium text-on-surface">{user.username}</td>
+                        <td className="py-3 px-4 font-medium text-on-surface flex items-center gap-2">
+                          <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isOnline ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-300'}`} title={isOnline ? 'En línea' : 'Desconectado'}></span>
+                          <span>{user.username}</span>
+                        </td>
                         <td className="py-3 px-4 text-on-surface-variant font-mono text-sm">{user.password}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
@@ -241,7 +249,7 @@ export default function AdminUsers({ onBack }) {
                           </button>
                         </td>
                       </tr>
-                    ))}
+                    )})}
                     {users.length === 0 && (
                       <tr>
                         <td colSpan="4" className="py-8 text-center text-secondary">

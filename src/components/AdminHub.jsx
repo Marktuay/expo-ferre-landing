@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import React, { useState, useEffect, useRef } from 'react';
+import { collection, query, where, getDocs, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
@@ -10,8 +10,50 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
+  const lastActivityRef = useRef(Date.now());
+
   // Correo maestro (fallback si no está en systemUsers pero tiene acceso en Firebase Auth)
   const MASTER_EMAIL = 'marktuay@gmail.com';
+
+  useEffect(() => {
+    if (!adminUser) return;
+
+    const handleActivity = () => {
+      lastActivityRef.current = Date.now();
+    };
+
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+    window.addEventListener('click', handleActivity);
+
+    const interval = setInterval(async () => {
+      const now = Date.now();
+      const inactiveTime = now - lastActivityRef.current;
+      
+      if (inactiveTime > 10 * 60 * 1000) {
+        setAdminUser(null);
+        auth.signOut();
+        return;
+      }
+
+      if (adminUser.id) {
+        try {
+          await updateDoc(doc(db, `${getEventBasePath()}/systemUsers`, adminUser.id), {
+            lastActive: serverTimestamp()
+          });
+        } catch (e) {
+          console.error("Error updating lastActive", e);
+        }
+      }
+    }, 60 * 1000);
+
+    return () => {
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      window.removeEventListener('click', handleActivity);
+      clearInterval(interval);
+    };
+  }, [adminUser, setAdminUser]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
