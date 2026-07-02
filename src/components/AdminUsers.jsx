@@ -113,7 +113,7 @@ export default function AdminUsers({ onBack }) {
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48 font-sans text-on-background">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <nav className="text-sm mb-6 text-on-surface-variant flex items-center gap-2 font-medium">
           <button onClick={onBack} className="hover:text-primary transition-colors flex items-center gap-1">
             <span className="material-symbols-outlined text-[18px]">arrow_back</span>
@@ -138,9 +138,9 @@ export default function AdminUsers({ onBack }) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Formulario de Creación */}
-          <div className="md:col-span-1 bg-surface p-6 rounded-lg shadow-md border border-outline-variant h-fit">
+          <div className="lg:col-span-1 bg-surface p-6 rounded-lg shadow-md border border-outline-variant h-fit">
             <h2 className="text-xl font-bold text-on-surface mb-4">Nuevo Usuario</h2>
             
             <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs p-3 rounded-md mb-4">
@@ -190,7 +190,7 @@ export default function AdminUsers({ onBack }) {
           </div>
 
           {/* Lista de Usuarios */}
-          <div className="md:col-span-2 bg-surface p-6 rounded-lg shadow-md border border-outline-variant">
+          <div className="lg:col-span-3 bg-surface p-6 rounded-lg shadow-md border border-outline-variant">
             <h2 className="text-xl font-bold text-on-surface mb-4">Usuarios del Sistema</h2>
             {isLoading ? (
               <div className="flex justify-center items-center py-12">
