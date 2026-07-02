@@ -74,6 +74,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Inactividad y Presencia (Pines de Estado):** Se agregó un sistema global en `AdminHub.jsx` que registra la actividad del usuario (`mousemove`, `keydown`, `click`). 
   - Si un usuario está inactivo por más de **10 minutos**, el sistema hace un cierre de sesión forzoso automáticamente (`auth.signOut()`).
   - Cada minuto de actividad actualiza el campo `lastActive` en Firestore. Esto permite mostrar visualmente en la tabla de Gestión de Usuarios un **Pin Verde 🟢** (conectado hace menos de 5 min) o **Pin Gris ⚪** (desconectado).
+  - **Ampliación a Patrocinadores:** Este mismo sistema de inactividad y rastreo de presencia se replicó en el panel de clientes (`SponsorDashboard.jsx`). Ahora los administradores pueden ver los pines de conexión en vivo desde el Directorio de Patrocinadores (`AdminSponsors.jsx`).
+- **Corrección de Sesión (Logout):** Se corrigió un detalle en el botón "Salir" del Administrador (`App.jsx`). Antes solo limpiaba la vista pero dejaba la sesión de Firebase Auth abierta, lo que causaba conflictos si el admin también era patrocinador. Ahora ejecuta un cierre de sesión completo.
 - **UI Ampliada:** Se ensanchó el contenedor maestro de la tabla de usuarios (`max-w-6xl` y `lg:grid-cols-4`) para mejorar la visibilidad de los datos y evitar recortes en pantallas más estrechas.
 - **Reglas de Seguridad:** Se restauraron las reglas definitivas en Firestore (`allow read, write: if request.auth != null;`) dado que la integración con Auth está completa.
 
