@@ -329,7 +329,7 @@ export default function App() {
                     <span className="material-symbols-outlined text-[20px]">dashboard</span> Mi Panel
                   </button>
                   <button 
-                    onClick={() => { setAdminUser(null); setCurrentView('landing'); }}
+                    onClick={() => { setAdminUser(null); handleLogout(); }}
                     className="bg-red-500/20 text-red-200 hover:bg-red-500 hover:text-white border border-red-500/50 font-bold py-2 px-4 rounded-md transition-all shadow-sm flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined text-[20px]">logout</span> Salir
@@ -425,7 +425,7 @@ export default function App() {
                     <span className="material-symbols-outlined">dashboard</span> Mi Panel
                   </button>
                   <button 
-                    onClick={() => { setAdminUser(null); setCurrentView('landing'); setIsMobileMenuOpen(false); }}
+                    onClick={() => { setAdminUser(null); handleLogout(); setIsMobileMenuOpen(false); }}
                     className="bg-red-500/20 text-red-200 border border-red-500/50 font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
                   >
                     <span className="material-symbols-outlined">logout</span> Salir
