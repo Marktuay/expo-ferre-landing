@@ -67,6 +67,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
 **Última actualización: 02 de Julio de 2026**
 
+- **Notificaciones Administrativas Centralizadas:** Se modificó la lógica de envíos de correo en `ContactPage.jsx`, `AuthPage.jsx` (patrocinadores nuevos) y `App.jsx` (preregistros) para que todos los avisos y alertas del sistema lleguen exclusivamente a la cuenta administrativa `karen.torres@rinsa.red`.
+
 - **Seguridad Master Admin Completada:** Se implementó exitosamente la validación de inicio de sesión con **Firebase Auth** para el panel de administración. El usuario maestro ahora utiliza un correo oficial (`marktuay@gmail.com`) y se verifica con la base de datos de Firebase, cerrando la brecha de seguridad.
 - **Creación de Sub-Usuarios (Instancia Secundaria):** Para permitir que el Administrador Maestro cree nuevos miembros del equipo desde la pantalla de "Gestión de Usuarios" sin que Firebase Auth lo desloguee accidentalmente de su sesión actual, se implementó el patrón de **Instancia Secundaria** (Secondary App) en `AdminUsers.jsx`.
 - **Inactividad y Presencia (Pines de Estado):** Se agregó un sistema global en `AdminHub.jsx` que registra la actividad del usuario (`mousemove`, `keydown`, `click`). 
