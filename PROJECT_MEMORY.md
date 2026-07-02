@@ -65,7 +65,15 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 30 de Junio de 2026**
+**Última actualización: 02 de Julio de 2026**
+
+- **Emergencia en Reglas de Firestore (Bypass Temporal):** Se detectó que el Panel de Administración original (`AdminHub.jsx`) utiliza un sistema de login manual (contraseña hardcodeada y verificación en `systemUsers`) sin integrarse con Firebase Auth. Esto provocó que al aplicar reglas de seguridad estrictas (`allow write: if request.auth != null`), Firebase bloqueara las acciones de los administradores porque para el motor de reglas siguen siendo visitantes anónimos (`request.auth == null`). Como parche de emergencia para no bloquear operaciones comerciales urgentes de registro, se restauraron temporalmente las reglas a Modo de Prueba público (`allow read, write: if true;`).
+- **🚀 RECORDATORIO PENDIENTE - IMPLEMENTAR OPCIÓN 2:** Se debe ejecutar la solución profesional y recomendada para asegurar la base de datos de nuevo. **Pasos requeridos:** 
+  1. El cliente debe entrar a Firebase Console > Authentication y agregar manualmente un usuario nuevo (ej. `admin@expoferre.com` con la contraseña maestra).
+  2. Yo debo modificar el código de la plataforma (probablemente `AdminHub.jsx`) para que, al iniciar sesión, se valide mediante Firebase Auth y entregue un token real.
+  3. Esto dejará la base de datos 100% blindada a prueba de hackers y permitirá restaurar las reglas restrictivas de Firestore de manera permanente eliminando el cartel rojo de advertencia.
+
+**Cambios Anteriores (30 de Junio de 2026):**
 
 - **Prevención de Preregistros Duplicados:** Se implementó una validación en tiempo real en el formulario de preregistro (`App.jsx`) que verifica en Firestore si el correo electrónico (email) ingresado ya existe. Si el correo se encuentra, se bloquea la creación del registro y el envío de correos, mostrando una alerta elegante (Toast) al usuario. Esto previene el spam accidental por doble clic o recargas de página.
 - **Reglas de Seguridad (Firestore):** Se actualizaron las reglas de seguridad de Firestore, saliendo del "Modo de Prueba" por defecto que caduca a los 30 días. La nueva configuración permite lectura pública global (necesaria para el mapa), escritura pública restrictiva (solo para pre-registros, contactos y correos), y obliga a estar autenticado para modificar información sensible como usuarios, stands y leads.
