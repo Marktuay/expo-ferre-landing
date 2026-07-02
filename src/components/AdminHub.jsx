@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { db, auth } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 
 export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }) {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  // Credenciales maestras
-  const MASTER_USER = 'admin';
-  const MASTER_PASSWORD = 'ExpoFerre2026!';
+  // Correo maestro (fallback si no está en systemUsers pero tiene acceso en Firebase Auth)
+  const MASTER_EMAIL = 'karen.torres@rinsa.red';
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
-      setError('Por favor, ingresa usuario y contraseña.');
+    if (!email || !password) {
+      setError('Por favor, ingresa tu correo y contraseña.');
       return;
     }
     
@@ -24,35 +24,43 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
     setIsLoggingIn(true);
 
     try {
-      if (username.toLowerCase() === MASTER_USER && password === MASTER_PASSWORD) {
-        setAdminUser({ username: MASTER_USER, role: 'admin' });
+      // 1. Iniciar sesión con Firebase Auth
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+
+      // 2. Verificar si es administrador
+      if (email.trim().toLowerCase() === MASTER_EMAIL) {
+        setAdminUser({ username: 'Admin', role: 'admin', email: email.trim().toLowerCase() });
       } else {
-        // Buscar en Firestore
+        // Buscar en Firestore en systemUsers
         const q = query(
           collection(db, `${getEventBasePath()}/systemUsers`), 
-          where('username', '==', username.toLowerCase())
+          where('username', '==', email.trim().toLowerCase())
         );
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
-          setError('Usuario o contraseña incorrectos.');
+          setError('No tienes permisos de administrador.');
+          await auth.signOut(); // Desloguear si no es admin
         } else {
           let found = false;
           querySnapshot.forEach((doc) => {
             const userData = doc.data();
-            if (userData.password === password) {
-              setAdminUser({ id: doc.id, username: userData.username, role: userData.role });
-              found = true;
-            }
+            setAdminUser({ id: doc.id, username: userData.username, role: userData.role, email: email.trim().toLowerCase() });
+            found = true;
           });
           if (!found) {
-            setError('Usuario o contraseña incorrectos.');
+            setError('No tienes permisos de administrador.');
+            await auth.signOut();
           }
         }
       }
     } catch (err) {
       console.error('Error logging in:', err);
-      setError('Hubo un error de conexión. Intenta de nuevo.');
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError('Correo o contraseña incorrectos.');
+      } else {
+        setError('Hubo un error de conexión. Intenta de nuevo.');
+      }
     } finally {
       setIsLoggingIn(false);
     }
@@ -69,10 +77,10 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
           
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <input 
-              type="text" 
-              placeholder="Usuario" 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email" 
+              placeholder="Correo Electrónico" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="px-4 py-3 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md"
             />
             <input 
