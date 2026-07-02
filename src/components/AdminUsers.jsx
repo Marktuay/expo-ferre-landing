@@ -121,19 +121,24 @@ export default function AdminUsers({ onBack }) {
           {/* Formulario de Creación */}
           <div className="md:col-span-1 bg-surface p-6 rounded-lg shadow-md border border-outline-variant h-fit">
             <h2 className="text-xl font-bold text-on-surface mb-4">Nuevo Usuario</h2>
+            
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs p-3 rounded-md mb-4">
+              <strong>Importante:</strong> Como mejoramos la seguridad, ahora todos los usuarios usan <strong>Correo Electrónico</strong>. Debes crearles la cuenta en <i>Firebase Console (Authentication)</i> primero, y luego registrarlos aquí con ese mismo correo y contraseña.
+            </div>
+
             <form onSubmit={handleCreateUser} className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm font-bold text-on-surface mb-1">Nombre de Usuario</label>
+                <label className="block text-sm font-bold text-on-surface mb-1">Correo Electrónico</label>
                 <input 
-                  type="text" 
+                  type="email" 
                   value={newUsername}
                   onChange={(e) => setNewUsername(e.target.value)}
-                  placeholder="ej. puerta1"
+                  placeholder="ej. puerta1@expoferre.com"
                   className="w-full px-4 py-2 border border-outline-variant rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-on-surface mb-1">Contraseña</label>
+                <label className="block text-sm font-bold text-on-surface mb-1">Contraseña (Misma de Firebase)</label>
                 <input 
                   type="text" 
                   value={newPassword}
@@ -175,7 +180,7 @@ export default function AdminUsers({ onBack }) {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-outline-variant text-secondary">
-                      <th className="py-3 px-4 font-bold text-sm uppercase">Usuario</th>
+                      <th className="py-3 px-4 font-bold text-sm uppercase">CORREO ELECTRÓNICO</th>
                       <th className="py-3 px-4 font-bold text-sm uppercase">Contraseña</th>
                       <th className="py-3 px-4 font-bold text-sm uppercase">Rol</th>
                       <th className="py-3 px-4 font-bold text-sm uppercase text-right">Acciones</th>
