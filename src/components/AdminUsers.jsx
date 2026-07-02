@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { collection, query, getDocs, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { db, firebaseConfig } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 
 export default function AdminUsers({ onBack }) {
@@ -39,14 +41,14 @@ export default function AdminUsers({ onBack }) {
   const handleCreateUser = async (e) => {
     e.preventDefault();
     if (!newUsername || !newPassword) {
-      setError('Por favor, ingresa usuario y contraseña.');
+      setError('Por favor, ingresa el correo y contraseña.');
       return;
     }
     
     // Validar que no exista
     const exists = users.find(u => u.username === newUsername.toLowerCase());
     if (exists) {
-      setError('El nombre de usuario ya existe.');
+      setError('El correo de usuario ya existe.');
       return;
     }
 
@@ -54,6 +56,25 @@ export default function AdminUsers({ onBack }) {
     setError('');
 
     try {
+      // 1. Crear el usuario en Firebase Auth usando una instancia secundaria
+      // Esto evita que el Administrador actual se desloguee accidentalmente
+      const secondaryAppName = "SecondaryApp_" + Date.now();
+      const secondaryApp = initializeApp(firebaseConfig, secondaryAppName);
+      const secondaryAuth = getAuth(secondaryApp);
+      
+      try {
+        await createUserWithEmailAndPassword(secondaryAuth, newUsername.toLowerCase(), newPassword);
+        await signOut(secondaryAuth); // Desloguear la instancia secundaria
+      } catch (authErr) {
+        if (authErr.code === 'auth/email-already-in-use') {
+          // Si ya existe en Firebase Auth, está bien, solo lo agregamos a Firestore
+          console.warn('El usuario ya existe en Auth, procediendo a guardar en Firestore');
+        } else {
+          throw new Error('Error al crear cuenta en Firebase Auth: ' + authErr.message);
+        }
+      }
+
+      // 2. Guardar el registro en Firestore para que tenga sus permisos (Roles) en el sistema
       await addDoc(collection(db, `${getEventBasePath()}/systemUsers`), {
         username: newUsername.toLowerCase(),
         password: newPassword,
@@ -67,7 +88,7 @@ export default function AdminUsers({ onBack }) {
       fetchUsers();
     } catch (err) {
       console.error("Error adding user: ", err);
-      setError('Error al crear el usuario.');
+      setError(err.message || 'Error al crear el usuario.');
     } finally {
       setIsSubmitting(false);
     }
