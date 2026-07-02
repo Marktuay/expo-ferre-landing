@@ -11,7 +11,7 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Correo maestro (fallback si no está en systemUsers pero tiene acceso en Firebase Auth)
-  const MASTER_EMAIL = 'karen.torres@rinsa.red';
+  const MASTER_EMAIL = 'marktuay@gmail.com';
 
   const handleLogin = async (e) => {
     e.preventDefault();

@@ -208,8 +208,8 @@ export default function AdminUsers({ onBack }) {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-outline-variant bg-surface-variant/20">
-                    <td className="py-3 px-4 font-bold">karen.torres@rinsa.red (Master)</td>
+                  <tr className="border-b border-outline-variant bg-surface-variant/20">
+                    <td className="py-3 px-4 font-bold">marktuay@gmail.com (Master)</td>
                     <td className="py-3 px-4 text-secondary">*******</td>
                     <td className="py-3 px-4">
                       <span className="px-2 py-1 bg-[#D2B48C] text-[#8B4513] rounded text-xs font-bold uppercase tracking-wider">Super Admin</span>
