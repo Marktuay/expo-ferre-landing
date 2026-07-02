@@ -67,11 +67,13 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
 **Última actualización: 02 de Julio de 2026**
 
-- **Emergencia en Reglas de Firestore (Bypass Temporal):** Se detectó que el Panel de Administración original (`AdminHub.jsx`) utiliza un sistema de login manual (contraseña hardcodeada y verificación en `systemUsers`) sin integrarse con Firebase Auth. Esto provocó que al aplicar reglas de seguridad estrictas (`allow write: if request.auth != null`), Firebase bloqueara las acciones de los administradores porque para el motor de reglas siguen siendo visitantes anónimos (`request.auth == null`). Como parche de emergencia para no bloquear operaciones comerciales urgentes de registro, se restauraron temporalmente las reglas a Modo de Prueba público (`allow read, write: if true;`).
-- **🚀 RECORDATORIO PENDIENTE - IMPLEMENTAR OPCIÓN 2:** Se debe ejecutar la solución profesional y recomendada para asegurar la base de datos de nuevo. **Pasos requeridos:** 
-  1. El cliente debe entrar a Firebase Console > Authentication y agregar manualmente un usuario nuevo (ej. `admin@expoferre.com` con la contraseña maestra).
-  2. Yo debo modificar el código de la plataforma (probablemente `AdminHub.jsx`) para que, al iniciar sesión, se valide mediante Firebase Auth y entregue un token real.
-  3. Esto dejará la base de datos 100% blindada a prueba de hackers y permitirá restaurar las reglas restrictivas de Firestore de manera permanente eliminando el cartel rojo de advertencia.
+- **Seguridad Master Admin Completada:** Se implementó exitosamente la validación de inicio de sesión con **Firebase Auth** para el panel de administración. El usuario maestro ahora utiliza un correo oficial (`marktuay@gmail.com`) y se verifica con la base de datos de Firebase, cerrando la brecha de seguridad.
+- **Creación de Sub-Usuarios (Instancia Secundaria):** Para permitir que el Administrador Maestro cree nuevos miembros del equipo desde la pantalla de "Gestión de Usuarios" sin que Firebase Auth lo desloguee accidentalmente de su sesión actual, se implementó el patrón de **Instancia Secundaria** (Secondary App) en `AdminUsers.jsx`.
+- **Inactividad y Presencia (Pines de Estado):** Se agregó un sistema global en `AdminHub.jsx` que registra la actividad del usuario (`mousemove`, `keydown`, `click`). 
+  - Si un usuario está inactivo por más de **10 minutos**, el sistema hace un cierre de sesión forzoso automáticamente (`auth.signOut()`).
+  - Cada minuto de actividad actualiza el campo `lastActive` en Firestore. Esto permite mostrar visualmente en la tabla de Gestión de Usuarios un **Pin Verde 🟢** (conectado hace menos de 5 min) o **Pin Gris ⚪** (desconectado).
+- **UI Ampliada:** Se ensanchó el contenedor maestro de la tabla de usuarios (`max-w-6xl` y `lg:grid-cols-4`) para mejorar la visibilidad de los datos y evitar recortes en pantallas más estrechas.
+- **Reglas de Seguridad:** Se restauraron las reglas definitivas en Firestore (`allow read, write: if request.auth != null;`) dado que la integración con Auth está completa.
 
 **Cambios Anteriores (30 de Junio de 2026):**
 
