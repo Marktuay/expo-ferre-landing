@@ -252,7 +252,7 @@ export default function App() {
 
       // Enviar copia al administrador
       await addDoc(collection(db, 'mail'), {
-        to: 'admin@rinsa.red',
+        to: 'karen.torres@rinsa.red',
         message: {
           subject: `Nuevo Preregistro: ${data.name} - ExpoFerre`,
           html: `

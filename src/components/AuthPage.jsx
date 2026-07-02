@@ -4,7 +4,7 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword 
 } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, addDoc, collection } from 'firebase/firestore';
 
 export default function AuthPage({ onBack }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -47,6 +47,28 @@ export default function AuthPage({ onBack }) {
           createdAt: serverTimestamp(),
           role: 'sponsor',
           status: 'pending'
+        });
+
+        // Notificar al administrador
+        await addDoc(collection(db, 'mail'), {
+          to: 'karen.torres@rinsa.red',
+          message: {
+            subject: `Nuevo Patrocinador Registrado: ${empresa} - ExpoFerre`,
+            html: `
+              <div style="font-family: Arial, sans-serif; color: #333;">
+                <h2 style="color: #0d47a1;">Nuevo Registro de Patrocinador</h2>
+                <p>Un nuevo patrocinador se ha registrado en el portal y está esperando aprobación.</p>
+                <ul>
+                  <li><strong>Empresa:</strong> ${empresa}</li>
+                  <li><strong>Contacto:</strong> ${nombre} ${apellido}</li>
+                  <li><strong>Email:</strong> ${email}</li>
+                  <li><strong>Teléfono:</strong> ${telefono}</li>
+                  <li><strong>Empleados:</strong> ${empleados}</li>
+                </ul>
+                <p>Por favor, ingresa al panel de administración para revisar y aprobar este registro.</p>
+              </div>
+            `
+          }
         });
       }
       // On success, App.jsx's onAuthStateChanged will detect the user and re-render.

@@ -29,6 +29,32 @@ const ContactPage = () => {
 
     try {
       await addDoc(collection(db, `${getEventBasePath()}/contacts`), data);
+      
+      // Notificar al administrador
+      await addDoc(collection(db, 'mail'), {
+        to: 'karen.torres@rinsa.red',
+        message: {
+          subject: `Nuevo Mensaje de Contacto: ${data.nombre} - ExpoFerre`,
+          html: `
+            <div style="font-family: Arial, sans-serif; color: #333;">
+              <h2 style="color: #0d47a1;">Nuevo Mensaje de Contacto</h2>
+              <p>Has recibido un nuevo mensaje a través del formulario de contacto.</p>
+              <ul>
+                <li><strong>Nombre:</strong> ${data.nombre}</li>
+                <li><strong>Empresa:</strong> ${data.empresa}</li>
+                <li><strong>Email:</strong> ${data.email}</li>
+                <li><strong>Teléfono:</strong> ${data.telefono}</li>
+                <li><strong>Asunto:</strong> ${data.asunto}</li>
+              </ul>
+              <p><strong>Mensaje:</strong></p>
+              <blockquote style="border-left: 4px solid #ccc; padding-left: 10px; color: #555;">
+                ${data.mensaje}
+              </blockquote>
+            </div>
+          `
+        }
+      });
+      
       setFormState('success');
       setTimeout(() => {
         setFormState('idle');
