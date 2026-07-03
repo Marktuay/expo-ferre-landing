@@ -10,7 +10,7 @@ import StaffRegistration from './components/StaffRegistration';
 import AuthPage from './components/AuthPage';
 import { auth, db } from './firebase';
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, setDoc, serverTimestamp, query, where, getDocs, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { getEventBasePath } from './config/eventConfig';
 import { QRCodeSVG } from 'qrcode.react';
 import ScannerModule from './components/ScannerModule';
@@ -217,20 +217,18 @@ export default function App() {
     try {
       const userEmail = data.email.trim().toLowerCase();
       
-      // Verificar si el correo ya existe
-      const q = query(
-        collection(db, `${getEventBasePath()}/preregistrations`),
-        where('email', '==', userEmail)
-      );
-      const snapshot = await getDocs(q);
+      // Verificar si el correo ya existe usando el correo como ID del documento
+      const docRef = doc(db, `${getEventBasePath()}/preregistrations`, userEmail);
+      const snapshot = await getDoc(docRef);
       
-      if (!snapshot.empty) {
+      if (snapshot.exists()) {
         showToast("Este correo ya está registrado. Te notificaremos pronto.");
         setFormState('idle');
         return;
       }
 
-      const docRef = await addDoc(collection(db, `${getEventBasePath()}/preregistrations`), data);
+      await setDoc(docRef, data);
+
       
       // Enviar correo al usuario
       await addDoc(collection(db, 'mail'), {
