@@ -268,7 +268,7 @@ export default function App() {
         }
       });
 
-      if (isApproved) {
+      if (status === 'approved') {
         setQrValue(docRef.id);
         setFormState('success');
       } else {
