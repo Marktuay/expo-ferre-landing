@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import AdminSponsorDetails from './AdminSponsorDetails';
 import PrintableBadgeList from './PrintableBadgeList';
