@@ -17,9 +17,17 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Optimización para Campañas (RRSS):** Soporte para anclaje automático (`#preregistro-form` y `#awards`) con *smooth scroll* garantizado y corrección de persistencia de vista de administrador para evitar redirecciones erróneas a clientes nuevos.
 
 ## 🐛 Troubleshooting y Problemas Conocidos
-**Problema:** Los assets estáticos (como imágenes) no se actualizan en producción o arrojan error a pesar de haber hecho `git pull` y `npm run build` en la VM.
-**Causa:** Cloudflare guarda una caché muy agresiva (`Cf-Cache-Status: HIT`) de los archivos, por lo que sirve versiones antiguas o páginas de error `404/index.html` cacheadas previamente.
-**Solución Rápida:** Renombrar el archivo de la imagen (ej: `logo.jpeg` a `logo-v2.jpeg`) y actualizar la ruta en el código de React. Esto fuerza a la CDN y a los navegadores a solicitar el nuevo archivo saltándose toda la caché.
+**Problema:** Los assets estáticos (como imágenes) o el código JavaScript no se actualizan en producción o arrojan error a pesar de haber hecho `git pull` y `npm run build` en la VM.
+**Causa:** Cloudflare o los navegadores móviles guardan una caché muy agresiva (`Cf-Cache-Status: HIT`) de los archivos, por lo que sirve versiones antiguas.
+**Solución Rápida:** Purgar caché en Cloudflare o entrar en modo incógnito/datos móviles. Para assets estáticos, renombrar el archivo de la imagen.
+
+**Problema:** Al aprobar patrocinadores o guardar preregistros, la pantalla lanza un error genérico ("Hubo un error al registrar/aprobar") pero los datos **sí** se guardan en la base de datos (Firebase).
+**Causa:** Un error de sintaxis en JavaScript (como una variable no definida, ej. `ReferenceError: isApproved is not defined`) ocurre *después* de hacer la escritura en Firebase, provocando que el código caiga en el bloque `catch` y muestre el mensaje de error, interrumpiendo el flujo de éxito de la interfaz.
+**Solución:** Revisar los `catch (error)` e imprimir el error real en consola. El problema no son los permisos de Firebase, sino lógica de UI rota.
+
+**Problema:** Errores genuinos de permisos (`permission-denied`) al intentar aprobar patrocinadores o modificar usuarios.
+**Causa:** Las reglas de Firestore exigen que el usuario esté autenticado (`request.auth != null`). Si la sesión de Firebase Auth del admin caducó o no se ha inicializado correctamente, Firebase bloquea la escritura.
+**Solución:** Asegurarse de que el cierre de sesión (`auth.signOut()`) no ocurrió por inactividad y que la regla de Firestore permite escrituras al rol adecuado.
 
 ### 2. Panel de Patrocinadores (Acceso Privado)
 - **Autenticación:** Login y Registro propio para patrocinadores.
