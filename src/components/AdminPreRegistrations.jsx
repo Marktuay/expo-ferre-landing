@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
-import { db, auth } from '../firebase';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, deleteDoc, setDoc } from 'firebase/firestore';
+import { db, auth, firebaseConfig } from '../firebase';
+import { initializeApp } from "firebase/app";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getEventBasePath } from '../config/eventConfig';
 import AdminFollowUpModal from './AdminFollowUpModal';
 
-export default function AdminPreRegistrations({ onBack }) {
+export default function AdminPreRegistrations({ onBack, adminUser }) {
   const [registrations, setRegistrations] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -13,6 +15,12 @@ export default function AdminPreRegistrations({ onBack }) {
   const [followUpModalOpen, setFollowUpModalOpen] = useState(false);
   const [selectedPersonForFollowUp, setSelectedPersonForFollowUp] = useState(null);
   const [needsFollowUpOnly, setNeedsFollowUpOnly] = useState(false);
+
+  // Migration States
+  const [migrationModalOpen, setMigrationModalOpen] = useState(false);
+  const [selectedPersonForMigration, setSelectedPersonForMigration] = useState(null);
+  const [migrationPassword, setMigrationPassword] = useState('');
+  const [isMigrating, setIsMigrating] = useState(false);
 
   useEffect(() => {
     const q = query(collection(db, `${getEventBasePath()}/preregistrations`), orderBy('createdAt', 'desc'));
@@ -35,6 +43,54 @@ export default function AdminPreRegistrations({ onBack }) {
 
     return () => unsubscribe();
   }, []);
+
+  const handleMigrateConfirm = async () => {
+    if (!migrationPassword || migrationPassword.length < 6) {
+      alert("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+    
+    setIsMigrating(true);
+    try {
+      // 1. Initialize secondary app to avoid logging out admin
+      const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp" + Date.now());
+      const secondaryAuth = getAuth(secondaryApp);
+      
+      // 2. Create user with email and password
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, selectedPersonForMigration.email, migrationPassword);
+      const newUserId = userCredential.user.uid;
+      
+      // 3. Save to users collection
+      const userRef = doc(db, 'users', newUserId);
+      await setDoc(userRef, {
+        name: selectedPersonForMigration.name || '',
+        email: selectedPersonForMigration.email || '',
+        phone: selectedPersonForMigration.phone || '',
+        company: selectedPersonForMigration.company || '',
+        role: 'sponsor',
+        status: 'approved',
+        createdAt: new Date()
+      });
+
+      // 4. Update original preregistration status
+      const preregRef = doc(db, `${getEventBasePath()}/preregistrations`, selectedPersonForMigration.id);
+      await updateDoc(preregRef, { status: 'migrated' });
+
+      alert('¡Preregistro migrado a Patrocinador exitosamente!');
+      setMigrationModalOpen(false);
+      setMigrationPassword('');
+      setSelectedPersonForMigration(null);
+    } catch (error) {
+      console.error('Error migrating to sponsor:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        alert('Error: Este correo ya tiene una cuenta registrada.');
+      } else {
+        alert('Error al migrar a patrocinador.');
+      }
+    } finally {
+      setIsMigrating(false);
+    }
+  };
 
   const handleApprove = async (reg) => {
     if (!window.confirm(`¿Estás seguro de que deseas aprobar el registro de ${reg.name}?`)) return;
@@ -196,7 +252,7 @@ export default function AdminPreRegistrations({ onBack }) {
                   Teléfono: reg.phone || '',
                   Empleados: reg.employees || '',
                   Puesto: reg.position || '',
-                  Estado: reg.status === 'approved' ? 'Aprobado' : reg.status === 'no_show' ? 'No Asistió' : 'Pendiente',
+                  Estado: reg.status === 'approved' ? 'Aprobado' : reg.status === 'no_show' ? 'No Asistió' : reg.status === 'migrated' ? 'Migrado' : 'Pendiente',
                   'Requiere Seguimiento': reg.needsFollowUp ? 'Sí' : 'No',
                   'Cant. Seguimientos': reg.followUps ? reg.followUps.length : 0,
                   'Último Seguimiento': reg.followUps && reg.followUps.length > 0 ? new Date(reg.followUps[0].date).toLocaleDateString() : 'N/A'
@@ -259,10 +315,12 @@ export default function AdminPreRegistrations({ onBack }) {
                         <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                           reg.status === 'approved' ? 'bg-[#16a34a]/10 text-[#16a34a]' : 
                           reg.status === 'no_show' ? 'bg-[#4b5563]/10 text-[#4b5563]' :
+                          reg.status === 'migrated' ? 'bg-[#0d47a1]/10 text-[#0d47a1]' :
                           'bg-[#f39200]/10 text-[#f39200]'
                         }`}>
                           {reg.status === 'approved' ? 'APROBADO' : 
-                           reg.status === 'no_show' ? 'NO ASISTIÓ' : 'PENDIENTE'}
+                           reg.status === 'no_show' ? 'NO ASISTIÓ' : 
+                           reg.status === 'migrated' ? 'MIGRADO' : 'PENDIENTE'}
                         </span>
                       </td>
                       <td className="p-4 text-secondary whitespace-nowrap">
@@ -300,7 +358,20 @@ export default function AdminPreRegistrations({ onBack }) {
                               </span>
                             )}
                           </button>
-                          {reg.status !== 'approved' && reg.status !== 'no_show' && (
+                          {reg.status !== 'migrated' && adminUser?.role === 'admin' && (
+                            <button 
+                              onClick={() => {
+                                setSelectedPersonForMigration(reg);
+                                setMigrationPassword('');
+                                setMigrationModalOpen(true);
+                              }} 
+                              className="text-[#9c27b0] hover:bg-[#9c27b0]/10 p-2 rounded-full transition-colors" 
+                              title="Migrar a Patrocinador"
+                            >
+                              <span className="material-symbols-outlined">business_center</span>
+                            </button>
+                          )}
+                          {reg.status !== 'approved' && reg.status !== 'no_show' && reg.status !== 'migrated' && (
                             <button onClick={() => handleApprove(reg)} className="text-[#16a34a] hover:bg-[#16a34a]/10 p-2 rounded-full transition-colors" title="Aprobar">
                               <span className="material-symbols-outlined">check_circle</span>
                             </button>
@@ -340,6 +411,83 @@ export default function AdminPreRegistrations({ onBack }) {
           collectionName="preregistrations"
           adminUser={{ username: auth.currentUser?.email || 'Staff' }}
         />
+      )}
+
+      {migrationModalOpen && selectedPersonForMigration && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="bg-[#0d47a1] p-6 text-white relative flex-shrink-0">
+              <button 
+                onClick={() => setMigrationModalOpen(false)}
+                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+                disabled={isMigrating}
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <span className="material-symbols-outlined">business_center</span>
+                Migrar a Patrocinador
+              </h2>
+              <p className="text-white/80 text-sm mt-2">
+                Convertir a <strong>{selectedPersonForMigration.name}</strong> en Patrocinador oficial.
+              </p>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1">
+              <div className="bg-[#f39200]/10 border border-[#f39200]/20 rounded-lg p-4 mb-6">
+                <p className="text-sm text-[#f39200] flex items-start gap-2">
+                  <span className="material-symbols-outlined text-[18px]">info</span>
+                  <span>
+                    El usuario usará su correo <strong>{selectedPersonForMigration.email}</strong> para acceder. 
+                    Por favor, asígnale una contraseña inicial y compártesela.
+                  </span>
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-on-surface mb-1">
+                    Contraseña Inicial (mín. 6 caracteres)
+                  </label>
+                  <input
+                    type="text"
+                    value={migrationPassword}
+                    onChange={(e) => setMigrationPassword(e.target.value)}
+                    placeholder="Ej. Expo2026-Ferreteria"
+                    className="w-full px-4 py-2 border border-outline-variant rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow"
+                    disabled={isMigrating}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-outline-variant bg-surface-variant/30 flex justify-end gap-3 flex-shrink-0">
+              <button
+                onClick={() => setMigrationModalOpen(false)}
+                className="px-4 py-2 text-secondary hover:bg-black/5 rounded-lg font-medium transition-colors"
+                disabled={isMigrating}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleMigrateConfirm}
+                disabled={isMigrating || migrationPassword.length < 6}
+                className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-[#1565c0] disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-sm transition-all flex items-center gap-2"
+              >
+                {isMigrating ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin text-[20px]">sync</span>
+                    Migrando...
+                  </>
+                ) : (
+                  <>
+                    Confirmar Migración
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -996,7 +996,7 @@ export default function App() {
         <AdminGlobalLeads onBack={() => setCurrentView('adminSponsorsHub')} />
       )}
       {currentView === 'adminPreRegistrations' && (
-        <AdminPreRegistrations onBack={() => setCurrentView('adminHub')} />
+        <AdminPreRegistrations onBack={() => setCurrentView('adminHub')} adminUser={adminUser} />
       )}
 
       {currentView === 'adminContact' && (
