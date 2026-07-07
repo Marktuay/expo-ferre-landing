@@ -80,6 +80,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   - Se creó un modal universal (`AdminFollowUpModal.jsx`) que muestra el historial completo de interacciones en tiempo real.
   - Se actualizaron las funciones de **Exportar a Excel** para incluir los detalles del último seguimiento y la cantidad total de llamadas realizadas a cada prospecto.
 - **Reporte de Marketing Mejorado:** Se agregó la columna "Empresa" a la tabla del Reporte de Marketing (obtenida del preregistro), así como en su respectiva función de exportación a CSV para un análisis de campaña más detallado.
+  - **Normalización de UTMs:** Se añadió un bloque de lógica para normalizar las fuentes (e.g. agrupando "Organico", "orgánico" bajo "Orgánico" y agrupando abreviaciones como "fb" bajo "Facebook") para que las tarjetas de resumen y la tabla muestren estadísticas precisas y sin duplicados de mayúsculas/minúsculas.
 
 **Cambios Anteriores (02 de Julio de 2026):**
 

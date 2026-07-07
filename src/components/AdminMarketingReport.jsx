@@ -20,7 +20,14 @@ export default function AdminMarketingReport({ onBack }) {
         const preregSnap = await getDocs(query(collection(db, `${basePath}/preregistrations`)));
         preregSnap.forEach(doc => {
           const d = doc.data();
-          const source = d.utm_source || 'Orgánico';
+          let rawSource = d.utm_source ? d.utm_source.toLowerCase().trim() : 'orgánico';
+          let source = rawSource;
+          if (rawSource === 'organico' || rawSource === 'orgánico') source = 'Orgánico';
+          else if (rawSource === 'fb' || rawSource === 'facebook') source = 'Facebook';
+          else if (rawSource === 'ig' || rawSource === 'instagram') source = 'Instagram';
+          else if (rawSource === 'in' || rawSource === 'linkedin') source = 'LinkedIn';
+          else source = rawSource.charAt(0).toUpperCase() + rawSource.slice(1);
+
           const medium = d.utm_medium || '-';
           const campaign = d.utm_campaign || '-';
 
