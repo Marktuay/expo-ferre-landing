@@ -70,6 +70,11 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Mecanismo propuesto:** Añadir un flag `isDemo: true` al crearlas. Requerirá implementar un script de limpieza (cron job en la VM o Firebase Cloud Functions) que analice la base de datos y borre a los usuarios del sistema Auth y sus documentos en Firestore si tienen más de 1 hora de haber sido creados.
 - **Estado:** En pausa. Plan de implementación redactado.
 
+### 3. Envío Automático de Correo (Migración a Patrocinador)
+- **Objetivo:** Enviar un correo electrónico de bienvenida automático a los usuarios cuando un administrador los migre de Preregistro a Patrocinador oficial.
+- **Mecanismo propuesto:** Inyectar un documento en la colección `mail` (Trigger Email de Firebase) al completar la migración en `AdminPreRegistrations.jsx`. El correo usará una plantilla HTML personalizada que incluirá un encabezado gráfico (banner), saludo, credenciales de acceso e información logística.
+- **Estado:** En espera del diseño del banner del encabezado por parte del cliente. Plan de implementación y estructura visual acordados.
+
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
