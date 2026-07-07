@@ -2,19 +2,70 @@ import React, { useState, useEffect } from 'react';
 import { UserCheck, Send } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { db, auth } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 
 const StaffRegistration = ({ onBack }) => {
   const [formState, setFormState] = useState('idle');
   const [registeredStaffId, setRegisteredStaffId] = useState(null);
+  const [staffCount, setStaffCount] = useState(0);
+  const [maxStaff, setMaxStaff] = useState(0);
+  const [loadingLimit, setLoadingLimit] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    
+    const fetchLimitData = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        setLoadingLimit(false);
+        return;
+      }
+      
+      try {
+        // Determinar categoría por los stands reservados
+        const qStands = query(collection(db, `${getEventBasePath()}/stands`), where('sponsorId', '==', user.uid));
+        const standsSnapshot = await getDocs(qStands);
+        
+        let calculatedMax = 0;
+        
+        standsSnapshot.forEach(doc => {
+          const standData = doc.data();
+          const size = standData.size || '';
+          if (size.includes('Diamante')) {
+            calculatedMax = Math.max(calculatedMax, 10);
+          } else if (size.includes('Oro')) {
+            calculatedMax = Math.max(calculatedMax, 6);
+          } else if (size.includes('Plata')) {
+            calculatedMax = Math.max(calculatedMax, 4);
+          }
+        });
+        
+        setMaxStaff(calculatedMax);
+
+        // Contar staff actual
+        const qStaff = query(collection(db, `${getEventBasePath()}/staff`), where('sponsorId', '==', user.uid));
+        const staffSnapshot = await getDocs(qStaff);
+        setStaffCount(staffSnapshot.size);
+        
+      } catch (error) {
+        console.error("Error fetching limit data:", error);
+      } finally {
+        setLoadingLimit(false);
+      }
+    };
+    
+    fetchLimitData();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (staffCount >= maxStaff) {
+      alert(`Has alcanzado el límite de staff permitido para tu categoría (${maxStaff} personas).`);
+      return;
+    }
+
     setFormState('submitting');
     
     try {
@@ -39,6 +90,7 @@ const StaffRegistration = ({ onBack }) => {
       const docRef = await addDoc(collection(db, `${getEventBasePath()}/staff`), data);
       
       setRegisteredStaffId(docRef.id);
+      setStaffCount(prev => prev + 1);
       setFormState('success');
     } catch (error) {
       console.error('Error saving staff:', error);
@@ -61,8 +113,14 @@ const StaffRegistration = ({ onBack }) => {
             <UserCheck size={36} /> Registro de Staff
           </h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">
-            Por favor, complete el siguiente formulario oficial para registrarse como parte del equipo de Staff de Expo Ferre 2026. Todos los campos son obligatorios.
+            Por favor, complete el siguiente formulario oficial para registrarse como parte del equipo de Staff de Expo Ferre 2026.
           </p>
+          
+          {!loadingLimit && (
+            <div className={`mt-4 inline-block px-4 py-2 rounded-full font-bold text-sm ${staffCount >= maxStaff ? 'bg-error text-on-error' : 'bg-primary-container text-on-primary-container'}`}>
+              Staff registrado: {staffCount} / {maxStaff}
+            </div>
+          )}
         </div>
 
         <div className="bg-white p-8 md:p-12 rounded-lg shadow-sm border border-outline-variant">
@@ -129,10 +187,20 @@ const StaffRegistration = ({ onBack }) => {
 
 
 
-              <div className="pt-6 border-t border-outline-variant flex justify-end">
+              <div className="pt-6 border-t border-outline-variant flex flex-col md:flex-row items-center justify-between gap-4">
+                {staffCount >= maxStaff && !loadingLimit ? (
+                  <p className="text-error font-bold text-sm">
+                    Has alcanzado el límite máximo de staff ({maxStaff}).
+                  </p>
+                ) : (
+                  <p className="text-secondary text-sm">
+                    Todos los campos con <span className="text-error">*</span> son obligatorios.
+                  </p>
+                )}
+                
                 <button 
                   type="submit" 
-                  disabled={formState === 'submitting'}
+                  disabled={formState === 'submitting' || staffCount >= maxStaff || loadingLimit}
                   className="w-full md:w-auto px-8 py-3 bg-primary text-on-primary font-bold rounded-md hover:bg-primary-fixed transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {formState === 'submitting' ? (

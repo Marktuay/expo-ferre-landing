@@ -83,6 +83,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   - **Normalización de UTMs:** Se añadió un bloque de lógica para normalizar las fuentes (e.g. agrupando "Organico", "orgánico" bajo "Orgánico" y agrupando abreviaciones como "fb" bajo "Facebook") para que las tarjetas de resumen y la tabla muestren estadísticas precisas y sin duplicados de mayúsculas/minúsculas.
 
 - **Prevención de Invitados Duplicados:** Se implementó en el formulario de invitados de los patrocinadores (`GuestForm.jsx`) una validación en tiempo real contra Firebase. Antes de registrar a un invitado, el sistema verifica que el correo electrónico no exista ya en la colección de `guests`. Si el correo ya fue registrado por el mismo u otro patrocinador, se bloquea el registro mostrando una alerta, previniendo gastos adicionales en catering o acreditaciones duplicadas.
+- **Límites de Acreditación de Staff:** Se implementó una restricción en el registro de staff de patrocinadores (`StaffRegistration.jsx`) basada en su categoría (calculada mediante el tamaño del stand que reservaron en el mapa). Los límites dinámicos son: Plata (máximo 4 staff), Oro (máximo 6 staff) y Diamante (máximo 10 staff). El formulario deshabilita el registro y muestra contadores visuales una vez que el patrocinador alcanza su capacidad.
 
 **Cambios Anteriores (02 de Julio de 2026):**
 
