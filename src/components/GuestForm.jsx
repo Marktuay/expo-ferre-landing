@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, Send } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { db, auth } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 
 const GuestForm = ({ onBack }) => {
@@ -21,6 +21,18 @@ const GuestForm = ({ onBack }) => {
       const formData = new FormData(e.target);
       const user = auth.currentUser;
       
+      const email = formData.get('email').trim().toLowerCase();
+
+      // Verificar duplicidad
+      const q = query(collection(db, `${getEventBasePath()}/guests`), where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        setFormState('idle');
+        alert(`El correo ${email} ya se encuentra registrado en la lista de invitados. No es posible duplicarlo.`);
+        return;
+      }
+
       const data = {
         sponsorId: user ? user.uid : 'unknown',
         sponsorEmail: user ? user.email : 'unknown',
@@ -29,7 +41,7 @@ const GuestForm = ({ onBack }) => {
         empresa: formData.get('empresa'),
         cargo: formData.get('cargo'),
         empleados: formData.get('empleados'),
-        email: formData.get('email'),
+        email: email,
         createdAt: serverTimestamp()
       };
       

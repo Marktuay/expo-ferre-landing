@@ -82,6 +82,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Reporte de Marketing Mejorado:** Se agregó la columna "Empresa" a la tabla del Reporte de Marketing (obtenida del preregistro), así como en su respectiva función de exportación a CSV para un análisis de campaña más detallado.
   - **Normalización de UTMs:** Se añadió un bloque de lógica para normalizar las fuentes (e.g. agrupando "Organico", "orgánico" bajo "Orgánico" y agrupando abreviaciones como "fb" bajo "Facebook") para que las tarjetas de resumen y la tabla muestren estadísticas precisas y sin duplicados de mayúsculas/minúsculas.
 
+- **Prevención de Invitados Duplicados:** Se implementó en el formulario de invitados de los patrocinadores (`GuestForm.jsx`) una validación en tiempo real contra Firebase. Antes de registrar a un invitado, el sistema verifica que el correo electrónico no exista ya en la colección de `guests`. Si el correo ya fue registrado por el mismo u otro patrocinador, se bloquea el registro mostrando una alerta, previniendo gastos adicionales en catering o acreditaciones duplicadas.
+
 **Cambios Anteriores (02 de Julio de 2026):**
 
 - **Notificaciones Administrativas Centralizadas:** Se modificó la lógica de envíos de correo en `ContactPage.jsx`, `AuthPage.jsx` (patrocinadores nuevos) y `App.jsx` (preregistros) para que todos los avisos y alertas del sistema lleguen exclusivamente a la cuenta administrativa `karen.torres@rinsa.red`.
