@@ -181,18 +181,6 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
                 </div>
               </button>
 
-              <button 
-                onClick={() => onNavigate('adminPreRegistrations')}
-                className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group"
-              >
-                <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-3xl">how_to_reg</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-on-surface mb-2">Preregistros</h3>
-                  <p className="text-secondary text-sm">Ver listado de personas que han completado el preregistro.</p>
-                </div>
-              </button>
 
               <button 
                 onClick={() => onNavigate('adminContact')}
@@ -238,6 +226,32 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
           {(adminUser.role === 'admin' || adminUser.role === 'tech_staff') && (
             <>
               <button 
+                onClick={() => onNavigate('adminPreRegistrations')}
+                className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group"
+              >
+                <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">how_to_reg</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface mb-2">Preregistros</h3>
+                  <p className="text-secondary text-sm">Ver listado de personas que han completado el preregistro y seguimiento CRM.</p>
+                </div>
+              </button>
+
+              <button 
+                onClick={() => onNavigate('adminGuests')}
+                className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group"
+              >
+                <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">groups</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface mb-2">Invitados VIP</h3>
+                  <p className="text-secondary text-sm">Lista de invitados de patrocinadores y seguimiento CRM.</p>
+                </div>
+              </button>
+
+              <button 
                 onClick={() => onNavigate('adminCheckIn')}
                 className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group ${adminUser.role === 'admin' ? 'md:col-span-1' : 'md:col-span-1'}`}
               >
@@ -249,20 +263,22 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
                   <p className="text-secondary text-sm">Registra la asistencia en puerta y detona la impresión rápida de gafetes.</p>
                 </div>
               </button>
-
-              <button 
-                onClick={() => onNavigate('adminAttendanceReport')}
-                className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group ${adminUser.role === 'admin' ? 'md:col-span-1' : 'md:col-span-2'}`}
-              >
-                <div className="w-16 h-16 bg-green-500/10 text-green-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-3xl">table_chart</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-on-surface mb-2">Reporte de Asistencia</h3>
-                  <p className="text-secondary text-sm">Visualiza métricas y exporta la lista de asistentes consolidados a Excel.</p>
-                </div>
-              </button>
             </>
+          )}
+
+          {adminUser.role === 'admin' && (
+            <button 
+              onClick={() => onNavigate('adminAttendanceReport')}
+              className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group md:col-span-1`}
+            >
+              <div className="w-16 h-16 bg-green-500/10 text-green-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                <span className="material-symbols-outlined text-3xl">table_chart</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-on-surface mb-2">Reporte de Asistencia</h3>
+                <p className="text-secondary text-sm">Visualiza métricas y exporta la lista de asistentes consolidados a Excel.</p>
+              </div>
+            </button>
           )}
         </div>
       </div>

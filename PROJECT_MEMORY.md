@@ -73,7 +73,14 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 02 de Julio de 2026**
+**Última actualización: 07 de Julio de 2026**
+
+- **Implementación de Mini-CRM (Seguimiento de Leads):** Se desarrolló un sistema integrado de seguimiento telefónico (CRM) dentro de las tablas de Preregistros (`AdminPreRegistrations.jsx`) e Invitados de Patrocinadores (`AdminGuests.jsx`).
+  - Permite al Staff añadir notas, registrar el resultado de la llamada (Ej. Contestó, Buzón, etc.) y marcar si requieren seguimiento posterior, almacenándolo todo en un array interno (`followUps`) dentro de cada documento en Firestore para optimizar costos de base de datos.
+  - Se creó un modal universal (`AdminFollowUpModal.jsx`) que muestra el historial completo de interacciones en tiempo real.
+  - Se actualizaron las funciones de **Exportar a Excel** para incluir los detalles del último seguimiento y la cantidad total de llamadas realizadas a cada prospecto.
+
+**Cambios Anteriores (02 de Julio de 2026):**
 
 - **Notificaciones Administrativas Centralizadas:** Se modificó la lógica de envíos de correo en `ContactPage.jsx`, `AuthPage.jsx` (patrocinadores nuevos) y `App.jsx` (preregistros) para que todos los avisos y alertas del sistema lleguen exclusivamente a la cuenta administrativa `karen.torres@rinsa.red`.
 

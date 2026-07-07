@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
+import AdminFollowUpModal from './AdminFollowUpModal';
 
 export default function AdminPreRegistrations({ onBack }) {
   const [registrations, setRegistrations] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  
+  // CRM States
+  const [followUpModalOpen, setFollowUpModalOpen] = useState(false);
+  const [selectedPersonForFollowUp, setSelectedPersonForFollowUp] = useState(null);
+  const [needsFollowUpOnly, setNeedsFollowUpOnly] = useState(false);
 
   useEffect(() => {
     const q = query(collection(db, `${getEventBasePath()}/preregistrations`), orderBy('createdAt', 'desc'));
@@ -140,7 +146,12 @@ export default function AdminPreRegistrations({ onBack }) {
     const emailMatch = reg.email?.toLowerCase().includes(term);
     const phoneMatch = reg.phone?.toLowerCase().includes(term);
     const companyMatch = reg.company?.toLowerCase().includes(term);
-    return nameMatch || emailMatch || phoneMatch || companyMatch;
+    const matchesSearch = nameMatch || emailMatch || phoneMatch || companyMatch;
+    
+    if (needsFollowUpOnly) {
+      return matchesSearch && reg.needsFollowUp === true;
+    }
+    return matchesSearch;
   });
 
   return (
@@ -152,7 +163,7 @@ export default function AdminPreRegistrations({ onBack }) {
             <p className="text-body-lg text-secondary">Personas que han completado el formulario de preregistro.</p>
           </div>
           
-          <div className="w-full md:flex-1 md:max-w-md">
+          <div className="w-full md:flex-1 md:max-w-md flex flex-col gap-3">
             <div className="relative">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary">search</span>
               <input 
@@ -163,6 +174,15 @@ export default function AdminPreRegistrations({ onBack }) {
                 className="w-full pl-10 pr-4 py-2 bg-white rounded-full border border-outline-variant focus:border-[#0d47a1] focus:ring-1 focus:ring-[#0d47a1] outline-none transition-shadow shadow-sm"
               />
             </div>
+            <label className="flex items-center gap-2 cursor-pointer ml-1 w-fit">
+              <input
+                type="checkbox"
+                checked={needsFollowUpOnly}
+                onChange={(e) => setNeedsFollowUpOnly(e.target.checked)}
+                className="w-4 h-4 text-primary rounded focus:ring-primary focus:ring-2 border-outline-variant"
+              />
+              <span className="text-sm text-on-surface font-medium">Mostrar solo "Requiere Seguimiento"</span>
+            </label>
           </div>
 
           <div className="flex flex-shrink-0 gap-4">
@@ -176,7 +196,10 @@ export default function AdminPreRegistrations({ onBack }) {
                   Teléfono: reg.phone || '',
                   Empleados: reg.employees || '',
                   Puesto: reg.position || '',
-                  Estado: reg.status === 'approved' ? 'Aprobado' : reg.status === 'no_show' ? 'No Asistió' : 'Pendiente'
+                  Estado: reg.status === 'approved' ? 'Aprobado' : reg.status === 'no_show' ? 'No Asistió' : 'Pendiente',
+                  'Requiere Seguimiento': reg.needsFollowUp ? 'Sí' : 'No',
+                  'Cant. Seguimientos': reg.followUps ? reg.followUps.length : 0,
+                  'Último Seguimiento': reg.followUps && reg.followUps.length > 0 ? new Date(reg.followUps[0].date).toLocaleDateString() : 'N/A'
                 }));
                 const worksheet = XLSX.utils.json_to_sheet(dataToExport);
                 const workbook = XLSX.utils.book_new();
@@ -248,9 +271,35 @@ export default function AdminPreRegistrations({ onBack }) {
                           month: '2-digit',
                           year: 'numeric'
                         })}
+                        {reg.needsFollowUp && (
+                          <div className="mt-1 flex items-center gap-1 text-[#f39200] text-xs font-bold">
+                            <span className="material-symbols-outlined text-[14px]">notification_important</span>
+                            Requiere seguimiento
+                          </div>
+                        )}
+                        {reg.followUps && reg.followUps.length > 0 && (
+                          <div className="mt-1 text-xs text-secondary">
+                            {reg.followUps.length} seguimiento(s)
+                          </div>
+                        )}
                       </td>
                       <td className="p-4 text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
+                          <button 
+                            onClick={() => {
+                              setSelectedPersonForFollowUp(reg);
+                              setFollowUpModalOpen(true);
+                            }} 
+                            className="text-[#f39200] hover:bg-[#f39200]/10 p-2 rounded-full transition-colors relative" 
+                            title="Añadir Seguimiento (CRM)"
+                          >
+                            <span className="material-symbols-outlined">support_agent</span>
+                            {reg.followUps && reg.followUps.length > 0 && (
+                              <span className="absolute -top-1 -right-1 bg-error text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
+                                {reg.followUps.length}
+                              </span>
+                            )}
+                          </button>
                           {reg.status !== 'approved' && reg.status !== 'no_show' && (
                             <button onClick={() => handleApprove(reg)} className="text-[#16a34a] hover:bg-[#16a34a]/10 p-2 rounded-full transition-colors" title="Aprobar">
                               <span className="material-symbols-outlined">check_circle</span>
@@ -279,6 +328,19 @@ export default function AdminPreRegistrations({ onBack }) {
           </div>
         </div>
       </div>
+
+      {followUpModalOpen && selectedPersonForFollowUp && (
+        <AdminFollowUpModal
+          isOpen={followUpModalOpen}
+          onClose={() => {
+            setFollowUpModalOpen(false);
+            setSelectedPersonForFollowUp(null);
+          }}
+          person={selectedPersonForFollowUp}
+          collectionName="preregistrations"
+          adminUser={{ username: auth.currentUser?.email || 'Staff' }}
+        />
+      )}
     </div>
   );
 }

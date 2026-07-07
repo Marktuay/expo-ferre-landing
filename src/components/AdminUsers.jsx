@@ -108,7 +108,7 @@ export default function AdminUsers({ onBack }) {
 
   const roleLabels = {
     'admin': 'Administrador (Total)',
-    'tech_staff': 'Staff Técnico (Escáner)'
+    'tech_staff': 'Staff ExpoFerre (CRM & Escáner)'
   };
 
   return (
@@ -175,7 +175,7 @@ export default function AdminUsers({ onBack }) {
                   onChange={(e) => setNewRole(e.target.value)}
                   className="w-full px-4 py-2 border border-outline-variant rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white"
                 >
-                  <option value="tech_staff">Staff Técnico (Solo Escáner)</option>
+                  <option value="tech_staff">Staff ExpoFerre (CRM & Escáner)</option>
                   <option value="admin">Administrador (Acceso Total)</option>
                 </select>
               </div>
