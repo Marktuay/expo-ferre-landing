@@ -84,6 +84,11 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 - **Prevención de Invitados Duplicados:** Se implementó en el formulario de invitados de los patrocinadores (`GuestForm.jsx`) una validación en tiempo real contra Firebase. Antes de registrar a un invitado, el sistema verifica que el correo electrónico no exista ya en la colección de `guests`. Si el correo ya fue registrado por el mismo u otro patrocinador, se bloquea el registro mostrando una alerta, previniendo gastos adicionales en catering o acreditaciones duplicadas.
 - **Límites de Acreditación de Staff:** Se implementó una restricción en el registro de staff de patrocinadores (`StaffRegistration.jsx`) basada en su categoría (calculada mediante el tamaño del stand que reservaron en el mapa). Los límites dinámicos son: Plata (máximo 4 staff), Oro (máximo 6 staff) y Diamante (máximo 10 staff). El formulario deshabilita el registro y muestra contadores visuales una vez que el patrocinador alcanza su capacidad.
+- **Migración Directa a Patrocinador:** En el panel de Preregistros (`AdminPreRegistrations.jsx`), los usuarios con rol de Administrador ahora pueden migrar prospectos directamente a cuentas oficiales de Patrocinador. 
+  - Se diseñó un modal que solicita una contraseña inicial. 
+  - Para evitar que la creación de la cuenta expulse al administrador de su sesión actual, se programó una **Instancia Secundaria de Firebase** que ejecuta la creación de la cuenta silenciosamente en segundo plano. 
+  - El registro original pasa a estado "MIGRADO" en lugar de eliminarse, conservando el historial. 
+  - Funcionalidad restringida por seguridad; el personal con rol `staff` no puede ver ni utilizar esta opción de migración.
 
 **Cambios Anteriores (02 de Julio de 2026):**
 
