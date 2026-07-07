@@ -29,6 +29,7 @@ export default function AdminMarketingReport({ onBack }) {
             name: d.name || `${d.firstName || ''} ${d.lastName || ''}`.trim() || 'Sin Nombre',
             email: d.email || 'N/A',
             phone: d.phone || '-',
+            company: d.company || '-',
             source,
             medium,
             campaign,
@@ -64,6 +65,7 @@ export default function AdminMarketingReport({ onBack }) {
       Nombre: item.name,
       Email: item.email,
       Teléfono: item.phone,
+      Empresa: item.company,
       Origen: item.source,
       Medio: item.medium,
       Campaña: item.campaign,
@@ -145,6 +147,7 @@ export default function AdminMarketingReport({ onBack }) {
                       <th className="p-4 font-label-lg text-on-surface">Nombre</th>
                       <th className="p-4 font-label-lg text-on-surface">Email</th>
                       <th className="p-4 font-label-lg text-on-surface">Teléfono</th>
+                      <th className="p-4 font-label-lg text-on-surface">Empresa</th>
                       <th className="p-4 font-label-lg text-on-surface">Origen (Source)</th>
                       <th className="p-4 font-label-lg text-on-surface">Medio (Medium)</th>
                       <th className="p-4 font-label-lg text-on-surface">Campaña</th>
@@ -154,7 +157,7 @@ export default function AdminMarketingReport({ onBack }) {
                   <tbody>
                     {data.length === 0 ? (
                       <tr>
-                        <td colSpan="7" className="p-8 text-center text-secondary">
+                        <td colSpan="8" className="p-8 text-center text-secondary">
                           No hay leads registrados todavía.
                         </td>
                       </tr>
@@ -164,6 +167,7 @@ export default function AdminMarketingReport({ onBack }) {
                           <td className="p-4 font-body-md text-on-surface">{item.name}</td>
                           <td className="p-4 font-body-md text-secondary">{item.email}</td>
                           <td className="p-4 font-body-md text-secondary">{item.phone}</td>
+                          <td className="p-4 font-body-md text-secondary">{item.company}</td>
                           <td className="p-4">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               item.source.toLowerCase().includes('instagram') ? 'bg-pink-100 text-pink-800' :

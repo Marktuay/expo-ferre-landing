@@ -79,6 +79,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   - Permite al Staff añadir notas, registrar el resultado de la llamada (Ej. Contestó, Buzón, etc.) y marcar si requieren seguimiento posterior, almacenándolo todo en un array interno (`followUps`) dentro de cada documento en Firestore para optimizar costos de base de datos.
   - Se creó un modal universal (`AdminFollowUpModal.jsx`) que muestra el historial completo de interacciones en tiempo real.
   - Se actualizaron las funciones de **Exportar a Excel** para incluir los detalles del último seguimiento y la cantidad total de llamadas realizadas a cada prospecto.
+- **Reporte de Marketing Mejorado:** Se agregó la columna "Empresa" a la tabla del Reporte de Marketing (obtenida del preregistro), así como en su respectiva función de exportación a CSV para un análisis de campaña más detallado.
 
 **Cambios Anteriores (02 de Julio de 2026):**
 
