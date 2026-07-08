@@ -146,16 +146,32 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
               <img src="https://expoferre2026.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
               
               <div style="padding: 30px;">
-                <h2 style="color: #16a34a; margin-top: 0;">¡Felicidades ${reg.name}!</h2>
-                <p>Tu preregistro para <strong>ExpoFerre 2026</strong> ha sido revisado y <strong>aprobado</strong> exitosamente.</p>
+                <h2 style="color: #16a34a; margin-top: 0;">¡Excelentes noticias, ${reg.name}!</h2>
+                <p>Su preregistro ha sido <strong>aprobado</strong> por el Comité Organizador de EXPO FERRE Nicaragua 2026.</p>
+                
+                <p>En los próximos días recibirá su invitación oficial para formar parte del encuentro más importante de la industria ferretera y de la construcción en Nicaragua.</p>
+                
+                <p>Prepárese para vivir una jornada de alto nivel, donde podrá descubrir las últimas tendencias del sector, conocer soluciones innovadoras, acceder a contenidos sobre ventas, financiamiento, transformación digital y estrategias de crecimiento, además de conectar con fabricantes, distribuidores, mayoristas y los principales tomadores de decisión del mercado.</p>
+
+                <div style="margin: 25px 0; padding: 20px; background-color: #f9fafb; border-radius: 8px; border-left: 4px solid #f39200;">
+                  <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.6;">
+                    <li>📅 <strong>Fecha:</strong> Sábado 17 de octubre de 2026</li>
+                    <li>📍 <strong>Lugar:</strong> Hotel Crowne Plaza – Salón Gran Darío</li>
+                    <li>🕢 <strong>Registro:</strong> 7:30 a. m.</li>
+                    <li>🕗 <strong>Evento:</strong> 8:00 a. m. – 5:00 p. m.</li>
+                    <li>🍽️ <strong>Incluye:</strong> Coffee break, almuerzo y cóctel de cierre.</li>
+                  </ul>
+                </div>
                 
                 <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
-                  <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; color: #0d47a1;">Tu Código de Acceso QR</p>
+                  <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; color: #0d47a1;">Su Código de Acceso QR</p>
                   <img src="${qrUrl}" alt="Código QR de Acceso" style="display: block; margin: 0 auto; width: 250px; height: 250px; border: 1px solid #e5e7eb; border-radius: 8px;"/>
-                  <p style="margin-top: 15px; font-size: 14px; color: #6b7280; margin-bottom: 0;">Muestra este código desde tu celular en los kioscos de entrada para imprimir tu gafete.</p>
+                  <p style="margin-top: 15px; font-size: 14px; color: #6b7280; margin-bottom: 0;">Muestre este código desde su celular en los kioscos de entrada para imprimir su gafete.</p>
                 </div>
 
-                <p>Te esperamos con los brazos abiertos en el mejor evento ferretero del año.</p>
+                <p>Gracias por su interés. Será un honor contar con su participación en EXPO FERRE Nicaragua 2026, donde se construyen las conexiones que impulsan los negocios.</p>
+                
+                <p style="margin-bottom: 0;">Cordialmente,<br/><strong>Equipo Organizador</strong></p>
               </div>
               
               <!-- Footer Image -->
