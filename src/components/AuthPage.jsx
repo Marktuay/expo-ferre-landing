@@ -16,6 +16,7 @@ export default function AuthPage({ onBack }) {
   // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   
   // Extra register fields
   const [nombre, setNombre] = useState('');
@@ -203,8 +204,24 @@ export default function AuthPage({ onBack }) {
             {!isForgotPassword && (
               <div>
                 <label className="block text-sm font-medium text-gray-700">Contraseña</label>
-                <div className="mt-1">
-                  <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#f39200] focus:border-[#f39200] sm:text-sm" />
+                <div className="mt-1 relative">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    required 
+                    value={password} 
+                    onChange={e => setPassword(e.target.value)} 
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#f39200] focus:border-[#f39200] sm:text-sm pr-10" 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                    title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">
+                      {showPassword ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
                 </div>
               </div>
             )}
