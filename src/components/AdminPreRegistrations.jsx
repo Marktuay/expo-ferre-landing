@@ -153,6 +153,12 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                 
                 <p>Prepárese para vivir una jornada de alto nivel, donde podrá descubrir las últimas tendencias del sector, conocer soluciones innovadoras, acceder a contenidos sobre ventas, financiamiento, transformación digital y estrategias de crecimiento, además de conectar con fabricantes, distribuidores, mayoristas y los principales tomadores de decisión del mercado.</p>
 
+                <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                  <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; color: #0d47a1;">Su Código de Acceso QR</p>
+                  <img src="${qrUrl}" alt="Código QR de Acceso" style="display: block; margin: 0 auto; width: 250px; height: 250px; border: 1px solid #e5e7eb; border-radius: 8px;"/>
+                  <p style="margin-top: 15px; font-size: 14px; color: #6b7280; margin-bottom: 0;">Muestre este código desde su celular en los kioscos de entrada para imprimir su gafete.</p>
+                </div>
+
                 <div style="margin: 25px 0; padding: 20px; background-color: #f9fafb; border-radius: 8px; border-left: 4px solid #f39200;">
                   <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.6;">
                     <li>📅 <strong>Fecha:</strong> Sábado 17 de octubre de 2026</li>
@@ -163,12 +169,6 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                   </ul>
                 </div>
                 
-                <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
-                  <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; color: #0d47a1;">Su Código de Acceso QR</p>
-                  <img src="${qrUrl}" alt="Código QR de Acceso" style="display: block; margin: 0 auto; width: 250px; height: 250px; border: 1px solid #e5e7eb; border-radius: 8px;"/>
-                  <p style="margin-top: 15px; font-size: 14px; color: #6b7280; margin-bottom: 0;">Muestre este código desde su celular en los kioscos de entrada para imprimir su gafete.</p>
-                </div>
-
                 <p>Gracias por su interés. Será un honor contar con su participación en EXPO FERRE Nicaragua 2026, donde se construyen las conexiones que impulsan los negocios.</p>
                 
                 <p style="margin-bottom: 0;">Cordialmente,<br/><strong>Equipo Organizador</strong></p>
