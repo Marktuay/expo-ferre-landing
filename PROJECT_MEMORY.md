@@ -83,6 +83,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Estandarización de Notificaciones por Correo:** Se modificaron todos los módulos (`App.jsx`, `AdminPreRegistrations.jsx`, `AuthPage.jsx`, `AdminSponsors.jsx`, `ContactPage.jsx`, `CreateSponsorModal.jsx`) para que utilicen plantillas HTML con encabezados y pies de página gráficos oficiales. Todas las notificaciones del sistema envían siempre copia a las cuentas de administración (`karen.torres@rinsa.red` y `AdmonEventKT@gmail.com`). Adicionalmente, en el correo de aprobación, el Código QR se reposicionó de forma destacada antes de la información logística del evento.
 - **Gestión de Contraseñas:** 
   - Se implementó la opción "Recuperar Contraseña" en `AuthPage.jsx` mediante el servicio nativo de Firebase Auth.
+  - Se añadió un botón (icono de ojo) en `AuthPage.jsx` que permite a los usuarios mostrar u ocultar su contraseña mientras la escriben, mejorando la experiencia de usuario (UX).
   - Se creó el componente `ChangePasswordForm.jsx` dentro de `SponsorDashboard.jsx` para que los patrocinadores puedan cambiar su contraseña una vez que inicien sesión de forma segura.
 - **Mejoras en el Panel Administrativo y CRM:**
   - Se añadieron tarjetas de resumen visuales en la cabecera de `AdminPreRegistrations.jsx` para mostrar en tiempo real la cantidad total de preregistros y la cantidad de aprobados.
