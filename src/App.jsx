@@ -236,13 +236,19 @@ export default function App() {
         message: {
           subject: 'Registro a ExpoFerre 2026',
           html: `
-            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #0d47a1;">¡Hola ${data.name}!</h2>
-              <p>Hemos recibido tu solicitud de preregistro para <strong>ExpoFerre 2026</strong>.</p>
-              <p><strong>Estatus:</strong> <span style="color: orange;">En revisión</span></p>
-              <p>Te notificaremos pronto mediante un correo automático cuando la administración haya revisado y aprobado tu registro, incluyendo tu código QR de acceso.</p>
-              <br/>
-              <p>Saludos cordiales,<br/><strong>El equipo de ExpoFerre</strong></p>
+            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+              <!-- Header Image -->
+              <img src="https://expoferre2026.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+              
+              <div style="padding: 30px;">
+                <h2 style="color: #0d47a1; margin-top: 0;">¡Hola ${data.name}!</h2>
+                <p>Hemos recibido tu solicitud de preregistro para <strong>ExpoFerre 2026</strong>.</p>
+                <p><strong>Estatus:</strong> <span style="color: orange;">En revisión</span></p>
+                <p>Te notificaremos pronto mediante un correo automático cuando la administración haya revisado y aprobado tu registro, incluyendo tu código QR de acceso.</p>
+              </div>
+              
+              <!-- Footer Image -->
+              <img src="https://expoferre2026.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
             </div>
           `
         }
@@ -250,19 +256,31 @@ export default function App() {
 
       // Enviar copia al administrador
       await addDoc(collection(db, 'mail'), {
-        to: 'karen.torres@rinsa.red',
+        to: ['karen.torres@rinsa.red', 'AdmonEventKT@gmail.com'],
         message: {
           subject: `Nuevo Preregistro: ${data.name} - ExpoFerre`,
           html: `
-            <div style="font-family: Arial, sans-serif; color: #333;">
-              <h2 style="color: #0d47a1;">Nuevo Preregistro en el Sistema</h2>
-              <ul>
-                <li><strong>Nombre:</strong> ${data.name}</li>
-                <li><strong>Empresa:</strong> ${data.company}</li>
-                <li><strong>Puesto:</strong> ${data.position}</li>
-                <li><strong>Cantidad de Empleados:</strong> ${data.employees}</li>
-                <li><strong>Estatus Automático:</strong> Pendiente (Requiere aprobación)</li>
-              </ul>
+            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+              <!-- Header Image -->
+              <img src="https://expoferre2026.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+              
+              <div style="padding: 30px;">
+                <h2 style="color: #0d47a1; margin-top: 0;">Nuevo Preregistro en el Sistema</h2>
+                <p>Se ha recibido un nuevo preregistro que espera ser revisado.</p>
+                <div style="margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 8px; border-left: 4px solid #0d47a1;">
+                  <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 10px;"><strong>Nombre:</strong> ${data.name}</li>
+                    <li style="margin-bottom: 10px;"><strong>Empresa:</strong> ${data.company}</li>
+                    <li style="margin-bottom: 10px;"><strong>Puesto:</strong> ${data.position}</li>
+                    <li style="margin-bottom: 10px;"><strong>Cantidad de Empleados:</strong> ${data.employees}</li>
+                    <li><strong>Estatus Automático:</strong> Pendiente (Requiere aprobación)</li>
+                  </ul>
+                </div>
+                <p>Por favor, ingresa al panel de administración para revisarlo.</p>
+              </div>
+              
+              <!-- Footer Image -->
+              <img src="https://expoferre2026.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
             </div>
           `
         }
