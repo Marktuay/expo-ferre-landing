@@ -51,21 +51,33 @@ export default function AuthPage({ onBack }) {
 
         // Notificar al administrador
         await addDoc(collection(db, 'mail'), {
-          to: 'karen.torres@rinsa.red',
+          to: ['karen.torres@rinsa.red', 'AdmonEventKT@gmail.com'],
           message: {
             subject: `Nuevo Patrocinador Registrado: ${empresa} - ExpoFerre`,
             html: `
-              <div style="font-family: Arial, sans-serif; color: #333;">
-                <h2 style="color: #0d47a1;">Nuevo Registro de Patrocinador</h2>
-                <p>Un nuevo patrocinador se ha registrado en el portal y está esperando aprobación.</p>
-                <ul>
-                  <li><strong>Empresa:</strong> ${empresa}</li>
-                  <li><strong>Contacto:</strong> ${nombre} ${apellido}</li>
-                  <li><strong>Email:</strong> ${email}</li>
-                  <li><strong>Teléfono:</strong> ${telefono}</li>
-                  <li><strong>Empleados:</strong> ${empleados}</li>
-                </ul>
-                <p>Por favor, ingresa al panel de administración para revisar y aprobar este registro.</p>
+              <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+                <!-- Header Image -->
+                <img src="https://expoferre2026.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+                
+                <div style="padding: 30px;">
+                  <h2 style="color: #0d47a1; margin-top: 0;">Nuevo Registro de Patrocinador</h2>
+                  <p>Un nuevo patrocinador se ha registrado en el portal y está esperando aprobación.</p>
+                  
+                  <div style="margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 8px; border-left: 4px solid #0d47a1;">
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                      <li style="margin-bottom: 10px;"><strong>Empresa:</strong> ${empresa}</li>
+                      <li style="margin-bottom: 10px;"><strong>Contacto:</strong> ${nombre} ${apellido}</li>
+                      <li style="margin-bottom: 10px;"><strong>Email:</strong> ${email}</li>
+                      <li style="margin-bottom: 10px;"><strong>Teléfono:</strong> ${telefono}</li>
+                      <li><strong>Empleados:</strong> ${empleados}</li>
+                    </ul>
+                  </div>
+                  
+                  <p>Por favor, ingresa al panel de administración para revisar y aprobar este registro.</p>
+                </div>
+                
+                <!-- Footer Image -->
+                <img src="https://expoferre2026.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
               </div>
             `
           }

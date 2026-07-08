@@ -32,24 +32,36 @@ const ContactPage = () => {
       
       // Notificar al administrador
       await addDoc(collection(db, 'mail'), {
-        to: 'karen.torres@rinsa.red',
+        to: ['karen.torres@rinsa.red', 'AdmonEventKT@gmail.com'],
         message: {
           subject: `Nuevo Mensaje de Contacto: ${data.nombre} - ExpoFerre`,
           html: `
-            <div style="font-family: Arial, sans-serif; color: #333;">
-              <h2 style="color: #0d47a1;">Nuevo Mensaje de Contacto</h2>
-              <p>Has recibido un nuevo mensaje a través del formulario de contacto.</p>
-              <ul>
-                <li><strong>Nombre:</strong> ${data.nombre}</li>
-                <li><strong>Empresa:</strong> ${data.empresa}</li>
-                <li><strong>Email:</strong> ${data.email}</li>
-                <li><strong>Teléfono:</strong> ${data.telefono}</li>
-                <li><strong>Asunto:</strong> ${data.asunto}</li>
-              </ul>
-              <p><strong>Mensaje:</strong></p>
-              <blockquote style="border-left: 4px solid #ccc; padding-left: 10px; color: #555;">
-                ${data.mensaje}
-              </blockquote>
+            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+              <!-- Header Image -->
+              <img src="https://expoferre2026.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+              
+              <div style="padding: 30px;">
+                <h2 style="color: #0d47a1; margin-top: 0;">Nuevo Mensaje de Contacto</h2>
+                <p>Has recibido un nuevo mensaje a través del formulario de contacto.</p>
+                
+                <div style="margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 8px; border-left: 4px solid #0d47a1;">
+                  <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 10px;"><strong>Nombre:</strong> ${data.nombre}</li>
+                    <li style="margin-bottom: 10px;"><strong>Empresa:</strong> ${data.empresa}</li>
+                    <li style="margin-bottom: 10px;"><strong>Email:</strong> ${data.email}</li>
+                    <li style="margin-bottom: 10px;"><strong>Teléfono:</strong> ${data.telefono}</li>
+                    <li><strong>Asunto:</strong> ${data.asunto}</li>
+                  </ul>
+                </div>
+                
+                <h3 style="color: #0d47a1; margin-top: 0;">Mensaje:</h3>
+                <blockquote style="margin: 0; padding: 15px; background-color: #f0f4f8; border-left: 4px solid #0d47a1; border-radius: 4px; color: #555;">
+                  ${data.mensaje}
+                </blockquote>
+              </div>
+              
+              <!-- Footer Image -->
+              <img src="https://expoferre2026.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
             </div>
           `
         }

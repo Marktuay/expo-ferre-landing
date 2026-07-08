@@ -58,11 +58,39 @@ export default function CreateSponsorModal({ onClose }) {
         
         // Agregar documento a la colección 'mail' para que la extensión "Trigger Email" envíe el correo
         await setDoc(doc(collection(db, 'mail')), {
-          to: formData.correo,
+          to: [formData.correo, 'karen.torres@rinsa.red', 'AdmonEventKT@gmail.com'],
           message: {
             subject: 'Bienvenido a Expo Ferre - Cuenta de Patrocinador Creada',
             text: `Hola ${formData.nombre},\n\nTu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido creada exitosamente.\n\nPor los momentos, tu cuenta se encuentra en estado "Pendiente de Aprobación". Te notificaremos por este medio una vez que tu cuenta haya sido aprobada para que puedas ingresar.\n\nTus credenciales de acceso serán:\nCorreo: ${formData.correo}\nContraseña: ${formData.password}\n\n¡Gracias por ser parte de Expo Ferre!`,
-            html: `<h3>Hola ${formData.nombre},</h3><p>Tu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido creada exitosamente.</p><p>Por los momentos, tu cuenta se encuentra en estado <strong>"Pendiente de Aprobación"</strong>. Te notificaremos por este medio una vez que tu cuenta haya sido aprobada para que puedas ingresar.</p><p>Tus credenciales de acceso serán:</p><ul><li><strong>Correo:</strong> ${formData.correo}</li><li><strong>Contraseña:</strong> ${formData.password}</li></ul><p>¡Gracias por ser parte de Expo Ferre!</p>`
+            html: `
+              <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+                <!-- Header Image -->
+                <img src="https://expoferre2026.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+                
+                <div style="padding: 30px;">
+                  <h2 style="color: #0d47a1; margin-top: 0;">¡Hola ${formData.nombre}!</h2>
+                  <p>Tu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido creada exitosamente por la administración.</p>
+                  
+                  <div style="margin: 30px 0; padding: 20px; background-color: #fff3e0; border-radius: 8px; border-left: 4px solid #f39200;">
+                    <p style="margin-top: 0; font-weight: bold; color: #e65100;">Estado: Pendiente de Aprobación</p>
+                    <p style="margin-bottom: 0;">Te notificaremos por este medio una vez que tu cuenta haya sido aprobada para que puedas ingresar a la plataforma.</p>
+                  </div>
+
+                  <div style="margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 8px; border-left: 4px solid #0d47a1;">
+                    <p style="margin-top: 0; font-weight: bold; color: #0d47a1; font-size: 16px;">Tus credenciales de acceso serán:</p>
+                    <ul style="list-style: none; padding: 0; margin-bottom: 0;">
+                      <li style="margin-bottom: 10px;"><strong>Correo:</strong> ${formData.correo}</li>
+                      <li><strong>Contraseña:</strong> ${formData.password}</li>
+                    </ul>
+                  </div>
+                  
+                  <p>¡Gracias por ser parte de Expo Ferre!</p>
+                </div>
+                
+                <!-- Footer Image -->
+                <img src="https://expoferre2026.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+              </div>
+            `
           }
         });
 

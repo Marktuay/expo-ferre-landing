@@ -141,20 +141,25 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
         message: {
           subject: '¡Registro Aprobado! - ExpoFerre 2026',
           html: `
-            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #16a34a;">¡Felicidades ${reg.name}!</h2>
-              <p>Tu preregistro para <strong>ExpoFerre 2026</strong> ha sido revisado y <strong>aprobado</strong> exitosamente.</p>
+            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+              <!-- Header Image -->
+              <img src="https://expoferre2026.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
               
-              <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 10px;">
-                <p style="margin-bottom: 15px; font-weight: bold; color: #0d47a1;">Tu Código de Acceso QR</p>
-                <img src="${qrUrl}" alt="Código QR de Acceso" style="display: block; margin: 0 auto; width: 250px; height: 250px; border: 1px solid #e5e7eb; border-radius: 8px;"/>
-                <p style="margin-top: 15px; font-size: 14px; color: #6b7280;">Muestra este código desde tu celular en los kioscos de entrada para imprimir tu gafete.</p>
-              </div>
+              <div style="padding: 30px;">
+                <h2 style="color: #16a34a; margin-top: 0;">¡Felicidades ${reg.name}!</h2>
+                <p>Tu preregistro para <strong>ExpoFerre 2026</strong> ha sido revisado y <strong>aprobado</strong> exitosamente.</p>
+                
+                <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                  <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; color: #0d47a1;">Tu Código de Acceso QR</p>
+                  <img src="${qrUrl}" alt="Código QR de Acceso" style="display: block; margin: 0 auto; width: 250px; height: 250px; border: 1px solid #e5e7eb; border-radius: 8px;"/>
+                  <p style="margin-top: 15px; font-size: 14px; color: #6b7280; margin-bottom: 0;">Muestra este código desde tu celular en los kioscos de entrada para imprimir tu gafete.</p>
+                </div>
 
-              <p>Te esperamos con los brazos abiertos en el mejor evento ferretero del año.</p>
-              <br/>
-              <p>Saludos cordiales,</p>
-              <p><strong>El equipo de ExpoFerre</strong></p>
+                <p>Te esperamos con los brazos abiertos en el mejor evento ferretero del año.</p>
+              </div>
+              
+              <!-- Footer Image -->
+              <img src="https://expoferre2026.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
             </div>
           `
         }
@@ -191,20 +196,25 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
         message: {
           subject: 'Recuperación de Acceso - ExpoFerre 2026',
           html: `
-            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #0d47a1;">¡Hola ${reg.name}!</h2>
-              <p>Te enviamos nuevamente tu código de acceso para <strong>ExpoFerre 2026</strong> a petición tuya o de la administración.</p>
+            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+              <!-- Header Image -->
+              <img src="https://expoferre2026.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
               
-              <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 10px;">
-                <p style="margin-bottom: 15px; font-weight: bold; color: #0d47a1;">Tu Código de Acceso QR</p>
-                <img src="${qrUrl}" alt="Código QR de Acceso" style="display: block; margin: 0 auto; width: 250px; height: 250px; border: 1px solid #e5e7eb; border-radius: 8px;"/>
-                <p style="margin-top: 15px; font-size: 14px; color: #6b7280;">Muestra este código desde tu celular en los kioscos de entrada para imprimir tu gafete.</p>
-              </div>
+              <div style="padding: 30px;">
+                <h2 style="color: #0d47a1; margin-top: 0;">¡Hola ${reg.name}!</h2>
+                <p>Te enviamos nuevamente tu código de acceso para <strong>ExpoFerre 2026</strong> a petición tuya o de la administración.</p>
+                
+                <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                  <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; color: #0d47a1;">Tu Código de Acceso QR</p>
+                  <img src="${qrUrl}" alt="Código QR de Acceso" style="display: block; margin: 0 auto; width: 250px; height: 250px; border: 1px solid #e5e7eb; border-radius: 8px;"/>
+                  <p style="margin-top: 15px; font-size: 14px; color: #6b7280; margin-bottom: 0;">Muestra este código desde tu celular en los kioscos de entrada para imprimir tu gafete.</p>
+                </div>
 
-              <p>Te esperamos con los brazos abiertos en el mejor evento ferretero del año.</p>
-              <br/>
-              <p>Saludos cordiales,</p>
-              <p><strong>El equipo de ExpoFerre</strong></p>
+                <p>Te esperamos con los brazos abiertos en el mejor evento ferretero del año.</p>
+              </div>
+              
+              <!-- Footer Image -->
+              <img src="https://expoferre2026.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
             </div>
           `
         }
