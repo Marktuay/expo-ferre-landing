@@ -238,7 +238,7 @@ export default function App() {
           html: `
             <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
               <!-- Header Image -->
-              <img src="https://expoferre2026.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+              <img src="https://expoferrenicaragua.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
               
               <div style="padding: 30px;">
                 <h2 style="color: #0d47a1; margin-top: 0;">¡Hola ${data.name}!</h2>
@@ -248,7 +248,7 @@ export default function App() {
               </div>
               
               <!-- Footer Image -->
-              <img src="https://expoferre2026.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+              <img src="https://expoferrenicaragua.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
             </div>
           `
         }
@@ -262,7 +262,7 @@ export default function App() {
           html: `
             <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
               <!-- Header Image -->
-              <img src="https://expoferre2026.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+              <img src="https://expoferrenicaragua.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
               
               <div style="padding: 30px;">
                 <h2 style="color: #0d47a1; margin-top: 0;">Nuevo Preregistro en el Sistema</h2>
@@ -280,7 +280,7 @@ export default function App() {
               </div>
               
               <!-- Footer Image -->
-              <img src="https://expoferre2026.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+              <img src="https://expoferrenicaragua.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
             </div>
           `
         }

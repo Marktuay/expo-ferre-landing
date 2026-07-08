@@ -183,11 +183,11 @@ export default function AdminSponsors({ onBack }) {
                                     bcc: 'admin@expoferrenicaragua.com', // Copia oculta al administrador
                                     message: {
                                       subject: '¡Tu cuenta de Patrocinador en Expo Ferre ha sido aprobada!',
-                                      text: `Hola ${sponsor.nombre || 'Patrocinador'},\n\nNos complace informarte que tu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido aprobada.\n\nYa puedes iniciar sesión en la plataforma para:\n- Reservar tu Stand en el Plano Interactivo.\n- Registrar a tu Staff y tus Invitados.\n- Utilizar el escáner de Gafetes (Leads).\n\nIngresa aquí: https://expoferre2026.com/login\n\n¡Gracias por ser parte de Expo Ferre!`,
+                                      text: `Hola ${sponsor.nombre || 'Patrocinador'},\n\nNos complace informarte que tu cuenta para el Panel de Patrocinadores de Expo Ferre ha sido aprobada.\n\nYa puedes iniciar sesión en la plataforma para:\n- Reservar tu Stand en el Plano Interactivo.\n- Registrar a tu Staff y tus Invitados.\n- Utilizar el escáner de Gafetes (Leads).\n\nIngresa aquí: https://expoferrenicaragua.com/login\n\n¡Gracias por ser parte de Expo Ferre!`,
                                       html: `
                                         <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
                                           <!-- Header Image -->
-                                          <img src="https://expoferre2026.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+                                          <img src="https://expoferrenicaragua.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
                                           
                                           <div style="padding: 30px;">
                                             <h2 style="color: #0d47a1; margin-top: 0;">¡Hola ${sponsor.nombre || 'Patrocinador'}!</h2>
@@ -203,14 +203,14 @@ export default function AdminSponsors({ onBack }) {
                                             </div>
 
                                             <div style="text-align: center; margin: 30px 0;">
-                                              <a href="https://expoferre2026.com/login" style="background-color: #f39200; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Acceder a la Plataforma</a>
+                                              <a href="https://expoferrenicaragua.com/login" style="background-color: #f39200; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Acceder a la Plataforma</a>
                                             </div>
                                             
                                             <p>¡Gracias por ser parte de Expo Ferre!</p>
                                           </div>
                                           
                                           <!-- Footer Image -->
-                                          <img src="https://expoferre2026.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+                                          <img src="https://expoferrenicaragua.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
                                         </div>
                                       `
                                     }
