@@ -6,6 +6,7 @@ import { getEventBasePath } from '../config/eventConfig';
 export default function AdminFollowUpModal({ isOpen, onClose, person, collectionName, adminUser }) {
   const [result, setResult] = useState('Contestó');
   const [notes, setNotes] = useState('');
+  const [needsFollowUp, setNeedsFollowUp] = useState(person.needsFollowUp || false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen || !person) return null;
@@ -24,7 +25,8 @@ export default function AdminFollowUpModal({ isOpen, onClose, person, collection
       };
 
       await updateDoc(personRef, {
-        followUps: arrayUnion(newFollowUp)
+        followUps: arrayUnion(newFollowUp),
+        needsFollowUp: needsFollowUp
       });
       
       setResult('Contestó');
@@ -35,6 +37,16 @@ export default function AdminFollowUpModal({ isOpen, onClose, person, collection
       alert("Hubo un error al guardar el seguimiento.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleToggleNeedsFollowUp = async (newValue) => {
+    setNeedsFollowUp(newValue);
+    try {
+      const personRef = doc(db, `${getEventBasePath()}/${collectionName}`, person.id);
+      await updateDoc(personRef, { needsFollowUp: newValue });
+    } catch (err) {
+      console.error("Error toggling needsFollowUp:", err);
     }
   };
 
@@ -112,6 +124,20 @@ export default function AdminFollowUpModal({ isOpen, onClose, person, collection
                 className="w-full p-2 border border-outline-variant rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"
               ></textarea>
             </div>
+
+            <label className="flex items-center gap-3 cursor-pointer mt-2 bg-surface-variant/30 p-3 rounded-lg border border-outline-variant w-fit hover:bg-surface-variant/50 transition-colors">
+              <input 
+                type="checkbox" 
+                checked={needsFollowUp} 
+                onChange={(e) => handleToggleNeedsFollowUp(e.target.checked)} 
+                className="w-5 h-5 text-primary rounded focus:ring-primary focus:ring-2 border-outline-variant cursor-pointer"
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-on-surface">Marcar como "Requiere Seguimiento"</span>
+                <span className="text-xs text-secondary">La persona aparecerá al usar el filtro principal</span>
+              </div>
+            </label>
+
             <div className="flex justify-end gap-3 mt-2">
               <button 
                 type="button" 
