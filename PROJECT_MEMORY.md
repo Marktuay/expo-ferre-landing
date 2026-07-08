@@ -78,7 +78,14 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 07 de Julio de 2026**
+**Última actualización: 08 de Julio de 2026**
+
+- **Estandarización de Notificaciones por Correo:** Se modificaron todos los módulos (`App.jsx`, `AdminPreRegistrations.jsx`, `AuthPage.jsx`, `AdminSponsors.jsx`, `ContactPage.jsx`, `CreateSponsorModal.jsx`) para que utilicen plantillas HTML con encabezados y pies de página gráficos oficiales. Todas las notificaciones del sistema envían siempre copia a las cuentas de administración (`karen.torres@rinsa.red` y `AdmonEventKT@gmail.com`).
+- **Gestión de Contraseñas:** 
+  - Se implementó la opción "Recuperar Contraseña" en `AuthPage.jsx` mediante el servicio nativo de Firebase Auth.
+  - Se creó el componente `ChangePasswordForm.jsx` dentro de `SponsorDashboard.jsx` para que los patrocinadores puedan cambiar su contraseña una vez que inicien sesión de forma segura.
+
+**Cambios Anteriores (07 de Julio de 2026):**
 
 - **Implementación de Mini-CRM (Seguimiento de Leads):** Se desarrolló un sistema integrado de seguimiento telefónico (CRM) dentro de las tablas de Preregistros (`AdminPreRegistrations.jsx`) e Invitados de Patrocinadores (`AdminGuests.jsx`).
   - Permite al Staff añadir notas, registrar el resultado de la llamada (Ej. Contestó, Buzón, etc.) y marcar si requieren seguimiento posterior, almacenándolo todo en un array interno (`followUps`) dentro de cada documento en Firestore para optimizar costos de base de datos.
