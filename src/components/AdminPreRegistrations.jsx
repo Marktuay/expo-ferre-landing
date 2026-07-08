@@ -277,6 +277,29 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
           <div className="flex-shrink-0">
             <h1 className="text-headline-md font-bold text-on-surface">Preregistros</h1>
             <p className="text-body-lg text-secondary">Personas que han completado el formulario de preregistro.</p>
+            
+            {!loading && (
+              <div className="flex flex-wrap gap-4 mt-6">
+                <div className="bg-white px-4 py-3 rounded-lg border border-outline-variant shadow-sm flex items-center gap-3">
+                  <div className="bg-primary/10 p-2 rounded-full text-primary flex items-center justify-center">
+                    <span className="material-symbols-outlined">group</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-secondary font-medium uppercase tracking-wider">Total Preregistros</p>
+                    <p className="text-2xl font-bold text-on-surface leading-tight">{registrations.length}</p>
+                  </div>
+                </div>
+                <div className="bg-white px-4 py-3 rounded-lg border border-outline-variant shadow-sm flex items-center gap-3">
+                  <div className="bg-[#16a34a]/10 p-2 rounded-full text-[#16a34a] flex items-center justify-center">
+                    <span className="material-symbols-outlined">how_to_reg</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-secondary font-medium uppercase tracking-wider">Aprobados</p>
+                    <p className="text-2xl font-bold text-on-surface leading-tight">{registrations.filter(reg => reg.status === 'approved').length}</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="w-full md:flex-1 md:max-w-md flex flex-col gap-3">
