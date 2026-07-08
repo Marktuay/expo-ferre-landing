@@ -84,6 +84,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Gestión de Contraseñas:** 
   - Se implementó la opción "Recuperar Contraseña" en `AuthPage.jsx` mediante el servicio nativo de Firebase Auth.
   - Se creó el componente `ChangePasswordForm.jsx` dentro de `SponsorDashboard.jsx` para que los patrocinadores puedan cambiar su contraseña una vez que inicien sesión de forma segura.
+- **Mejoras en el Panel Administrativo y CRM:**
+  - Se añadieron tarjetas de resumen visuales en la cabecera de `AdminPreRegistrations.jsx` para mostrar en tiempo real la cantidad total de preregistros y la cantidad de aprobados.
+  - Se solucionó un bug lógico en el CRM (`AdminFollowUpModal.jsx`). Se integró un checkbox explícito ("Marcar como Requiere Seguimiento") que permite a los administradores encender/apagar de forma manual la bandera de estado `needsFollowUp`, logrando que el filtro "Mostrar solo Requiere Seguimiento" funcione correctamente.
 - **Seguridad en Repositorio:** El usuario configuró exitosamente una llave SSH en la VM de producción para realizar descargas de código seguras desde GitHub (`git pull`) sin necesidad de re-autenticarse con tokens temporales.
 
 **Cambios Anteriores (07 de Julio de 2026):**
