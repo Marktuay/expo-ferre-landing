@@ -4,6 +4,7 @@ import GuestForm from './GuestForm';
 import InteractiveMap from './InteractiveMap';
 import SponsorActivity from './SponsorActivity';
 import SponsorScanner from './SponsorScanner';
+import ChangePasswordForm from './ChangePasswordForm';
 import { auth, db } from '../firebase';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
@@ -80,6 +81,10 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
     return <SpeakerForm onClose={() => setActiveForm(null)} />;
   }
 
+  if (activeForm === 'change_password') {
+    return <ChangePasswordForm onBack={() => setActiveForm(null)} />;
+  }
+
   if (activeForm === 'guest') {
     return <GuestForm onBack={() => setActiveForm(null)} />;
   }
@@ -102,9 +107,26 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
           </div>
           
           {auth.currentUser && isApproved && (
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-outline-variant flex flex-col items-center gap-2">
-              <QRCodeSVG value={auth.currentUser.uid} size={100} level="M" />
-              <span className="font-label-sm text-on-surface-variant">Mi Código QR</span>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setActiveForm('change_password')} 
+                className="hidden md:flex bg-white text-secondary border border-outline-variant hover:bg-surface-variant font-bold py-2 px-4 rounded-md shadow-sm items-center gap-2 transition-colors"
+              >
+                <span className="material-symbols-outlined">lock_reset</span> Cambiar Contraseña
+              </button>
+              
+              <div className="bg-white p-4 rounded-lg shadow-sm border border-outline-variant flex flex-col items-center gap-2 relative group">
+                <QRCodeSVG value={auth.currentUser.uid} size={100} level="M" />
+                <span className="font-label-sm text-on-surface-variant">Mi Código QR</span>
+                
+                {/* Mobile version of change password */}
+                <button 
+                  onClick={() => setActiveForm('change_password')} 
+                  className="md:hidden mt-2 bg-white text-secondary border border-outline-variant hover:bg-surface-variant font-bold py-1 px-2 rounded-md shadow-sm flex items-center gap-1 text-xs w-full justify-center transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[14px]">lock_reset</span> Contraseña
+                </button>
+              </div>
             </div>
           )}
         </div>

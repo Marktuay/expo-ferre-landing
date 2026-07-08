@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { auth, db } from '../firebase';
 import { 
   createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword 
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, addDoc, collection } from 'firebase/firestore';
 
 export default function AuthPage({ onBack }) {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -26,6 +28,26 @@ export default function AuthPage({ onBack }) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (isForgotPassword) {
+      if (!email) {
+        setError('Ingresa tu correo para recuperar la contraseña.');
+        setLoading(false);
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert('Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.');
+        setIsForgotPassword(false);
+        setIsLogin(true);
+      } catch (err) {
+        console.error(err);
+        setError('Ocurrió un error al intentar enviar el correo de recuperación.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
 
     try {
       if (isLogin) {
@@ -110,10 +132,10 @@ export default function AuthPage({ onBack }) {
           </button>
         </div>
         <h2 className="mt-2 text-center text-3xl font-extrabold text-[#283474]">
-          {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
+          {isForgotPassword ? 'Recuperar Contraseña' : (isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Accede al portal exclusivo para patrocinadores
+          {isForgotPassword ? 'Ingresa tu correo para recibir un enlace de recuperación' : 'Accede al portal exclusivo para patrocinadores'}
         </p>
       </div>
 
@@ -178,12 +200,24 @@ export default function AuthPage({ onBack }) {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Contraseña</label>
-              <div className="mt-1">
-                <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#f39200] focus:border-[#f39200] sm:text-sm" />
+            {!isForgotPassword && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+                <div className="mt-1">
+                  <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#f39200] focus:border-[#f39200] sm:text-sm" />
+                </div>
               </div>
-            </div>
+            )}
+
+            {isLogin && !isForgotPassword && (
+              <div className="flex items-center justify-end">
+                <div className="text-sm">
+                  <button type="button" onClick={() => setIsForgotPassword(true)} className="font-medium text-[#f39200] hover:text-[#d88200]">
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div>
               <button
@@ -191,7 +225,7 @@ export default function AuthPage({ onBack }) {
                 disabled={loading}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#f39200] hover:bg-[#d88200] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f39200] transition-colors disabled:opacity-70"
               >
-                {loading ? 'Procesando...' : (isLogin ? 'Ingresar' : 'Registrarse')}
+                {loading ? 'Procesando...' : (isForgotPassword ? 'Enviar enlace' : (isLogin ? 'Ingresar' : 'Registrarse'))}
               </button>
             </div>
           </form>
@@ -203,21 +237,34 @@ export default function AuthPage({ onBack }) {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">
-                  {isLogin ? '¿No tienes cuenta?' : '¿Ya tienes una cuenta?'}
+                  {isForgotPassword ? '¿Opciones alternativas?' : (isLogin ? '¿No tienes cuenta?' : '¿Ya tienes una cuenta?')}
                 </span>
               </div>
             </div>
 
             <div className="mt-6">
-              <button
-                onClick={() => {
-                  setIsLogin(!isLogin);
-                  setError(null);
-                }}
-                className="w-full flex justify-center py-2 px-4 border-2 border-[#283474] rounded-md shadow-sm text-sm font-bold text-[#283474] bg-white hover:bg-[#283474] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#283474] transition-colors"
-              >
-                {isLogin ? 'Crear una cuenta nueva' : 'Iniciar Sesión'}
-              </button>
+              {isForgotPassword ? (
+                <button
+                  onClick={() => {
+                    setIsForgotPassword(false);
+                    setIsLogin(true);
+                    setError(null);
+                  }}
+                  className="w-full flex justify-center py-2 px-4 border-2 border-[#283474] rounded-md shadow-sm text-sm font-bold text-[#283474] bg-white hover:bg-[#283474] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#283474] transition-colors"
+                >
+                  Volver a Iniciar Sesión
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsLogin(!isLogin);
+                    setError(null);
+                  }}
+                  className="w-full flex justify-center py-2 px-4 border-2 border-[#283474] rounded-md shadow-sm text-sm font-bold text-[#283474] bg-white hover:bg-[#283474] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#283474] transition-colors"
+                >
+                  {isLogin ? 'Crear una cuenta nueva' : 'Iniciar Sesión'}
+                </button>
+              )}
             </div>
           </div>
         </div>
