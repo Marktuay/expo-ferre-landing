@@ -151,6 +151,21 @@ export default function App() {
       
       // Ordenar por importancia (Diamante -> Oro -> Plata)
       fetchedLogos.sort((a, b) => a.order - b.order);
+
+      // TODO: ELIMINAR ESTO DESPUÉS. Código temporal para poder visualizar el diseño 
+      // si aún no se han subido logos a la base de datos.
+      if (fetchedLogos.length === 0) {
+        fetchedLogos.push(
+          { url: 'https://via.placeholder.com/250x150/e0f2fe/075985?text=Diamante+1', category: 'Diamante', order: 1 },
+          { url: 'https://via.placeholder.com/250x150/e0f2fe/075985?text=Diamante+2', category: 'Diamante', order: 1 },
+          { url: 'https://via.placeholder.com/250x150/e0f2fe/075985?text=Diamante+3', category: 'Diamante', order: 1 },
+          { url: 'https://via.placeholder.com/250x150/fef08a/854d0e?text=Oro+1', category: 'Oro', order: 2 },
+          { url: 'https://via.placeholder.com/250x150/fef08a/854d0e?text=Oro+2', category: 'Oro', order: 2 },
+          { url: 'https://via.placeholder.com/250x150/e5e7eb/374151?text=Plata+1', category: 'Plata', order: 3 },
+          { url: 'https://via.placeholder.com/250x150/e5e7eb/374151?text=Plata+2', category: 'Plata', order: 3 }
+        );
+      }
+
       setSponsorLogos(fetchedLogos);
     });
     return () => unsubscribe();
@@ -537,66 +552,92 @@ export default function App() {
             <div className="absolute inset-0 bg-gradient-to-r from-inverse-surface/90 via-inverse-surface/50 to-transparent"></div>
           </div>
 
-          {/* Superimposed Sponsors Reel */}
+          {/* Superimposed Sponsors List */}
           {sponsorLogos.length > 0 && (
             <div className="w-full z-20 mb-8 md:mb-12 shrink-0 mt-8">
               <div className="container mx-auto px-margin-mobile text-center">
                 <FadeIn direction="up">
                   <h2 className="font-headline-xl text-2xl md:text-4xl text-white font-black tracking-widest mb-4 uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Patrocinan</h2>
-                  {sponsorLogos.length < 5 ? (
-                    <div className="flex justify-center items-center gap-8 md:gap-16 py-4 flex-wrap">
-                      {sponsorLogos.map((logo, index) => (
-                        <div key={`single-${index}`} className="flex-shrink-0 flex flex-col items-center justify-center transition-all p-4">
-                          <div className="min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] overflow-hidden flex items-center justify-center">
-                            <img src={logo.url} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
-                          </div>
-                          <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest mt-2 px-3 py-1 rounded-full ${
-                            logo.category === 'Diamante' ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' :
-                            logo.category === 'Oro' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
-                            logo.category === 'Plata' ? 'bg-gray-200 text-gray-700 border border-gray-400' :
-                            'bg-white/10 text-white'
-                          }`}>{logo.category}</span>
+                  <div className="bg-black/20 py-6 md:py-8 rounded-2xl border border-white/10 backdrop-blur-sm overflow-hidden relative w-full flex items-center">
+                    <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-black/50 to-transparent z-10 pointer-events-none"></div>
+                    <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-black/50 to-transparent z-10 pointer-events-none"></div>
+                    
+                    <div className="animate-scroll-logos flex items-stretch">
+                      {[1, 2].map((set) => (
+                        <div key={`set-${set}`} className="flex items-stretch pr-12 md:pr-24">
+                          
+                          {sponsorLogos.filter(l => l.category === 'Diamante').length > 0 && (
+                            <div className="flex items-stretch gap-4 md:gap-6 mx-6 md:mx-8">
+                              <div className="flex items-start pt-2 border-r-2 border-white/30 pr-4 md:pr-6">
+                                <span className="font-black uppercase tracking-widest text-sm md:text-base text-cyan-300 drop-shadow-md">Diamante</span>
+                              </div>
+                              <div className="flex items-center gap-4 md:gap-6">
+                                {sponsorLogos.filter(l => l.category === 'Diamante').map((logo, index) => (
+                                  <div key={`diamante-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-3 bg-white/10 rounded-xl border border-white/20">
+                                    <div className="w-32 h-20 md:w-44 md:h-28 overflow-hidden flex items-center justify-center">
+                                      <img src={logo.url} alt={`Sponsor Diamante ${index}`} className="max-w-full max-h-full object-contain drop-shadow-lg" />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {sponsorLogos.filter(l => l.category === 'Oro').length > 0 && (
+                            <div className="flex items-stretch gap-4 md:gap-6 mx-6 md:mx-8">
+                              <div className="flex items-start pt-2 border-r-2 border-white/30 pr-4 md:pr-6">
+                                <span className="font-black uppercase tracking-widest text-sm md:text-base text-yellow-400 drop-shadow-md">Oro</span>
+                              </div>
+                              <div className="flex items-center gap-4 md:gap-6">
+                                {sponsorLogos.filter(l => l.category === 'Oro').map((logo, index) => (
+                                  <div key={`oro-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-3 bg-white/10 rounded-xl border border-white/20">
+                                    <div className="w-32 h-20 md:w-44 md:h-28 overflow-hidden flex items-center justify-center">
+                                      <img src={logo.url} alt={`Sponsor Oro ${index}`} className="max-w-full max-h-full object-contain drop-shadow-lg" />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {sponsorLogos.filter(l => l.category === 'Plata').length > 0 && (
+                            <div className="flex items-stretch gap-4 md:gap-6 mx-6 md:mx-8">
+                              <div className="flex items-start pt-2 border-r-2 border-white/30 pr-4 md:pr-6">
+                                <span className="font-black uppercase tracking-widest text-sm md:text-base text-gray-300 drop-shadow-md">Plata</span>
+                              </div>
+                              <div className="flex items-center gap-4 md:gap-6">
+                                {sponsorLogos.filter(l => l.category === 'Plata').map((logo, index) => (
+                                  <div key={`plata-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-3 bg-white/10 rounded-xl border border-white/20">
+                                    <div className="w-28 h-16 md:w-36 md:h-24 overflow-hidden flex items-center justify-center">
+                                      <img src={logo.url} alt={`Sponsor Plata ${index}`} className="max-w-full max-h-full object-contain drop-shadow-lg" />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {sponsorLogos.filter(l => l.category === 'Patrocinador').length > 0 && (
+                            <div className="flex items-stretch gap-4 md:gap-6 mx-6 md:mx-8">
+                              <div className="flex items-start pt-2 border-r-2 border-white/30 pr-4 md:pr-6">
+                                <span className="font-black uppercase tracking-widest text-xs md:text-sm text-white/80 drop-shadow-md">Apoyan</span>
+                              </div>
+                              <div className="flex items-center gap-4 md:gap-6">
+                                {sponsorLogos.filter(l => l.category === 'Patrocinador').map((logo, index) => (
+                                  <div key={`patro-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-2 bg-white/5 rounded-xl border border-white/10">
+                                    <div className="w-24 h-14 md:w-32 md:h-20 overflow-hidden flex items-center justify-center">
+                                      <img src={logo.url} alt={`Patrocinador ${index}`} className="max-w-full max-h-full object-contain drop-shadow-md" />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="overflow-hidden relative w-full flex items-center py-2">
-                      <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-black/20 to-transparent z-10 pointer-events-none"></div>
-                      <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-black/20 to-transparent z-10 pointer-events-none"></div>
-                      <div className="animate-scroll-logos flex">
-                        <div className="flex gap-8 md:gap-16 pr-8 md:pr-16 items-center">
-                          {sponsorLogos.map((logo, index) => (
-                            <div key={`first-${index}`} className="flex-shrink-0 flex flex-col items-center justify-center transition-all p-4">
-                              <div className="min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] overflow-hidden flex items-center justify-center">
-                                <img src={logo.url} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
-                              </div>
-                              <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest mt-2 px-3 py-1 rounded-full ${
-                                logo.category === 'Diamante' ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' :
-                                logo.category === 'Oro' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
-                                logo.category === 'Plata' ? 'bg-gray-200 text-gray-700 border border-gray-400' :
-                                'bg-white/10 text-white'
-                              }`}>{logo.category}</span>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="flex gap-8 md:gap-16 pr-8 md:pr-16 items-center">
-                          {sponsorLogos.map((logo, index) => (
-                            <div key={`second-${index}`} className="flex-shrink-0 flex flex-col items-center justify-center transition-all p-4">
-                              <div className="min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] overflow-hidden flex items-center justify-center">
-                                <img src={logo.url} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
-                              </div>
-                              <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest mt-2 px-3 py-1 rounded-full ${
-                                logo.category === 'Diamante' ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' :
-                                logo.category === 'Oro' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
-                                logo.category === 'Plata' ? 'bg-gray-200 text-gray-700 border border-gray-400' :
-                                'bg-white/10 text-white'
-                              }`}>{logo.category}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </FadeIn>
               </div>
             </div>

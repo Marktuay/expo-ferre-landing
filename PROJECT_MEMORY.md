@@ -66,9 +66,14 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Estado:** En pausa a la espera de que el cliente adquiera y configure una Máquina Virtual (Google Cloud `e2-medium` recomendada) con el número de WhatsApp usando un API como *Evolution API* o *Baileys*.
 
 ### 2. Cuentas Demo de Patrocinadores (Auto-destruibles)
-- **Objetivo:** Permitir la creación de cuentas "Demo" desde el modal administrativo de patrocinadores para hacer demostraciones de venta a prospectos.
-- **Mecanismo propuesto:** Añadir un flag `isDemo: true` al crearlas. Requerirá implementar un script de limpieza (cron job en la VM o Firebase Cloud Functions) que analice la base de datos y borre a los usuarios del sistema Auth y sus documentos en Firestore si tienen más de 1 hora de haber sido creados.
-- **Estado:** En pausa. Plan de implementación redactado.
+- **Refactorización de Logos (Reel):** Se restauró el comportamiento de scroll horizontal infinito (marquee) para los logos de los patrocinadores, pero ahora están agrupados por categoría (Diamante, Oro, Plata, Apoyan).
+- **Diseño de Logos:** Los textos indicadores de categoría se hicieron más pequeños y se alinearon a la parte superior (top) junto a la línea divisoria vertical. Se inyectaron logos de prueba (placeholders) de manera temporal para poder previsualizar el diseño mientras la base de datos está vacía.
+- **Hero Video:** Se reemplazó el video a `presentacion-ia-karen.mp4` (4.7mb), escalado al 35%, sin controles del navegador, con un botón personalizado para mutear/desmutear. Todo esto ya está en la rama `main` de GitHub.
+
+### Próximos Pasos (Pendientes post-reinicio)
+1. Integración de la API de WhatsApp para envío de código QR y logística.
+2. Migración automatizada de correos (Aviso de cambio de Pre-registro a Patrocinador).
+3. Creación de cuentas Demo (`isDemo: true`) y script/cron job para limpieza.
 
 ### 3. Envío Automático de Correo (Migración a Patrocinador)
 - **Objetivo:** Enviar un correo electrónico de bienvenida automático a los usuarios cuando un administrador los migre de Preregistro a Patrocinador oficial.
