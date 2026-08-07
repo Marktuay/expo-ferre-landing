@@ -78,7 +78,12 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 08 de Julio de 2026**
+**Última actualización: 07 de Agosto de 2026**
+
+- **UI / Landing Page (Mejoras Hero):** Se actualizó el video principal a `presentacion-ia-karen.mp4`. Se ajustó su visualización para evitar recortes (eliminando la proporción 16:9), adaptando su escala a un 35% del ancho disponible. Se implementó un botón flotante personalizado para activar/desactivar el sonido, garantizando la reproducción sin problemas de controles nativos ocultos.
+- **Carrusel de Patrocinadores (Logos):** Se mejoró la renderización del reel infinito. Los logos descargados de Firebase ahora se ordenan automáticamente por jerarquía de categoría (Diamante, luego Oro, luego Plata). Se agregó una etiqueta visual (pastilla con color distintivo) debajo de cada logo para identificar fácilmente su nivel de patrocinio.
+
+**Cambios Anteriores (08 de Julio de 2026):**
 
 - **Estandarización de Notificaciones por Correo:** Se modificaron todos los módulos (`App.jsx`, `AdminPreRegistrations.jsx`, `AuthPage.jsx`, `AdminSponsors.jsx`, `ContactPage.jsx`, `CreateSponsorModal.jsx`) para que utilicen plantillas HTML con encabezados y pies de página gráficos oficiales. Todas las notificaciones del sistema envían siempre copia a las cuentas de administración (`karen.torres@rinsa.red` y `AdmonEventKT@gmail.com`). Adicionalmente, en el correo de aprobación, el Código QR se reposicionó de forma destacada antes de la información logística del evento.
 - **Gestión de Contraseñas:** 

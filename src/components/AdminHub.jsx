@@ -267,18 +267,33 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
           )}
 
           {adminUser.role === 'admin' && (
-            <button 
-              onClick={() => onNavigate('adminAttendanceReport')}
-              className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group md:col-span-1`}
-            >
-              <div className="w-16 h-16 bg-green-500/10 text-green-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="material-symbols-outlined text-3xl">table_chart</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-on-surface mb-2">Reporte de Asistencia</h3>
-                <p className="text-secondary text-sm">Visualiza métricas y exporta la lista de asistentes consolidados a Excel.</p>
-              </div>
-            </button>
+            <>
+              <button 
+                onClick={() => onNavigate('adminAttendanceReport')}
+                className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group md:col-span-1`}
+              >
+                <div className="w-16 h-16 bg-green-500/10 text-green-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">table_chart</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface mb-2">Reporte de Asistencia</h3>
+                  <p className="text-secondary text-sm">Visualiza métricas y exporta la lista de asistentes consolidados a Excel.</p>
+                </div>
+              </button>
+
+              <button 
+                onClick={() => onNavigate('adminPushNotifications')}
+                className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group md:col-span-1`}
+              >
+                <div className="w-16 h-16 bg-red-500/10 text-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">notifications_active</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface mb-2">Notificaciones Push</h3>
+                  <p className="text-secondary text-sm">Envía avisos masivos a la app móvil de los asistentes.</p>
+                </div>
+              </button>
+            </>
           )}
         </div>
       </div>

@@ -27,6 +27,7 @@ import AdminUsers from './components/AdminUsers';
 import AdminCheckIn from './components/AdminCheckIn';
 import AdminAttendanceReport from './components/AdminAttendanceReport';
 import AdminMarketingReport from './components/AdminMarketingReport';
+import AdminPushNotifications from './components/AdminPushNotifications';
 
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -118,6 +119,8 @@ export default function App() {
     }
   }, [adminUser]);
   const [sponsorLogos, setSponsorLogos] = useState([]);
+  const [isVideoMuted, setIsVideoMuted] = useState(true);
+  const videoRef = useRef(null);
 
   useEffect(() => {
     const q = query(collection(db, `${getEventBasePath()}/stands`), where('status', 'in', ['reserved', 'sold']));
@@ -125,17 +128,29 @@ export default function App() {
       const fetchedLogos = [];
       snapshot.forEach(doc => {
         const data = doc.data();
+        
+        const sizeStr = (data.size || '').toLowerCase();
+        let category = '';
+        let order = 99;
+        if (sizeStr.includes('diamante')) { category = 'Diamante'; order = 1; }
+        else if (sizeStr.includes('oro')) { category = 'Oro'; order = 2; }
+        else if (sizeStr.includes('plata')) { category = 'Plata'; order = 3; }
+        else { category = 'Patrocinador'; order = 4; }
+
         if (data.logo && typeof data.logo === 'string' && data.logo.trim().length > 10) {
-          fetchedLogos.push(data.logo);
+          fetchedLogos.push({ url: data.logo, category, order });
         }
         if (data.additionalLogos && Array.isArray(data.additionalLogos)) {
           data.additionalLogos.forEach(addLogo => {
             if (addLogo && typeof addLogo === 'string' && addLogo.trim().length > 10) {
-              fetchedLogos.push(addLogo);
+              fetchedLogos.push({ url: addLogo, category, order });
             }
           });
         }
       });
+      
+      // Ordenar por importancia (Diamante -> Oro -> Plata)
+      fetchedLogos.sort((a, b) => a.order - b.order);
       setSponsorLogos(fetchedLogos);
     });
     return () => unsubscribe();
@@ -530,9 +545,17 @@ export default function App() {
                   <h2 className="font-headline-xl text-2xl md:text-4xl text-white font-black tracking-widest mb-4 uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Patrocinan</h2>
                   {sponsorLogos.length < 5 ? (
                     <div className="flex justify-center items-center gap-8 md:gap-16 py-4 flex-wrap">
-                      {sponsorLogos.map((logoUrl, index) => (
-                        <div key={`single-${index}`} className="flex-shrink-0 flex items-center justify-center min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] transition-all overflow-hidden p-4">
-                          <img src={logoUrl} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
+                      {sponsorLogos.map((logo, index) => (
+                        <div key={`single-${index}`} className="flex-shrink-0 flex flex-col items-center justify-center transition-all p-4">
+                          <div className="min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] overflow-hidden flex items-center justify-center">
+                            <img src={logo.url} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
+                          </div>
+                          <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest mt-2 px-3 py-1 rounded-full ${
+                            logo.category === 'Diamante' ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' :
+                            logo.category === 'Oro' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
+                            logo.category === 'Plata' ? 'bg-gray-200 text-gray-700 border border-gray-400' :
+                            'bg-white/10 text-white'
+                          }`}>{logo.category}</span>
                         </div>
                       ))}
                     </div>
@@ -542,16 +565,32 @@ export default function App() {
                       <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-black/20 to-transparent z-10 pointer-events-none"></div>
                       <div className="animate-scroll-logos flex">
                         <div className="flex gap-8 md:gap-16 pr-8 md:pr-16 items-center">
-                          {sponsorLogos.map((logoUrl, index) => (
-                            <div key={`first-${index}`} className="flex-shrink-0 flex items-center justify-center min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] transition-all overflow-hidden p-4">
-                              <img src={logoUrl} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
+                          {sponsorLogos.map((logo, index) => (
+                            <div key={`first-${index}`} className="flex-shrink-0 flex flex-col items-center justify-center transition-all p-4">
+                              <div className="min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] overflow-hidden flex items-center justify-center">
+                                <img src={logo.url} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
+                              </div>
+                              <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest mt-2 px-3 py-1 rounded-full ${
+                                logo.category === 'Diamante' ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' :
+                                logo.category === 'Oro' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
+                                logo.category === 'Plata' ? 'bg-gray-200 text-gray-700 border border-gray-400' :
+                                'bg-white/10 text-white'
+                              }`}>{logo.category}</span>
                             </div>
                           ))}
                         </div>
                         <div className="flex gap-8 md:gap-16 pr-8 md:pr-16 items-center">
-                          {sponsorLogos.map((logoUrl, index) => (
-                            <div key={`second-${index}`} className="flex-shrink-0 flex items-center justify-center min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] transition-all overflow-hidden p-4">
-                              <img src={logoUrl} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
+                          {sponsorLogos.map((logo, index) => (
+                            <div key={`second-${index}`} className="flex-shrink-0 flex flex-col items-center justify-center transition-all p-4">
+                              <div className="min-w-[200px] min-h-[57px] max-w-[400px] h-[120px] md:h-[180px] overflow-hidden flex items-center justify-center">
+                                <img src={logo.url} alt={`Sponsor ${index}`} className="w-full h-full object-contain drop-shadow-md" />
+                              </div>
+                              <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest mt-2 px-3 py-1 rounded-full ${
+                                logo.category === 'Diamante' ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' :
+                                logo.category === 'Oro' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
+                                logo.category === 'Plata' ? 'bg-gray-200 text-gray-700 border border-gray-400' :
+                                'bg-white/10 text-white'
+                              }`}>{logo.category}</span>
                             </div>
                           ))}
                         </div>
@@ -580,17 +619,31 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <div className="lg:col-span-5">
-              <div className="bg-[#d9d9d9]/80 backdrop-blur-sm border border-outline-variant hard-shadow-orange rounded-5px overflow-hidden aspect-video relative flex items-center justify-center shadow-2xl">
+            <div className="lg:col-span-5 flex justify-center">
+              <div className="bg-[#d9d9d9]/80 backdrop-blur-sm border border-outline-variant hard-shadow-orange rounded-5px overflow-hidden relative flex items-center justify-center shadow-2xl w-[35%] min-w-[200px]">
                 <video 
-                  className="w-full h-full object-cover" 
+                  ref={videoRef}
+                  className="w-full h-auto object-contain" 
                   autoPlay 
                   loop 
-                  muted 
+                  muted={isVideoMuted}
                   playsInline
                 >
-                  <source src="/video3expoferre.mp4" type="video/mp4" />
+                  <source src="/presentacion-ia-karen.mp4" type="video/mp4" />
                 </video>
+                <button
+                  onClick={() => {
+                    if (videoRef.current) {
+                      videoRef.current.muted = !videoRef.current.muted;
+                      setIsVideoMuted(videoRef.current.muted);
+                    }
+                  }}
+                  className="absolute bottom-2 right-2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors flex items-center justify-center z-20 shadow-md"
+                >
+                  <span className="material-symbols-outlined text-sm">
+                    {isVideoMuted ? 'volume_off' : 'volume_up'}
+                  </span>
+                </button>
               </div>
             </div>
           </div>
@@ -1015,6 +1068,9 @@ export default function App() {
       )}
       {currentView === 'adminPreRegistrations' && (
         <AdminPreRegistrations onBack={() => setCurrentView('adminHub')} adminUser={adminUser} />
+      )}
+      {currentView === 'adminPushNotifications' && (
+        <AdminPushNotifications onBack={() => setCurrentView('adminHub')} />
       )}
 
       {currentView === 'adminContact' && (
