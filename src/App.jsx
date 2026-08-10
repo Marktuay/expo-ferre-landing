@@ -118,7 +118,25 @@ export default function App() {
       localStorage.removeItem('expoFerre_adminUser');
     }
   }, [adminUser]);
-  const [sponsorLogos, setSponsorLogos] = useState([]);
+  
+  // TODO: ELIMINAR ESTO DESPUÉS. Placeholders iniciales apuntando a las carpetas locales.
+  // IMPORTANTE: Como usas los nombres reales de las empresas, debes actualizar esta lista 
+  // con el nombre exacto de tu archivo (ej. '/diamante/rotoplas.png').
+  const initialPlaceholders = [
+    { url: '/diamante/sinsa.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/comasa.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/extelpng.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/importacionesballadares.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/megalines.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/sur.png', category: 'Diamante', order: 1 },
+    { url: '/oro/plycem%20.png', category: 'Oro', order: 2 },
+    { url: '/oro/sicsa.png', category: 'Oro', order: 2 },
+    { url: '/plata/casco.png', category: 'Plata', order: 3 },
+    { url: '/plata/ferdandezsera.png', category: 'Plata', order: 3 },
+    { url: '/plata/midenesa.png', category: 'Plata', order: 3 },
+  ];
+  
+  const [sponsorLogos, setSponsorLogos] = useState(initialPlaceholders);
   const [isVideoMuted, setIsVideoMuted] = useState(true);
   const videoRef = useRef(null);
 
@@ -152,21 +170,12 @@ export default function App() {
       // Ordenar por importancia (Diamante -> Oro -> Plata)
       fetchedLogos.sort((a, b) => a.order - b.order);
 
-      // TODO: ELIMINAR ESTO DESPUÉS. Código temporal para poder visualizar el diseño 
-      // si aún no se han subido logos a la base de datos.
+      // Si no hay logos en Firebase, mantener los placeholders.
       if (fetchedLogos.length === 0) {
-        fetchedLogos.push(
-          { url: 'https://via.placeholder.com/250x150/e0f2fe/075985?text=Diamante+1', category: 'Diamante', order: 1 },
-          { url: 'https://via.placeholder.com/250x150/e0f2fe/075985?text=Diamante+2', category: 'Diamante', order: 1 },
-          { url: 'https://via.placeholder.com/250x150/e0f2fe/075985?text=Diamante+3', category: 'Diamante', order: 1 },
-          { url: 'https://via.placeholder.com/250x150/fef08a/854d0e?text=Oro+1', category: 'Oro', order: 2 },
-          { url: 'https://via.placeholder.com/250x150/fef08a/854d0e?text=Oro+2', category: 'Oro', order: 2 },
-          { url: 'https://via.placeholder.com/250x150/e5e7eb/374151?text=Plata+1', category: 'Plata', order: 3 },
-          { url: 'https://via.placeholder.com/250x150/e5e7eb/374151?text=Plata+2', category: 'Plata', order: 3 }
-        );
+        setSponsorLogos(initialPlaceholders);
+      } else {
+        setSponsorLogos(fetchedLogos);
       }
-
-      setSponsorLogos(fetchedLogos);
     });
     return () => unsubscribe();
   }, []);
@@ -554,10 +563,10 @@ export default function App() {
 
           {/* Superimposed Sponsors List */}
           {sponsorLogos.length > 0 && (
-            <div className="w-full z-20 mb-8 md:mb-12 shrink-0 mt-8">
+            <div className="w-full z-20 mb-8 md:mb-12 shrink-0 -mt-2">
               <div className="container mx-auto px-margin-mobile text-center">
                 <FadeIn direction="up">
-                  <h2 className="font-headline-xl text-2xl md:text-4xl text-white font-black tracking-widest mb-4 uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Patrocinan</h2>
+                  <h2 className="font-headline-xl text-2xl md:text-4xl text-white font-black tracking-widest mb-6 uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Patrocinan</h2>
                   <div className="bg-black/20 py-6 md:py-8 rounded-2xl border border-white/10 backdrop-blur-sm overflow-hidden relative w-full flex items-center">
                     <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-black/50 to-transparent z-10 pointer-events-none"></div>
                     <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-black/50 to-transparent z-10 pointer-events-none"></div>
@@ -566,6 +575,9 @@ export default function App() {
                       {[1, 2].map((set) => (
                         <div key={`set-${set}`} className="flex items-stretch pr-12 md:pr-24">
                           
+                          {/* Espaciador para que el reel empiece desde el borde derecho y haya una pausa entre ciclos */}
+                          <div className="w-[50vw] shrink-0"></div>
+
                           {sponsorLogos.filter(l => l.category === 'Diamante').length > 0 && (
                             <div className="flex items-stretch gap-4 md:gap-6 mx-6 md:mx-8">
                               <div className="flex items-start pt-2 border-r-2 border-white/30 pr-4 md:pr-6">
@@ -574,7 +586,7 @@ export default function App() {
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Diamante').map((logo, index) => (
                                   <div key={`diamante-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-3 bg-white/10 rounded-xl border border-white/20">
-                                    <div className="w-32 h-20 md:w-44 md:h-28 overflow-hidden flex items-center justify-center">
+                                    <div className="w-32 md:w-44 aspect-video overflow-hidden flex items-center justify-center">
                                       <img src={logo.url} alt={`Sponsor Diamante ${index}`} className="max-w-full max-h-full object-contain drop-shadow-lg" />
                                     </div>
                                   </div>
@@ -591,7 +603,7 @@ export default function App() {
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Oro').map((logo, index) => (
                                   <div key={`oro-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-3 bg-white/10 rounded-xl border border-white/20">
-                                    <div className="w-32 h-20 md:w-44 md:h-28 overflow-hidden flex items-center justify-center">
+                                    <div className="w-32 md:w-44 aspect-video overflow-hidden flex items-center justify-center">
                                       <img src={logo.url} alt={`Sponsor Oro ${index}`} className="max-w-full max-h-full object-contain drop-shadow-lg" />
                                     </div>
                                   </div>
@@ -608,7 +620,7 @@ export default function App() {
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Plata').map((logo, index) => (
                                   <div key={`plata-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-3 bg-white/10 rounded-xl border border-white/20">
-                                    <div className="w-28 h-16 md:w-36 md:h-24 overflow-hidden flex items-center justify-center">
+                                    <div className="w-28 md:w-36 aspect-video overflow-hidden flex items-center justify-center">
                                       <img src={logo.url} alt={`Sponsor Plata ${index}`} className="max-w-full max-h-full object-contain drop-shadow-lg" />
                                     </div>
                                   </div>
@@ -625,7 +637,7 @@ export default function App() {
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Patrocinador').map((logo, index) => (
                                   <div key={`patro-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-2 bg-white/5 rounded-xl border border-white/10">
-                                    <div className="w-24 h-14 md:w-32 md:h-20 overflow-hidden flex items-center justify-center">
+                                    <div className="w-24 md:w-32 aspect-video overflow-hidden flex items-center justify-center">
                                       <img src={logo.url} alt={`Patrocinador ${index}`} className="max-w-full max-h-full object-contain drop-shadow-md" />
                                     </div>
                                   </div>
@@ -661,7 +673,7 @@ export default function App() {
               </div>
             </div>
             <div className="lg:col-span-5 flex justify-center">
-              <div className="bg-[#d9d9d9]/80 backdrop-blur-sm border border-outline-variant hard-shadow-orange rounded-5px overflow-hidden relative flex items-center justify-center shadow-2xl w-[35%] min-w-[200px]">
+              <div className="bg-[#d9d9d9]/80 backdrop-blur-sm border border-outline-variant hard-shadow-orange rounded-5px overflow-hidden relative flex items-center justify-center shadow-2xl w-[60%] min-w-[200px]">
                 <video 
                   ref={videoRef}
                   className="w-full h-auto object-contain" 

@@ -19,7 +19,7 @@
     100% { transform: translateX(-50%); }
 }
 .animate-scroll-logos {
-    animation: scroll-logos 25s linear infinite;
+    animation: scroll-logos 55s linear infinite;
     display: flex;
     width: max-content;
 }

@@ -67,13 +67,22 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ### 2. Cuentas Demo de Patrocinadores (Auto-destruibles)
 - **Refactorización de Logos (Reel):** Se restauró el comportamiento de scroll horizontal infinito (marquee) para los logos de los patrocinadores, pero ahora están agrupados por categoría (Diamante, Oro, Plata, Apoyan).
-- **Diseño de Logos:** Los textos indicadores de categoría se hicieron más pequeños y se alinearon a la parte superior (top) junto a la línea divisoria vertical. Se inyectaron logos de prueba (placeholders) de manera temporal para poder previsualizar el diseño mientras la base de datos está vacía.
-- **Hero Video:** Se reemplazó el video a `presentacion-ia-karen.mp4` (4.7mb), escalado al 35%, sin controles del navegador, con un botón personalizado para mutear/desmutear. Todo esto ya está en la rama `main` de GitHub.
+- **Diseño de Logos:** Los textos indicadores de categoría se hicieron más pequeños y se alinearon a la parte superior (top) junto a la línea divisoria vertical. Se re-inyectaron logos de prueba (placeholders) de manera temporal para poder previsualizar el diseño mientras la base de datos está vacía y confirmar formato con el cliente.
+- **Hero Video:** Se reemplazó el video a `presentacion-ia-karen.mp4` (4.7mb), escalado al 60%, sin controles del navegador, con un botón personalizado para mutear/desmutear. Todo esto ya está en la rama `main` de GitHub.
 
-### Próximos Pasos (Pendientes post-reinicio)
-1. Integración de la API de WhatsApp para envío de código QR y logística.
-2. Migración automatizada de correos (Aviso de cambio de Pre-registro a Patrocinador).
-3. Creación de cuentas Demo (`isDemo: true`) y script/cron job para limpieza.
+### Progreso Actual y Pendientes
+- **Cuentas Demo:** (Pendiente) Crear el campo boolean isDemo y job de limpieza.
+- **WhatsApp API:** (Pendiente) Integrar el envío del QR, a la espera de la configuración de la VM.
+- **Correos:** (Pendiente) Aviso automático para el estatus de pre-registro -> patrocinador.
+- **Logos de Patrocinadores:** (Completado) 
+  - Se configuró formato 16:9 con Tailwind `aspect-video` para estandarización.
+  - Se activaron y publicaron 6 logos Diamante, 2 Oro y 3 Plata reales.
+  - Se optimizó la animación del reel a 55s y se añadió un espaciador de 50vw para garantizar que los patrocinadores principales entren elegante y completamente visibles desde el inicio al cargar la página.
+  - Se reordenó la categoría Diamante para priorizar a Sinsa.
+
+## Próximos pasos
+- Subir los logos faltantes de Oro, Plata o Apoyan (cuando el diseñador los provea) y habilitar su carga en `App.jsx`.
+- Iniciar con el backend/Firebase para Cuentas Demo o migración de correos según priorice el cliente.
 
 ### 3. Envío Automático de Correo (Migración a Patrocinador)
 - **Objetivo:** Enviar un correo electrónico de bienvenida automático a los usuarios cuando un administrador los migre de Preregistro a Patrocinador oficial.
