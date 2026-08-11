@@ -123,12 +123,13 @@ export default function App() {
   // IMPORTANTE: Como usas los nombres reales de las empresas, debes actualizar esta lista 
   // con el nombre exacto de tu archivo (ej. '/diamante/rotoplas.png').
   const initialPlaceholders = [
-    { url: '/diamante/sinsa.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/sur.png', category: 'Diamante', order: 1 },
     { url: '/diamante/comasa.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/sinsa.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/noelito%20.png', category: 'Diamante', order: 1 },
     { url: '/diamante/extelpng.png', category: 'Diamante', order: 1 },
     { url: '/diamante/importacionesballadares.png', category: 'Diamante', order: 1 },
     { url: '/diamante/megalines.png', category: 'Diamante', order: 1 },
-    { url: '/diamante/sur.png', category: 'Diamante', order: 1 },
     { url: '/oro/plycem%20.png', category: 'Oro', order: 2 },
     { url: '/oro/sicsa.png', category: 'Oro', order: 2 },
     { url: '/plata/casco.png', category: 'Plata', order: 3 },
