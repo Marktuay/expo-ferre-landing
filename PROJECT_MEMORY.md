@@ -71,7 +71,13 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Hero Video:** Se reemplazó el video a `presentacion-ia-karen.mp4` (4.7mb), escalado al 60%, sin controles del navegador, con un botón personalizado para mutear/desmutear. Todo esto ya está en la rama `main` de GitHub.
 
 ### Progreso Actual y Pendientes
-- **Cuentas Demo:** (Pendiente) Crear el campo boolean isDemo y job de limpieza.
+- **Cuentas y Limpieza Demo:**
+  - (Pendiente) Migración y scripts para las cuentas temporales o demos con `isDemo`.
+  - (Pendiente) Job de limpieza periódica de usuarios demostrativos.
+
+- **Preregistros y Google Sheets:**
+  - **Sincronización en Tiempo Real:** Se implementó una integración en `App.jsx` que envía silenciosamente un POST al Webhook (Google Apps Script) cada vez que un visitante completa exitosamente su registro, alimentando de manera automática y gratuita un Google Sheet con los datos del visitante (Nombre, Empresa, Email, Teléfono, UTMs, etc.).
+
 - **WhatsApp API:** (Pendiente) Integrar el envío del QR, a la espera de la configuración de la VM.
 - **Correos:** (Pendiente) Aviso automático para el estatus de pre-registro -> patrocinador.
 - **Logos de Patrocinadores:** (Completado) 

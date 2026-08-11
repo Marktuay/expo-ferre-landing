@@ -126,9 +126,9 @@ export default function App() {
     { url: '/diamante/sur.png', category: 'Diamante', order: 1 },
     { url: '/diamante/comasa.png', category: 'Diamante', order: 1 },
     { url: '/diamante/sinsa.png', category: 'Diamante', order: 1 },
-    { url: '/diamante/noelito%20.png', category: 'Diamante', order: 1 },
     { url: '/diamante/extelpng.png', category: 'Diamante', order: 1 },
     { url: '/diamante/importacionesballadares.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/noelito%20.png', category: 'Diamante', order: 1 },
     { url: '/diamante/megalines.png', category: 'Diamante', order: 1 },
     { url: '/oro/plycem%20.png', category: 'Oro', order: 2 },
     { url: '/oro/sicsa.png', category: 'Oro', order: 2 },
@@ -325,6 +325,20 @@ export default function App() {
           `
         }
       });
+
+      // Sincronizar con Google Sheets Webhook
+      try {
+        fetch('https://script.google.com/macros/s/AKfycbyfJKrTw_rfJr5nK6pn0Nr8_2B7GxaQLBD_3kCexYW7i0b7g7ha8si8bq9OOGEn7dCI/exec', {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+          body: JSON.stringify(data)
+        });
+      } catch (e) {
+        console.error("Error sincronizando con Google Sheets", e);
+      }
 
       if (status === 'approved') {
         setQrValue(docRef.id);
