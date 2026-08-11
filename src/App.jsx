@@ -130,6 +130,7 @@ export default function App() {
     { url: '/diamante/importacionesballadares.png', category: 'Diamante', order: 1 },
     { url: '/diamante/noelito%20.png', category: 'Diamante', order: 1 },
     { url: '/diamante/megalines.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/megalines1.png', category: 'Diamante', order: 1 },
     { url: '/oro/plycem%20.png', category: 'Oro', order: 2 },
     { url: '/oro/sicsa.png', category: 'Oro', order: 2 },
     { url: '/plata/casco.png', category: 'Plata', order: 3 },
