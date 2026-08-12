@@ -172,12 +172,10 @@ export default function App() {
       // Ordenar por importancia (Diamante -> Oro -> Plata)
       fetchedLogos.sort((a, b) => a.order - b.order);
 
-      // Si no hay logos en Firebase, mantener los placeholders.
-      if (fetchedLogos.length === 0) {
-        setSponsorLogos(initialPlaceholders);
-      } else {
-        setSponsorLogos(fetchedLogos);
-      }
+      // Combinar los logos iniciales estáticos con los logos dinámicos cargados desde Firebase
+      const combinedLogos = [...initialPlaceholders, ...fetchedLogos];
+      combinedLogos.sort((a, b) => a.order - b.order);
+      setSponsorLogos(combinedLogos);
     });
     return () => unsubscribe();
   }, []);
