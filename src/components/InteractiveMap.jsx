@@ -509,12 +509,12 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
                 <ul className="list-disc pl-5 space-y-1">
                   <li>Formatos permitidos: <strong>JPG, PNG o SVG</strong>.</li>
                   <li>Las imágenes se optimizarán automáticamente para no sobrecargar el sistema.</li>
-                  <li>El primer logo aparecerá en el mapa y en el carrusel. Los adicionales solo en el carrusel.</li>
+                  <li>El logo principal aparecerá al pasar el cursor o hacer clic sobre el stand en el mapa interactivo.</li>
                 </ul>
               </div>
               
               <div className="flex flex-col gap-2 border-b border-outline-variant pb-4 mb-2">
-                <label className="text-label-md font-bold text-on-surface">Logo Principal (Mapa y Carrusel) <span className="text-red-500">*</span></label>
+                <label className="text-label-md font-bold text-on-surface">Logo Principal (Mapa Interactivo) <span className="text-red-500">*</span></label>
                 <input 
                   type="file" 
                   name="logoFile"
