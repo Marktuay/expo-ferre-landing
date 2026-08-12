@@ -139,6 +139,8 @@ export default function App() {
   ];
   
   const sponsorLogos = initialPlaceholders;
+  const [isVideoMuted, setIsVideoMuted] = useState(true);
+  const videoRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
