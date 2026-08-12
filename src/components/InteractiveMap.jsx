@@ -198,7 +198,7 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
               <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
                 <div className="relative w-[1200px] h-[800px] md:w-[1600px] md:h-[1000px] max-w-none">
                   <img 
-                    src="/mapa-expo-ferre.svg" 
+                    src="/Mapa-Expo-Ferre-Agosto.svg" 
                     alt="Plano del Evento Expo Ferre" 
                     className="w-full h-full object-contain select-none cursor-crosshair"
                     draggable="false"
