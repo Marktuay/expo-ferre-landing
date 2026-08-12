@@ -138,47 +138,7 @@ export default function App() {
     { url: '/plata/midenesa.png', category: 'Plata', order: 3 },
   ];
   
-  const [sponsorLogos, setSponsorLogos] = useState(initialPlaceholders);
-  const [isVideoMuted, setIsVideoMuted] = useState(true);
-  const videoRef = useRef(null);
-
-  useEffect(() => {
-    const q = query(collection(db, `${getEventBasePath()}/stands`), where('status', 'in', ['reserved', 'sold']));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedLogos = [];
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        
-        const sizeStr = (data.size || '').toLowerCase();
-        let category = '';
-        let order = 99;
-        if (sizeStr.includes('diamante')) { category = 'Diamante'; order = 1; }
-        else if (sizeStr.includes('oro')) { category = 'Oro'; order = 2; }
-        else if (sizeStr.includes('plata')) { category = 'Plata'; order = 3; }
-        else { category = 'Patrocinador'; order = 4; }
-
-        if (data.logo && typeof data.logo === 'string' && data.logo.trim().length > 10) {
-          fetchedLogos.push({ url: data.logo, category, order });
-        }
-        if (data.additionalLogos && Array.isArray(data.additionalLogos)) {
-          data.additionalLogos.forEach(addLogo => {
-            if (addLogo && typeof addLogo === 'string' && addLogo.trim().length > 10) {
-              fetchedLogos.push({ url: addLogo, category, order });
-            }
-          });
-        }
-      });
-      
-      // Ordenar por importancia (Diamante -> Oro -> Plata)
-      fetchedLogos.sort((a, b) => a.order - b.order);
-
-      // Combinar los logos iniciales estáticos con los logos dinámicos cargados desde Firebase
-      const combinedLogos = [...initialPlaceholders, ...fetchedLogos];
-      combinedLogos.sort((a, b) => a.order - b.order);
-      setSponsorLogos(combinedLogos);
-    });
-    return () => unsubscribe();
-  }, []);
+  const sponsorLogos = initialPlaceholders;
 
   useEffect(() => {
     const handleScroll = () => {
