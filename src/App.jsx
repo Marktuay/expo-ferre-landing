@@ -133,6 +133,7 @@ export default function App() {
     { url: '/diamante/noelito%20.png', category: 'Diamante', order: 1 },
     { url: '/oro/plycem%20.png', category: 'Oro', order: 2 },
     { url: '/oro/sicsa.png', category: 'Oro', order: 2 },
+    { url: '/oro/logo-jp-technology.png', category: 'Oro', order: 2 },
     { url: '/plata/casco.png', category: 'Plata', order: 3 },
     { url: '/plata/ferdandezsera.png', category: 'Plata', order: 3 },
     { url: '/plata/midenesa.png', category: 'Plata', order: 3 },
