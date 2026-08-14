@@ -699,8 +699,8 @@ export default function App() {
 
             <div className="flex flex-col gap-8 mb-8">
               <FadeIn direction="up">
-                <div className="flex flex-col lg:flex-row gap-8">
-                  <div className="w-full lg:w-[40%] space-y-6 text-base md:text-lg text-[#283474] font-medium bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="space-y-6 text-lg text-[#283474] font-medium bg-white p-8 md:p-10 rounded-xl shadow-sm border border-gray-100 w-full flex flex-col justify-center">
                     <p className="leading-relaxed">
                       <strong className="font-black">EXPO FERRE</strong> nace como la primera plataforma especializada del sector ferretero en Nicaragua para crear negocios, fortalecer, conectar y modernizar la industria a través de un espacio de alto nivel enfocado en la innovación, el comercio y las relaciones estratégicas.
                     </p>
@@ -711,8 +711,8 @@ export default function App() {
                       <strong className="font-black">EXPO FERRE</strong> impulsará oportunidades reales de posicionamiento, expansión comercial, generación de alianzas y conexión directa entre marcas y compradores estratégicos del sector.
                     </p>
                   </div>
-                  <div id="plano-stands" className="w-full lg:w-[60%] bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col h-[600px] md:h-[650px] relative">
-                    <InteractiveMap />
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex items-center justify-center p-2">
+                    <img src="/map-expo-ferre-140826.svg" alt="Mapa de Expo Ferre" className="w-full h-auto object-contain max-h-[600px] hover:scale-105 transition-transform duration-300" />
                   </div>
                 </div>
               </FadeIn>
