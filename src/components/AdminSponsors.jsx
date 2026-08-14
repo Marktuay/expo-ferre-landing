@@ -24,7 +24,7 @@ export default function AdminSponsors({ onBack }) {
       const combinedMap = new Map();
 
       userResults.forEach(u => {
-        combinedMap.set(u.id, { ...u, standName: '' });
+        combinedMap.set(u.id, { ...u, standList: [] });
       });
 
       standResults.forEach(st => {
@@ -36,20 +36,21 @@ export default function AdminSponsors({ onBack }) {
           }
         }
         if (match) {
-          match.standName = match.standName ? `${match.standName}, ${st.name}` : st.name;
+          if (!match.standList) match.standList = [];
+          if (!match.standList.includes(st.name)) match.standList.push(st.name);
           if (st.logo && !match.logo) match.logo = st.logo;
-        } else if (st.company || st.name) {
+        } else if (st.company && st.company.trim().length > 0) {
           const fakeId = `stand-sponsor-${st.id}`;
           combinedMap.set(fakeId, {
             id: fakeId,
-            nombre: st.company || st.name,
+            nombre: st.company.trim(),
             apellido: '',
-            empresa: st.company || st.name,
+            empresa: st.company.trim(),
             correo: st.sponsorEmail || 'N/A',
             telefono: 'N/A',
             status: 'approved',
             createdAt: st.updatedAt?.toDate() || new Date(),
-            standName: st.name,
+            standList: [st.name],
             logo: st.logo
           });
         }
@@ -129,6 +130,7 @@ export default function AdminSponsors({ onBack }) {
                   Fecha: s.createdAt.toLocaleDateString() + ' ' + s.createdAt.toLocaleTimeString(),
                   Nombre: (`${s.nombre || s.name || ''} ${s.apellido || ''}`).trim() || 'Sin Nombre',
                   Empresa: s.empresa || s.company || 'N/A',
+                  Stand: s.standList && s.standList.length > 0 ? s.standList.join(', ') : 'Sin Stand',
                   Email: s.correo || s.email || 'N/A',
                   Teléfono: s.telefono || s.phone || 'N/A',
                   Empleados: s.empleados || 'N/A'
@@ -192,9 +194,24 @@ export default function AdminSponsors({ onBack }) {
                         </div>
                       </td>
                       <td className="p-4 text-secondary">{sponsor.empresa || sponsor.company || 'N/A'}</td>
-                      <td className="p-4 text-secondary">
-                        {sponsor.standName ? (
-                          <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-300">{sponsor.standName}</span>
+                      <td className="p-4 text-secondary max-w-[220px]">
+                        {sponsor.standList && sponsor.standList.length > 0 ? (
+                          sponsor.standList.length <= 2 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {sponsor.standList.map(name => (
+                                <span key={name} className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-300 whitespace-nowrap">{name}</span>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1" title={sponsor.standList.join(', ')}>
+                              <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-300 whitespace-nowrap">
+                                {sponsor.standList[0]}
+                              </span>
+                              <span className="bg-gray-100 text-gray-700 text-xs font-bold px-2 py-0.5 rounded-full border border-gray-300 whitespace-nowrap">
+                                +{sponsor.standList.length - 1} más ({sponsor.standList.length} total)
+                              </span>
+                            </div>
+                          )
                         ) : (
                           <span className="text-gray-400 text-xs font-medium">Sin Stand</span>
                         )}
