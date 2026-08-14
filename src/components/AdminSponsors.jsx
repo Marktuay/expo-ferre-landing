@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import AdminSponsorDetails from './AdminSponsorDetails';
 import PrintableBadgeList from './PrintableBadgeList';
 import CreateSponsorModal from './CreateSponsorModal';
+import { getEventBasePath } from '../config/eventConfig';
 
 export default function AdminSponsors({ onBack }) {
   const [sponsors, setSponsors] = useState([]);
@@ -13,28 +14,74 @@ export default function AdminSponsors({ onBack }) {
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
-    const q = query(collection(db, 'users'), where('role', '==', 'sponsor'));
+    const qUsers = query(collection(db, 'users'), where('role', '==', 'sponsor'));
+    const qStands = query(collection(db, `${getEventBasePath()}/stands`), where('status', 'in', ['reserved', 'sold']));
     
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const results = [];
-      snapshot.forEach((doc) => {
-        results.push({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate() || new Date()
-        });
+    let userResults = [];
+    let standResults = [];
+
+    const updateCombined = () => {
+      const combinedMap = new Map();
+
+      userResults.forEach(u => {
+        combinedMap.set(u.id, { ...u, standName: '' });
       });
-      // Sort in descending order by date locally since we filter by role
-      results.sort((a, b) => b.createdAt - a.createdAt);
-      
-      setSponsors(results);
+
+      standResults.forEach(st => {
+        let match = null;
+        for (const [id, user] of combinedMap.entries()) {
+          if (id === st.sponsorId || (st.sponsorEmail && (user.correo === st.sponsorEmail || user.email === st.sponsorEmail))) {
+            match = user;
+            break;
+          }
+        }
+        if (match) {
+          match.standName = match.standName ? `${match.standName}, ${st.name}` : st.name;
+          if (st.logo && !match.logo) match.logo = st.logo;
+        } else if (st.company || st.name) {
+          const fakeId = `stand-sponsor-${st.id}`;
+          combinedMap.set(fakeId, {
+            id: fakeId,
+            nombre: st.company || st.name,
+            apellido: '',
+            empresa: st.company || st.name,
+            correo: st.sponsorEmail || 'N/A',
+            telefono: 'N/A',
+            status: 'approved',
+            createdAt: st.updatedAt?.toDate() || new Date(),
+            standName: st.name,
+            logo: st.logo
+          });
+        }
+      });
+
+      const finalResults = Array.from(combinedMap.values());
+      finalResults.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      setSponsors(finalResults);
       setLoading(false);
-    }, (error) => {
-      console.error("Error fetching sponsors:", error);
-      setLoading(false);
+    };
+
+    const unsubUsers = onSnapshot(qUsers, (snapshot) => {
+      userResults = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date()
+      }));
+      updateCombined();
     });
 
-    return () => unsubscribe();
+    const unsubStands = onSnapshot(qStands, (snapshot) => {
+      standResults = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      updateCombined();
+    });
+
+    return () => {
+      unsubUsers();
+      unsubStands();
+    };
   }, []);
 
   if (selectedSponsor) {
@@ -109,6 +156,7 @@ export default function AdminSponsors({ onBack }) {
                 <tr className="bg-surface-variant/30 border-b border-outline-variant">
                   <th className="p-4 font-bold text-on-surface">Nombre</th>
                   <th className="p-4 font-bold text-on-surface">Empresa</th>
+                  <th className="p-4 font-bold text-on-surface">Stand</th>
                   <th className="p-4 font-bold text-on-surface">Email</th>
                   <th className="p-4 font-bold text-on-surface">Teléfono</th>
                   <th className="p-4 font-bold text-on-surface">Empleados</th>
@@ -120,13 +168,13 @@ export default function AdminSponsors({ onBack }) {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="8" className="p-8 text-center text-secondary">
+                    <td colSpan="9" className="p-8 text-center text-secondary">
                       Cargando datos...
                     </td>
                   </tr>
                 ) : sponsors.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="p-8 text-center text-secondary">
+                    <td colSpan="9" className="p-8 text-center text-secondary">
                       No hay patrocinadores registrados.
                     </td>
                   </tr>
@@ -144,6 +192,13 @@ export default function AdminSponsors({ onBack }) {
                         </div>
                       </td>
                       <td className="p-4 text-secondary">{sponsor.empresa || sponsor.company || 'N/A'}</td>
+                      <td className="p-4 text-secondary">
+                        {sponsor.standName ? (
+                          <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-300">{sponsor.standName}</span>
+                        ) : (
+                          <span className="text-gray-400 text-xs font-medium">Sin Stand</span>
+                        )}
+                      </td>
                       <td className="p-4 text-secondary">{sponsor.correo || sponsor.email || 'N/A'}</td>
                       <td className="p-4 text-secondary">{sponsor.telefono || sponsor.phone || 'N/A'}</td>
                       <td className="p-4 text-secondary">{sponsor.empleados || 'N/A'}</td>
