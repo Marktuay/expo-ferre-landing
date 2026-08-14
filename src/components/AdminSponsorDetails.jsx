@@ -16,32 +16,42 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
 
     // Use sponsor.id (which is their uid) or their email as fallback for legacy records
     const sponsorId = sponsor.id;
-    const sponsorEmail = sponsor.correo;
+    const sponsorEmail = sponsor.correo || sponsor.email || '';
 
-    // We only query by sponsorId because we updated the logic. If necessary in the future, we could also query by sponsorEmail.
-    
-    // Escuchar invitados
-    const qGuests = query(collection(db, `${getEventBasePath()}/guests`), where('sponsorId', '==', sponsorId));
+    // Escuchar invitados (por ID o por Email)
+    const qGuests = query(collection(db, `${getEventBasePath()}/guests`));
     const unsubGuests = onSnapshot(qGuests, (snapshot) => {
-      setGuests(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const list = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(g => g.sponsorId === sponsorId || (sponsorEmail && g.sponsorEmail === sponsorEmail));
+      setGuests(list);
     });
 
-    // Escuchar staff
-    const qStaff = query(collection(db, `${getEventBasePath()}/staff`), where('sponsorId', '==', sponsorId));
+    // Escuchar staff (por ID o por Email)
+    const qStaff = query(collection(db, `${getEventBasePath()}/staff`));
     const unsubStaff = onSnapshot(qStaff, (snapshot) => {
-      setStaff(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const list = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(s => s.sponsorId === sponsorId || (sponsorEmail && s.sponsorEmail === sponsorEmail));
+      setStaff(list);
     });
 
-    // Escuchar conferencistas
-    const qSpeakers = query(collection(db, `${getEventBasePath()}/speakers`), where('sponsorId', '==', sponsorId));
+    // Escuchar conferencistas (por ID o por Email)
+    const qSpeakers = query(collection(db, `${getEventBasePath()}/speakers`));
     const unsubSpeakers = onSnapshot(qSpeakers, (snapshot) => {
-      setSpeakers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const list = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(sp => sp.sponsorId === sponsorId || (sponsorEmail && sp.sponsorEmail === sponsorEmail));
+      setSpeakers(list);
     });
 
-    // Escuchar stands
-    const qStands = query(collection(db, `${getEventBasePath()}/stands`), where('sponsorId', '==', sponsorId));
+    // Escuchar stands (por ID o por Email)
+    const qStands = query(collection(db, `${getEventBasePath()}/stands`));
     const unsubStands = onSnapshot(qStands, (snapshot) => {
-      setStands(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const list = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(st => st.sponsorId === sponsorId || (sponsorEmail && st.sponsorEmail === sponsorEmail));
+      setStands(list);
     });
 
     // Set loading false after a small delay
