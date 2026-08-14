@@ -6,6 +6,23 @@ import PrintableBadgeList from './PrintableBadgeList';
 import CreateSponsorModal from './CreateSponsorModal';
 import { getEventBasePath } from '../config/eventConfig';
 
+const OFFICIAL_SPONSORS = [
+  { company: 'Sur', category: 'Diamante', logo: '/diamante/sur.png' },
+  { company: 'Comasa', category: 'Diamante', logo: '/diamante/comasa.png' },
+  { company: 'Sinsa', category: 'Diamante', logo: '/diamante/sinsa.png' },
+  { company: 'Extel', category: 'Diamante', logo: '/diamante/extelpng.png' },
+  { company: 'Importaciones Balladares', category: 'Diamante', logo: '/diamante/importacionesballadares.png' },
+  { company: 'Megalines', category: 'Diamante', logo: '/diamante/megalines.png' },
+  { company: 'Megalines 1', category: 'Diamante', logo: '/diamante/megalines1.png' },
+  { company: 'Noelito', category: 'Diamante', logo: '/diamante/noelito%20.png' },
+  { company: 'Plycem', category: 'Oro', logo: '/oro/plycem%20.png' },
+  { company: 'Sicsa', category: 'Oro', logo: '/oro/sicsa.png' },
+  { company: 'JP Technology', category: 'Oro', logo: '/oro/logo-jp-technology.png' },
+  { company: 'Casco', category: 'Plata', logo: '/plata/casco.png' },
+  { company: 'Fernández Sera', category: 'Plata', logo: '/plata/ferdandezsera.png' },
+  { company: 'Midenesa', category: 'Plata', logo: '/plata/midenesa.png' }
+];
+
 export default function AdminSponsors({ onBack }) {
   const [sponsors, setSponsors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +69,34 @@ export default function AdminSponsors({ onBack }) {
             createdAt: st.updatedAt?.toDate() || new Date(),
             standList: [st.name],
             logo: st.logo
+          });
+        }
+      });
+
+      // Incluir también los patrocinadores oficiales confirmados de la feria (Sur, Noelito, Comasa, etc.)
+      OFFICIAL_SPONSORS.forEach(off => {
+        let match = null;
+        for (const [id, user] of combinedMap.entries()) {
+          const comp = (user.empresa || user.company || user.nombre || '').toLowerCase();
+          if (comp.includes(off.company.toLowerCase())) {
+            match = user;
+            break;
+          }
+        }
+        if (!match) {
+          const offId = `official-${off.company.toLowerCase().replace(/\s+/g, '-')}`;
+          combinedMap.set(offId, {
+            id: offId,
+            nombre: off.company,
+            apellido: '',
+            empresa: off.company,
+            correo: 'Patrocinador Oficial',
+            telefono: 'N/A',
+            status: 'approved',
+            createdAt: new Date(2026, 0, 1),
+            standList: [],
+            logo: off.logo,
+            isOfficial: true
           });
         }
       });
