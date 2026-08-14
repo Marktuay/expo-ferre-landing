@@ -198,18 +198,18 @@ export default function AdminSponsors({ onBack }) {
 
         <div className="bg-white rounded-lg shadow-md border border-outline-variant overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full min-w-[1100px] text-left border-collapse">
               <thead>
                 <tr className="bg-surface-variant/30 border-b border-outline-variant">
-                  <th className="p-4 font-bold text-on-surface">Nombre</th>
-                  <th className="p-4 font-bold text-on-surface">Empresa</th>
-                  <th className="p-4 font-bold text-on-surface">Stand</th>
-                  <th className="p-4 font-bold text-on-surface">Email</th>
-                  <th className="p-4 font-bold text-on-surface">Teléfono</th>
-                  <th className="p-4 font-bold text-on-surface">Empleados</th>
-                  <th className="p-4 font-bold text-on-surface">Estado</th>
-                  <th className="p-4 font-bold text-on-surface">Fecha</th>
-                  <th className="p-4 font-bold text-on-surface text-center">Acciones</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Nombre</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Empresa</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Stand</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Email / Rol</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Teléfono</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Empleados</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Estado</th>
+                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Fecha</th>
+                  <th className="p-4 font-bold text-on-surface text-center whitespace-nowrap">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -228,7 +228,7 @@ export default function AdminSponsors({ onBack }) {
                 ) : (
                   sponsors.map((sponsor) => (
                     <tr key={sponsor.id} className="border-b border-outline-variant hover:bg-surface-variant/10 transition-colors">
-                      <td className="p-4 text-on-surface font-medium">
+                      <td className="p-4 text-on-surface font-medium whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {sponsor.lastActive && (Date.now() - sponsor.lastActive.toMillis() < 5 * 60 * 1000) ? (
                             <span className="w-2.5 h-2.5 bg-green-500 rounded-full shrink-0" title="En línea"></span>
@@ -238,49 +238,60 @@ export default function AdminSponsors({ onBack }) {
                           {(`${sponsor.nombre || sponsor.name || ''} ${sponsor.apellido || ''}`).trim() || 'Sin Nombre'}
                         </div>
                       </td>
-                      <td className="p-4 text-secondary">{sponsor.empresa || sponsor.company || 'N/A'}</td>
-                      <td className="p-4 text-secondary max-w-[220px]">
+                      <td className="p-4 text-secondary font-semibold whitespace-nowrap">{sponsor.empresa || sponsor.company || 'N/A'}</td>
+                      <td className="p-4 text-secondary whitespace-nowrap">
                         {sponsor.standList && sponsor.standList.length > 0 ? (
                           sponsor.standList.length <= 2 ? (
                             <div className="flex flex-wrap gap-1">
                               {sponsor.standList.map(name => (
-                                <span key={name} className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-300 whitespace-nowrap">{name}</span>
+                                <span key={name} className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-300 whitespace-nowrap">{name}</span>
                               ))}
                             </div>
                           ) : (
                             <div className="flex items-center gap-1" title={sponsor.standList.join(', ')}>
-                              <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-300 whitespace-nowrap">
+                              <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-300 whitespace-nowrap">
                                 {sponsor.standList[0]}
                               </span>
-                              <span className="bg-gray-100 text-gray-700 text-xs font-bold px-2 py-0.5 rounded-full border border-gray-300 whitespace-nowrap">
+                              <span className="bg-gray-100 text-gray-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-gray-300 whitespace-nowrap">
                                 +{sponsor.standList.length - 1} más ({sponsor.standList.length} total)
                               </span>
                             </div>
                           )
                         ) : (
-                          <span className="text-gray-400 text-xs font-medium">Sin Stand</span>
+                          <span className="bg-gray-100 text-gray-500 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-gray-200 whitespace-nowrap">Sin Stand</span>
                         )}
                       </td>
-                      <td className="p-4 text-secondary">{sponsor.correo || sponsor.email || 'N/A'}</td>
-                      <td className="p-4 text-secondary">{sponsor.telefono || sponsor.phone || 'N/A'}</td>
-                      <td className="p-4 text-secondary">{sponsor.empleados || 'N/A'}</td>
-                      <td className="p-4">
+                      <td className="p-4 text-secondary whitespace-nowrap">
+                        {sponsor.isOfficial || sponsor.correo === 'Patrocinador Oficial' ? (
+                          <span className="bg-amber-100 text-amber-900 border border-amber-300 text-xs font-semibold px-2.5 py-0.5 rounded-full whitespace-nowrap">Patrocinador Oficial</span>
+                        ) : (
+                          sponsor.correo || sponsor.email || 'N/A'
+                        )}
+                      </td>
+                      <td className="p-4 text-secondary whitespace-nowrap">{sponsor.telefono || sponsor.phone || 'N/A'}</td>
+                      <td className="p-4 text-secondary whitespace-nowrap">{sponsor.empleados || 'N/A'}</td>
+                      <td className="p-4 whitespace-nowrap">
                         {(!sponsor.status || sponsor.status === 'approved') ? (
                           <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-green-400">Aprobado</span>
                         ) : (
                           <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-yellow-400">Pendiente</span>
                         )}
                       </td>
-                      <td className="p-4 text-secondary">
-                        {sponsor.createdAt.toLocaleDateString('es-ES', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                      <td className="p-4 text-secondary whitespace-nowrap">
+                        {sponsor.isOfficial ? (
+                          <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full border border-gray-200 whitespace-nowrap">Confirmado</span>
+                        ) : (
+                          sponsor.createdAt.toLocaleDateString('es-ES', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
+                        )}
                       </td>
-                      <td className="p-4 flex gap-2 justify-center">
+                      <td className="p-4 text-center whitespace-nowrap">
+                        <div className="flex gap-2 justify-center items-center">
                         {(sponsor.status === 'pending' || sponsor.status === 'pendiente') && (
                           <button 
                             onClick={async () => {
