@@ -705,7 +705,7 @@ export default function App() {
                     </p>
                   </div>
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex items-center justify-center p-2">
-                    <img src="/Mapa-Expo-Ferre-Agosto.svg" alt="Mapa de Expo Ferre" className="w-full h-auto object-contain max-h-[600px] hover:scale-105 transition-transform duration-300" />
+                    <img src="/map-expo-ferre-140826.svg" alt="Mapa de Expo Ferre" className="w-full h-auto object-contain max-h-[600px] hover:scale-105 transition-transform duration-300" />
                   </div>
                 </div>
               </FadeIn>
