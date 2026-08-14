@@ -40,63 +40,88 @@ export default function AdminSponsors({ onBack }) {
     const updateCombined = () => {
       const combinedMap = new Map();
 
-      userResults.forEach(u => {
-        combinedMap.set(u.id, { ...u, standList: [] });
+      // 1. Inicializar con Patrocinadores Oficiales confirmados
+      OFFICIAL_SPONSORS.forEach(off => {
+        const offId = `official-${off.company.toLowerCase().replace(/\s+/g, '-')}`;
+        combinedMap.set(offId, {
+          id: offId,
+          nombre: off.company,
+          apellido: '',
+          empresa: off.company,
+          correo: 'Patrocinador Oficial',
+          telefono: 'N/A',
+          status: 'approved',
+          createdAt: new Date(2026, 0, 1),
+          standList: [],
+          logo: off.logo,
+          isOfficial: true
+        });
       });
 
-      standResults.forEach(st => {
-        let match = null;
-        for (const [id, user] of combinedMap.entries()) {
-          if (id === st.sponsorId || (st.sponsorEmail && (user.correo === st.sponsorEmail || user.email === st.sponsorEmail))) {
-            match = user;
+      // 2. Fusionar cuentas de usuarios registrados
+      userResults.forEach(u => {
+        let matchKey = u.id;
+        const uComp = (u.empresa || u.company || u.nombre || '').toLowerCase();
+        
+        for (const [key, item] of combinedMap.entries()) {
+          const itemComp = (item.empresa || item.company || item.nombre || '').toLowerCase();
+          if (itemComp && uComp && (itemComp.includes(uComp) || uComp.includes(itemComp))) {
+            matchKey = key;
             break;
           }
         }
+        const existing = combinedMap.get(matchKey) || {};
+        combinedMap.set(matchKey, {
+          ...existing,
+          ...u,
+          id: u.id,
+          standList: existing.standList || [],
+          isOfficial: false
+        });
+      });
+
+      // 3. Fusionar información de estands reservados
+      standResults.forEach(st => {
+        let match = null;
+        const stComp = (st.company || '').toLowerCase();
+        const stEmail = (st.sponsorEmail || '').toLowerCase();
+        const stContact = st.contactName || st.contact || '';
+        const stPhone = st.phone || '';
+
+        for (const [key, item] of combinedMap.entries()) {
+          const itemEmail = (item.correo || item.email || '').toLowerCase();
+          const itemComp = (item.empresa || item.company || item.nombre || '').toLowerCase();
+
+          const emailMatch = stEmail && (itemEmail === stEmail || key === st.sponsorId);
+          const compMatch = stComp && itemComp && (itemComp.includes(stComp) || stComp.includes(itemComp));
+
+          if (emailMatch || compMatch) {
+            match = item;
+            break;
+          }
+        }
+
         if (match) {
           if (!match.standList) match.standList = [];
           if (!match.standList.includes(st.name)) match.standList.push(st.name);
-          if (st.logo && !match.logo) match.logo = st.logo;
+          if (st.logo) match.logo = st.logo;
+          if (st.company && st.company.trim()) match.empresa = st.company.trim();
+          if (stEmail && (match.correo === 'Patrocinador Oficial' || !match.correo)) match.correo = stEmail;
+          if (stContact && (!match.nombre || match.nombre === match.empresa)) match.nombre = stContact;
+          if (stPhone && (match.telefono === 'N/A' || !match.telefono)) match.telefono = stPhone;
         } else if (st.company && st.company.trim().length > 0) {
           const fakeId = `stand-sponsor-${st.id}`;
           combinedMap.set(fakeId, {
             id: fakeId,
-            nombre: st.company.trim(),
+            nombre: st.contactName || st.company.trim(),
             apellido: '',
             empresa: st.company.trim(),
             correo: st.sponsorEmail || 'N/A',
-            telefono: 'N/A',
+            telefono: st.phone || 'N/A',
             status: 'approved',
             createdAt: st.updatedAt?.toDate() || new Date(),
             standList: [st.name],
             logo: st.logo
-          });
-        }
-      });
-
-      // Incluir también los patrocinadores oficiales confirmados de la feria (Sur, Noelito, Comasa, etc.)
-      OFFICIAL_SPONSORS.forEach(off => {
-        let match = null;
-        for (const [id, user] of combinedMap.entries()) {
-          const comp = (user.empresa || user.company || user.nombre || '').toLowerCase();
-          if (comp.includes(off.company.toLowerCase())) {
-            match = user;
-            break;
-          }
-        }
-        if (!match) {
-          const offId = `official-${off.company.toLowerCase().replace(/\s+/g, '-')}`;
-          combinedMap.set(offId, {
-            id: offId,
-            nombre: off.company,
-            apellido: '',
-            empresa: off.company,
-            correo: 'Patrocinador Oficial',
-            telefono: 'N/A',
-            status: 'approved',
-            createdAt: new Date(2026, 0, 1),
-            standList: [],
-            logo: off.logo,
-            isOfficial: true
           });
         }
       });
