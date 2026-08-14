@@ -47,7 +47,7 @@ export const initialStandsList = [
   { id: 'stand-38', x: '56.88%', y: '66.52%', name: 'Stand 38', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' }
 ];
 
-export default function InteractiveMap({ onBack, isAdminMode = false, sponsorData }) {
+export default function InteractiveMap({ onBack, isAdminMode = false, sponsorData, showHeader = false }) {
   const [stands, setStands] = useState(initialStandsList);
   const [selectedStand, setSelectedStand] = useState(null);
   const [clickCoords, setClickCoords] = useState(null);
@@ -137,45 +137,49 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
   return (
     <div className="w-full bg-background rounded-5px border border-outline-variant overflow-hidden flex flex-col h-full">
       {/* Cabecera del Mapa */}
-      <div className="bg-surface-container border-b border-outline-variant p-4 flex items-center justify-between z-10 relative shadow-sm">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onBack}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-surface hover:bg-surface-dim transition-colors text-secondary border border-outline-variant"
-          >
-            <span className="material-symbols-outlined">arrow_back</span>
-          </button>
-          <div>
-            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
-              Plano de Exposición
-            </h2>
-            <p className="text-body-sm text-secondary">
-              Desliza para moverte por el plano. Haz clic o toca cualquier pin de color azul <span className="w-3 h-3 inline-block rounded-full bg-blue-500 border border-white/50 align-middle mx-1"></span> para iniciar tu reservación.
-            </p>
-            {clickCoords && (
-              <p className="text-body-sm text-primary font-mono mt-1">
-                Coordenadas click: X: {clickCoords.x}%, Y: {clickCoords.y}%
-              </p>
+      {showHeader && (
+        <div className="bg-surface-container border-b border-outline-variant p-4 flex items-center justify-between z-10 relative shadow-sm">
+          <div className="flex items-center gap-4">
+            {onBack && (
+              <button 
+                onClick={onBack}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-surface hover:bg-surface-dim transition-colors text-secondary border border-outline-variant"
+              >
+                <span className="material-symbols-outlined">arrow_back</span>
+              </button>
             )}
+            <div>
+              <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+                Plano de Exposición y Stands
+              </h2>
+              <p className="text-body-sm text-secondary">
+                Desliza para moverte por el plano. Haz clic o toca cualquier pin de color para consultar los detalles y la disponibilidad.
+              </p>
+              {clickCoords && isAdmin && (
+                <p className="text-body-sm text-primary font-mono mt-1">
+                  Coordenadas click: X: {clickCoords.x}%, Y: {clickCoords.y}%
+                </p>
+              )}
+            </div>
+          </div>
+          
+          {/* Leyenda Visual */}
+          <div className="hidden md:flex items-center gap-6 text-label-sm font-medium">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-blue-500 border border-white/50"></span>
+              <span className="text-secondary">Disponible</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-red-500 border border-white"></span>
+              <span className="text-secondary">Seleccionado</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-surface-variant border border-outline opacity-80"></span>
+              <span className="text-secondary">Vendido</span>
+            </div>
           </div>
         </div>
-        
-        {/* Leyenda Visual */}
-        <div className="hidden md:flex items-center gap-6 text-label-sm font-medium">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-blue-500 border border-white/50"></span>
-            <span className="text-secondary">Disponible</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-red-500 border border-white"></span>
-            <span className="text-secondary">Seleccionado</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-surface-variant border border-outline opacity-80"></span>
-            <span className="text-secondary">Vendido</span>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Contenedor del Mapa con Zoom */}
       <div className="flex-1 bg-[#F5F5F7] relative overflow-hidden cursor-move">
@@ -585,50 +589,6 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
               </div>
             </form>
           </div>
-        </div>
-      )}
-
-      {/* Botón Admin */}
-      {!isAdmin && (
-        <button 
-          onClick={() => setIsAdminModalOpen(true)}
-          className="absolute bottom-4 right-4 z-50 text-secondary/30 hover:text-secondary transition-colors"
-          title="Acceso Administrador"
-        >
-          <span className="material-symbols-outlined text-sm">lock</span>
-        </button>
-      )}
-
-      {/* Modal Admin */}
-      {isAdminModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-surface rounded-lg shadow-xl w-full max-w-sm animate-in zoom-in-95 duration-200 overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-outline-variant bg-[#F5F5F7]">
-              <h3 className="font-headline-sm font-bold text-on-surface">Administración</h3>
-              <button 
-                onClick={() => setIsAdminModalOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-variant transition-colors text-secondary"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <form className="p-6 flex flex-col gap-4 bg-surface" onSubmit={handleAdminLogin}>
-              <div className="flex flex-col gap-1">
-                <label className="text-label-md font-medium text-on-surface">Contraseña maestra</label>
-                <input name="password" required type="password" className="px-4 py-2 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md" placeholder="••••••••" />
-              </div>
-              <button type="submit" className="mt-2 px-5 py-2 bg-primary-container text-on-primary-container rounded-md font-label-lg font-bold hover:bg-[#F2B04A] transition-colors hard-shadow w-full">
-                Acceder
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Dev Helper - Mostrar Coordenadas al hacer clic */}
-      {clickCoords && (
-        <div className="absolute bottom-4 left-4 bg-black/80 text-white px-3 py-1.5 rounded-md z-50 font-mono text-sm pointer-events-none shadow-lg">
-          Copiar: X: '{clickCoords.x}%', Y: '{clickCoords.y}%'
         </div>
       )}
 

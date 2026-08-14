@@ -105,10 +105,12 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   - **Compatibilidad Bilingüe en Firestore:** Se implementaron fallbacks cruzados para soportar campos en español (`nombre`, `empresa`, `correo`, `telefono`) e inglés (`name`, `company`, `email`, `phone`), garantizando que ningún registro quede con campos vacíos.
   - **Sincronización con `reservationDetails`:** Se añadió extracción de datos anidados de reservaciones para vincular automáticamente estands (como el **Stand 38 de Ferretería Noelito / Linda Gutiérrez** o el **Stand 21 de Grupo SUR**) con sus datos de contacto, correo y teléfono, tanto en la tabla general como en la vista 360 de "Detalles".
   - **UI Adaptativa y Sin Scrollbar Horizontal:** Se ajustó la tabla a `w-full` con padding y tipografía responsive (`text-xs md:text-sm`) eliminando por completo la barra de desplazamiento horizontal. Se agregaron badges compactos para estands (`Stand 38`), roles (`Patrocinador Oficial`) y estados (`Confirmado`, `Aprobado`).
-- **Actualización de Mapa Interactivo y Assets (`App.jsx` & `InteractiveMap.jsx`):**
-  - Se actualizó la ruta del mapa SVG vectorial a `/map-expo-ferre-140826.svg` en la Landing Page y el panel de reservaciones, sobreescribiendo `public/mapa-expo-ferre.svg` para asegurar compatibilidad.
-  - Se incluyó la nueva marca en categoría Oro: **JP Technology** (`/oro/logo-jp-technology.png`).
-  - Se mantuvo la lista estática `initialPlaceholders` desvinculada de Firestore para proteger el orden exacto del reel de patrocinadores en la portada.
+- **Integración de Plano Interactivo de Stands en la Landing Page (`App.jsx` & `InteractiveMap.jsx`):**
+  - **Reemplazo de Imagen Estática por Mapa Vivo:** Se sustituyó la etiqueta `<img>` del mapa estático en la página principal (Home) por el componente reactivo `<InteractiveMap />`.
+  - **Ocultamiento de Leyenda/Cabecera en Portada:** Se removió la barra superior ("Plano de Exposición y Stands", instrucciones y leyenda de colores) en la vista pública de la portada mediante la propiedad `showHeader={false}` por defecto, logrando una integración limpia e inmersiva.
+  - **Remoción de Ícono de Candado y Modal de Administración:** Se eliminaron el ícono de candado flotante (`lock`) y la ventana emergente de contraseña maestra que aparecía en la esquina inferior del mapa.
+  - **Experiencia de Usuario (UX) Pública:** Ahora todos los visitantes de la landing page pueden mover, ampliar (zoom), consultar disponibilidad de estands, ver los logotipos de las marcas participantes (Sinsa, Noelito, Sur, etc.) en tiempo real e iniciar la reservación directamente desde la portada.
+  - **Navegación e Identificador:** Se agregó el botón **"Plano de Stands"** en la barra de navegación principal (escritorio y menú móvil) que desplaza suavemente al ancla `#plano-stands`.
 - **Webhook con Google Sheets para Preregistros:** Se integró un envio silencioso POST en `App.jsx` al Webhook de Google Apps Script para respaldar automáticamente cada preregistro público en un archivo de Google Sheets.
 
 **Cambios Anteriores (07 de Agosto de 2026):**

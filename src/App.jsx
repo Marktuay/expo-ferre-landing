@@ -28,6 +28,7 @@ import AdminCheckIn from './components/AdminCheckIn';
 import AdminAttendanceReport from './components/AdminAttendanceReport';
 import AdminMarketingReport from './components/AdminMarketingReport';
 import AdminPushNotifications from './components/AdminPushNotifications';
+import InteractiveMap from './components/InteractiveMap';
 
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -328,6 +329,9 @@ export default function App() {
             <button onClick={() => setCurrentView('landing')} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
               <span className="material-symbols-outlined text-[22px]">home</span> Inicio
             </button>
+            <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'plano-stands', 100); }} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
+              <span className="material-symbols-outlined text-[22px]">map</span> Plano de Stands
+            </button>
             <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'awards', 100); }} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
               <span className="material-symbols-outlined text-[22px]">emoji_events</span> Premios
             </button>
@@ -432,6 +436,9 @@ export default function App() {
           <div className="lg:hidden absolute top-full left-0 w-full bg-[#2a2f40]/95 backdrop-blur-md border-b border-white/10 shadow-lg py-4 px-6 flex flex-col gap-3 max-h-[calc(100vh-80px)] overflow-y-auto">
             <button onClick={() => { setCurrentView('landing'); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
               <span className="material-symbols-outlined text-[24px]">home</span> Inicio
+            </button>
+            <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'plano-stands', 100); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
+              <span className="material-symbols-outlined text-[24px]">map</span> Plano de Stands
             </button>
             <button onClick={() => { setCurrentView('sponsorDashboard'); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
               <span className="material-symbols-outlined text-[24px]">military_tech</span> Patrocinadores
@@ -704,8 +711,8 @@ export default function App() {
                       <strong className="font-black">EXPO FERRE</strong> impulsará oportunidades reales de posicionamiento, expansión comercial, generación de alianzas y conexión directa entre marcas y compradores estratégicos del sector.
                     </p>
                   </div>
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex items-center justify-center p-2">
-                    <img src="/map-expo-ferre-140826.svg" alt="Mapa de Expo Ferre" className="w-full h-auto object-contain max-h-[600px] hover:scale-105 transition-transform duration-300" />
+                  <div id="plano-stands" className="bg-white rounded-xl shadow-lg border border-gray-200 w-full overflow-hidden flex flex-col h-[600px] md:h-[650px] relative">
+                    <InteractiveMap />
                   </div>
                 </div>
               </FadeIn>

@@ -216,7 +216,7 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
 
       {activeForm === 'map' && (
         <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md p-4 md:p-8 overflow-hidden flex flex-col animate-in fade-in duration-300">
-          <InteractiveMap onBack={() => setActiveForm(null)} sponsorData={userData} />
+          <InteractiveMap onBack={() => setActiveForm(null)} sponsorData={userData} showHeader={true} />
         </div>
       )}
     </div>
