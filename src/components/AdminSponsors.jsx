@@ -374,6 +374,7 @@ export default function AdminSponsors({ onBack }) {
                         >
                           Detalles
                         </button>
+                        </div>
                       </td>
                     </tr>
                   ))
