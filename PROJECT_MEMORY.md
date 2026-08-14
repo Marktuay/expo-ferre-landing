@@ -98,10 +98,20 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 07 de Agosto de 2026**
+**Última actualización: 14 de Agosto de 2026**
 
-- **UI / Landing Page (Mejoras Hero):** Se actualizó el video principal a `presentacion-ia-karen.mp4`. Se ajustó su visualización para evitar recortes (eliminando la proporción 16:9), adaptando su escala a un 35% del ancho disponible. Se implementó un botón flotante personalizado para activar/desactivar el sonido, garantizando la reproducción sin problemas de controles nativos ocultos.
-- **Carrusel de Patrocinadores (Logos):** Se mejoró la renderización del reel infinito. Los logos descargados de Firebase ahora se ordenan automáticamente por jerarquía de categoría (Diamante, luego Oro, luego Plata). Se agregó una etiqueta visual (pastilla con color distintivo) debajo de cada logo para identificar fácilmente su nivel de patrocinio.
+- **Refactorización Completa del Panel de Directorio y Vista 360 de Patrocinadores (`AdminSponsors.jsx` & `AdminSponsorDetails.jsx`):**
+  - **Fusión Multifuente Inteligente:** El Directorio de Patrocinadores ahora unifica en tiempo real 3 fuentes de datos: cuentas de usuarios en Firestore (`users`), estands reservados en el mapa interactivo (`events/2026/stands`) y la lista de patrocinadores oficiales confirmados de la feria (Sur, Noelito, Comasa, Extel, Sinsa, Plycem, Sicsa, JP Technology, Casco, Fernández Sera, Midenesa, etc.).
+  - **Compatibilidad Bilingüe en Firestore:** Se implementaron fallbacks cruzados para soportar campos en español (`nombre`, `empresa`, `correo`, `telefono`) e inglés (`name`, `company`, `email`, `phone`), garantizando que ningún registro quede con campos vacíos.
+  - **Sincronización con `reservationDetails`:** Se añadió extracción de datos anidados de reservaciones para vincular automáticamente estands (como el **Stand 38 de Ferretería Noelito / Linda Gutiérrez** o el **Stand 21 de Grupo SUR**) con sus datos de contacto, correo y teléfono, tanto en la tabla general como en la vista 360 de "Detalles".
+  - **UI Adaptativa y Sin Scrollbar Horizontal:** Se ajustó la tabla a `w-full` con padding y tipografía responsive (`text-xs md:text-sm`) eliminando por completo la barra de desplazamiento horizontal. Se agregaron badges compactos para estands (`Stand 38`), roles (`Patrocinador Oficial`) y estados (`Confirmado`, `Aprobado`).
+- **Actualización de Mapa Interactivo y Assets (`App.jsx` & `InteractiveMap.jsx`):**
+  - Se actualizó la ruta del mapa SVG vectorial a `/map-expo-ferre-140826.svg` en la Landing Page y el panel de reservaciones, sobreescribiendo `public/mapa-expo-ferre.svg` para asegurar compatibilidad.
+  - Se incluyó la nueva marca en categoría Oro: **JP Technology** (`/oro/logo-jp-technology.png`).
+  - Se mantuvo la lista estática `initialPlaceholders` desvinculada de Firestore para proteger el orden exacto del reel de patrocinadores en la portada.
+- **Webhook con Google Sheets para Preregistros:** Se integró un envio silencioso POST en `App.jsx` al Webhook de Google Apps Script para respaldar automáticamente cada preregistro público en un archivo de Google Sheets.
+
+**Cambios Anteriores (07 de Agosto de 2026):**
 
 **Cambios Anteriores (08 de Julio de 2026):**
 
