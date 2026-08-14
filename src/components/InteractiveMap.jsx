@@ -209,56 +209,99 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
                     onClick={handleImageClick}
                   />
                   
-                  {/* Capa Interactiva: Iteramos sobre los stands para crear "hotspots" clicables */}
+                  {/* Capa Interactiva: Iteramos sobre los stands para crear "hotspots" y globos de mapa con logos */}
                   {stands.map((stand) => {
                     const isSelected = selectedStand?.id === stand.id;
                     const isMine = auth.currentUser && stand.sponsorId === auth.currentUser.uid;
-                    
+                    const hasLogo = Boolean(stand.logo);
+                    const companyName = stand.reservationDetails?.empresa || stand.company || stand.name;
+
                     return (
-                      <button
+                      <div
                         key={stand.id}
-                        onClick={() => handleStandClick(stand)}
-                        className={`absolute flex items-center justify-center transition-all duration-300 rounded-full shadow-md cursor-pointer border-2 group hover:z-30 ${
-                          isSelected 
-                            ? 'bg-red-500 text-white border-white scale-125 z-20 shadow-lg' 
-                            : stand.status === 'available'
-                              ? 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-110 border-white/50 z-10'
-                              : isMine
-                                ? 'bg-green-500 text-white hover:bg-green-600 hover:scale-110 border-white/50 z-10'
-                                : 'bg-surface-variant text-secondary border-outline hover:opacity-100 opacity-80 z-0'
-                        }`}
+                        className="absolute group z-10 hover:z-40 pointer-events-auto"
                         style={{
                           left: stand.x,
                           top: stand.y,
-                          width: '24px',
-                          height: '24px',
-                          transform: 'translate(-50%, -50%)',
+                          transform: 'translate(-50%, -100%)',
                         }}
                       >
-                        {stand.logo ? (
-                          <span className="material-symbols-outlined text-[14px]">storefront</span>
-                        ) : null}
-                        
-                        {/* Tooltip Flotante */}
-                        <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-surface text-on-surface p-3 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-all pointer-events-none shadow-xl border border-outline-variant flex flex-col items-center gap-2 z-50">
-                          {stand.logo && (
-                            <div className="bg-white p-2 rounded-md border border-outline-variant w-max">
+                        {hasLogo ? (
+                          /* Globo de mapa con logo visible (Map Balloon Callout) */
+                          <button
+                            onClick={() => handleStandClick(stand)}
+                            className={`relative bg-white rounded-lg p-1 px-1.5 border-2 shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 cursor-pointer ${
+                              isSelected 
+                                ? 'border-red-500 ring-2 ring-red-400 z-30 scale-110 shadow-2xl' 
+                                : 'border-[#283474] hover:border-[#f39200] z-20'
+                            }`}
+                          >
+                            <img 
+                              src={stand.logo} 
+                              alt={companyName} 
+                              className="h-6 md:h-7 max-w-[55px] md:max-w-[70px] object-contain" 
+                            />
+                            {/* Cola indicadora del globo estilo marcador de mapa */}
+                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white border-b-2 border-r-2 border-[#283474] rotate-45"></div>
+                          </button>
+                        ) : stand.status !== 'available' ? (
+                          /* Globo de mapa con nombre si está reservado pero aún sin logo */
+                          <button
+                            onClick={() => handleStandClick(stand)}
+                            className={`relative bg-white rounded-md px-1.5 py-0.5 border-2 shadow-md flex items-center justify-center transition-all duration-300 hover:scale-110 cursor-pointer ${
+                              isSelected 
+                                ? 'border-red-500 text-red-600' 
+                                : 'border-[#283474] text-[#283474]'
+                            }`}
+                          >
+                            <span className="text-[10px] md:text-xs font-bold whitespace-nowrap max-w-[65px] truncate">
+                              {companyName}
+                            </span>
+                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-b-2 border-r-2 border-[#283474] rotate-45"></div>
+                          </button>
+                        ) : (
+                          /* Pin de stand disponible (Punto Azul interactivo) */
+                          <button
+                            onClick={() => handleStandClick(stand)}
+                            className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer border-2 hover:scale-125 translate-y-3 ${
+                              isSelected 
+                                ? 'bg-red-500 text-white border-white scale-125 z-20 shadow-lg' 
+                                : 'bg-blue-500 text-white hover:bg-blue-600 border-white/80 z-10'
+                            }`}
+                            title={`${stand.name} - Disponible`}
+                          >
+                            <span className="text-[9px] font-bold">
+                              {stand.name.replace('Stand ', '')}
+                            </span>
+                          </button>
+                        )}
+
+                        {/* Tooltip Detallado al hacer Hover */}
+                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-surface text-on-surface p-3 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-all pointer-events-none shadow-2xl border border-outline-variant flex flex-col items-center gap-2 z-50 min-w-[150px]">
+                          {hasLogo && (
+                            <div className="bg-white p-2 rounded-md border border-outline-variant w-full flex justify-center">
                               <img 
                                 src={stand.logo} 
                                 alt={stand.name} 
-                                className="min-w-[200px] min-h-[57px] max-w-[400px] max-h-[250px] object-contain" 
+                                className="max-h-[80px] max-w-[180px] object-contain" 
                               />
                             </div>
                           )}
                           <div className="text-center w-max">
                             <span className="font-bold block text-primary">{stand.name}</span>
-                            <span className="block text-secondary text-xs">
+                            {companyName && companyName !== stand.name && (
+                              <span className="font-semibold block text-xs text-on-surface">{companyName}</span>
+                            )}
+                            <span className="block text-secondary text-xs mt-0.5">
                               {stand.status === 'available' ? 'Disponible' : isMine ? 'Mi Stand' : 'Reservado'}
+                            </span>
+                            <span className="block text-[11px] text-gray-500 font-mono mt-0.5">
+                              {stand.size} • {stand.price}
                             </span>
                           </div>
                           <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-surface border-b border-r border-outline-variant rotate-45"></div>
                         </div>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
