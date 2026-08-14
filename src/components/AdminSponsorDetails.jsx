@@ -16,41 +16,61 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
 
     // Use sponsor.id (which is their uid) or their email as fallback for legacy records
     const sponsorId = sponsor.id;
-    const sponsorEmail = sponsor.correo || sponsor.email || '';
+    const sponsorEmail = (sponsor.correo || sponsor.email || '').toLowerCase();
+    const sponsorCompany = (sponsor.empresa || sponsor.company || sponsor.nombre || '').toLowerCase();
 
-    // Escuchar invitados (por ID o por Email)
+    // Escuchar invitados
     const qGuests = query(collection(db, `${getEventBasePath()}/guests`));
     const unsubGuests = onSnapshot(qGuests, (snapshot) => {
       const list = snapshot.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(g => g.sponsorId === sponsorId || (sponsorEmail && g.sponsorEmail === sponsorEmail));
+        .filter(g => {
+          const gEmail = (g.sponsorEmail || g.email || '').toLowerCase();
+          return g.sponsorId === sponsorId || (sponsorEmail && gEmail === sponsorEmail);
+        });
       setGuests(list);
     });
 
-    // Escuchar staff (por ID o por Email)
+    // Escuchar staff
     const qStaff = query(collection(db, `${getEventBasePath()}/staff`));
     const unsubStaff = onSnapshot(qStaff, (snapshot) => {
       const list = snapshot.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(s => s.sponsorId === sponsorId || (sponsorEmail && s.sponsorEmail === sponsorEmail));
+        .filter(s => {
+          const sEmail = (s.sponsorEmail || s.email || '').toLowerCase();
+          return s.sponsorId === sponsorId || (sponsorEmail && sEmail === sponsorEmail);
+        });
       setStaff(list);
     });
 
-    // Escuchar conferencistas (por ID o por Email)
+    // Escuchar conferencistas
     const qSpeakers = query(collection(db, `${getEventBasePath()}/speakers`));
     const unsubSpeakers = onSnapshot(qSpeakers, (snapshot) => {
       const list = snapshot.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(sp => sp.sponsorId === sponsorId || (sponsorEmail && sp.sponsorEmail === sponsorEmail));
+        .filter(sp => {
+          const spEmail = (sp.sponsorEmail || sp.email || '').toLowerCase();
+          return sp.sponsorId === sponsorId || (sponsorEmail && spEmail === sponsorEmail);
+        });
       setSpeakers(list);
     });
 
-    // Escuchar stands (por ID o por Email)
+    // Escuchar stands
     const qStands = query(collection(db, `${getEventBasePath()}/stands`));
     const unsubStands = onSnapshot(qStands, (snapshot) => {
       const list = snapshot.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(st => st.sponsorId === sponsorId || (sponsorEmail && st.sponsorEmail === sponsorEmail));
+        .filter(st => {
+          const stEmail = (st.reservationDetails?.correo || st.sponsorEmail || st.email || '').toLowerCase();
+          const stComp = (st.reservationDetails?.empresa || st.company || st.empresa || '').toLowerCase();
+          
+          const idMatch = st.sponsorId && st.sponsorId === sponsorId;
+          const emailMatch = sponsorEmail && stEmail && (stEmail === sponsorEmail);
+          const compMatch = sponsorCompany && stComp && (stComp.includes(sponsorCompany) || sponsorCompany.includes(stComp));
+          const nameMatch = sponsor.standList && sponsor.standList.includes(st.name);
+
+          return idMatch || emailMatch || compMatch || nameMatch;
+        });
       setStands(list);
     });
 
