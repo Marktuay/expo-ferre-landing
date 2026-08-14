@@ -276,30 +276,18 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
                           </button>
                         )}
 
-                        {/* Tooltip Ampliado al hacer Hover con Logo Grande */}
-                        <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-white text-on-surface p-3.5 rounded-xl text-sm opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none shadow-2xl border-2 border-[#283474]/20 flex flex-col items-center gap-2.5 z-50 min-w-[220px]">
-                          {hasLogo && (
-                            <div className="bg-white p-3 rounded-lg border border-gray-200 w-full flex justify-center shadow-inner">
-                              <img 
-                                src={stand.logo} 
-                                alt={stand.name} 
-                                className="max-h-[140px] max-w-[250px] md:max-h-[170px] md:max-w-[280px] object-contain transition-transform duration-300 group-hover:scale-105" 
-                              />
-                            </div>
+                        {/* Tooltip Ampliado al hacer Hover - SOLO LOGO */}
+                        <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-white p-3 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none shadow-2xl border-2 border-[#283474]/20 flex items-center justify-center z-50 min-w-[160px] max-w-[300px]">
+                          {hasLogo ? (
+                            <img 
+                              src={stand.logo} 
+                              alt={companyName} 
+                              className="max-h-[140px] max-w-[250px] md:max-h-[170px] md:max-w-[280px] object-contain transition-transform duration-300 group-hover:scale-105" 
+                            />
+                          ) : (
+                            <span className="font-bold text-sm text-[#283474] px-2 py-1">{companyName}</span>
                           )}
-                          <div className="text-center w-full">
-                            <span className="font-bold text-base block text-[#283474]">{stand.name}</span>
-                            {companyName && companyName !== stand.name && (
-                              <span className="font-extrabold block text-sm text-[#f39200]">{companyName}</span>
-                            )}
-                            <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
-                              {stand.status === 'available' ? 'Disponible' : isMine ? 'Mi Stand' : 'Reservado'}
-                            </span>
-                            <span className="block text-xs text-gray-500 font-medium mt-1">
-                              {stand.size}
-                            </span>
-                          </div>
-                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-b-2 border-r-2 border-gray-200 rotate-45"></div>
+                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-white border-b-2 border-r-2 border-[#283474]/20 rotate-45"></div>
                         </div>
                       </div>
                     );
