@@ -83,10 +83,11 @@ export default function AdminSponsors({ onBack }) {
       // 3. Fusionar información de estands reservados
       standResults.forEach(st => {
         let match = null;
-        const stComp = (st.company || '').toLowerCase();
-        const stEmail = (st.sponsorEmail || '').toLowerCase();
-        const stContact = st.contactName || st.contact || '';
-        const stPhone = st.phone || '';
+        const stComp = (st.reservationDetails?.empresa || st.company || st.empresa || '').toLowerCase();
+        const stEmail = (st.reservationDetails?.correo || st.sponsorEmail || st.email || '').toLowerCase();
+        const stContact = st.reservationDetails?.nombre ? `${st.reservationDetails.nombre} ${st.reservationDetails.apellido || ''}`.trim() : (st.contactName || st.contact || '');
+        const stPhone = st.reservationDetails?.telefono || st.phone || '';
+        const companyName = st.reservationDetails?.empresa || st.company || st.empresa || '';
 
         for (const [key, item] of combinedMap.entries()) {
           const itemEmail = (item.correo || item.email || '').toLowerCase();
@@ -105,19 +106,19 @@ export default function AdminSponsors({ onBack }) {
           if (!match.standList) match.standList = [];
           if (!match.standList.includes(st.name)) match.standList.push(st.name);
           if (st.logo) match.logo = st.logo;
-          if (st.company && st.company.trim()) match.empresa = st.company.trim();
+          if (companyName && companyName.trim()) match.empresa = companyName.trim();
           if (stEmail && (match.correo === 'Patrocinador Oficial' || !match.correo)) match.correo = stEmail;
           if (stContact && (!match.nombre || match.nombre === match.empresa)) match.nombre = stContact;
           if (stPhone && (match.telefono === 'N/A' || !match.telefono)) match.telefono = stPhone;
-        } else if (st.company && st.company.trim().length > 0) {
+        } else if (companyName && companyName.trim().length > 0) {
           const fakeId = `stand-sponsor-${st.id}`;
           combinedMap.set(fakeId, {
             id: fakeId,
-            nombre: st.contactName || st.company.trim(),
+            nombre: stContact || companyName.trim(),
             apellido: '',
-            empresa: st.company.trim(),
-            correo: st.sponsorEmail || 'N/A',
-            telefono: st.phone || 'N/A',
+            empresa: companyName.trim(),
+            correo: stEmail || 'N/A',
+            telefono: stPhone || 'N/A',
             status: 'approved',
             createdAt: st.updatedAt?.toDate() || new Date(),
             standList: [st.name],
