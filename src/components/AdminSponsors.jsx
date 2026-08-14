@@ -80,10 +80,10 @@ export default function AdminSponsors({ onBack }) {
               import('xlsx').then(XLSX => {
                 const dataToExport = sponsors.map(s => ({
                   Fecha: s.createdAt.toLocaleDateString() + ' ' + s.createdAt.toLocaleTimeString(),
-                  Nombre: `${s.nombre || ''} ${s.apellido || ''}`.trim(),
-                  Empresa: s.empresa || '',
-                  Email: s.correo || '',
-                  Teléfono: s.telefono || '',
+                  Nombre: (`${s.nombre || s.name || ''} ${s.apellido || ''}`).trim() || 'Sin Nombre',
+                  Empresa: s.empresa || s.company || 'N/A',
+                  Email: s.correo || s.email || 'N/A',
+                  Teléfono: s.telefono || s.phone || 'N/A',
                   Empleados: s.empleados || 'N/A'
                 }));
                 const worksheet = XLSX.utils.json_to_sheet(dataToExport);
@@ -140,12 +140,12 @@ export default function AdminSponsors({ onBack }) {
                           ) : (
                             <span className="w-2.5 h-2.5 bg-gray-300 rounded-full shrink-0" title="Desconectado"></span>
                           )}
-                          {`${sponsor.nombre || ''} ${sponsor.apellido || ''}`.trim() || 'Sin Nombre'}
+                          {(`${sponsor.nombre || sponsor.name || ''} ${sponsor.apellido || ''}`).trim() || 'Sin Nombre'}
                         </div>
                       </td>
-                      <td className="p-4 text-secondary">{sponsor.empresa}</td>
-                      <td className="p-4 text-secondary">{sponsor.correo}</td>
-                      <td className="p-4 text-secondary">{sponsor.telefono}</td>
+                      <td className="p-4 text-secondary">{sponsor.empresa || sponsor.company || 'N/A'}</td>
+                      <td className="p-4 text-secondary">{sponsor.correo || sponsor.email || 'N/A'}</td>
+                      <td className="p-4 text-secondary">{sponsor.telefono || sponsor.phone || 'N/A'}</td>
                       <td className="p-4 text-secondary">{sponsor.empleados || 'N/A'}</td>
                       <td className="p-4">
                         {(!sponsor.status || sponsor.status === 'approved') ? (

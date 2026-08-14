@@ -64,9 +64,13 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
       const userRef = doc(db, 'users', newUserId);
       await setDoc(userRef, {
         name: selectedPersonForMigration.name || '',
+        nombre: selectedPersonForMigration.name || '',
         email: selectedPersonForMigration.email || '',
+        correo: selectedPersonForMigration.email || '',
         phone: selectedPersonForMigration.phone || '',
+        telefono: selectedPersonForMigration.phone || '',
         company: selectedPersonForMigration.company || '',
+        empresa: selectedPersonForMigration.company || '',
         role: 'sponsor',
         status: 'approved',
         createdAt: new Date()
