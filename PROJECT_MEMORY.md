@@ -129,9 +129,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Sherwin Williams (`/plata/logo-sherwin-williams.jpg` - sin escala para visualización 100% completa e íntegra sin ningún recorte)
     3. Casco (`/plata/casco.png`)
     4. Midenesa (`/plata/midenesa.png`)
-- **Soporte Universal de Escala Transform y Seguimiento de Assets:**
-  - Se añadió la propiedad `style={logo.scale ? { transform: scale(...) } : undefined}` en todos los renderizadores de categorías (Diamante, Oro, Plata) en `App.jsx`.
-  - Se agregaron al control de versiones (Git) todas las nuevas imágenes de patrocinadores en `public/diamante/`, `public/oro/` y `public/plata/` para despliegue inmediato en producción.
+- **Estandarización Estética de Tarjetas de Logotipos (`App.jsx`):**
+  - Se envolvió cada logotipo dentro de una tarjeta interior **blanca sólida con bordes redondeados y padding** (`bg-white rounded-lg p-1.5 shadow-inner`).
+  - Esto garantiza que logotipos oscuros o apaisados/verticales (como **Sherwin Williams**) se distingan con total contraste, nitidez y 0% de recorte de texto.
 
 **Cambios Anteriores (14 de Agosto de 2026):**
 
