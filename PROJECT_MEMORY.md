@@ -129,9 +129,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Sherwin Williams (`/plata/logo-sherwin-williams.jpg` - sin escala para visualización 100% completa e íntegra sin ningún recorte)
     3. Casco (`/plata/casco.png`)
     4. Midenesa (`/plata/midenesa.png`)
-- **Estandarización Estética de Tarjetas de Logotipos (`App.jsx`):**
-  - Se envolvió cada logotipo dentro de una tarjeta interior **blanca sólida con bordes redondeados y padding** (`bg-white rounded-lg p-1.5 shadow-inner`).
-  - Esto garantiza que logotipos oscuros o apaisados/verticales (como **Sherwin Williams**) se distingan con total contraste, nitidez y 0% de recorte de texto.
+- **Restauración de Tarjetas Transparentes / Cristal para PNGs (`App.jsx`):**
+  - Se eliminó el fondo blanco interior fijo `bg-white`, retornando al diseño elegante de tarjetas traslúcidas de cristal (`bg-white/10 rounded-xl border border-white/20`).
+  - Esto solucionó que logotipos en formato PNG transparente con letras/gráficos blancos (como **Indenicza**, **JP Studio White**, **SUR**, **Sinsa**, etc.) se camuflaran contra cajas blancas, permitiendo que destaquen con total contraste y nitidez sobre el fondo azul oscuro de la sección.
 
 **Cambios Anteriores (14 de Agosto de 2026):**
 
