@@ -117,9 +117,13 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     13. Megalíneas (`/diamante/megalines1.png`)
     14. Pensilvania (`/diamante/pensilvania.jpg`)
     15. Flash (`/diamante/megalines.png`)
-  - **Inclusión del Logo de Armoconsa en Categoría Oro (`App.jsx`):**
-    - Se copió y agregó el logo de **Armoconsa** (`/oro/armoconsa.png`) dentro de la categoría **Oro**, posicionándolo inmediatamente después del logo de Sicsa.
-  - **Seguimiento de Assets:** Se agregaron al control de versiones (Git) todas las nuevas imágenes de patrocinadores en `public/diamante/` y `public/oro/` para despliegue inmediato en producción.
+  - **Inclusión y Ordenamiento en Categoría Plata (`App.jsx`):**
+    - Se reorganizó la secuencia exacta de logotipos en la categoría **Plata**:
+      1. Fernández Sera (`/plata/ferdandezsera.png`)
+      2. Sherwin Williams (`/plata/SherwinWilliams.jpg`)
+      3. Casco (`/plata/casco.png`)
+      4. Midenesa (`/plata/midenesa.png`)
+  - **Seguimiento de Assets:** Se agregaron al control de versiones (Git) todas las nuevas imágenes de patrocinadores en `public/diamante/`, `public/oro/` y `public/plata/` para despliegue inmediato en producción.
 
 **Cambios Anteriores (14 de Agosto de 2026):**
 
