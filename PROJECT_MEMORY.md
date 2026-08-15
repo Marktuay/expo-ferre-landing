@@ -82,7 +82,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Correos:** (Pendiente) Aviso automático para el estatus de pre-registro -> patrocinador.
 - **Logos de Patrocinadores:** (Completado) 
   - Se configuró formato 16:9 con Tailwind `aspect-video` para estandarización.
-  - Se activaron y publicaron 6 logos Diamante, 2 Oro y 3 Plata reales.
+  - Se activaron y publicaron logos Diamante (incluyendo la incorporación de **BAC Credomatic** `/diamante/logo-bac.jpeg` ubicado justo antes de Noelito), Oro y Plata reales.
   - Se optimizó la animación del reel a 55s y se añadió un espaciador de 50vw para garantizar que los patrocinadores principales entren elegante y completamente visibles desde el inicio al cargar la página.
   - Se reordenó la categoría Diamante para priorizar a Sinsa.
 
@@ -98,7 +98,12 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 14 de Agosto de 2026**
+**Última actualización: 15 de Agosto de 2026**
+
+- **Inclusión del Logo de BAC en el Reel Principal (`App.jsx`):**
+  - Se agregó la imagen de **BAC Credomatic** (`/diamante/logo-bac.jpeg`) en la categoría **Diamante** dentro del arreglo del carrusel en la portada, posicionándolo exactamente antes del logo de Ferretería Noelito.
+
+**Cambios Anteriores (14 de Agosto de 2026):**
 
 - **Refactorización Completa del Panel de Directorio y Vista 360 de Patrocinadores (`AdminSponsors.jsx` & `AdminSponsorDetails.jsx`):**
   - **Fusión Multifuente Inteligente:** El Directorio de Patrocinadores ahora unifica en tiempo real 3 fuentes de datos: cuentas de usuarios en Firestore (`users`), estands reservados en el mapa interactivo (`events/2026/stands`) y la lista de patrocinadores oficiales confirmados de la feria (Sur, Noelito, Comasa, Extel, Sinsa, Plycem, Sicsa, JP Technology, Casco, Fernández Sera, Midenesa, etc.).
