@@ -141,6 +141,7 @@ export default function App() {
     { url: '/diamante/megalines.png', category: 'Diamante', order: 1 },
     { url: '/oro/plycem%20.png', category: 'Oro', order: 2 },
     { url: '/oro/sicsa.png', category: 'Oro', order: 2 },
+    { url: '/oro/armoconsa.png', category: 'Oro', order: 2 },
     { url: '/oro/logo-jp-technology.png', category: 'Oro', order: 2 },
     { url: '/plata/casco.png', category: 'Plata', order: 3 },
     { url: '/plata/ferdandezsera.png', category: 'Plata', order: 3 },
@@ -600,7 +601,12 @@ export default function App() {
                                 {sponsorLogos.filter(l => l.category === 'Oro').map((logo, index) => (
                                   <div key={`oro-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-3 bg-white/10 rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer">
                                     <div className="w-32 md:w-44 aspect-video overflow-hidden flex items-center justify-center">
-                                      <img src={logo.url} alt={`Sponsor Oro ${index}`} className="max-w-full max-h-full object-contain drop-shadow-lg" />
+                                      <img 
+                                        src={logo.url} 
+                                        alt={`Sponsor Oro ${index}`} 
+                                        className="max-w-full max-h-full object-contain drop-shadow-lg" 
+                                        style={logo.scale ? { transform: `scale(${logo.scale})` } : undefined}
+                                      />
                                     </div>
                                   </div>
                                 ))}
