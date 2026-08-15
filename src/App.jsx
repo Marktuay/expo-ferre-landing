@@ -144,7 +144,7 @@ export default function App() {
     { url: '/oro/armoconsa.png', category: 'Oro', order: 2 },
     { url: '/oro/logo-jp-technology.png', category: 'Oro', order: 2 },
     { url: '/plata/ferdandezsera.png', category: 'Plata', order: 3 },
-    { url: '/plata/SherwinWilliams.jpg', category: 'Plata', order: 3 },
+    { url: '/plata/logo-sherwin-williams.jpg', category: 'Plata', order: 3, scale: 1.6 },
     { url: '/plata/casco.png', category: 'Plata', order: 3 },
     { url: '/plata/midenesa.png', category: 'Plata', order: 3 },
   ];
