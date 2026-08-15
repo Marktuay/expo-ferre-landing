@@ -114,8 +114,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     10. Maximiza (`/diamante/maximiza.jpeg`)
     11. Indenicza (`/diamante/indeninicsa.png`)
     12. Arcelor (`/diamante/LOGO-ARCELOR.png` - ampliado un **20%** con `scale: 1.2`)
-    13. Megalíneas (`/diamante/megalines.png`)
-    14. Flash (`/diamante/megalines1.png`)
+    13. Megalíneas (`/diamante/megalines1.png`)
+    14. Flash (`/diamante/megalines.png`)
   - **Seguimiento de Assets:** Se agregaron al control de versiones (Git) todas las nuevas imágenes de patrocinadores en `public/diamante/` para despliegue inmediato en producción.
 
 **Cambios Anteriores (14 de Agosto de 2026):**
