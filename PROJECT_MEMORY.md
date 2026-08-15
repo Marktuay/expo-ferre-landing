@@ -113,7 +113,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     9. Romax (`/diamante/romax.jpeg`)
     10. Maximiza (`/diamante/maximiza.jpeg`)
     11. Indenicza (`/diamante/indeninicsa.png`)
-    12. Arcelor (`/diamante/LOGO-ARCELOR.png`)
+    12. Arcelor (`/diamante/LOGO-ARCELOR.png` - ampliado un **20%** con `scale: 1.2`)
 
 **Cambios Anteriores (14 de Agosto de 2026):**
 
