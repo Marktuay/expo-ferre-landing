@@ -137,7 +137,7 @@ export default function App() {
     { url: '/diamante/indeninicsa.png', category: 'Diamante', order: 1 },
     { url: '/diamante/LOGO-ARCELOR.png', category: 'Diamante', order: 1, scale: 1.2 },
     { url: '/diamante/megalines1.png', category: 'Diamante', order: 1 },
-    { url: '/diamante/pensilvania.jpg', category: 'Diamante', order: 1, scale: 1.2 },
+    { url: '/diamante/pensilvania.jpg', category: 'Diamante', order: 1, scale: 1.35 },
     { url: '/diamante/megalines.png', category: 'Diamante', order: 1 },
     { url: '/oro/plycem%20.png', category: 'Oro', order: 2 },
     { url: '/oro/sicsa.png', category: 'Oro', order: 2 },
