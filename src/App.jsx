@@ -142,7 +142,7 @@ export default function App() {
     { url: '/oro/plycem%20.png', category: 'Oro', order: 2 },
     { url: '/oro/sicsa.png', category: 'Oro', order: 2 },
     { url: '/oro/armoconsa.png', category: 'Oro', order: 2 },
-    { url: '/oro/logo-jp-technology.png', category: 'Oro', order: 2 },
+    { url: '/oro/jp-studio-white.png', category: 'Oro', order: 2 },
     { url: '/plata/ferdandezsera.png', category: 'Plata', order: 3 },
     { url: '/plata/logo-sherwin-williams.jpg', category: 'Plata', order: 3 },
     { url: '/plata/casco.png', category: 'Plata', order: 3 },
