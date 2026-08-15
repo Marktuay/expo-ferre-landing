@@ -100,7 +100,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
 **Última actualización: 15 de Agosto de 2026**
 
-- **Inclusión del Logo de BAC en el Reel Principal (`App.jsx`):**
+- **Inclusión del Logo de Kermil y BAC en el Reel Principal (`App.jsx`):**
+  - Se agregó la imagen de **Kermil** (`/diamante/logo-kermil.png`) en la categoría **Diamante** dentro del arreglo del carrusel en la portada, posicionándolo inmediatamente después del logo de Grupo SUR.
   - Se agregó la imagen de **BAC Credomatic** (`/diamante/logo-bac.jpeg`) en la categoría **Diamante** dentro del arreglo del carrusel en la portada, posicionándolo exactamente antes del logo de Ferretería Noelito.
 
 **Cambios Anteriores (14 de Agosto de 2026):**
