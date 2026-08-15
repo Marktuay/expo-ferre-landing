@@ -115,7 +115,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     11. Indenicza (`/diamante/indeninicsa.png`)
     12. Arcelor (`/diamante/LOGO-ARCELOR.png` - ampliado un **20%** con `scale: 1.2`)
     13. Megalíneas (`/diamante/megalines1.png`)
-    14. Pensilvania (`/diamante/pensilvania.jpg`)
+    14. Pensilvania (`/diamante/pensilvania.jpg` - ampliado un **20%** con `scale: 1.2`)
     15. Flash (`/diamante/megalines.png`)
   - **Inclusión y Ordenamiento en Categoría Plata (`App.jsx`):**
     - Se reorganizó la secuencia exacta de logotipos en la categoría **Plata**:
