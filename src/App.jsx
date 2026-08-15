@@ -135,7 +135,7 @@ export default function App() {
     { url: '/diamante/romax.jpeg', category: 'Diamante', order: 1 },
     { url: '/diamante/maximiza.jpeg', category: 'Diamante', order: 1 },
     { url: '/diamante/indeninicsa.png', category: 'Diamante', order: 1 },
-    { url: '/diamante/LOGO-ARCELOR.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/LOGO-ARCELOR.png', category: 'Diamante', order: 1, scale: 1.2 },
     { url: '/diamante/megalines.png', category: 'Diamante', order: 1 },
     { url: '/diamante/megalines1.png', category: 'Diamante', order: 1 },
     { url: '/oro/plycem%20.png', category: 'Oro', order: 2 },
@@ -577,7 +577,12 @@ export default function App() {
                                 {sponsorLogos.filter(l => l.category === 'Diamante').map((logo, index) => (
                                   <div key={`diamante-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-3 bg-white/10 rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer">
                                     <div className="w-32 md:w-44 aspect-video overflow-hidden flex items-center justify-center">
-                                      <img src={logo.url} alt={`Sponsor Diamante ${index}`} className="max-w-full max-h-full object-contain drop-shadow-lg" />
+                                      <img 
+                                        src={logo.url} 
+                                        alt={`Sponsor Diamante ${index}`} 
+                                        className="max-w-full max-h-full object-contain drop-shadow-lg" 
+                                        style={logo.scale ? { transform: `scale(${logo.scale})` } : undefined}
+                                      />
                                     </div>
                                   </div>
                                 ))}
