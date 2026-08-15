@@ -122,7 +122,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     1. Plycem (`/oro/plycem%20.png`)
     2. Sicsa (`/oro/sicsa.png`)
     3. Armoconsa (`/oro/armoconsa.png` - copiado e integrado)
-    4. JP Technology (`/oro/logo-jp-technology.png`)
+    4. JP Studio / Technology (`/oro/jp-studio-white.png` - actualizado a versión blanca)
 - **Inclusión y Ordenamiento en Categoría Plata (`App.jsx`):**
   - Se reorganizó la secuencia exacta de logotipos en la categoría **Plata**:
     1. Fernández Sera (`/plata/ferdandezsera.png`)
