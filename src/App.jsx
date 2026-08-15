@@ -134,6 +134,8 @@ export default function App() {
     { url: '/diamante/importacionesballadares.png', category: 'Diamante', order: 1 },
     { url: '/diamante/romax.jpeg', category: 'Diamante', order: 1 },
     { url: '/diamante/maximiza.jpeg', category: 'Diamante', order: 1 },
+    { url: '/diamante/indeninicsa.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/LOGO-ARCELOR.png', category: 'Diamante', order: 1 },
     { url: '/diamante/megalines.png', category: 'Diamante', order: 1 },
     { url: '/diamante/megalines1.png', category: 'Diamante', order: 1 },
     { url: '/oro/plycem%20.png', category: 'Oro', order: 2 },
