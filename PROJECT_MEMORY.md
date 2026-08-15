@@ -126,7 +126,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Inclusión y Ordenamiento en Categoría Plata (`App.jsx`):**
   - Se reorganizó la secuencia exacta de logotipos en la categoría **Plata**:
     1. Fernández Sera (`/plata/ferdandezsera.png`)
-    2. Sherwin Williams (`/plata/SherwinWilliams.jpg` - rastreado e indexado en Git)
+    2. Sherwin Williams (`/plata/logo-sherwin-williams.jpg` - renombrado a minúsculas, registrado en Git y ampliado un **60%** con `scale: 1.6`)
     3. Casco (`/plata/casco.png`)
     4. Midenesa (`/plata/midenesa.png`)
 - **Soporte Universal de Escala Transform y Seguimiento de Assets:**
