@@ -578,12 +578,12 @@ export default function App() {
                               </div>
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Diamante').map((logo, index) => (
-                                  <div key={`diamante-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-2.5 bg-white/10 rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer">
-                                    <div className="w-32 md:w-44 aspect-video bg-white rounded-lg p-1.5 flex items-center justify-center overflow-hidden shadow-inner">
+                                  <div key={`diamante-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-3 bg-white/10 rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer">
+                                    <div className="w-32 md:w-44 aspect-video overflow-hidden flex items-center justify-center">
                                       <img 
                                         src={logo.url} 
                                         alt={`Sponsor Diamante ${index}`} 
-                                        className="max-w-full max-h-full object-contain drop-shadow-sm" 
+                                        className="max-w-full max-h-full object-contain drop-shadow-lg" 
                                         style={logo.scale ? { transform: `scale(${logo.scale})` } : undefined}
                                       />
                                     </div>
@@ -600,12 +600,12 @@ export default function App() {
                               </div>
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Oro').map((logo, index) => (
-                                  <div key={`oro-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-2.5 bg-white/10 rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer">
-                                    <div className="w-32 md:w-44 aspect-video bg-white rounded-lg p-1.5 flex items-center justify-center overflow-hidden shadow-inner">
+                                  <div key={`oro-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-3 bg-white/10 rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer">
+                                    <div className="w-32 md:w-44 aspect-video overflow-hidden flex items-center justify-center">
                                       <img 
                                         src={logo.url} 
                                         alt={`Sponsor Oro ${index}`} 
-                                        className="max-w-full max-h-full object-contain drop-shadow-sm" 
+                                        className="max-w-full max-h-full object-contain drop-shadow-lg" 
                                         style={logo.scale ? { transform: `scale(${logo.scale})` } : undefined}
                                       />
                                     </div>
@@ -622,12 +622,12 @@ export default function App() {
                               </div>
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Plata').map((logo, index) => (
-                                  <div key={`plata-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-2.5 bg-white/10 rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer">
-                                    <div className="w-28 md:w-36 aspect-video bg-white rounded-lg p-1.5 flex items-center justify-center overflow-hidden shadow-inner">
+                                  <div key={`plata-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-3 bg-white/10 rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer">
+                                    <div className="w-28 md:w-36 aspect-video overflow-hidden flex items-center justify-center">
                                       <img 
                                         src={logo.url} 
                                         alt={`Sponsor Plata ${index}`} 
-                                        className="max-w-full max-h-full object-contain drop-shadow-sm" 
+                                        className="max-w-full max-h-full object-contain drop-shadow-lg" 
                                         style={logo.scale ? { transform: `scale(${logo.scale})` } : undefined}
                                       />
                                     </div>
@@ -645,8 +645,8 @@ export default function App() {
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Patrocinador').map((logo, index) => (
                                   <div key={`patro-${set}-${index}`} className="flex-shrink-0 flex items-center justify-center p-2 bg-white/5 rounded-xl border border-white/10 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer">
-                                    <div className="w-24 md:w-32 aspect-video bg-white rounded-lg p-1.5 flex items-center justify-center overflow-hidden shadow-inner">
-                                      <img src={logo.url} alt={`Patrocinador ${index}`} className="max-w-full max-h-full object-contain drop-shadow-sm" />
+                                    <div className="w-24 md:w-32 aspect-video overflow-hidden flex items-center justify-center">
+                                      <img src={logo.url} alt={`Patrocinador ${index}`} className="max-w-full max-h-full object-contain drop-shadow-md" />
                                     </div>
                                   </div>
                                 ))}
