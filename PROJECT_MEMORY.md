@@ -110,6 +110,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     6. BAC Credomatic (`/diamante/logo-bac.jpeg`)
     7. Ferretería Noelito (`/diamante/noelito%20.png`)
     8. Importaciones Balladares (`/diamante/importacionesballadares.png`)
+    9. Romax (`/diamante/romax.jpeg`)
+    10. Maximiza (`/diamante/maximiza.jpeg`)
 
 **Cambios Anteriores (14 de Agosto de 2026):**
 
