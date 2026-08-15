@@ -125,6 +125,7 @@ export default function App() {
   // con el nombre exacto de tu archivo (ej. '/diamante/rotoplas.png').
   const initialPlaceholders = [
     { url: '/diamante/sur.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/logo-kermil.png', category: 'Diamante', order: 1 },
     { url: '/diamante/comasa.png', category: 'Diamante', order: 1 },
     { url: '/diamante/sinsa.png', category: 'Diamante', order: 1 },
     { url: '/diamante/extelpng.png', category: 'Diamante', order: 1 },
