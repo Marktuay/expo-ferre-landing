@@ -115,7 +115,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     11. Indenicza (`/diamante/indeninicsa.png`)
     12. Arcelor (`/diamante/LOGO-ARCELOR.png` - ampliado un **20%** con `scale: 1.2`)
     13. Megalíneas (`/diamante/megalines1.png`)
-    14. Pensilvania (`/diamante/pensilvania.jpg` - ampliado un **20%** con `scale: 1.2`)
+    14. Pensilvania (`/diamante/pensilvania.jpg` - ampliado un **35%** con `scale: 1.35`)
     15. Flash (`/diamante/megalines.png`)
 - **Inclusión y Ordenamiento en Categoría Oro (`App.jsx`):**
   - Se configuró la secuencia exacta de logotipos en la categoría **Oro**:
@@ -126,7 +126,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Inclusión y Ordenamiento en Categoría Plata (`App.jsx`):**
   - Se reorganizó la secuencia exacta de logotipos en la categoría **Plata**:
     1. Fernández Sera (`/plata/ferdandezsera.png`)
-    2. Sherwin Williams (`/plata/SherwinWilliams.jpg`)
+    2. Sherwin Williams (`/plata/SherwinWilliams.jpg` - rastreado e indexado en Git)
     3. Casco (`/plata/casco.png`)
     4. Midenesa (`/plata/midenesa.png`)
 - **Soporte Universal de Escala Transform y Seguimiento de Assets:**
