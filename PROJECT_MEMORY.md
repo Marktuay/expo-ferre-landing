@@ -112,6 +112,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     8. Importaciones Balladares (`/diamante/importacionesballadares.png`)
     9. Romax (`/diamante/romax.jpeg`)
     10. Maximiza (`/diamante/maximiza.jpeg`)
+    11. Indenicza (`/diamante/indeninicsa.png`)
+    12. Arcelor (`/diamante/LOGO-ARCELOR.png`)
 
 **Cambios Anteriores (14 de Agosto de 2026):**
 
