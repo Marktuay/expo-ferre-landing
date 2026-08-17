@@ -102,14 +102,14 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 - **Ordenamiento y Actualización del Reel Diamante (`App.jsx`):**
   - Se reorganizó la secuencia exacta de logotipos en la categoría **Diamante**:
-    1. Grupo SUR (`/diamante/sur.png`)
-    2. Kermil (`/diamante/logo-kermil.png`)
-    3. Sinsa (`/diamante/sinsa.png`)
-    4. Comasa (`/diamante/comasa.png`)
-    5. Extel (`/diamante/extelpng.png`)
-    6. BAC Credomatic (`/diamante/logo-bac.jpeg`)
-    7. Ferretería Noelito (`/diamante/noelito%20.png`)
-    8. Importaciones Balladares (`/diamante/importacionesballadares.png`)
+    1. Grupo SUR (`/diamante/sur.png` - fondo blanco `bgWhite: true`)
+    2. Kermil (`/diamante/logo-kermil.png` - fondo blanco `bgWhite: true`)
+    3. Sinsa (`/diamante/sinsa.png` - fondo blanco `bgWhite: true`)
+    4. Comasa (`/diamante/comasa.png` - fondo blanco `bgWhite: true`)
+    5. Extel (`/diamante/extelpng.png` - fondo blanco `bgWhite: true`)
+    6. BAC Credomatic (`/diamante/logo-bac.jpeg` - fondo blanco `bgWhite: true`)
+    7. Ferretería Noelito (`/diamante/noelito%20.png` - fondo blanco `bgWhite: true`)
+    8. Importaciones Balladares (`/diamante/importacionesballadares.png` - fondo blanco `bgWhite: true`)
     9. Romax (`/diamante/romax.jpeg` - fondo blanco `bgWhite: true`)
     10. Maximiza (`/diamante/maximiza.jpeg` - fondo blanco `bgWhite: true`)
     11. Indenicza (`/diamante/indeninicsa.png` - fondo gris claro `bgClass: bg-gray-100/90` para óptimo contraste de letras)
