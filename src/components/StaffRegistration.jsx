@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { UserCheck, Send } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { db, auth } from '../firebase';
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 
 const StaffRegistration = ({ onBack }) => {
@@ -10,6 +10,7 @@ const StaffRegistration = ({ onBack }) => {
   const [registeredStaffId, setRegisteredStaffId] = useState(null);
   const [staffCount, setStaffCount] = useState(0);
   const [maxStaff, setMaxStaff] = useState(0);
+  const [sponsorCompany, setSponsorCompany] = useState('');
   const [loadingLimit, setLoadingLimit] = useState(true);
 
   useEffect(() => {
@@ -23,33 +24,58 @@ const StaffRegistration = ({ onBack }) => {
       }
       
       try {
-        // Determinar categoría por los stands reservados
-        const qStands = query(collection(db, `${getEventBasePath()}/stands`), where('sponsorId', '==', user.uid));
-        const standsSnapshot = await getDocs(qStands);
-        
         let calculatedMax = 0;
-        
-        standsSnapshot.forEach(doc => {
-          const standData = doc.data();
-          const size = standData.size || '';
-          if (size.includes('Diamante')) {
-            calculatedMax = Math.max(calculatedMax, 10);
-          } else if (size.includes('Oro')) {
-            calculatedMax = Math.max(calculatedMax, 6);
-          } else if (size.includes('Plata')) {
-            calculatedMax = Math.max(calculatedMax, 4);
+
+        // 1. Obtener datos de la empresa y categoría desde el documento de usuario en Firestore (users/${user.uid})
+        try {
+          const userDocSnap = await getDoc(doc(db, 'users', user.uid));
+          if (userDocSnap.exists()) {
+            const uData = userDocSnap.data();
+            const companyName = uData.empresa || uData.company || uData.nombre || uData.name || '';
+            setSponsorCompany(companyName);
+            
+            const cat = (uData.category || uData.sponsorCategory || uData.type || '').toLowerCase();
+            if (cat.includes('diamante')) calculatedMax = 10;
+            else if (cat.includes('oro')) calculatedMax = 6;
+            else if (cat.includes('plata')) calculatedMax = 4;
           }
-        });
+        } catch (e) {
+          console.warn("No se pudo obtener el perfil de usuario:", e);
+        }
+
+        // 2. Si no hay categoría definida en el perfil, buscar en los stands reservados
+        if (calculatedMax === 0) {
+          const qStands = query(collection(db, `${getEventBasePath()}/stands`), where('sponsorId', '==', user.uid));
+          const standsSnapshot = await getDocs(qStands);
+          
+          standsSnapshot.forEach(d => {
+            const standData = d.data();
+            const size = (standData.size || standData.category || standData.type || '').toLowerCase();
+            if (size.includes('diamante')) {
+              calculatedMax = Math.max(calculatedMax, 10);
+            } else if (size.includes('oro')) {
+              calculatedMax = Math.max(calculatedMax, 6);
+            } else if (size.includes('plata')) {
+              calculatedMax = Math.max(calculatedMax, 4);
+            }
+          });
+        }
         
+        // 3. Fallback seguro: Si no se encuentra categoría explícita ni stand aún, asignar 4 acreditaciones por defecto (Categoría Plata) para no bloquear al usuario
+        if (calculatedMax === 0) {
+          calculatedMax = 4;
+        }
+
         setMaxStaff(calculatedMax);
 
-        // Contar staff actual
+        // Contar staff actual ya registrado por este patrocinador
         const qStaff = query(collection(db, `${getEventBasePath()}/staff`), where('sponsorId', '==', user.uid));
         const staffSnapshot = await getDocs(qStaff);
         setStaffCount(staffSnapshot.size);
         
       } catch (error) {
         console.error("Error fetching limit data:", error);
+        setMaxStaff(prev => (prev > 0 ? prev : 4));
       } finally {
         setLoadingLimit(false);
       }
@@ -76,12 +102,10 @@ const StaffRegistration = ({ onBack }) => {
         nombre: formData.get('nombre'),
         apellido: formData.get('apellido'),
         email: formData.get('email'),
-        telefono: formData.get('telefono'),
-        empresa: formData.get('empresa') || '',
-        tamanoEmpresa: formData.get('tamanoEmpresa') || '',
-        sector: formData.get('sector') || '',
-        tipoCargo: formData.get('tipoCargo') || '',
-        cargo: formData.get('cargo') || '',
+        telefono: formData.get('telefono') || '',
+        empresa: formData.get('empresa') || sponsorCompany || '',
+        cargo: formData.get('cargo') || 'Staff de Stand',
+        sector: formData.get('sector') || 'Comercial',
         createdAt: serverTimestamp(),
         sponsorId: user ? user.uid : null,
         sponsorEmail: user ? user.email : null
@@ -113,7 +137,7 @@ const StaffRegistration = ({ onBack }) => {
             <UserCheck size={36} /> Registro de Staff
           </h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">
-            Por favor, complete el siguiente formulario oficial para registrarse como parte del equipo de Staff de Expo Ferre 2026.
+            Complete el formulario para acreditar al personal de equipo en Expo Ferre 2026.
           </p>
           
           {!loadingLimit && (
@@ -131,7 +155,7 @@ const StaffRegistration = ({ onBack }) => {
               </div>
               <div>
                 <h3 className="font-bold text-2xl mb-2 text-primary">¡Registro completado!</h3>
-                <p className="text-secondary mb-6">El código QR para la acreditación de su staff ha sido generado.</p>
+                <p className="text-secondary mb-6">El código QR para la acreditación de su staff ha sido generado con éxito.</p>
                 
                 <div className="bg-surface-variant p-6 rounded-lg inline-block border border-outline mb-6">
                   <QRCodeSVG value={registeredStaffId || 'loading'} size={180} level="M" />
@@ -162,15 +186,15 @@ const StaffRegistration = ({ onBack }) => {
               
               {/* Datos Personales */}
               <div className="space-y-4">
-                <h3 className="font-headline-sm text-secondary border-b pb-2">Datos Personales</h3>
+                <h3 className="font-headline-sm text-secondary border-b pb-2">Datos Personales del Staff</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="font-label-md text-on-surface font-bold">Nombre <span className="text-error">*</span></label>
-                    <input name="nombre" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Su nombre" />
+                    <input name="nombre" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Nombre" />
                   </div>
                   <div className="space-y-2">
                     <label className="font-label-md text-on-surface font-bold">Apellido <span className="text-error">*</span></label>
-                    <input name="apellido" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Su apellido" />
+                    <input name="apellido" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Apellido" />
                   </div>
                   <div className="space-y-2">
                     <label className="font-label-md text-on-surface font-bold">Correo electrónico <span className="text-error">*</span></label>
@@ -180,12 +204,16 @@ const StaffRegistration = ({ onBack }) => {
                     <label className="font-label-md text-on-surface font-bold">Teléfono móvil</label>
                     <input name="telefono" type="tel" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="+505 8000 0000" />
                   </div>
-
+                  <div className="space-y-2">
+                    <label className="font-label-md text-on-surface font-bold">Empresa / Patrocinador</label>
+                    <input name="empresa" type="text" defaultValue={sponsorCompany} className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Nombre de la empresa" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-on-surface font-bold">Cargo / Rol en el Stand</label>
+                    <input name="cargo" type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Ej: Asesor Comercial, Técnico, etc." />
+                  </div>
                 </div>
               </div>
-
-
-
 
               <div className="pt-6 border-t border-outline-variant flex flex-col md:flex-row items-center justify-between gap-4">
                 {staffCount >= maxStaff && !loadingLimit ? (
@@ -207,7 +235,7 @@ const StaffRegistration = ({ onBack }) => {
                     <span className="material-symbols-outlined animate-spin">progress_activity</span>
                   ) : (
                     <>
-                      <Send size={20} /> Registrarse
+                      <Send size={20} /> Registrar Staff
                     </>
                   )}
                 </button>

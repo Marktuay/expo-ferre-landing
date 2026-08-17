@@ -145,7 +145,7 @@ export default function AdminStaff({ onBack }) {
                       <td className="p-4 text-secondary">{staff.empresa}</td>
                       <td className="p-4 text-secondary">{staff.cargo}</td>
                       <td className="p-4 text-secondary">{staff.sector}</td>
-                      <td className="p-4 text-secondary">{staff.createdAt.toLocaleDateString()}</td>
+                      <td className="p-4 text-secondary">{staff.createdAt?.toLocaleDateString ? staff.createdAt.toLocaleDateString() : 'Reciente'}</td>
                       <td className="p-4 text-center">
                         <button 
                           onClick={() => setPrintItems([staff])}
