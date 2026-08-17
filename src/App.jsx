@@ -134,7 +134,7 @@ export default function App() {
     { url: '/diamante/importacionesballadares.png', category: 'Diamante', order: 1 },
     { url: '/diamante/romax.jpeg', category: 'Diamante', order: 1 },
     { url: '/diamante/maximiza.jpeg', category: 'Diamante', order: 1 },
-    { url: '/diamante/indeninicsa.png', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/indeninicsa.png', category: 'Diamante', order: 1, bgClass: 'bg-slate-900/90' },
     { url: '/diamante/LOGO-ARCELOR.png', category: 'Diamante', order: 1, scale: 1.2, bgWhite: true },
     { url: '/diamante/megalines1.png', category: 'Diamante', order: 1 },
     { url: '/diamante/pensilvania.jpg', category: 'Diamante', order: 1, scale: 1.35 },
@@ -578,7 +578,7 @@ export default function App() {
                               </div>
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Diamante').map((logo, index) => (
-                                  <div key={`diamante-${set}-${index}`} className={`flex-shrink-0 flex items-center justify-center p-3 ${logo.bgWhite ? 'bg-white p-2' : 'bg-white/10'} rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer`}>
+                                  <div key={`diamante-${set}-${index}`} className={`flex-shrink-0 flex items-center justify-center p-3 ${logo.bgClass ? logo.bgClass : (logo.bgWhite ? 'bg-white p-2' : 'bg-white/10')} rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer`}>
                                     <div className="w-32 md:w-44 aspect-video overflow-hidden flex items-center justify-center">
                                       <img 
                                         src={logo.url} 
@@ -600,7 +600,7 @@ export default function App() {
                               </div>
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Oro').map((logo, index) => (
-                                  <div key={`oro-${set}-${index}`} className={`flex-shrink-0 flex items-center justify-center p-3 ${logo.bgWhite ? 'bg-white p-2' : 'bg-white/10'} rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer`}>
+                                  <div key={`oro-${set}-${index}`} className={`flex-shrink-0 flex items-center justify-center p-3 ${logo.bgClass ? logo.bgClass : (logo.bgWhite ? 'bg-white p-2' : 'bg-white/10')} rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer`}>
                                     <div className="w-32 md:w-44 aspect-video overflow-hidden flex items-center justify-center">
                                       <img 
                                         src={logo.url} 
@@ -622,7 +622,7 @@ export default function App() {
                               </div>
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Plata').map((logo, index) => (
-                                  <div key={`plata-${set}-${index}`} className={`flex-shrink-0 flex items-center justify-center p-3 ${logo.bgWhite ? 'bg-white p-2' : 'bg-white/10'} rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer`}>
+                                  <div key={`plata-${set}-${index}`} className={`flex-shrink-0 flex items-center justify-center p-3 ${logo.bgClass ? logo.bgClass : (logo.bgWhite ? 'bg-white p-2' : 'bg-white/10')} rounded-xl border border-white/20 hover:scale-110 hover:bg-white/20 transition-all duration-300 cursor-pointer`}>
                                     <div className="w-28 md:w-36 aspect-video overflow-hidden flex items-center justify-center">
                                       <img 
                                         src={logo.url} 
