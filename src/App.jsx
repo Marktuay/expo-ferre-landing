@@ -139,13 +139,13 @@ export default function App() {
     { url: '/diamante/megalines1.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/pensilvania.jpg', category: 'Diamante', order: 1, scale: 1.35, bgWhite: true },
     { url: '/diamante/megalines.png', category: 'Diamante', order: 1, bgWhite: true },
-    { url: '/oro/plycem%20.png', category: 'Oro', order: 2 },
-    { url: '/oro/sicsa.png', category: 'Oro', order: 2 },
+    { url: '/oro/plycem%20.png', category: 'Oro', order: 2, bgWhite: true },
+    { url: '/oro/sicsa.png', category: 'Oro', order: 2, bgWhite: true },
     { url: '/oro/armoconsa.png', category: 'Oro', order: 2 },
-    { url: '/oro/jp-studio-white.png', category: 'Oro', order: 2 },
-    { url: '/plata/ferdandezsera.png', category: 'Plata', order: 3 },
+    { url: '/oro/jp-studio-white.png', category: 'Oro', order: 2, bgWhite: true },
+    { url: '/plata/ferdandezsera.png', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/logo-sherwin-williams.jpg', category: 'Plata', order: 3 },
-    { url: '/plata/casco.png', category: 'Plata', order: 3 },
+    { url: '/plata/casco.png', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/midenesa.png', category: 'Plata', order: 3 },
   ];
   
