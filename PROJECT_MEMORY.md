@@ -112,7 +112,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     8. Importaciones Balladares (`/diamante/importacionesballadares.png`)
     9. Romax (`/diamante/romax.jpeg`)
     10. Maximiza (`/diamante/maximiza.jpeg`)
-    11. Indenicza (`/diamante/indeninicsa.png` - configurado con fondo blanco `bgWhite: true` para visibilidad de PNG transparente)
+    11. Indenicza (`/diamante/indeninicsa.png` - tarjeta oscura `bgClass: bg-slate-900/90` para que la letra inicial blanca "I" y todo el texto se aprecien al 100%)
     12. Arcelor (`/diamante/LOGO-ARCELOR.png` - ampliado un **20%** con `scale: 1.2` y fondo blanco `bgWhite: true`)
     13. Megalíneas (`/diamante/megalines1.png`)
     14. Pensilvania (`/diamante/pensilvania.jpg` - ampliado un **35%** con `scale: 1.35`)
