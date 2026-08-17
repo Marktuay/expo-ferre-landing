@@ -65,14 +65,17 @@ export default function AdminSpeakers({ onBack }) {
             <button onClick={() => {
               import('xlsx').then(XLSX => {
                 const dataToExport = speakers.map(s => ({
-                  Fecha: s.createdAt.toLocaleDateString() + ' ' + s.createdAt.toLocaleTimeString(),
+                  Fecha: s.createdAt?.toLocaleDateString ? s.createdAt.toLocaleDateString() + ' ' + s.createdAt.toLocaleTimeString() : 'N/A',
                   Nombre: `${s.nombre || ''} ${s.apellido || ''}`.trim(),
                   Cargo: s.cargo || '',
                   Empresa: s.empresa || '',
-                  Email: s.correo || '',
+                  Email: s.email || s.correo || '',
                   Teléfono: s.telefono || '',
-                  Tema: s.tema || '',
-                  Formato: s.formato || ''
+                  LinkedIn: s.linkedin || '',
+                  Facebook: s.facebook || '',
+                  Instagram: s.instagram || '',
+                  Tema: s.titulo || s.tema || '',
+                  Formato: Array.isArray(s.formatos) ? s.formatos.join(', ') : (s.formato || '')
                 }));
                 const worksheet = XLSX.utils.json_to_sheet(dataToExport);
                 const workbook = XLSX.utils.book_new();

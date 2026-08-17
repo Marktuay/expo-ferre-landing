@@ -33,8 +33,9 @@ const SpeakerForm = ({ onClose }) => {
         empresa: formData.get('empresa'),
         tamanoEmpresa: formData.get('tamanoEmpresa'),
         telefono: formData.get('telefono'),
-        linkedin: formData.get('linkedin'),
-        facebook: formData.get('facebook'),
+        linkedin: formData.get('linkedin') || '',
+        facebook: formData.get('facebook') || '',
+        instagram: formData.get('instagram') || '',
         formatos: formatos,
         titulo: formData.get('titulo'),
         resumen: formData.get('resumen'),
@@ -153,9 +154,13 @@ const SpeakerForm = ({ onClose }) => {
                     <label className="font-label-md text-on-surface font-bold">LinkedIn (Opcional)</label>
                     <input name="linkedin" type="url" placeholder="https://linkedin.com/in/..." className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                   </div>
-                  <div className="space-y-2 md:col-span-2">
+                  <div className="space-y-2">
                     <label className="font-label-md text-on-surface font-bold">Facebook personal/empresa (Opcional)</label>
                     <input name="facebook" type="url" placeholder="https://facebook.com/..." className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-on-surface font-bold">Instagram personal/empresa (Opcional)</label>
+                    <input name="instagram" type="text" placeholder="https://instagram.com/..." className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                   </div>
                 </div>
               </div>
