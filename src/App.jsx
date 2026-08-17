@@ -124,14 +124,14 @@ export default function App() {
   // IMPORTANTE: Como usas los nombres reales de las empresas, debes actualizar esta lista 
   // con el nombre exacto de tu archivo (ej. '/diamante/rotoplas.png').
   const initialPlaceholders = [
-    { url: '/diamante/sur.png', category: 'Diamante', order: 1 },
-    { url: '/diamante/logo-kermil.png', category: 'Diamante', order: 1 },
-    { url: '/diamante/sinsa.png', category: 'Diamante', order: 1 },
-    { url: '/diamante/comasa.png', category: 'Diamante', order: 1 },
-    { url: '/diamante/extelpng.png', category: 'Diamante', order: 1 },
-    { url: '/diamante/logo-bac.jpeg', category: 'Diamante', order: 1 },
-    { url: '/diamante/noelito%20.png', category: 'Diamante', order: 1 },
-    { url: '/diamante/importacionesballadares.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/sur.png', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/logo-kermil.png', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/sinsa.png', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/comasa.png', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/extelpng.png', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/logo-bac.jpeg', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/noelito%20.png', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/importacionesballadares.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/romax.jpeg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/maximiza.jpeg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/indeninicsa.png', category: 'Diamante', order: 1, bgClass: 'bg-gray-100/90' },
