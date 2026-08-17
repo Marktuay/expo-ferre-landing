@@ -113,7 +113,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     9. Romax (`/diamante/romax.jpeg`)
     10. Maximiza (`/diamante/maximiza.jpeg`)
     11. Indenicza (`/diamante/indeninicsa.png` - configurado con fondo blanco `bgWhite: true` para visibilidad de PNG transparente)
-    12. Arcelor (`/diamante/LOGO-ARCELOR.png` - ampliado un **20%** con `scale: 1.2`)
+    12. Arcelor (`/diamante/LOGO-ARCELOR.png` - ampliado un **20%** con `scale: 1.2` y fondo blanco `bgWhite: true`)
     13. Megalíneas (`/diamante/megalines1.png`)
     14. Pensilvania (`/diamante/pensilvania.jpg` - ampliado un **35%** con `scale: 1.35`)
     15. Flash (`/diamante/megalines.png`)
