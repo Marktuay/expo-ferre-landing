@@ -123,12 +123,13 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Sicsa (`/oro/sicsa.png` - fondo blanco `bgWhite: true`)
     3. Armoconsa (`/oro/armoconsa.png` - copiado e integrado)
     4. JP Studio / Technology (`/oro/jp-studio-white.png` - fondo blanco `bgWhite: true`)
-- **Inclusión y Ordenamiento en Categoría Plata (`App.jsx`):**
-  - Se reorganizó la secuencia exacta de logotipos en la categoría **Plata**:
-    1. Fernández Sera (`/plata/ferdandezsera.png` - fondo blanco `bgWhite: true`)
-    2. Sherwin Williams (`/plata/logo-sherwin-williams.jpg` - sin escala para visualización 100% completa e íntegra sin ningún recorte)
-    3. Casco (`/plata/casco.png` - fondo blanco `bgWhite: true`)
-    4. Midenesa (`/plata/midenesa.png`)
+- **Corrección de Lógica en Registro de Staff de Patrocinadores (`StaffRegistration.jsx`):**
+  - **Diagnóstico del problema:** Si un patrocinador no tenía un stand reservado activamente en `events/2026/stands` (o si su categoría estaba asignada directamente en su perfil de usuario `users`), la variable `maxStaff` calculaba `0`. Esto causaba que la validación `0 >= 0` se evaluara como verdadera, **bloqueando de inmediato el botón de registro** y mostrando el mensaje erróneo *"Has alcanzado el límite máximo de staff (0)"*.
+  - **Solución implementada:**
+    1. Se añadió consulta al perfil de Firestore (`users/${user.uid}`) para detectar la categoría del patrocinador (**Diamante** ➡️ 10, **Oro** ➡️ 6, **Plata** ➡️ 4).
+    2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
+    3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
+    4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
 - **Restauración de Tarjetas Transparentes / Cristal para PNGs (`App.jsx`):**
   - Se eliminó el fondo blanco interior fijo `bg-white`, retornando al diseño elegante de tarjetas traslúcidas de cristal (`bg-white/10 rounded-xl border border-white/20`).
   - Esto solucionó que logotipos en formato PNG transparente con letras/gráficos blancos (como **Indenicza**, **JP Studio White**, **SUR**, **Sinsa**, etc.) se camuflaran contra cajas blancas, permitiendo que destaquen con total contraste y nitidez sobre el fondo azul oscuro de la sección.
