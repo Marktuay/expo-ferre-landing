@@ -114,9 +114,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     10. Maximiza (`/diamante/maximiza.jpeg` - fondo blanco `bgWhite: true`)
     11. Indenicza (`/diamante/indeninicsa.png` - fondo gris claro `bgClass: bg-gray-100/90` para óptimo contraste de letras)
     12. Arcelor (`/diamante/LOGO-ARCELOR.png` - reducido un **10%** a `scale: 1.1` con fondo blanco `bgWhite: true`)
-    13. Megalíneas (`/diamante/megalines1.png`)
-    14. Pensilvania (`/diamante/pensilvania.jpg` - ampliado un **35%** con `scale: 1.35`)
-    15. Flash (`/diamante/megalines.png`)
+    13. Megalíneas (`/diamante/megalines1.png` - fondo blanco `bgWhite: true`)
+    14. Pensilvania (`/diamante/pensilvania.jpg` - ampliado un **35%** con `scale: 1.35` y fondo blanco `bgWhite: true`)
+    15. Flash (`/diamante/megalines.png` - fondo blanco `bgWhite: true`)
 - **Inclusión y Ordenamiento en Categoría Oro (`App.jsx`):**
   - Se configuró la secuencia exacta de logotipos en la categoría **Oro**:
     1. Plycem (`/oro/plycem%20.png`)
