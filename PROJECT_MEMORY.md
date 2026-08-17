@@ -119,15 +119,15 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     15. Flash (`/diamante/megalines.png` - fondo blanco `bgWhite: true`)
 - **Inclusión y Ordenamiento en Categoría Oro (`App.jsx`):**
   - Se configuró la secuencia exacta de logotipos en la categoría **Oro**:
-    1. Plycem (`/oro/plycem%20.png`)
-    2. Sicsa (`/oro/sicsa.png`)
+    1. Plycem (`/oro/plycem%20.png` - fondo blanco `bgWhite: true`)
+    2. Sicsa (`/oro/sicsa.png` - fondo blanco `bgWhite: true`)
     3. Armoconsa (`/oro/armoconsa.png` - copiado e integrado)
-    4. JP Studio / Technology (`/oro/jp-studio-white.png` - actualizado a versión blanca)
+    4. JP Studio / Technology (`/oro/jp-studio-white.png` - fondo blanco `bgWhite: true`)
 - **Inclusión y Ordenamiento en Categoría Plata (`App.jsx`):**
   - Se reorganizó la secuencia exacta de logotipos en la categoría **Plata**:
-    1. Fernández Sera (`/plata/ferdandezsera.png`)
+    1. Fernández Sera (`/plata/ferdandezsera.png` - fondo blanco `bgWhite: true`)
     2. Sherwin Williams (`/plata/logo-sherwin-williams.jpg` - sin escala para visualización 100% completa e íntegra sin ningún recorte)
-    3. Casco (`/plata/casco.png`)
+    3. Casco (`/plata/casco.png` - fondo blanco `bgWhite: true`)
     4. Midenesa (`/plata/midenesa.png`)
 - **Restauración de Tarjetas Transparentes / Cristal para PNGs (`App.jsx`):**
   - Se eliminó el fondo blanco interior fijo `bg-white`, retornando al diseño elegante de tarjetas traslúcidas de cristal (`bg-white/10 rounded-xl border border-white/20`).
