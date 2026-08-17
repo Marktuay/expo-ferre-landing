@@ -109,7 +109,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     5. Extel (`/diamante/extelpng.png` - fondo blanco `bgWhite: true`)
     6. BAC Credomatic (`/diamante/logo-bac.jpeg` - fondo blanco `bgWhite: true`)
     7. Ferretería Noelito (`/diamante/noelito%20.png` - fondo blanco `bgWhite: true`)
-    8. Importaciones Balladares (`/diamante/importacionesballadares.png` - fondo blanco `bgWhite: true`)
+    8. Importaciones Balladares (`/diamante/importacionesballadares.png` - fondo de cristal traslúcido original)
     9. Romax (`/diamante/romax.jpeg` - fondo blanco `bgWhite: true`)
     10. Maximiza (`/diamante/maximiza.jpeg` - fondo blanco `bgWhite: true`)
     11. Indenicza (`/diamante/indeninicsa.png` - fondo gris claro `bgClass: bg-gray-100/90` para óptimo contraste de letras)
