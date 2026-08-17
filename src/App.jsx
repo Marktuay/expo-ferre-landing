@@ -135,7 +135,7 @@ export default function App() {
     { url: '/diamante/romax.jpeg', category: 'Diamante', order: 1 },
     { url: '/diamante/maximiza.jpeg', category: 'Diamante', order: 1 },
     { url: '/diamante/indeninicsa.png', category: 'Diamante', order: 1, bgWhite: true },
-    { url: '/diamante/LOGO-ARCELOR.png', category: 'Diamante', order: 1, scale: 1.2 },
+    { url: '/diamante/LOGO-ARCELOR.png', category: 'Diamante', order: 1, scale: 1.2, bgWhite: true },
     { url: '/diamante/megalines1.png', category: 'Diamante', order: 1 },
     { url: '/diamante/pensilvania.jpg', category: 'Diamante', order: 1, scale: 1.35 },
     { url: '/diamante/megalines.png', category: 'Diamante', order: 1 },
