@@ -105,6 +105,7 @@ export default function AdminGuests({ onBack }) {
                   Teléfono: g.telefono || '',
                   Empresa: g.empresa || '',
                   Cargo: g.cargo || '',
+                  Ciudad: g.ciudad || 'N/A',
                   'Cantidad de Empleados': g.empleados || '',
                   'Patrocinador (Nombre)': sponsorsMap[g.sponsorId] || 'Desconocido',
                   'Patrocinador (Email)': g.sponsorEmail || 'Desconocido',
@@ -139,6 +140,7 @@ export default function AdminGuests({ onBack }) {
                   <th className="p-4 font-bold text-on-surface">Teléfono</th>
                   <th className="p-4 font-bold text-on-surface">Empresa</th>
                   <th className="p-4 font-bold text-on-surface">Cargo</th>
+                  <th className="p-4 font-bold text-on-surface">Ciudad</th>
                   <th className="p-4 font-bold text-on-surface">Empleados</th>
                   <th className="p-4 font-bold text-on-surface">Patrocinador</th>
                   <th className="p-4 font-bold text-on-surface">Registrado Por</th>
@@ -149,13 +151,13 @@ export default function AdminGuests({ onBack }) {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="10" className="p-8 text-center text-secondary">
+                    <td colSpan="11" className="p-8 text-center text-secondary">
                       Cargando datos...
                     </td>
                   </tr>
                 ) : guestsList.length === 0 ? (
                   <tr>
-                    <td colSpan="10" className="p-8 text-center text-secondary">
+                    <td colSpan="11" className="p-8 text-center text-secondary">
                       No hay invitados registrados.
                     </td>
                   </tr>
@@ -167,6 +169,7 @@ export default function AdminGuests({ onBack }) {
                       <td className="p-4 text-secondary">{guest.telefono}</td>
                       <td className="p-4 text-secondary">{guest.empresa}</td>
                       <td className="p-4 text-secondary">{guest.cargo}</td>
+                      <td className="p-4 text-secondary font-medium">{guest.ciudad || 'N/A'}</td>
                       <td className="p-4 text-secondary">{guest.empleados}</td>
                       <td className="p-4 text-secondary font-bold text-sm text-primary">{sponsorsMap[guest.sponsorId] || 'Desconocido'}</td>
                       <td className="p-4 text-secondary text-sm font-bold">{guest.sponsorEmail || 'N/A'}</td>

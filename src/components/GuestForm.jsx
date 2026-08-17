@@ -41,6 +41,7 @@ const GuestForm = ({ onBack }) => {
         empresa: formData.get('empresa'),
         cargo: formData.get('cargo'),
         empleados: formData.get('empleados'),
+        ciudad: formData.get('ciudad') || 'Managua',
         email: email,
         createdAt: serverTimestamp()
       };
@@ -133,6 +134,30 @@ const GuestForm = ({ onBack }) => {
                   <div className="space-y-2">
                     <label className="font-label-md text-on-surface font-bold">Cargo <span className="text-error">*</span></label>
                     <input name="cargo" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Puesto o Cargo" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-on-surface font-bold">Ciudad / Departamento <span className="text-error">*</span></label>
+                    <select name="ciudad" required className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface">
+                      <option value="">Seleccione una ciudad</option>
+                      <option value="Managua">Managua</option>
+                      <option value="León">León</option>
+                      <option value="Masaya">Masaya</option>
+                      <option value="Granada">Granada</option>
+                      <option value="Chinandega">Chinandega</option>
+                      <option value="Matagalpa">Matagalpa</option>
+                      <option value="Estelí">Estelí</option>
+                      <option value="Jinotega">Jinotega</option>
+                      <option value="Rivas">Rivas</option>
+                      <option value="Carazo">Carazo (Jinotepe)</option>
+                      <option value="Boaco">Boaco</option>
+                      <option value="Chontales">Chontales (Juigalpa)</option>
+                      <option value="Madriz">Madriz (Somoto)</option>
+                      <option value="Nueva Segovia">Nueva Segovia (Ocotal)</option>
+                      <option value="Río San Juan">Río San Juan (San Carlos)</option>
+                      <option value="RACCN">RACCN (Bilwi)</option>
+                      <option value="RACCS">RACCS (Bluefields)</option>
+                      <option value="Otra / Internacional">Otra / Internacional</option>
+                    </select>
                   </div>
                   <div className="space-y-2">
                     <label className="font-label-md text-on-surface font-bold">Cantidad de Empleados <span className="text-error">*</span></label>
