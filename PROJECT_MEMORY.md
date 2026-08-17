@@ -130,9 +130,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
-- **Restauración de Tarjetas Transparentes / Cristal para PNGs (`App.jsx`):**
-  - Se eliminó el fondo blanco interior fijo `bg-white`, retornando al diseño elegante de tarjetas traslúcidas de cristal (`bg-white/10 rounded-xl border border-white/20`).
-  - Esto solucionó que logotipos en formato PNG transparente con letras/gráficos blancos (como **Indenicza**, **JP Studio White**, **SUR**, **Sinsa**, etc.) se camuflaran contra cajas blancas, permitiendo que destaquen con total contraste y nitidez sobre el fondo azul oscuro de la sección.
+- **Campo "Ciudad / Departamento" en Registro de Invitados (`GuestForm.jsx` & `AdminGuests.jsx`):**
+  - Se agregó el campo desplegable obligatorio **Ciudad / Departamento** al formulario de registro de invitados VIP (`GuestForm.jsx`), incluyendo la lista completa de departamentos y ciudades principales de Nicaragua (Managua, León, Masaya, Granada, Chinandega, Matagalpa, Estelí, Jinotega, Rivas, Carazo, Boaco, Chontales, Madriz, Nueva Segovia, Río San Juan, RACCN, RACCS, Otra / Internacional).
+  - Se actualizó el panel administrativo `AdminGuests.jsx` para guardar y mostrar la columna **Ciudad** en la tabla y en las descargas a Excel (`Lista_Invitados.xlsx`).
 
 **Cambios Anteriores (14 de Agosto de 2026):**
 
