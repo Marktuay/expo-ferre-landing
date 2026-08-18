@@ -29,8 +29,8 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
         }
       });
       
-      // Auto-inicializar si está en 0
-      if (snapshot.docs.length > 0 && reserved === 0) {
+      // Auto-inicializar los 19 stands oficiales si hay menos de 19 reservados
+      if (snapshot.docs.length > 0 && reserved < 19) {
         seedOfficialStands(db).catch(err => console.error("Error auto-seeding stands:", err));
       }
 
