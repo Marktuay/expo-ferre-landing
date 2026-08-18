@@ -130,9 +130,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
-- **Colección Dedicada de Respaldo Nivel Firestore (`events/2026/stands_backup`):**
-  - Se creó una subcolección nativa en Firestore llamada `events/2026/stands_backup` que actúa como espejo/respaldo de seguridad independiente en la nube.
-  - Al ejecutar precargas o presionar los botones **"💾 Crear Respaldo"** o **"🔄 Restaurar Respaldo"** en `AdminSponsorsHub.jsx`, el sistema genera una copia idéntica snapshot en Firestore y permite restaurar todas las reservaciones, logotipos y datos directamente desde esa subcolección de respaldo.
+- **Restricción Exclusiva de Seguridad para Cuenta Maestra (`marktuay@gmail.com`):**
+  - Se configuró la visibilidad de los botones **"💾 Crear Respaldo"**, **"🔄 Restaurar Respaldo"** y **"⚡ Cargar Oficiales"** en `AdminSponsorsHub.jsx` y `AdminPanel.jsx` para que estén **estrictamente restringidos y visibles únicamente** al iniciar sesión con la cuenta de administrador maestro (`marktuay@gmail.com`). Ningún usuario secundario o staff podrá visualizar ni manipular las funciones de respaldo o re-inicialización.
 - **Campo "Instagram personal/empresa (Opcional)" en Alta de Conferencias (`SpeakerForm.jsx` & `AdminSpeakers.jsx`):**
   - Se agregó el campo de texto opcional **Instagram personal/empresa (Opcional)** al formulario de registro de conferencias/speakers (`SpeakerForm.jsx`), ubicándolo en el grid junto a LinkedIn y Facebook.
   - Se actualizó el submit handler y el módulo de administración (`AdminSpeakers.jsx`) para almacenar este dato en Firestore (`events/2026/speakers`) e incluir LinkedIn, Facebook e Instagram en las exportaciones a Excel (`Conferencias.xlsx`).
