@@ -141,7 +141,7 @@ export default function App() {
     { url: '/diamante/megalines.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/oro/plycem%20.png', category: 'Oro', order: 2, bgWhite: true },
     { url: '/oro/sicsa.png', category: 'Oro', order: 2, bgWhite: true },
-    { url: '/oro/armoconsa.png', category: 'Oro', order: 2 },
+    { url: '/oro/armoconsa.png', category: 'Oro', order: 2, bgWhite: true },
     { url: '/oro/jp-studio-white.png', category: 'Oro', order: 2, bgWhite: true },
     { url: '/plata/ferdandezsera.png', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/logo-sherwin-williams.jpg', category: 'Plata', order: 3 },
