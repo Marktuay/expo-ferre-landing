@@ -146,7 +146,7 @@ export default function App() {
     { url: '/plata/ferdandezsera.png', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/logo-sherwin-williams.jpg', category: 'Plata', order: 3 },
     { url: '/plata/casco.png', category: 'Plata', order: 3, bgWhite: true },
-    { url: '/plata/midenesa.png', category: 'Plata', order: 3 },
+    { url: '/plata/Logo_MIDESA-removebg-preview.png', category: 'Plata', order: 3, bgWhite: true },
   ];
   
   const sponsorLogos = initialPlaceholders;

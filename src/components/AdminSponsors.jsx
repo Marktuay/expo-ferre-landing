@@ -20,7 +20,7 @@ const OFFICIAL_SPONSORS = [
   { company: 'JP Technology', category: 'Oro', logo: '/oro/logo-jp-technology.png' },
   { company: 'Casco', category: 'Plata', logo: '/plata/casco.png' },
   { company: 'Fernández Sera', category: 'Plata', logo: '/plata/ferdandezsera.png' },
-  { company: 'Midenesa', category: 'Plata', logo: '/plata/midenesa.png' }
+  { company: 'Midesa', category: 'Plata', logo: '/plata/Logo_MIDESA-removebg-preview.png' }
 ];
 
 export default function AdminSponsors({ onBack }) {

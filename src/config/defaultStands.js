@@ -125,14 +125,14 @@ export const DEFAULT_OFFICIAL_STANDS = [
   {
     id: 'stand-9',
     status: 'reserved',
-    logo: '/plata/midenesa.png',
-    sponsorId: 'official-midenesa',
-    sponsorEmail: 'ventas@midenesa.com.ni',
+    logo: '/plata/Logo_MIDESA-removebg-preview.png',
+    sponsorId: 'official-midesa',
+    sponsorEmail: 'ventas@midesa.com.ni',
     reservationDetails: {
-      empresa: 'Midenesa',
+      empresa: 'Midesa',
       nombre: 'Ventas',
-      apellido: 'Midenesa',
-      correo: 'ventas@midenesa.com.ni',
+      apellido: 'Midesa',
+      correo: 'ventas@midesa.com.ni',
       telefono: '+505 2240 7788',
       categoria: 'Plata'
     }
