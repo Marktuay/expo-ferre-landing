@@ -1120,7 +1120,7 @@ export default function App() {
       )}
 
       {currentView === 'adminPanel' && (
-        <AdminPanel onBack={() => setCurrentView('adminSponsorsHub')} />
+        <AdminPanel onBack={() => setCurrentView('adminSponsorsHub')} adminUser={adminUser} />
       )}
 
 

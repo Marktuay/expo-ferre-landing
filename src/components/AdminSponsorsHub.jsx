@@ -89,6 +89,8 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
     }
   };
 
+  const isMasterAdmin = (adminUser?.email?.toLowerCase() === 'marktuay@gmail.com') || (auth.currentUser?.email?.toLowerCase() === 'marktuay@gmail.com');
+
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
       <div className="max-w-5xl mx-auto">
@@ -98,33 +100,37 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
             <p className="text-body-lg text-secondary">Selecciona el panel al que deseas acceder.</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button 
-              onClick={handleCreateBackup} 
-              disabled={isSeeding}
-              className="px-3 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-1.5 text-xs disabled:opacity-50"
-              title="Guardar copia de seguridad actual en Firestore (events/2026/stands_backup)"
-            >
-              <span className="material-symbols-outlined text-sm">save</span>
-              Crear Respaldo
-            </button>
-            <button 
-              onClick={handleRestoreBackup} 
-              disabled={isSeeding}
-              className="px-3 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-1.5 text-xs disabled:opacity-50"
-              title="Restaurar de la copia de seguridad guardada en Firestore"
-            >
-              <span className="material-symbols-outlined text-sm">restore</span>
-              Restaurar Respaldo
-            </button>
-            <button 
-              onClick={handleSeedStands} 
-              disabled={isSeeding}
-              className="px-4 py-2 bg-primary text-on-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 text-sm disabled:opacity-50"
-              title="Restaurar / Cargar los stands de los patrocinadores oficiales de la feria"
-            >
-              <span className="material-symbols-outlined text-sm">refresh</span>
-              {isSeeding ? 'Cargando...' : 'Cargar Oficiales'}
-            </button>
+            {isMasterAdmin && (
+              <>
+                <button 
+                  onClick={handleCreateBackup} 
+                  disabled={isSeeding}
+                  className="px-3 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-1.5 text-xs disabled:opacity-50"
+                  title="Guardar copia de seguridad actual en Firestore (events/2026/stands_backup)"
+                >
+                  <span className="material-symbols-outlined text-sm">save</span>
+                  Crear Respaldo
+                </button>
+                <button 
+                  onClick={handleRestoreBackup} 
+                  disabled={isSeeding}
+                  className="px-3 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-1.5 text-xs disabled:opacity-50"
+                  title="Restaurar de la copia de seguridad guardada en Firestore"
+                >
+                  <span className="material-symbols-outlined text-sm">restore</span>
+                  Restaurar Respaldo
+                </button>
+                <button 
+                  onClick={handleSeedStands} 
+                  disabled={isSeeding}
+                  className="px-4 py-2 bg-primary text-on-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 text-sm disabled:opacity-50"
+                  title="Restaurar / Cargar los stands de los patrocinadores oficiales de la feria"
+                >
+                  <span className="material-symbols-outlined text-sm">refresh</span>
+                  {isSeeding ? 'Cargando...' : 'Cargar Oficiales'}
+                </button>
+              </>
+            )}
             <button onClick={onBack} className="px-5 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2">
               <span className="material-symbols-outlined">arrow_back</span>
               Volver al Hub

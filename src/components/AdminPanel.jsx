@@ -5,12 +5,16 @@ import { getEventBasePath } from '../config/eventConfig';
 import { seedOfficialStands } from '../config/defaultStands';
 import InteractiveMap from './InteractiveMap';
 
-export default function AdminPanel({ onBack }) {
+import { auth } from '../firebase';
+
+export default function AdminPanel({ onBack, adminUser }) {
   const [reservedStands, setReservedStands] = useState([]);
   const [sponsors, setSponsors] = useState({});
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('list');
   const [isSeeding, setIsSeeding] = useState(false);
+
+  const isMasterAdmin = (adminUser?.email?.toLowerCase() === 'marktuay@gmail.com') || (auth.currentUser?.email?.toLowerCase() === 'marktuay@gmail.com');
 
   useEffect(() => {
     const fetchSponsors = async () => {
@@ -86,15 +90,17 @@ export default function AdminPanel({ onBack }) {
             <p className="text-body-lg text-secondary">Tienes {reservedStands.length} stands reservados actualmente.</p>
           </div>
           <div className="flex gap-4">
-            <button 
-              onClick={handleSeed}
-              disabled={isSeeding}
-              className="px-4 py-2 bg-primary text-on-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 text-sm disabled:opacity-50"
-              title="Restaurar / Cargar los stands de los patrocinadores oficiales de la feria"
-            >
-              <span className="material-symbols-outlined text-sm">refresh</span>
-              {isSeeding ? 'Cargando...' : 'Cargar Stands Oficiales'}
-            </button>
+            {isMasterAdmin && (
+              <button 
+                onClick={handleSeed}
+                disabled={isSeeding}
+                className="px-4 py-2 bg-primary text-on-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 text-sm disabled:opacity-50"
+                title="Restaurar / Cargar los stands de los patrocinadores oficiales de la feria"
+              >
+                <span className="material-symbols-outlined text-sm">refresh</span>
+                {isSeeding ? 'Cargando...' : 'Cargar Stands Oficiales'}
+              </button>
+            )}
             <button onClick={() => {
               import('xlsx').then(XLSX => {
                 const dataToExport = reservedStands.map(stand => ({
