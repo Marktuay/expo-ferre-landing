@@ -4,6 +4,7 @@ import { collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firesto
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, auth } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
+import { seedOfficialStands } from '../config/defaultStands';
 
 // Stands mapeados directamente desde las coordenadas del archivo SVG original
 export const initialStandsList = [
@@ -77,10 +78,11 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
         });
         setStands(mergedStands);
       } else {
-        // Inicializar stands en Firestore si está vacío
+        // Inicializar stands en Firestore si está vacío y auto-cargar oficiales
         initialStandsList.forEach(async (stand) => {
           await setDoc(doc(db, `${getEventBasePath()}/stands`, stand.id), stand);
         });
+        seedOfficialStands(db).catch(err => console.error("Error auto-seeding in InteractiveMap:", err));
       }
     });
 
