@@ -3,16 +3,15 @@ import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import { initialStandsList } from './InteractiveMap';
+import { seedOfficialStands } from '../config/defaultStands';
 
 export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [reservedStandsCount, setReservedStandsCount] = useState(0);
   const [staffCount, setStaffCount] = useState(0);
+  const [isSeeding, setIsSeeding] = useState(false);
 
   useEffect(() => {
-    // Solo suscribirse a estas métricas si es admin
-    if (adminUser?.role !== 'admin') return;
-
     const standsQ = query(collection(db, `${getEventBasePath()}/stands`));
     const unsubStands = onSnapshot(standsQ, (snapshot) => {
       let reserved = 0;
@@ -22,17 +21,19 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
         const data = doc.data();
         if (data.status === 'reserved' || data.status === 'sold') {
           reserved++;
-          // Find price from initialStandsList based on id
-          const standConfig = initialStandsList.find(s => s.id === doc.id);
-          if (standConfig && standConfig.price) {
-            // Remove non-numeric characters except dots and commas
-            const priceStr = standConfig.price.replace(/[^0-9.-]+/g, "");
-            const priceVal = parseFloat(priceStr);
-            if (!isNaN(priceVal)) revenue += priceVal;
-          }
+          const standConfig = initialStandsList.find(s => s.id === doc.id || s.id === data.id);
+          const priceToUse = data.price || standConfig?.price || '0';
+          const priceStr = priceToUse.replace(/[^0-9.-]+/g, "");
+          const priceVal = parseFloat(priceStr);
+          if (!isNaN(priceVal)) revenue += priceVal;
         }
       });
       
+      // Auto-inicializar si está en 0
+      if (snapshot.docs.length > 0 && reserved === 0) {
+        seedOfficialStands(db).catch(err => console.error("Error auto-seeding stands:", err));
+      }
+
       setReservedStandsCount(reserved);
       setTotalRevenue(revenue);
     });
@@ -46,7 +47,20 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
       unsubStands();
       unsubStaff();
     };
-  }, [adminUser]);
+  }, []);
+
+  const handleSeedStands = async () => {
+    setIsSeeding(true);
+    try {
+      await seedOfficialStands(db);
+      alert('Stands de los patrocinadores oficiales cargados con éxito.');
+    } catch (err) {
+      console.error("Error cargando stands oficiales:", err);
+      alert('Hubo un error al cargar los stands oficiales.');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
@@ -57,6 +71,15 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
             <p className="text-body-lg text-secondary">Selecciona el panel al que deseas acceder.</p>
           </div>
           <div className="flex gap-4">
+            <button 
+              onClick={handleSeedStands} 
+              disabled={isSeeding}
+              className="px-4 py-2 bg-primary text-on-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 text-sm disabled:opacity-50"
+              title="Restaurar / Cargar los stands de los patrocinadores oficiales de la feria"
+            >
+              <span className="material-symbols-outlined text-sm">refresh</span>
+              {isSeeding ? 'Cargando...' : 'Cargar Stands Oficiales'}
+            </button>
             <button onClick={onBack} className="px-5 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2">
               <span className="material-symbols-outlined">arrow_back</span>
               Volver al Hub

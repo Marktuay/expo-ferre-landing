@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
+import { seedOfficialStands } from '../config/defaultStands';
 import InteractiveMap from './InteractiveMap';
 
 export default function AdminPanel({ onBack }) {
@@ -9,6 +10,7 @@ export default function AdminPanel({ onBack }) {
   const [sponsors, setSponsors] = useState({});
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('list');
+  const [isSeeding, setIsSeeding] = useState(false);
 
   useEffect(() => {
     const fetchSponsors = async () => {
@@ -45,6 +47,19 @@ export default function AdminPanel({ onBack }) {
     return () => unsubscribe();
   }, []);
 
+  const handleSeed = async () => {
+    setIsSeeding(true);
+    try {
+      await seedOfficialStands(db);
+      alert('Stands de los patrocinadores oficiales cargados con éxito.');
+    } catch (err) {
+      console.error("Error seeding stands:", err);
+      alert('Hubo un error al cargar los stands.');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   const handleRelease = async (standId) => {
     if (window.confirm(`¿Estás seguro de que deseas liberar el stand ${standId}? Esta acción no se puede deshacer.`)) {
       try {
@@ -71,6 +86,15 @@ export default function AdminPanel({ onBack }) {
             <p className="text-body-lg text-secondary">Tienes {reservedStands.length} stands reservados actualmente.</p>
           </div>
           <div className="flex gap-4">
+            <button 
+              onClick={handleSeed}
+              disabled={isSeeding}
+              className="px-4 py-2 bg-primary text-on-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 text-sm disabled:opacity-50"
+              title="Restaurar / Cargar los stands de los patrocinadores oficiales de la feria"
+            >
+              <span className="material-symbols-outlined text-sm">refresh</span>
+              {isSeeding ? 'Cargando...' : 'Cargar Stands Oficiales'}
+            </button>
             <button onClick={() => {
               import('xlsx').then(XLSX => {
                 const dataToExport = reservedStands.map(stand => ({
