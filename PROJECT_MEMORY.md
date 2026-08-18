@@ -130,11 +130,12 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
-- **Estandarización de Rutas y Nombres de Archivos de Logos (`balladares.png`, `midesa.png`):**
-  - Para evitar incompatibilidades de mayúsculas/minúsculas y caracteres especiales en los servidores web Linux de Google Cloud, se estandarizaron los nombres y rutas de los logos a minúsculas limpias:
-    - `/diamante/balladares.png`
-    - `/plata/midesa.png`
-  - Se actualizaron las referencias en `App.jsx`, `AdminSponsors.jsx` y `defaultStands.js`, y se subieron los nuevos archivos binarios directamente a GitHub.
+- **Incorporación de Logos Cemex, CANAL y Construrama en Categoría Diamante (`App.jsx`, `AdminSponsors.jsx`):**
+  - Se añadieron los logos de **Cemex**, **CANAL** y **Construrama** en la categoría **Diamante**, ubicándolos inmediatamente después del logo de *Noelito* en el orden exacto solicitado:
+    1. `/diamante/cemex.png`
+    2. `/diamante/canal.png`
+    3. `/diamante/construrama.png`
+  - Se subieron los archivos de imagen a GitHub y se configuraron con contenedor de fondo blanco para óptima visualización.
 - **Campo "Instagram personal/empresa (Opcional)" en Alta de Conferencias (`SpeakerForm.jsx` & `AdminSpeakers.jsx`):**
   - Se agregó el campo de texto opcional **Instagram personal/empresa (Opcional)** al formulario de registro de conferencias/speakers (`SpeakerForm.jsx`), ubicándolo en el grid junto a LinkedIn y Facebook.
   - Se actualizó el submit handler y el módulo de administración (`AdminSpeakers.jsx`) para almacenar este dato en Firestore (`events/2026/speakers`) e incluir LinkedIn, Facebook e Instagram en las exportaciones a Excel (`Conferencias.xlsx`).
