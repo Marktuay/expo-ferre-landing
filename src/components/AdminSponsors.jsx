@@ -11,7 +11,7 @@ const OFFICIAL_SPONSORS = [
   { company: 'Comasa', category: 'Diamante', logo: '/diamante/comasa.png' },
   { company: 'Sinsa', category: 'Diamante', logo: '/diamante/sinsa.png' },
   { company: 'Extel', category: 'Diamante', logo: '/diamante/extelpng.png' },
-  { company: 'Importaciones Balladares', category: 'Diamante', logo: '/diamante/balladares-blue.png' },
+  { company: 'Importaciones Balladares', category: 'Diamante', logo: '/diamante/balladares.png' },
   { company: 'Megalines', category: 'Diamante', logo: '/diamante/megalines.png' },
   { company: 'Megalines 1', category: 'Diamante', logo: '/diamante/megalines1.png' },
   { company: 'Noelito', category: 'Diamante', logo: '/diamante/noelito%20.png' },
@@ -20,7 +20,7 @@ const OFFICIAL_SPONSORS = [
   { company: 'JP Technology', category: 'Oro', logo: '/oro/logo-jp-technology.png' },
   { company: 'Casco', category: 'Plata', logo: '/plata/casco.png' },
   { company: 'Fernández Sera', category: 'Plata', logo: '/plata/ferdandezsera.png' },
-  { company: 'Midesa', category: 'Plata', logo: '/plata/Logo_MIDESA-removebg-preview.png' }
+  { company: 'Midesa', category: 'Plata', logo: '/plata/midesa.png' }
 ];
 
 export default function AdminSponsors({ onBack }) {

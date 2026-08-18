@@ -131,7 +131,7 @@ export default function App() {
     { url: '/diamante/extelpng.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/logo-bac.jpeg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/noelito%20.png', category: 'Diamante', order: 1, bgWhite: true },
-    { url: '/diamante/balladares-blue.png', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/balladares.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/romax.jpeg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/maximiza.jpeg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/indeninicsa.png', category: 'Diamante', order: 1, bgClass: 'bg-gray-100/90' },
@@ -146,7 +146,7 @@ export default function App() {
     { url: '/plata/ferdandezsera.png', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/logo-sherwin-williams.jpg', category: 'Plata', order: 3 },
     { url: '/plata/casco.png', category: 'Plata', order: 3, bgWhite: true },
-    { url: '/plata/Logo_MIDESA-removebg-preview.png', category: 'Plata', order: 3, bgWhite: true },
+    { url: '/plata/midesa.png', category: 'Plata', order: 3, bgWhite: true },
   ];
   
   const sponsorLogos = initialPlaceholders;

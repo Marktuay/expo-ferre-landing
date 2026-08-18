@@ -125,7 +125,7 @@ export const DEFAULT_OFFICIAL_STANDS = [
   {
     id: 'stand-9',
     status: 'reserved',
-    logo: '/plata/Logo_MIDESA-removebg-preview.png',
+    logo: '/plata/midesa.png',
     sponsorId: 'official-midesa',
     sponsorEmail: 'ventas@midesa.com.ni',
     reservationDetails: {
@@ -245,7 +245,7 @@ export const DEFAULT_OFFICIAL_STANDS = [
   {
     id: 'stand-34',
     status: 'reserved',
-    logo: '/diamante/balladares-blue.png',
+    logo: '/diamante/balladares.png',
     sponsorId: 'official-importaciones-balladares',
     sponsorEmail: 'info@balladares.com.ni',
     reservationDetails: {
