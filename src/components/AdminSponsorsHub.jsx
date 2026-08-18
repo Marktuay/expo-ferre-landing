@@ -3,7 +3,7 @@ import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import { initialStandsList } from './InteractiveMap';
-import { seedOfficialStands } from '../config/defaultStands';
+import { seedOfficialStands, createFirestoreBackup, restoreFromFirestoreBackup } from '../config/defaultStands';
 
 export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
   const [totalRevenue, setTotalRevenue] = useState(0);
@@ -53,10 +53,37 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
     setIsSeeding(true);
     try {
       await seedOfficialStands(db);
-      alert('Stands de los patrocinadores oficiales cargados con éxito.');
+      alert('Stands de los patrocinadores oficiales cargados y respaldados en Firestore con éxito.');
     } catch (err) {
       console.error("Error cargando stands oficiales:", err);
       alert('Hubo un error al cargar los stands oficiales.');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
+  const handleCreateBackup = async () => {
+    setIsSeeding(true);
+    try {
+      await createFirestoreBackup(db);
+      alert('Respaldo snapshot creado exitosamente en la colección de Firestore: events/2026/stands_backup');
+    } catch (err) {
+      console.error("Error al respaldar en Firestore:", err);
+      alert('Hubo un error al crear el respaldo en Firestore.');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
+  const handleRestoreBackup = async () => {
+    if (!window.confirm('¿Deseas restaurar las reservaciones de los stands desde el respaldo guardado en Firestore?')) return;
+    setIsSeeding(true);
+    try {
+      await restoreFromFirestoreBackup(db);
+      alert('Reservaciones de stands restauradas exitosamente desde el respaldo en Firestore.');
+    } catch (err) {
+      console.error("Error al restaurar desde Firestore:", err);
+      alert('Hubo un error al restaurar el respaldo desde Firestore.');
     } finally {
       setIsSeeding(false);
     }
@@ -70,7 +97,25 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
             <h1 className="text-headline-md font-bold text-on-surface">Gestión de Patrocinadores</h1>
             <p className="text-body-lg text-secondary">Selecciona el panel al que deseas acceder.</p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-3">
+            <button 
+              onClick={handleCreateBackup} 
+              disabled={isSeeding}
+              className="px-3 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-1.5 text-xs disabled:opacity-50"
+              title="Guardar copia de seguridad actual en Firestore (events/2026/stands_backup)"
+            >
+              <span className="material-symbols-outlined text-sm">save</span>
+              Crear Respaldo
+            </button>
+            <button 
+              onClick={handleRestoreBackup} 
+              disabled={isSeeding}
+              className="px-3 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-1.5 text-xs disabled:opacity-50"
+              title="Restaurar de la copia de seguridad guardada en Firestore"
+            >
+              <span className="material-symbols-outlined text-sm">restore</span>
+              Restaurar Respaldo
+            </button>
             <button 
               onClick={handleSeedStands} 
               disabled={isSeeding}
@@ -78,7 +123,7 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
               title="Restaurar / Cargar los stands de los patrocinadores oficiales de la feria"
             >
               <span className="material-symbols-outlined text-sm">refresh</span>
-              {isSeeding ? 'Cargando...' : 'Cargar Stands Oficiales'}
+              {isSeeding ? 'Cargando...' : 'Cargar Oficiales'}
             </button>
             <button onClick={onBack} className="px-5 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2">
               <span className="material-symbols-outlined">arrow_back</span>

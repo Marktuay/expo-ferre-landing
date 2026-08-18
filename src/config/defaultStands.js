@@ -1,4 +1,4 @@
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { getEventBasePath } from './eventConfig';
 
 export const DEFAULT_OFFICIAL_STANDS = [
@@ -291,7 +291,42 @@ export const DEFAULT_OFFICIAL_STANDS = [
 
 export const seedOfficialStands = async (db) => {
   for (const stand of DEFAULT_OFFICIAL_STANDS) {
-    const ref = doc(db, `${getEventBasePath()}/stands`, stand.id);
-    await setDoc(ref, stand, { merge: true });
+    // 1. Guardar en la colección activa de stands
+    const refActive = doc(db, `${getEventBasePath()}/stands`, stand.id);
+    await setDoc(refActive, stand, { merge: true });
+
+    // 2. Guardar en la colección de respaldo de Firestore
+    const refBackup = doc(db, `${getEventBasePath()}/stands_backup`, stand.id);
+    await setDoc(refBackup, stand, { merge: true });
+  }
+};
+
+// Crear copia de respaldo snapshot actual de Firestore
+export const createFirestoreBackup = async (db) => {
+  const standsSnap = await getDocs(collection(db, `${getEventBasePath()}/stands`));
+  
+  if (!standsSnap.empty) {
+    for (const d of standsSnap.docs) {
+      const backupRef = doc(db, `${getEventBasePath()}/stands_backup`, d.id);
+      await setDoc(backupRef, d.data(), { merge: true });
+    }
+  } else {
+    // Si la activa está vacía, respaldar plantilla oficial
+    await seedOfficialStands(db);
+  }
+};
+
+// Restaurar stands activas desde la colección de respaldo en Firestore
+export const restoreFromFirestoreBackup = async (db) => {
+  const backupSnap = await getDocs(collection(db, `${getEventBasePath()}/stands_backup`));
+  
+  if (!backupSnap.empty) {
+    for (const d of backupSnap.docs) {
+      const activeRef = doc(db, `${getEventBasePath()}/stands`, d.id);
+      await setDoc(activeRef, d.data(), { merge: true });
+    }
+  } else {
+    // Si la de respaldo está vacía, re-inicializar
+    await seedOfficialStands(db);
   }
 };
