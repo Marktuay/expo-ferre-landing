@@ -3,48 +3,78 @@ import { getEventBasePath } from './eventConfig';
 
 export const DEFAULT_OFFICIAL_STANDS = [
   {
-    id: 'stand-38',
+    id: 'stand-1',
     status: 'reserved',
-    logo: '/diamante/noelito%20.png',
-    sponsorId: 'official-noelito',
-    sponsorEmail: 'info@noelito.com.ni',
+    logo: '/diamante/romax.jpeg',
+    sponsorId: 'official-romax',
+    sponsorEmail: 'contacto@romax.com.ni',
     reservationDetails: {
-      empresa: 'Ferretería Noelito',
-      nombre: 'Linda',
-      apellido: 'Gutiérrez',
-      correo: 'info@noelito.com.ni',
-      telefono: '+505 8888 8888',
-      categoria: 'Diamante'
-    }
-  },
-  {
-    id: 'stand-21',
-    status: 'reserved',
-    logo: '/diamante/sur.png',
-    sponsorId: 'official-sur',
-    sponsorEmail: 'ventas@gruposur.com.ni',
-    reservationDetails: {
-      empresa: 'Grupo SUR',
-      nombre: 'Mario',
-      apellido: 'Jarquín',
-      correo: 'ventas@gruposur.com.ni',
-      telefono: '+505 8777 7777',
-      categoria: 'Diamante'
-    }
-  },
-  {
-    id: 'stand-11',
-    status: 'reserved',
-    logo: '/diamante/sinsa.png',
-    sponsorId: 'official-sinsa',
-    sponsorEmail: 'contacto@sinsa.com.ni',
-    reservationDetails: {
-      empresa: 'Sinsa',
+      empresa: 'Romax',
       nombre: 'Atención',
-      apellido: 'Sinsa',
-      correo: 'contacto@sinsa.com.ni',
-      telefono: '+505 2270 0000',
-      categoria: 'Diamante'
+      apellido: 'Romax',
+      correo: 'contacto@romax.com.ni',
+      telefono: '+505 2200 0001',
+      categoria: 'Oro'
+    }
+  },
+  {
+    id: 'stand-2',
+    status: 'reserved',
+    logo: '/diamante/maximiza.jpeg',
+    sponsorId: 'official-maximiza',
+    sponsorEmail: 'contacto@maximiza.com.ni',
+    reservationDetails: {
+      empresa: 'Maximiza',
+      nombre: 'Atención',
+      apellido: 'Maximiza',
+      correo: 'contacto@maximiza.com.ni',
+      telefono: '+505 2200 0002',
+      categoria: 'Oro'
+    }
+  },
+  {
+    id: 'stand-3',
+    status: 'reserved',
+    logo: '/diamante/indeninicsa.png',
+    sponsorId: 'official-indenicza',
+    sponsorEmail: 'contacto@indenicza.com.ni',
+    reservationDetails: {
+      empresa: 'Indenicza',
+      nombre: 'Atención',
+      apellido: 'Indenicza',
+      correo: 'contacto@indenicza.com.ni',
+      telefono: '+505 2200 0003',
+      categoria: 'Oro'
+    }
+  },
+  {
+    id: 'stand-4',
+    status: 'reserved',
+    logo: '/diamante/LOGO-ARCELOR.png',
+    sponsorId: 'official-arcelor',
+    sponsorEmail: 'contacto@arcelor.com.ni',
+    reservationDetails: {
+      empresa: 'Arcelor',
+      nombre: 'Atención',
+      apellido: 'Arcelor',
+      correo: 'contacto@arcelor.com.ni',
+      telefono: '+505 2200 0004',
+      categoria: 'Oro'
+    }
+  },
+  {
+    id: 'stand-5',
+    status: 'reserved',
+    logo: '/diamante/pensilvania.jpg',
+    sponsorId: 'official-pensilvania',
+    sponsorEmail: 'contacto@pensilvania.com.ni',
+    reservationDetails: {
+      empresa: 'Pensilvania',
+      nombre: 'Atención',
+      apellido: 'Pensilvania',
+      correo: 'contacto@pensilvania.com.ni',
+      telefono: '+505 2200 0005',
+      categoria: 'Oro'
     }
   },
   {
@@ -59,6 +89,66 @@ export const DEFAULT_OFFICIAL_STANDS = [
       apellido: 'Comasa',
       correo: 'ventas@comasa.com.ni',
       telefono: '+505 2255 1111',
+      categoria: 'Diamante'
+    }
+  },
+  {
+    id: 'stand-7',
+    status: 'reserved',
+    logo: '/plata/casco.png',
+    sponsorId: 'official-casco',
+    sponsorEmail: 'ventas@casco.com.ni',
+    reservationDetails: {
+      empresa: 'Casco',
+      nombre: 'Representante',
+      apellido: 'Casco',
+      correo: 'ventas@casco.com.ni',
+      telefono: '+505 2252 3344',
+      categoria: 'Plata'
+    }
+  },
+  {
+    id: 'stand-8',
+    status: 'reserved',
+    logo: '/plata/ferdandezsera.png',
+    sponsorId: 'official-fernández-sera',
+    sponsorEmail: 'info@fernandezsera.com.ni',
+    reservationDetails: {
+      empresa: 'Fernández Sera',
+      nombre: 'Administración',
+      apellido: 'Fernández Sera',
+      correo: 'info@fernandezsera.com.ni',
+      telefono: '+505 2268 5566',
+      categoria: 'Plata'
+    }
+  },
+  {
+    id: 'stand-9',
+    status: 'reserved',
+    logo: '/plata/midenesa.png',
+    sponsorId: 'official-midenesa',
+    sponsorEmail: 'ventas@midenesa.com.ni',
+    reservationDetails: {
+      empresa: 'Midenesa',
+      nombre: 'Ventas',
+      apellido: 'Midenesa',
+      correo: 'ventas@midenesa.com.ni',
+      telefono: '+505 2240 7788',
+      categoria: 'Plata'
+    }
+  },
+  {
+    id: 'stand-11',
+    status: 'reserved',
+    logo: '/diamante/sinsa.png',
+    sponsorId: 'official-sinsa',
+    sponsorEmail: 'contacto@sinsa.com.ni',
+    reservationDetails: {
+      empresa: 'Sinsa',
+      nombre: 'Atención',
+      apellido: 'Sinsa',
+      correo: 'contacto@sinsa.com.ni',
+      telefono: '+505 2270 0000',
       categoria: 'Diamante'
     }
   },
@@ -78,47 +168,17 @@ export const DEFAULT_OFFICIAL_STANDS = [
     }
   },
   {
-    id: 'stand-31',
+    id: 'stand-21',
     status: 'reserved',
-    logo: '/diamante/logo-bac.jpeg',
-    sponsorId: 'official-bac-credomatic',
-    sponsorEmail: 'contacto@baccredomatic.com',
+    logo: '/diamante/sur.png',
+    sponsorId: 'official-sur',
+    sponsorEmail: 'ventas@gruposur.com.ni',
     reservationDetails: {
-      empresa: 'BAC Credomatic',
-      nombre: 'BAC',
-      apellido: 'Empresas',
-      correo: 'contacto@baccredomatic.com',
-      telefono: '+505 2274 4444',
-      categoria: 'Diamante'
-    }
-  },
-  {
-    id: 'stand-34',
-    status: 'reserved',
-    logo: '/diamante/importacionesballadares.png',
-    sponsorId: 'official-importaciones-balladares',
-    sponsorEmail: 'info@balladares.com.ni',
-    reservationDetails: {
-      empresa: 'Importaciones Balladares',
-      nombre: 'Gerardo',
-      apellido: 'Balladares',
-      correo: 'info@balladares.com.ni',
-      telefono: '+505 2249 3333',
-      categoria: 'Diamante'
-    }
-  },
-  {
-    id: 'stand-35',
-    status: 'reserved',
-    logo: '/diamante/megalines1.png',
-    sponsorId: 'official-megalines',
-    sponsorEmail: 'contacto@megalineas.com.ni',
-    reservationDetails: {
-      empresa: 'Megalíneas',
-      nombre: 'Megalíneas',
-      apellido: 'Nicaragua',
-      correo: 'contacto@megalineas.com.ni',
-      telefono: '+505 2250 5555',
+      empresa: 'Grupo SUR',
+      nombre: 'Mario',
+      apellido: 'Jarquín',
+      correo: 'ventas@gruposur.com.ni',
+      telefono: '+505 8777 7777',
       categoria: 'Diamante'
     }
   },
@@ -168,48 +228,63 @@ export const DEFAULT_OFFICIAL_STANDS = [
     }
   },
   {
-    id: 'stand-7',
+    id: 'stand-31',
     status: 'reserved',
-    logo: '/plata/casco.png',
-    sponsorId: 'official-casco',
-    sponsorEmail: 'ventas@casco.com.ni',
+    logo: '/diamante/logo-bac.jpeg',
+    sponsorId: 'official-bac-credomatic',
+    sponsorEmail: 'contacto@baccredomatic.com',
     reservationDetails: {
-      empresa: 'Casco',
-      nombre: 'Representante',
-      apellido: 'Casco',
-      correo: 'ventas@casco.com.ni',
-      telefono: '+505 2252 3344',
-      categoria: 'Plata'
+      empresa: 'BAC Credomatic',
+      nombre: 'BAC',
+      apellido: 'Empresas',
+      correo: 'contacto@baccredomatic.com',
+      telefono: '+505 2274 4444',
+      categoria: 'Diamante'
     }
   },
   {
-    id: 'stand-8',
+    id: 'stand-34',
     status: 'reserved',
-    logo: '/plata/ferdandezsera.png',
-    sponsorId: 'official-fernández-sera',
-    sponsorEmail: 'info@fernandezsera.com.ni',
+    logo: '/diamante/importacionesballadares.png',
+    sponsorId: 'official-importaciones-balladares',
+    sponsorEmail: 'info@balladares.com.ni',
     reservationDetails: {
-      empresa: 'Fernández Sera',
-      nombre: 'Administración',
-      apellido: 'Fernández Sera',
-      correo: 'info@fernandezsera.com.ni',
-      telefono: '+505 2268 5566',
-      categoria: 'Plata'
+      empresa: 'Importaciones Balladares',
+      nombre: 'Gerardo',
+      apellido: 'Balladares',
+      correo: 'info@balladares.com.ni',
+      telefono: '+505 2249 3333',
+      categoria: 'Diamante'
     }
   },
   {
-    id: 'stand-9',
+    id: 'stand-35',
     status: 'reserved',
-    logo: '/plata/midenesa.png',
-    sponsorId: 'official-midenesa',
-    sponsorEmail: 'ventas@midenesa.com.ni',
+    logo: '/diamante/megalines1.png',
+    sponsorId: 'official-megalines',
+    sponsorEmail: 'contacto@megalineas.com.ni',
     reservationDetails: {
-      empresa: 'Midenesa',
-      nombre: 'Ventas',
-      apellido: 'Midenesa',
-      correo: 'ventas@midenesa.com.ni',
-      telefono: '+505 2240 7788',
-      categoria: 'Plata'
+      empresa: 'Megalíneas',
+      nombre: 'Megalíneas',
+      apellido: 'Nicaragua',
+      correo: 'contacto@megalineas.com.ni',
+      telefono: '+505 2250 5555',
+      categoria: 'Diamante'
+    }
+  },
+  {
+    id: 'stand-38',
+    status: 'reserved',
+    logo: '/diamante/noelito%20.png',
+    sponsorId: 'official-noelito',
+    sponsorEmail: 'info@noelito.com.ni',
+    reservationDetails: {
+      empresa: 'Ferretería Noelito',
+      nombre: 'Linda',
+      apellido: 'Gutiérrez',
+      correo: 'info@noelito.com.ni',
+      telefono: '+505 8888 8888',
+      categoria: 'Diamante'
     }
   }
 ];
