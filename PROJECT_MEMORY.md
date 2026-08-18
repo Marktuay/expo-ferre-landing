@@ -130,12 +130,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
-- **Blindaje y Auto-Restauración Permanente de Stands Oficiales (`defaultStands.js`, `InteractiveMap.jsx`, `AdminSponsorsHub.jsx`, `AdminPanel.jsx`):**
-  - **Diagnóstico:** Si la subcolección de Firestore `events/2026/stands` se reiniciaba o quedaba vacía en reservaciones, los contadores de *Stands Reservados* e *Ingresos Proyectados* mostraban `0 / 38` y `$0 USD`.
-  - **Solución implementada para evitar que se repita:**
-    1. Se creó el catálogo maestro `DEFAULT_OFFICIAL_STANDS` con los 19 patrocinadores oficiales asignados a sus respectivos estands (*Stand 1 Romax, Stand 2 Maximiza, Stand 3 Indenicza, Stand 4 Arcelor, Stand 5 Pensilvania, Stand 6 Comasa, Stand 7 Casco, Stand 8 Fernández Sera, Stand 9 Midenesa, Stand 11 Sinsa, Stand 16 Extel, Stand 21 SUR, Stand 26 Plycem, Stand 27 Sicsa, Stand 28 JP Technology, Stand 31 BAC Credomatic, Stand 34 Importaciones Balladares, Stand 35 Megalíneas, Stand 38 Ferretería Noelito*), alcanzando **$56,800 USD**.
-    2. Se integró auto-restauración silenciosa (*Self-Healing*) en `InteractiveMap.jsx` y `AdminSponsorsHub.jsx`: si la base de datos pierde reservaciones o cae por debajo de 19 estands, el sistema re-inyecta automáticamente las reservas oficiales.
-    3. Se agregaron botones de acción rápida **"⚡ Cargar Stands Oficiales"** en las cabeceras de `AdminSponsorsHub.jsx` y `AdminPanel.jsx` para restaurar instantáneamente todas las reservas y logotipos con 1 solo clic.
+- **Colección Dedicada de Respaldo Nivel Firestore (`events/2026/stands_backup`):**
+  - Se creó una subcolección nativa en Firestore llamada `events/2026/stands_backup` que actúa como espejo/respaldo de seguridad independiente en la nube.
+  - Al ejecutar precargas o presionar los botones **"💾 Crear Respaldo"** o **"🔄 Restaurar Respaldo"** en `AdminSponsorsHub.jsx`, el sistema genera una copia idéntica snapshot en Firestore y permite restaurar todas las reservaciones, logotipos y datos directamente desde esa subcolección de respaldo.
 - **Campo "Instagram personal/empresa (Opcional)" en Alta de Conferencias (`SpeakerForm.jsx` & `AdminSpeakers.jsx`):**
   - Se agregó el campo de texto opcional **Instagram personal/empresa (Opcional)** al formulario de registro de conferencias/speakers (`SpeakerForm.jsx`), ubicándolo en el grid junto a LinkedIn y Facebook.
   - Se actualizó el submit handler y el módulo de administración (`AdminSpeakers.jsx`) para almacenar este dato en Firestore (`events/2026/speakers`) e incluir LinkedIn, Facebook e Instagram en las exportaciones a Excel (`Conferencias.xlsx`).
