@@ -130,9 +130,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
-- **Actualización de Logo Importaciones Balladares en Categoría Diamante (`App.jsx`, `AdminSponsors.jsx`, `defaultStands.js`):**
-  - Se cambió la imagen del logo de Importaciones Balladares a `/diamante/balladares-blue.png` en la categoría **Diamante**.
-  - Se configuró con fondo blanco (`bgWhite: true`) para destacar sus gráficos con óptimo contraste en el carrusel de la portada y en los paneles de administración y mapa interactivo.
+- **Fondo Blanco para Logo Armoconsa en Categoría Oro (`App.jsx`):**
+  - Se configuró la tarjeta del logo de Armoconsa (`/oro/armoconsa.png`) con fondo blanco (`bgWhite: true`) en el carrusel de patrocinadores de la portada para ofrecer óptimo contraste y visibilidad.
 - **Campo "Instagram personal/empresa (Opcional)" en Alta de Conferencias (`SpeakerForm.jsx` & `AdminSpeakers.jsx`):**
   - Se agregó el campo de texto opcional **Instagram personal/empresa (Opcional)** al formulario de registro de conferencias/speakers (`SpeakerForm.jsx`), ubicándolo en el grid junto a LinkedIn y Facebook.
   - Se actualizó el submit handler y el módulo de administración (`AdminSpeakers.jsx`) para almacenar este dato en Firestore (`events/2026/speakers`) e incluir LinkedIn, Facebook e Instagram en las exportaciones a Excel (`Conferencias.xlsx`).
