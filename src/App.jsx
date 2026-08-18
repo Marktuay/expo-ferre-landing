@@ -131,7 +131,7 @@ export default function App() {
     { url: '/diamante/extelpng.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/logo-bac.jpeg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/noelito%20.png', category: 'Diamante', order: 1, bgWhite: true },
-    { url: '/diamante/importacionesballadares.png', category: 'Diamante', order: 1 },
+    { url: '/diamante/balladares-blue.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/romax.jpeg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/maximiza.jpeg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/indeninicsa.png', category: 'Diamante', order: 1, bgClass: 'bg-gray-100/90' },

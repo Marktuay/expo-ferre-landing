@@ -245,7 +245,7 @@ export const DEFAULT_OFFICIAL_STANDS = [
   {
     id: 'stand-34',
     status: 'reserved',
-    logo: '/diamante/importacionesballadares.png',
+    logo: '/diamante/balladares-blue.png',
     sponsorId: 'official-importaciones-balladares',
     sponsorEmail: 'info@balladares.com.ni',
     reservationDetails: {
