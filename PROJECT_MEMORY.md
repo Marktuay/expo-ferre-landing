@@ -130,8 +130,11 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
-- **Carga de Archivos de Logos PNG a GitHub (`public/diamante/balladares-blue.png`, `public/plata/Logo_MIDESA-removebg-preview.png`):**
-  - Se añadieron y subieron exitosamente a GitHub los archivos binarios `balladares-blue.png` y `Logo_MIDESA-removebg-preview.png` a las carpetas `public/diamante/` y `public/plata/` para garantizar su despliegue y visibilidad en producción (Vercel/Hosting).
+- **Estandarización de Rutas y Nombres de Archivos de Logos (`balladares.png`, `midesa.png`):**
+  - Para evitar incompatibilidades de mayúsculas/minúsculas y caracteres especiales en los servidores web Linux de Google Cloud, se estandarizaron los nombres y rutas de los logos a minúsculas limpias:
+    - `/diamante/balladares.png`
+    - `/plata/midesa.png`
+  - Se actualizaron las referencias en `App.jsx`, `AdminSponsors.jsx` y `defaultStands.js`, y se subieron los nuevos archivos binarios directamente a GitHub.
 - **Campo "Instagram personal/empresa (Opcional)" en Alta de Conferencias (`SpeakerForm.jsx` & `AdminSpeakers.jsx`):**
   - Se agregó el campo de texto opcional **Instagram personal/empresa (Opcional)** al formulario de registro de conferencias/speakers (`SpeakerForm.jsx`), ubicándolo en el grid junto a LinkedIn y Facebook.
   - Se actualizó el submit handler y el módulo de administración (`AdminSpeakers.jsx`) para almacenar este dato en Firestore (`events/2026/speakers`) e incluir LinkedIn, Facebook e Instagram en las exportaciones a Excel (`Conferencias.xlsx`).
