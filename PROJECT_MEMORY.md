@@ -130,6 +130,12 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
+- **Auto-Restauración y Precarga de Stands Oficiales (`defaultStands.js`, `AdminSponsorsHub.jsx`, `AdminPanel.jsx`):**
+  - **Diagnóstico:** Si la subcolección de Firestore `events/2026/stands` se reiniciaba o quedaba vacía en reservaciones, los contadores de *Stands Reservados* e *Ingresos Proyectados* mostraban `0 / 38` y `$0 USD`.
+  - **Solución implementada:**
+    1. Se creó la matriz `DEFAULT_OFFICIAL_STANDS` con los 14 patrocinadores oficiales asignados a sus respectivos stands (*Stand 38 Noelito, Stand 21 SUR, Stand 11 Sinsa, Stand 6 Comasa, Stand 16 Extel, Stand 31 BAC Credomatic, Stand 34 Importaciones Balladares, Stand 35 Megalíneas, Stand 26 Plycem, Stand 27 Sicsa, Stand 28 JP Technology, Stand 7 Casco, Stand 8 Fernández Sera, Stand 9 Midenesa*).
+    2. Se implementó auto-inicialización en Firestore cuando se detectan 0 reservaciones en `AdminSponsorsHub.jsx`.
+    3. Se agregaron botones de acción rápida **"⚡ Cargar Stands Oficiales"** en las cabeceras de `AdminSponsorsHub.jsx` y `AdminPanel.jsx` para restaurar instantáneamente todas las reservas y logotipos con 1 solo clic.
 - **Campo "Instagram personal/empresa (Opcional)" en Alta de Conferencias (`SpeakerForm.jsx` & `AdminSpeakers.jsx`):**
   - Se agregó el campo de texto opcional **Instagram personal/empresa (Opcional)** al formulario de registro de conferencias/speakers (`SpeakerForm.jsx`), ubicándolo en el grid junto a LinkedIn y Facebook.
   - Se actualizó el submit handler y el módulo de administración (`AdminSpeakers.jsx`) para almacenar este dato en Firestore (`events/2026/speakers`) e incluir LinkedIn, Facebook e Instagram en las exportaciones a Excel (`Conferencias.xlsx`).
