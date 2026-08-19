@@ -130,6 +130,7 @@ export default function App() {
     { url: '/diamante/comasa.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/extelpng.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/logo-bac.jpeg', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/lafise.jpg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/noelito%20.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/cemex.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/canal.png', category: 'Diamante', order: 1, bgWhite: true },

@@ -18,6 +18,7 @@ const OFFICIAL_SPONSORS = [
   { company: 'Cemex', category: 'Diamante', logo: '/diamante/cemex.png' },
   { company: 'CANAL', category: 'Diamante', logo: '/diamante/canal.png' },
   { company: 'Construrama', category: 'Diamante', logo: '/diamante/construrama.png' },
+  { company: 'Banco LAFISE', category: 'Diamante', logo: '/diamante/lafise.jpg' },
   { company: 'Plycem', category: 'Oro', logo: '/oro/plycem%20.png' },
   { company: 'Sicsa', category: 'Oro', logo: '/oro/sicsa.png' },
   { company: 'JP Technology', category: 'Oro', logo: '/oro/logo-jp-technology.png' },
