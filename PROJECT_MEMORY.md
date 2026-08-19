@@ -130,8 +130,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
-- **Incorporación del Logo de Banco LAFISE en Categoría Diamante (`App.jsx`, `AdminSponsors.jsx`):**
-  - Se agregó el logo de **Banco LAFISE** (`/diamante/lafise.jpg`) a la categoría **Diamante** del reel continuo en la portada y al directorio administrativo.
+- **Incorporación y Reordenamiento del Logo de Banco LAFISE en Categoría Diamante (`App.jsx`, `AdminSponsors.jsx`):**
+  - Se colocó el logo de **Banco LAFISE** (`/diamante/lafise.jpg`) en la categoría **Diamante** inmediatamente después del logo de **Noelito** en la secuencia del reel continuo.
   - Se configuró con tarjeta de contenedor de fondo blanco (`bgWhite: true`) para garantizar nitidez y contraste visual.
   - Se subió el archivo binario a GitHub y se sincronizó con la rama `main`.
 - **Campo "Instagram personal/empresa (Opcional)" en Alta de Conferencias (`SpeakerForm.jsx` & `AdminSpeakers.jsx`):**
