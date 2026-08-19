@@ -130,12 +130,10 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
-- **Incorporación de Logos Cemex, CANAL y Construrama en Categoría Diamante (`App.jsx`, `AdminSponsors.jsx`):**
-  - Se añadieron los logos de **Cemex**, **CANAL** y **Construrama** en la categoría **Diamante**, ubicándolos inmediatamente después del logo de *Noelito* en el orden exacto solicitado:
-    1. `/diamante/cemex.png`
-    2. `/diamante/canal.png`
-    3. `/diamante/construrama.png`
-  - Se subieron los archivos de imagen a GitHub y se configuraron con contenedor de fondo blanco para óptima visualización.
+- **Incorporación del Logo de Banco LAFISE en Categoría Diamante (`App.jsx`, `AdminSponsors.jsx`):**
+  - Se agregó el logo de **Banco LAFISE** (`/diamante/lafise.jpg`) a la categoría **Diamante** del reel continuo en la portada y al directorio administrativo.
+  - Se configuró con tarjeta de contenedor de fondo blanco (`bgWhite: true`) para garantizar nitidez y contraste visual.
+  - Se subió el archivo binario a GitHub y se sincronizó con la rama `main`.
 - **Campo "Instagram personal/empresa (Opcional)" en Alta de Conferencias (`SpeakerForm.jsx` & `AdminSpeakers.jsx`):**
   - Se agregó el campo de texto opcional **Instagram personal/empresa (Opcional)** al formulario de registro de conferencias/speakers (`SpeakerForm.jsx`), ubicándolo en el grid junto a LinkedIn y Facebook.
   - Se actualizó el submit handler y el módulo de administración (`AdminSpeakers.jsx`) para almacenar este dato en Firestore (`events/2026/speakers`) e incluir LinkedIn, Facebook e Instagram en las exportaciones a Excel (`Conferencias.xlsx`).
