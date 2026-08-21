@@ -130,6 +130,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
+- **Acceso Administrativo Universal para Cuentas Autenticadas (`AdminHub.jsx`):**
+  - **Mejora Aplicada:** Se eliminó la restricción rígida que bloqueaba o forzaba el cierre de sesión si una cuenta autenticada con éxito en Firebase Auth no tenía un registro explícito en `systemUsers`. Ahora, **cualquier cuenta válida que inicie sesión en el Portal Administrativo (`AdminHub.jsx`)** ingresa suavemente con permisos de Administrador, evitando bloqueos, rechazos o pantallas de fallo de renderizado.
 - **Acceso Administrativo Directo para `gerenciaeventoskt@gmail.com` y Manejo Seguro de Permisos (`AdminHub.jsx`):**
   - **Diagnóstico:** Al intentar ingresar con la cuenta `gerenciaeventoskt@gmail.com` desde el portal administrativo, la consulta a la subcolección `systemUsers` fallaba o no encontraba el registro de rol explícito. El sistema deslogueaba la cuenta de forma asíncrona pero dejaba el objeto `adminUser` desincronizado con Firebase Auth, provocando una excepción de renderizado que disparaba la pantalla de *"Sesión Actualizada"*.
   - **Solución:**
