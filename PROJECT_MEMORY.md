@@ -138,6 +138,11 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
+- **Purga Total de Almacenamiento Local al Cerrar Sesión (`App.jsx`, `AdminHub.jsx`, `SponsorDashboard.jsx`):**
+  - **Diagnóstico:** Al presionar "Salir", la clave de sesión administrativa (`expoFerre_adminUser`) o el estado de navegación en `localStorage` permanecía guardado en el navegador. Al recargar la página (`F5`), React volvía a inicializar `adminUser` leyendo `localStorage.getItem('expoFerre_adminUser')`, haciendo que la cuenta `marktuay@gmail.com` reapareciera como conectada.
+  - **Solución:**
+    1. Se agregó en `App.jsx`, `AdminHub.jsx` y `SponsorDashboard.jsx` la instrucción explícita `localStorage.clear()` y `sessionStorage.clear()` al ejecutar cualquier cierre de sesión.
+    2. Se configuró el listener de `onAuthStateChanged` para que, cuando Firebase Auth pase a `null`, limpie e invalide inmediatamente `adminUser` de `localStorage`.
 - **Protección por PIN Maestro de Seguridad (`2026`) para Acciones Críticas en Firestore (`AdminSponsorsHub.jsx`, `AdminPanel.jsx`):**
   - **Requisito de Seguridad:** Evitar que cualquier operador presione por error o sin autorización los botones de **💾 Crear Respaldo**, **🔄 Restaurar Respaldo** y **⚡ Cargar Oficiales**.
   - **Solución Implementada:**
