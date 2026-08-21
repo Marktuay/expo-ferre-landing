@@ -130,6 +130,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
+- **Redirección Silenciosa y Limpia a la Portada (`ErrorBoundary.jsx`):**
+  - Se retiró la tarjeta flotante de aviso *"Sesión Actualizada"* a petición directa.
+  - Ahora, ante cualquier expiración de token, inactividad (10 minutos) o desincronización de sesión, **el sistema cierra la sesión y redirige automáticamente de forma limpia y transparente a la Portada Pública (Home)** para que el usuario vuelva a iniciar sesión si lo desea, sin ventanas flotantes ni interrupciones visuales.
 - **Auto-Creación de Perfil de Patrocinador y Actualizaciones Seguras en Firestore (`App.jsx`, `SponsorDashboard.jsx`):**
   - **Diagnóstico:** Si una cuenta de usuario ingresaba al portal de patrocinadores pero no tenía un documento previamente creado en la colección `users` de Firestore, `currentUserData` quedaba como `null` y la actualización periódica `updateDoc(doc(db, 'users', uid))` fallaba con la excepción `No document to update`, disparando la tarjeta de error.
   - **Solución:**
