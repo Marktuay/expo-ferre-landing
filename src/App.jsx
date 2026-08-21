@@ -368,30 +368,27 @@ export default function App() {
           
           {/* Desktop Buttons (Right Side) */}
           <div className="hidden lg:flex items-center gap-4">
-            {currentView.startsWith('admin') ? (
-              adminUser ? (
-                <div className="flex items-center gap-4">
-                  <div className="flex flex-col items-end">
-                    <span className="text-xs text-gray-400">Administrador</span>
-                    <span className="text-sm font-bold text-white">{adminUser.username}</span>
-                  </div>
-                  <button 
-                    onClick={() => setCurrentView('adminHub')}
-                    className="bg-[#f39200] text-white font-bold py-2 px-4 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-[20px]">dashboard</span> Mi Panel
-                  </button>
-                  <button 
-                    onClick={() => { setAdminUser(null); handleLogout(); }}
-                    className="bg-red-500/20 text-red-200 hover:bg-red-500 hover:text-white border border-red-500/50 font-bold py-2 px-4 rounded-md transition-all shadow-sm flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-[20px]">logout</span> Salir
-                  </button>
+            {adminUser ? (
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-end">
+                  <span className="text-xs text-gray-400">Administrador</span>
+                  <span className="text-sm font-bold text-white">{adminUser.username}</span>
                 </div>
-              ) : null
-            ) : (
-              currentUser ? (
-                <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setCurrentView('adminHub')}
+                  className="bg-[#f39200] text-white font-bold py-2 px-4 rounded-md hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[20px]">dashboard</span> Mi Panel
+                </button>
+                <button 
+                  onClick={() => { setAdminUser(null); handleLogout(); }}
+                  className="bg-red-500/20 text-red-200 hover:bg-red-500 hover:text-white border border-red-500/50 font-bold py-2 px-4 rounded-md transition-all shadow-sm flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[20px]">logout</span> Salir
+                </button>
+              </div>
+            ) : currentUser ? (
+              <div className="flex items-center gap-4">
                 <div className="flex flex-col items-end">
                   <span className="text-[10px] text-gray-400">Patrocinador</span>
                   {currentUserData ? (
@@ -444,7 +441,7 @@ export default function App() {
                   <span className="material-symbols-outlined text-[22px]">confirmation_number</span> Quiero asistir
                 </button>
               </>
-            ))}
+            )}
           </div>
         </div>
 
@@ -467,27 +464,25 @@ export default function App() {
               <span className="material-symbols-outlined text-[24px]">mail</span> Contacto
             </button>
             <hr className="border-white/10 my-2" />
-            {currentView.startsWith('admin') ? (
-              adminUser ? (
-                <div className="flex flex-col gap-3">
-                  <div className="bg-white/5 py-2 px-4 rounded-md text-center">
-                    <span className="block text-xs text-gray-400">Sesión iniciada como</span>
-                    <span className="block text-sm font-bold text-white truncate">{adminUser.username}</span>
-                  </div>
-                  <button 
-                    onClick={() => { setCurrentView('adminHub'); setIsMobileMenuOpen(false); }}
-                    className="bg-[#f39200] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
-                  >
-                    <span className="material-symbols-outlined">dashboard</span> Mi Panel
-                  </button>
-                  <button 
-                    onClick={() => { setAdminUser(null); handleLogout(); setIsMobileMenuOpen(false); }}
-                    className="bg-red-500/20 text-red-200 border border-red-500/50 font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
-                  >
-                    <span className="material-symbols-outlined">logout</span> Salir
-                  </button>
+            {adminUser ? (
+              <div className="flex flex-col gap-3">
+                <div className="bg-white/5 py-2 px-4 rounded-md text-center">
+                  <span className="block text-xs text-gray-400">Sesión iniciada como</span>
+                  <span className="block text-sm font-bold text-white truncate">{adminUser.username}</span>
                 </div>
-              ) : null
+                <button 
+                  onClick={() => { setCurrentView('adminHub'); setIsMobileMenuOpen(false); }}
+                  className="bg-[#f39200] text-white font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
+                >
+                  <span className="material-symbols-outlined">dashboard</span> Mi Panel
+                </button>
+                <button 
+                  onClick={() => { setAdminUser(null); handleLogout(); setIsMobileMenuOpen(false); }}
+                  className="bg-red-500/20 text-red-200 border border-red-500/50 font-bold py-3 px-4 rounded-md flex justify-center items-center gap-2 text-lg"
+                >
+                  <span className="material-symbols-outlined">logout</span> Salir
+                </button>
+              </div>
             ) : (
               currentUser ? (
                 <div className="flex flex-col gap-3">

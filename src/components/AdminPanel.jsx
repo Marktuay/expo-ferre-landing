@@ -124,9 +124,9 @@ export default function AdminPanel({ onBack, adminUser }) {
               <span className="material-symbols-outlined">home</span>
               Volver al menú
             </button>
-            <button onClick={() => setIsAuthenticated(false)} className="px-5 py-2 bg-error text-on-error rounded-md hover:bg-error/90 transition-colors font-label-lg flex items-center gap-2">
-              <span className="material-symbols-outlined">logout</span>
-              Salir
+            <button onClick={onBack} className="px-5 py-2 bg-error text-on-error rounded-md hover:bg-error/90 transition-colors font-label-lg flex items-center gap-2">
+              <span className="material-symbols-outlined">arrow_back</span>
+              Volver
             </button>
           </div>
         </div>
