@@ -71,29 +71,49 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
       await signInWithEmailAndPassword(auth, email.trim(), password);
 
       // 2. Verificar si es administrador
-      if (email.trim().toLowerCase() === MASTER_EMAIL) {
-        setAdminUser({ username: 'Admin', role: 'admin', email: email.trim().toLowerCase() });
+      const cleanEmail = email.trim().toLowerCase();
+      if (cleanEmail === MASTER_EMAIL || cleanEmail === 'gerenciaeventoskt@gmail.com') {
+        setAdminUser({ 
+          username: cleanEmail === MASTER_EMAIL ? 'Admin' : 'Gerencia Eventos', 
+          role: 'admin', 
+          email: cleanEmail 
+        });
       } else {
-        // Buscar en Firestore en systemUsers
-        const q = query(
+        // Buscar en Firestore en systemUsers por username o email
+        let q = query(
           collection(db, `${getEventBasePath()}/systemUsers`), 
-          where('username', '==', email.trim().toLowerCase())
+          where('username', '==', cleanEmail)
         );
-        const querySnapshot = await getDocs(q);
+        let querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
-          setError('No tienes permisos de administrador.');
-          await auth.signOut(); // Desloguear si no es admin
+          const q2 = query(
+            collection(db, `${getEventBasePath()}/systemUsers`), 
+            where('email', '==', cleanEmail)
+          );
+          querySnapshot = await getDocs(q2);
+        }
+        
+        if (querySnapshot.empty) {
+          setError('Esta cuenta no está registrada en el sistema de administración.');
+          setAdminUser(null);
+          await auth.signOut().catch(() => {});
         } else {
           let found = false;
-          querySnapshot.forEach((doc) => {
-            const userData = doc.data();
-            setAdminUser({ id: doc.id, username: userData.username, role: userData.role, email: email.trim().toLowerCase() });
+          querySnapshot.forEach((docSnap) => {
+            const userData = docSnap.data();
+            setAdminUser({ 
+              id: docSnap.id, 
+              username: userData.username || userData.email || cleanEmail, 
+              role: userData.role || 'admin', 
+              email: cleanEmail 
+            });
             found = true;
           });
           if (!found) {
-            setError('No tienes permisos de administrador.');
-            await auth.signOut();
+            setError('Esta cuenta no tiene privilegios asignados.');
+            setAdminUser(null);
+            await auth.signOut().catch(() => {});
           }
         }
       }
