@@ -130,6 +130,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
+- **Habilitación de Permisos Maestros Totales (Respaldos y Restauración) para Todas las Cuentas de Administración (`AdminSponsorsHub.jsx`, `AdminPanel.jsx`):**
+  - **Diagnóstico:** Anteriormente, los botones de **💾 Crear Respaldo**, **🔄 Restaurar Respaldo** y **⚡ Cargar Oficiales** estaban restringidos por correo estricto (`isMasterAdmin = email === 'marktuay@gmail.com'`). Al ingresar cuentas como `gerenciaeventoskt@gmail.com` o administradores delegados, la evaluación denegaba el acceso a estas herramientas clave.
+  - **Solución:** Se desmovilizó el filtro exclusivo de correo. Ahora **todas las cuentas de administración autorizadas** tienen acceso total e irrestricto a los botones de creación de respaldos, restauración de snapshots y carga de oficiales en Firestore.
 - **Redirección Silenciosa y Limpia a la Portada (`ErrorBoundary.jsx`):**
   - Se retiró la tarjeta flotante de aviso *"Sesión Actualizada"* a petición directa.
   - Ahora, ante cualquier expiración de token, inactividad (10 minutos) o desincronización de sesión, **el sistema cierra la sesión y redirige automáticamente de forma limpia y transparente a la Portada Pública (Home)** para que el usuario vuelva a iniciar sesión si lo desea, sin ventanas flotantes ni interrupciones visuales.
