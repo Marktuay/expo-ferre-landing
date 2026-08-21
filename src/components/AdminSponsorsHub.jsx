@@ -89,7 +89,7 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
     }
   };
 
-  const isMasterAdmin = (adminUser?.email?.toLowerCase() === 'marktuay@gmail.com') || (auth.currentUser?.email?.toLowerCase() === 'marktuay@gmail.com');
+  const isMasterAdmin = true; // Acceso total habilitado para todos los administradores (backup, restauración y carga de oficiales)
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">

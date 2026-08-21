@@ -14,7 +14,7 @@ export default function AdminPanel({ onBack, adminUser }) {
   const [activeTab, setActiveTab] = useState('list');
   const [isSeeding, setIsSeeding] = useState(false);
 
-  const isMasterAdmin = (adminUser?.email?.toLowerCase() === 'marktuay@gmail.com') || (auth.currentUser?.email?.toLowerCase() === 'marktuay@gmail.com');
+  const isMasterAdmin = true; // Acceso total habilitado para todos los administradores (cargar oficiales y backups)
 
   useEffect(() => {
     const fetchSponsors = async () => {
