@@ -138,6 +138,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
+- **Destrucción Directa de Base de Datos IndexedDB (`firebaseLocalStorageDb`) en Cierre de Sesión (`App.jsx`, `AdminHub.jsx`):**
+  - **Causa Raíz:** El SDK web de Firebase guarda las credenciales en la base de datos interna del navegador `IndexedDB` (`firebaseLocalStorageDb`). Al recargar la página (`F5`), Firebase Auth re-leía ese almacenamiento antes de que la orden de cierre terminara en segundo plano.
+  - **Solución Definitiva:** Se agregó la llamada nativa `indexedDB.deleteDatabase('firebaseLocalStorageDb')` al ejecutar cualquier cierre de sesión. Esto elimina de raíz el almacenamiento persistente de credenciales del navegador, garantizando que al recargar la página (`F5`), el usuario permanezca 100% deslogueado y sin rastros de la cuenta `marktuay@gmail.com`.
 - **Purga Total de Almacenamiento Local al Cerrar Sesión (`App.jsx`, `AdminHub.jsx`, `SponsorDashboard.jsx`):**
   - **Diagnóstico:** Al presionar "Salir", la clave de sesión administrativa (`expoFerre_adminUser`) o el estado de navegación en `localStorage` permanecía guardado en el navegador. Al recargar la página (`F5`), React volvía a inicializar `adminUser` leyendo `localStorage.getItem('expoFerre_adminUser')`, haciendo que la cuenta `marktuay@gmail.com` reapareciera como conectada.
   - **Solución:**
