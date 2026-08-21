@@ -84,6 +84,8 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
         });
         seedOfficialStands(db).catch(err => console.error("Error auto-seeding in InteractiveMap:", err));
       }
+    }, (error) => {
+      console.warn("InteractiveMap onSnapshot permission or network warning:", error);
     });
 
     return () => unsub();

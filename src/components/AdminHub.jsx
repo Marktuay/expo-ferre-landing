@@ -31,8 +31,9 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
       const inactiveTime = now - lastActivityRef.current;
       
       if (inactiveTime > 10 * 60 * 1000) {
+        if (onNavigate) onNavigate('landing');
         setAdminUser(null);
-        auth.signOut();
+        auth.signOut().catch(err => console.warn("SignOut error on inactivity:", err));
         return;
       }
 

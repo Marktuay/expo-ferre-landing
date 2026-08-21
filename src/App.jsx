@@ -192,11 +192,15 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
       setCurrentView('landing');
       setIsMobileMenuOpen(false);
+      setAdminUser(null);
+      setSponsorUser(null);
+      setCurrentUserData(null);
+      await signOut(auth);
     } catch (error) {
       console.error('Error signing out:', error);
+      setCurrentView('landing');
     }
   };
 
