@@ -197,9 +197,11 @@ export default function App() {
       setAdminUser(null);
       setSponsorUser(null);
       setCurrentUserData(null);
+      setCurrentUser(null);
       await signOut(auth);
     } catch (error) {
       console.error('Error signing out:', error);
+      setCurrentUser(null);
       setCurrentView('landing');
     }
   };
