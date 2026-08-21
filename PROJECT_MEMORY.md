@@ -130,6 +130,12 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
+- **Acceso Administrativo Directo para `gerenciaeventoskt@gmail.com` y Manejo Seguro de Permisos (`AdminHub.jsx`):**
+  - **Diagnóstico:** Al intentar ingresar con la cuenta `gerenciaeventoskt@gmail.com` desde el portal administrativo, la consulta a la subcolección `systemUsers` fallaba o no encontraba el registro de rol explícito. El sistema deslogueaba la cuenta de forma asíncrona pero dejaba el objeto `adminUser` desincronizado con Firebase Auth, provocando una excepción de renderizado que disparaba la pantalla de *"Sesión Actualizada"*.
+  - **Solución:**
+    1. Se agregó la cuenta `gerenciaeventoskt@gmail.com` a las credenciales reconocidas directamente como Administrador con rol completo en `AdminHub.jsx`.
+    2. Se expandió la búsqueda en `systemUsers` para consultar por `username` y por `email`, asignando un fallback de rol `'admin'`.
+    3. Se limpió de forma síncrona el estado `setAdminUser(null)` antes de cualquier `auth.signOut()` si una cuenta no posee permisos, previniendo que se dispare la tarjeta de error.
 - **Persistencia de Controles de Administrador en la Barra de Navegación (`App.jsx`, `AdminPanel.jsx`):**
   - **Problema:** Anteriormente la barra superior solo mostraba el botón de "Administrador" si la ruta iniciaba con `admin`. Si el administrador salía a la portada pública (`landing`), la barra cambiaba a los botones públicos ("Quiero patrocinar" / "Quiero asistir"), provocando que al hacer clic apareciera la pantalla de inicio de sesión de patrocinadores.
   - **Solución:** Se ajustó la barra de navegación para evaluar primero si la sesión activa de `adminUser` está encendida. Sin importar en qué página se encuentre (portada, contacto, etc.), el administrador mantiene visibles de forma permanente sus controles **"📊 Mi Panel"** y **"🚪 Salir"**. Se corrigió además una referencia de botón legado en `AdminPanel.jsx`.
