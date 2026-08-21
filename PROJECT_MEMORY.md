@@ -98,7 +98,15 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 15 de Agosto de 2026**
+**Última actualización: 21 de Agosto de 2026**
+
+- **Ordenamiento y Adición de Patrocinadores Diamante (`App.jsx` & `AdminSponsors.jsx`):**
+  - Se configuró el orden exacto de 19 marcas en la categoría Diamante (Sur, Kermil, Megalineas, Pensilvania, Flash Mark, Sinsa, Comasa, Extel, **Nitrotel**, BAC, Importaciones Balladares, Cemex, Construrama, Cemento Canal, Noelito, Banco LAFISE, Indenicsa, ArcelorMittal, Romax y Maximiza).
+  - **Corrección de Imagen de Megalineas:** Se solucionó el cruce de imágenes donde `megalines.png` correspondía a **Flash Mark** y `megalines1.png` correspondía a **Megalineas**.
+  - **Nuevo Integrante:** Se agregó el logo de **Nitrotel** (`/diamante/nitrotel.png`) ubicado inmediatamente después de Extel.
+  - **Actualización de Marca:** Se reemplazó el logo de Importaciones Balladares por su versión oficial limpia con texto azul (`/diamante/balladares.png`).
+
+**Cambios Anteriores (14 de Agosto de 2026):**
 
 - **Ordenamiento y Actualización del Reel Diamante (`App.jsx`):**
   - Se reorganizó la secuencia exacta de logotipos en la categoría **Diamante**:
