@@ -130,10 +130,12 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
-- **Incorporación y Reordenamiento del Logo de Banco LAFISE en Categoría Diamante (`App.jsx`, `AdminSponsors.jsx`):**
-  - Se colocó el logo de **Banco LAFISE** (`/diamante/lafise.jpg`) en la categoría **Diamante** inmediatamente después del logo de **Noelito** en la secuencia del reel continuo.
-  - Se configuró con tarjeta de contenedor de fondo blanco (`bgWhite: true`) para garantizar nitidez y contraste visual.
-  - Se subió el archivo binario a GitHub y se sincronizó con la rama `main`.
+- **Blindaje Total Contra Pantallas en Blanco (`ErrorBoundary.jsx`, `main.jsx`, `App.jsx`, `InteractiveMap.jsx`, `AdminHub.jsx`, `SponsorDashboard.jsx`):**
+  - **Diagnóstico:** Al cerrar sesión o cuando expiraba la sesión por inactividad (10 min), el estado del usuario pasaba a `null` mientras React aún renderizaba componentes privados, provocando un colapso de renderizado (*White Screen of Death*). Igualmente, si las consultas de Firestore (`onSnapshot`) recibían un rechazo de permisos por inactividad sin manejador de errores, la app colapsaba.
+  - **Solución Implementada:**
+    1. Se creó el componente protector universal [`ErrorBoundary.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/ErrorBoundary.jsx) y se envolvió toda la aplicación en `main.jsx`.
+    2. Se reordenó el flujo de cierre de sesión en `App.jsx`, `AdminHub.jsx` y `SponsorDashboard.jsx` para redireccionar suavemente a la portada (`landing`) y reiniciar el estado local *antes* de ejecutar `signOut(auth)`.
+    3. Se agregaron callbacks de manejo de errores a las consultas en tiempo real (`onSnapshot`) en `InteractiveMap.jsx` y módulos para evitar excepciones no capturadas.
 - **Campo "Instagram personal/empresa (Opcional)" en Alta de Conferencias (`SpeakerForm.jsx` & `AdminSpeakers.jsx`):**
   - Se agregó el campo de texto opcional **Instagram personal/empresa (Opcional)** al formulario de registro de conferencias/speakers (`SpeakerForm.jsx`), ubicándolo en el grid junto a LinkedIn y Facebook.
   - Se actualizó el submit handler y el módulo de administración (`AdminSpeakers.jsx`) para almacenar este dato en Firestore (`events/2026/speakers`) e incluir LinkedIn, Facebook e Instagram en las exportaciones a Excel (`Conferencias.xlsx`).
