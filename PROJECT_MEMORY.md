@@ -130,6 +130,11 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
+- **Auto-Creación de Perfil de Patrocinador y Actualizaciones Seguras en Firestore (`App.jsx`, `SponsorDashboard.jsx`):**
+  - **Diagnóstico:** Si una cuenta de usuario ingresaba al portal de patrocinadores pero no tenía un documento previamente creado en la colección `users` de Firestore, `currentUserData` quedaba como `null` y la actualización periódica `updateDoc(doc(db, 'users', uid))` fallaba con la excepción `No document to update`, disparando la tarjeta de error.
+  - **Solución:**
+    1. Se configuró en `App.jsx` una rutina de auto-creación de perfil base con `setDoc(docRef, basicProfile, { merge: true })` para cualquier cuenta autenticada que ingrese por primera vez.
+    2. Se reemplazaron todas las llamadas a `updateDoc` por `setDoc(..., { merge: true })` en `SponsorDashboard.jsx` para garantizar que la actualización de `lastActive` funcione siempre de forma segura sin romper la interfaz.
 - **Acceso Administrativo Universal para Cuentas Autenticadas (`AdminHub.jsx`):**
   - **Mejora Aplicada:** Se eliminó la restricción rígida que bloqueaba o forzaba el cierre de sesión si una cuenta autenticada con éxito en Firebase Auth no tenía un registro explícito en `systemUsers`. Ahora, **cualquier cuenta válida que inicie sesión en el Portal Administrativo (`AdminHub.jsx`)** ingresa suavemente con permisos de Administrador, evitando bloqueos, rechazos o pantallas de fallo de renderizado.
 - **Acceso Administrativo Directo para `gerenciaeventoskt@gmail.com` y Manejo Seguro de Permisos (`AdminHub.jsx`):**
