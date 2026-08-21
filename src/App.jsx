@@ -208,24 +208,23 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
-      localStorage.removeItem('expoFerre_adminUser');
-      localStorage.removeItem('expoFerre_currentView');
-      localStorage.clear();
-      sessionStorage.clear();
+      await signOut(auth);
+    } catch (error) {
+      console.error('Error signing out of Firebase Auth:', error);
+    } finally {
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+        indexedDB.deleteDatabase('firebaseLocalStorageDb');
+      } catch (e) {
+        console.warn("IndexedDB delete warning:", e);
+      }
       setCurrentView('landing');
       setIsMobileMenuOpen(false);
       setAdminUser(null);
       setSponsorUser(null);
       setCurrentUserData(null);
       setCurrentUser(null);
-      await signOut(auth);
-    } catch (error) {
-      console.error('Error signing out:', error);
-      localStorage.clear();
-      sessionStorage.clear();
-      setAdminUser(null);
-      setCurrentUser(null);
-      setCurrentView('landing');
     }
   };
 

@@ -177,8 +177,11 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
             </button>
             <button 
               onClick={async () => {
-                localStorage.clear();
-                sessionStorage.clear();
+                try {
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  indexedDB.deleteDatabase('firebaseLocalStorageDb');
+                } catch (e) {}
                 setAdminUser(null);
                 await auth.signOut().catch(() => {});
                 if (onBack) onBack();
