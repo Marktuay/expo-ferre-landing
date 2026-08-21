@@ -132,6 +132,7 @@ export default function App() {
     { url: '/diamante/sinsa.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/comasa.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/extelpng.png', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/nitrotel.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/logo-bac.jpeg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/balladares.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/cemex.png', category: 'Diamante', order: 1, bgWhite: true },

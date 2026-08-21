@@ -15,6 +15,7 @@ const OFFICIAL_SPONSORS = [
   { company: 'Sinsa', category: 'Diamante', logo: '/diamante/sinsa.png' },
   { company: 'Comasa', category: 'Diamante', logo: '/diamante/comasa.png' },
   { company: 'Extel', category: 'Diamante', logo: '/diamante/extelpng.png' },
+  { company: 'Nitrotel', category: 'Diamante', logo: '/diamante/nitrotel.png' },
   { company: 'BAC', category: 'Diamante', logo: '/diamante/logo-bac.jpeg' },
   { company: 'Importaciones Balladares', category: 'Diamante', logo: '/diamante/balladares.png' },
   { company: 'Cemex', category: 'Diamante', logo: '/diamante/cemex.png' },
