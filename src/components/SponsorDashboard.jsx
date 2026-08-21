@@ -66,10 +66,14 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
 
   const handleLogout = async () => {
     try {
+      localStorage.clear();
+      sessionStorage.clear();
       if (onBack) onBack();
       await signOut(auth);
     } catch (error) {
       console.error('Error signing out:', error);
+      localStorage.clear();
+      sessionStorage.clear();
       if (onBack) onBack();
     }
   };

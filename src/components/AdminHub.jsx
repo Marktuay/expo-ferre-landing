@@ -175,7 +175,16 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
               <span className="material-symbols-outlined">home</span>
               Volver al menú
             </button>
-            <button onClick={() => setAdminUser(null)} className="px-5 py-2 bg-error text-on-error rounded-md hover:bg-error/90 transition-colors font-label-lg flex items-center gap-2">
+            <button 
+              onClick={async () => {
+                localStorage.clear();
+                sessionStorage.clear();
+                setAdminUser(null);
+                await auth.signOut().catch(() => {});
+                if (onBack) onBack();
+              }} 
+              className="px-5 py-2 bg-error text-on-error rounded-md hover:bg-error/90 transition-colors font-label-lg flex items-center gap-2"
+            >
               <span className="material-symbols-outlined">logout</span>
               Salir
             </button>

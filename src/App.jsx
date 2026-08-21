@@ -197,6 +197,9 @@ export default function App() {
         }
       } else {
         setCurrentUserData(null);
+        setAdminUser(null);
+        localStorage.removeItem('expoFerre_adminUser');
+        localStorage.removeItem('expoFerre_currentView');
       }
       setAuthLoading(false);
     });
@@ -205,6 +208,10 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
+      localStorage.removeItem('expoFerre_adminUser');
+      localStorage.removeItem('expoFerre_currentView');
+      localStorage.clear();
+      sessionStorage.clear();
       setCurrentView('landing');
       setIsMobileMenuOpen(false);
       setAdminUser(null);
@@ -214,6 +221,9 @@ export default function App() {
       await signOut(auth);
     } catch (error) {
       console.error('Error signing out:', error);
+      localStorage.clear();
+      sessionStorage.clear();
+      setAdminUser(null);
       setCurrentUser(null);
       setCurrentView('landing');
     }
