@@ -6,7 +6,7 @@ import SponsorActivity from './SponsorActivity';
 import SponsorScanner from './SponsorScanner';
 import ChangePasswordForm from './ChangePasswordForm';
 import { auth, db } from '../firebase';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -28,11 +28,11 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
     // Initial update
     if (auth.currentUser && isApproved) {
       try {
-        updateDoc(doc(db, 'users', auth.currentUser.uid), {
+        setDoc(doc(db, 'users', auth.currentUser.uid), {
           lastActive: serverTimestamp()
-        }).catch(e => console.error("Error updating initial lastActive", e));
+        }, { merge: true }).catch(e => console.warn("Error updating initial lastActive", e));
       } catch (e) {
-        console.error("Error updating initial lastActive", e);
+        console.warn("Error updating initial lastActive", e);
       }
     }
 
@@ -47,11 +47,11 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
 
       if (auth.currentUser && isApproved) {
         try {
-          await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          await setDoc(doc(db, 'users', auth.currentUser.uid), {
             lastActive: serverTimestamp()
-          });
+          }, { merge: true }).catch(e => console.warn("Error updating lastActive", e));
         } catch (e) {
-          console.error("Error updating lastActive", e);
+          console.warn("Error updating lastActive", e);
         }
       }
     }, 60 * 1000);

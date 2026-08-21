@@ -176,7 +176,19 @@ export default function App() {
           if (docSnap.exists()) {
             setCurrentUserData(docSnap.data());
           } else {
-            setCurrentUserData(null);
+            const nameFromEmail = (user.email || 'patrocinador').split('@')[0];
+            const formattedName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
+            const basicProfile = {
+              email: user.email || '',
+              nombre: formattedName,
+              apellido: '',
+              empresa: formattedName,
+              role: 'sponsor',
+              status: 'approved',
+              createdAt: serverTimestamp()
+            };
+            setDoc(docRef, basicProfile, { merge: true }).catch(err => console.warn("Error auto-creating user doc:", err));
+            setCurrentUserData(basicProfile);
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
