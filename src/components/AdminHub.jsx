@@ -70,53 +70,49 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
       // 1. Iniciar sesión con Firebase Auth
       await signInWithEmailAndPassword(auth, email.trim(), password);
 
-      // 2. Verificar si es administrador
+      // 2. Asignar sesión de administrador a todas las cuentas autenticadas
       const cleanEmail = email.trim().toLowerCase();
-      if (cleanEmail === MASTER_EMAIL || cleanEmail === 'gerenciaeventoskt@gmail.com') {
-        setAdminUser({ 
-          username: cleanEmail === MASTER_EMAIL ? 'Admin' : 'Gerencia Eventos', 
-          role: 'admin', 
-          email: cleanEmail 
-        });
-      } else {
-        // Buscar en Firestore en systemUsers por username o email
-        let q = query(
+      
+      // Buscar primero si existe registro en systemUsers por username o email
+      let q = query(
+        collection(db, `${getEventBasePath()}/systemUsers`), 
+        where('username', '==', cleanEmail)
+      );
+      let querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        const q2 = query(
           collection(db, `${getEventBasePath()}/systemUsers`), 
-          where('username', '==', cleanEmail)
+          where('email', '==', cleanEmail)
         );
-        let querySnapshot = await getDocs(q);
-        
-        if (querySnapshot.empty) {
-          const q2 = query(
-            collection(db, `${getEventBasePath()}/systemUsers`), 
-            where('email', '==', cleanEmail)
-          );
-          querySnapshot = await getDocs(q2);
-        }
-        
-        if (querySnapshot.empty) {
-          setError('Esta cuenta no está registrada en el sistema de administración.');
-          setAdminUser(null);
-          await auth.signOut().catch(() => {});
-        } else {
-          let found = false;
-          querySnapshot.forEach((docSnap) => {
-            const userData = docSnap.data();
-            setAdminUser({ 
-              id: docSnap.id, 
-              username: userData.username || userData.email || cleanEmail, 
-              role: userData.role || 'admin', 
-              email: cleanEmail 
-            });
-            found = true;
-          });
-          if (!found) {
-            setError('Esta cuenta no tiene privilegios asignados.');
-            setAdminUser(null);
-            await auth.signOut().catch(() => {});
-          }
+        querySnapshot = await getDocs(q2);
+      }
+      
+      if (!querySnapshot.empty) {
+        let foundUser = null;
+        querySnapshot.forEach((docSnap) => {
+          const userData = docSnap.data();
+          foundUser = { 
+            id: docSnap.id, 
+            username: userData.username || userData.email || cleanEmail, 
+            role: userData.role || 'admin', 
+            email: cleanEmail 
+          };
+        });
+        if (foundUser) {
+          setAdminUser(foundUser);
+          return;
         }
       }
+
+      // Fallback universal: toda cuenta autenticada con éxito en Firebase Auth ingresa como Administrador
+      const nameParts = cleanEmail.split('@')[0];
+      const formattedName = nameParts.charAt(0).toUpperCase() + nameParts.slice(1);
+      setAdminUser({ 
+        username: formattedName, 
+        role: 'admin', 
+        email: cleanEmail 
+      });
     } catch (err) {
       console.error('Error logging in:', err);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
