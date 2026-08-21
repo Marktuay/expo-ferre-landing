@@ -130,6 +130,12 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. Se implementó un **fallback seguro de 4 cupos base** (Categoría Plata) si aún no registra stand ni categoría explícita, evitando que cualquier patrocinador autenticado quede bloqueado con 0 acreditaciones.
     3. Se añadió auto-completado del campo `empresa` y campo para `cargo/rol` en el stand.
     4. Se hizo nulo-seguro el renderizado de fechas en `AdminStaff.jsx`.
+- **Protección por PIN Maestro de Seguridad (`2026`) para Acciones Críticas en Firestore (`AdminSponsorsHub.jsx`, `AdminPanel.jsx`):**
+  - **Requisito de Seguridad:** Evitar que cualquier operador presione por error o sin autorización los botones de **💾 Crear Respaldo**, **🔄 Restaurar Respaldo** y **⚡ Cargar Oficiales**.
+  - **Solución Implementada:**
+    1. Se creó un modal de seguridad con autenticación por PIN Maestro en [`AdminSponsorsHub.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsorsHub.jsx) y [`AdminPanel.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminPanel.jsx).
+    2. Al hacer clic en cualquiera de las 3 acciones críticas de base de datos, el sistema abre un modal de autorización solicitando la **Clave Maestra de Seguridad**.
+    3. PIN Maestro por defecto asignado: **`2026`** (fácilmente modificable a cualquier otra clave deseada). Si la clave es incorrecta, la acción se aborta inmediatamente.
 - **Habilitación de Permisos Maestros Totales (Respaldos y Restauración) para Todas las Cuentas de Administración (`AdminSponsorsHub.jsx`, `AdminPanel.jsx`):**
   - **Diagnóstico:** Anteriormente, los botones de **💾 Crear Respaldo**, **🔄 Restaurar Respaldo** y **⚡ Cargar Oficiales** estaban restringidos por correo estricto (`isMasterAdmin = email === 'marktuay@gmail.com'`). Al ingresar cuentas como `gerenciaeventoskt@gmail.com` o administradores delegados, la evaluación denegaba el acceso a estas herramientas clave.
   - **Solución:** Se desmovilizó el filtro exclusivo de correo. Ahora **todas las cuentas de administración autorizadas** tienen acceso total e irrestricto a los botones de creación de respaldos, restauración de snapshots y carga de oficiales en Firestore.
