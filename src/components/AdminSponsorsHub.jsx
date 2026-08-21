@@ -49,7 +49,39 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
     };
   }, []);
 
-  const handleSeedStands = async () => {
+  const MASTER_PIN = '2026';
+  const [pinModal, setPinModal] = useState({ open: false, action: null, title: '' });
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState('');
+
+  const requestPinAction = (action, title) => {
+    setPinModal({ open: true, action, title });
+    setPinInput('');
+    setPinError('');
+  };
+
+  const executePinAction = async (e) => {
+    e.preventDefault();
+    if (pinInput.trim() !== MASTER_PIN) {
+      setPinError('PIN Maestro Incorrecto. Acción cancelada por seguridad.');
+      return;
+    }
+
+    const actionToRun = pinModal.action;
+    setPinModal({ open: false, action: null, title: '' });
+    setPinInput('');
+    setPinError('');
+
+    if (actionToRun === 'seed') {
+      await runSeedStands();
+    } else if (actionToRun === 'create_backup') {
+      await runCreateBackup();
+    } else if (actionToRun === 'restore_backup') {
+      await runRestoreBackup();
+    }
+  };
+
+  const runSeedStands = async () => {
     setIsSeeding(true);
     try {
       await seedOfficialStands(db);
@@ -62,7 +94,7 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
     }
   };
 
-  const handleCreateBackup = async () => {
+  const runCreateBackup = async () => {
     setIsSeeding(true);
     try {
       await createFirestoreBackup(db);
@@ -75,8 +107,7 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
     }
   };
 
-  const handleRestoreBackup = async () => {
-    if (!window.confirm('¿Deseas restaurar las reservaciones de los stands desde el respaldo guardado en Firestore?')) return;
+  const runRestoreBackup = async () => {
     setIsSeeding(true);
     try {
       await restoreFromFirestoreBackup(db);
@@ -103,7 +134,7 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
             {isMasterAdmin && (
               <>
                 <button 
-                  onClick={handleCreateBackup} 
+                  onClick={() => requestPinAction('create_backup', 'Crear Respaldo en Firestore')} 
                   disabled={isSeeding}
                   className="px-3 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-1.5 text-xs disabled:opacity-50"
                   title="Guardar copia de seguridad actual en Firestore (events/2026/stands_backup)"
@@ -112,7 +143,7 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
                   Crear Respaldo
                 </button>
                 <button 
-                  onClick={handleRestoreBackup} 
+                  onClick={() => requestPinAction('restore_backup', 'Restaurar Respaldo de Firestore')} 
                   disabled={isSeeding}
                   className="px-3 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-1.5 text-xs disabled:opacity-50"
                   title="Restaurar de la copia de seguridad guardada en Firestore"
@@ -121,7 +152,7 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
                   Restaurar Respaldo
                 </button>
                 <button 
-                  onClick={handleSeedStands} 
+                  onClick={() => requestPinAction('seed', 'Cargar Stands Oficiales')} 
                   disabled={isSeeding}
                   className="px-4 py-2 bg-primary text-on-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 text-sm disabled:opacity-50"
                   title="Restaurar / Cargar los stands de los patrocinadores oficiales de la feria"
@@ -251,6 +282,49 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
           </button>
         </div>
       </div>
+
+      {/* Modal de Validación de PIN Maestro */}
+      {pinModal.open && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200">
+            <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mb-4 mx-auto">
+              <span className="material-symbols-outlined text-2xl">shield_lock</span>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-1 text-center">{pinModal.title}</h3>
+            <p className="text-gray-600 text-sm mb-6 text-center">
+              Ingresa la Clave Maestra de Seguridad para autorizar esta acción en la base de datos.
+            </p>
+            
+            <form onSubmit={executePinAction} className="flex flex-col gap-4">
+              <input 
+                type="password"
+                placeholder="PIN Maestro"
+                value={pinInput}
+                onChange={(e) => { setPinInput(e.target.value); setPinError(''); }}
+                autoFocus
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-center text-2xl tracking-widest font-mono focus:outline-none focus:border-[#283474] focus:ring-2 focus:ring-[#283474]/20"
+              />
+              {pinError && <p className="text-red-600 text-xs font-bold text-center">{pinError}</p>}
+              
+              <div className="flex gap-3 mt-2">
+                <button 
+                  type="button" 
+                  onClick={() => { setPinModal({ open: false, action: null, title: '' }); setPinInput(''); setPinError(''); }}
+                  className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="flex-1 py-2.5 px-4 bg-[#283474] hover:bg-[#1e2759] text-white font-bold rounded-xl shadow-md transition-colors"
+                >
+                  Confirmar PIN
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
