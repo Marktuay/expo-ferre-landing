@@ -35,7 +35,9 @@ const OFFICIAL_SPONSORS = [
   { company: 'JP Technology', category: 'Oro', logo: '/oro/logo-jp-technology.png' },
   { company: 'Casco', category: 'Plata', logo: '/plata/casco.png' },
   { company: 'Fernández Sera', category: 'Plata', logo: '/plata/ferdandezsera.png' },
-  { company: 'Midesa', category: 'Plata', logo: '/plata/midesa.png' }
+  { company: 'Midesa', category: 'Plata', logo: '/plata/midesa.png' },
+  { company: 'Madinisa', category: 'Plata', logo: '/plata/madinisa.png' },
+  { company: 'Sonax', category: 'Plata', logo: '/plata/sonax.jpg' }
 ];
 
 export default function AdminSponsors({ onBack }) {
