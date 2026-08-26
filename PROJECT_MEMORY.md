@@ -98,7 +98,31 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 21 de Agosto de 2026**
+**Última actualización: 26 de Agosto de 2026**
+
+- **Sincronización Oficial del Mapa de Estands con Tabla Comercial (`defaultStands.js` & Firestore):**
+  - Se reconfiguró la plantilla maestra de estands (`DEFAULT_OFFICIAL_STANDS`) para coincidir 100% con la tabla final de ventas del cliente:
+    - **Sinsa:** Stands 1, 2, 3 y 4
+    - **ARMOCONSA:** Stand 5
+    - **Importaciones Balladares:** Stands 6 y 16
+    - **Extel:** Stand 11
+    - **Sherwin-Williams:** Stand 12
+    - **Fernández Sera:** Stand 13
+    - **Sicsa Nicaragua:** Stand 15
+    - **Megalineas:** Stands 19 y 20
+    - **Grupo SUR:** Stand 21
+    - **CEMEX:** Stands 22 y 23
+    - **LAFISE:** Stand 26
+    - **Indenicsa:** Stands 27 y 28
+    - **Plycem:** Stand 30
+    - **BAC Credomatic:** Stand 31
+    - **Casco:** Stand 32
+    - **MIDESA:** Stand 37
+    - **Ferretería Noelito:** Stand 38
+    - **Empresas sin estand asignado:** Romax, JP Technology, Madinisa
+    - **Estands Libres:** 7, 8, 9, 10, 14, 17, 18, 24, 25, 29, 33, 34, 35, 36
+
+**Cambios Anteriores (21 de Agosto de 2026):**
 
 - **Ordenamiento y Adición de Patrocinadores Diamante (`App.jsx` & `AdminSponsors.jsx`):**
   - Se configuró el orden exacto de 19 marcas en la categoría Diamante (Sur, Kermil, Megalineas, Pensilvania, Flash Mark, Sinsa, Comasa, Extel, **Nitrotel**, BAC, Importaciones Balladares, Cemex, Construrama, Cemento Canal, Noelito, Banco LAFISE, Indenicsa, ArcelorMittal, Romax y Maximiza).
