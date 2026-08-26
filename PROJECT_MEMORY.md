@@ -100,6 +100,15 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
 **Última actualización: 26 de Agosto de 2026**
 
+- **Adición de Logos Holcim y Disensa en Categoría Oro (`App.jsx` & `AdminSponsors.jsx`):**
+  - Se agregaron los logos oficiales de **Holcim** (`/oro/holcim.jpeg`) y **Disensa** (`/oro/disensa.jpeg`) en el reel de logos de la categoría **Oro**, ubicados exactamente después de **Armoconsa**:
+    1. Plycem
+    2. Sicsa
+    3. Armoconsa
+    4. **Holcim**
+    5. **Disensa**
+    6. JP Studio / Technology
+
 - **Sistema de Invitación a Conferencistas por Correo, WhatsApp y Enlace Directo:**
   - **`InviteSpeakerModal.jsx`:** Nuevo componente que permite al patrocinador enviar una invitación a su speaker mediante:
     - Correo electrónico formal con plantilla HTML e imágenes oficiales de ExpoFerre 2026 (procesado por Firebase Trigger Email `collection(db, 'mail')`).
