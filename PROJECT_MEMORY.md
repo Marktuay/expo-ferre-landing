@@ -100,6 +100,15 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
 **Última actualización: 26 de Agosto de 2026**
 
+- **Sistema de Invitación a Conferencistas por Correo, WhatsApp y Enlace Directo:**
+  - **`InviteSpeakerModal.jsx`:** Nuevo componente que permite al patrocinador enviar una invitación a su speaker mediante:
+    - Correo electrónico formal con plantilla HTML e imágenes oficiales de ExpoFerre 2026 (procesado por Firebase Trigger Email `collection(db, 'mail')`).
+    - Enlace directo de auto-registro en portapapeles.
+    - Mensaje pre-redactado de WhatsApp.
+  - **`SpeakerForm.jsx`:** Actualizado para procesar parámetros de URL (`sponsorId`, `sponsorName`, `sponsorEmail`) y desplegar el distintivo *"Conferencia invitada por: [Empresa Patrocinadora]"*, vinculando la conferencia automáticamente.
+  - **`SponsorDashboard.jsx`:** Tarjeta de conferencias dividida con dos opciones: *"Enviar Invitación"* y *"Registrar Yo Mismo"*.
+  - **`App.jsx`:** Detecta rutas públicas (`?form=speaker`) para que el conferencista llene sus datos sin necesidad de autenticarse.
+
 - **Sincronización Oficial del Mapa de Estands con Tabla Comercial (`defaultStands.js` & Firestore):**
   - Se reconfiguró la plantilla maestra de estands (`DEFAULT_OFFICIAL_STANDS`) para coincidir 100% con la tabla final de ventas del cliente:
     - **Sinsa:** Stands 1, 2, 3 y 4
