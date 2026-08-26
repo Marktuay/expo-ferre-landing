@@ -29,6 +29,7 @@ import AdminAttendanceReport from './components/AdminAttendanceReport';
 import AdminMarketingReport from './components/AdminMarketingReport';
 import AdminPushNotifications from './components/AdminPushNotifications';
 import InteractiveMap from './components/InteractiveMap';
+import SpeakerForm from './components/SpeakerForm';
 
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -64,6 +65,9 @@ const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
 
 export default function App() {
   const [currentView, setCurrentView] = useState(() => {
+    if (window.location.search.includes('form=speaker') || window.location.search.includes('speaker=register')) {
+      return 'speakerRegistration';
+    }
     if (window.location.hash) {
       return 'landing';
     }
@@ -1233,6 +1237,10 @@ export default function App() {
         ) : (
           <AuthPage onBack={() => setCurrentView('landing')} />
         )
+      )}
+
+      {currentView === 'speakerRegistration' && (
+        <SpeakerForm onClose={() => setCurrentView('landing')} />
       )}
 
       {/* Footer */}

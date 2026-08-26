@@ -9,6 +9,11 @@ const SpeakerForm = ({ onClose }) => {
   const [formState, setFormState] = useState('idle');
   const [registeredSpeakerId, setRegisteredSpeakerId] = useState(null);
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlSponsorId = urlParams.get('sponsorId') || null;
+  const urlSponsorName = urlParams.get('sponsorName') || null;
+  const urlSponsorEmail = urlParams.get('sponsorEmail') || null;
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -41,8 +46,9 @@ const SpeakerForm = ({ onClose }) => {
         resumen: formData.get('resumen'),
         autorizaCompartir: formData.get('auth'),
         createdAt: serverTimestamp(),
-        sponsorId: user ? user.uid : null,
-        sponsorEmail: user ? user.email : null
+        sponsorId: user ? user.uid : (urlSponsorId || null),
+        sponsorEmail: user ? user.email : (urlSponsorEmail || null),
+        sponsorCompany: urlSponsorName || (user ? user.email : 'Patrocinador Oficial')
       };
       
       const docRef = await addDoc(collection(db, `${getEventBasePath()}/speakers`), data);
@@ -59,12 +65,14 @@ const SpeakerForm = ({ onClose }) => {
   return (
     <main className="pt-40 md:pt-48 pb-20 md:pb-32 px-margin-mobile md:px-margin-desktop bg-background min-h-screen">
       <div className="max-w-3xl mx-auto">
-        <button 
-          onClick={onClose}
-          className="mb-6 flex items-center gap-2 text-primary hover:text-primary-container font-bold transition-colors"
-        >
-          <span className="material-symbols-outlined">arrow_back</span> Volver
-        </button>
+        {onClose && (
+          <button 
+            onClick={onClose}
+            className="mb-6 flex items-center gap-2 text-primary hover:text-primary-container font-bold transition-colors"
+          >
+            <span className="material-symbols-outlined">arrow_back</span> Volver
+          </button>
+        )}
         <div className="text-center mb-10">
           <h1 className="font-headline-lg text-headline-lg text-primary mb-4 flex items-center justify-center gap-3">
             <Mic size={36} /> Alta de Conferencias
@@ -72,6 +80,13 @@ const SpeakerForm = ({ onClose }) => {
           <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">
             Complete los datos del speaker y detalles de su participación para registrar la conferencia.
           </p>
+
+          {urlSponsorName && (
+            <div className="mt-4 bg-primary/10 border border-primary/20 rounded-md p-3 max-w-xl mx-auto flex items-center justify-center gap-2 text-primary font-bold text-sm">
+              <span className="material-symbols-outlined text-base">handshake</span>
+              Conferencia invitada por: <span className="underline">{urlSponsorName}</span>
+            </div>
+          )}
         </div>
 
         <div className="bg-white p-8 md:p-12 rounded-lg shadow-sm border border-outline-variant">

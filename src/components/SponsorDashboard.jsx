@@ -5,6 +5,7 @@ import InteractiveMap from './InteractiveMap';
 import SponsorActivity from './SponsorActivity';
 import SponsorScanner from './SponsorScanner';
 import ChangePasswordForm from './ChangePasswordForm';
+import InviteSpeakerModal from './InviteSpeakerModal';
 import { auth, db } from '../firebase';
 import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
@@ -12,6 +13,7 @@ import { QRCodeSVG } from 'qrcode.react';
 
 const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) => {
   const [activeForm, setActiveForm] = useState(null);
+  const [isInviteSpeakerOpen, setIsInviteSpeakerOpen] = useState(false);
   const lastActivityRef = useRef(Date.now());
   
   const isApproved = userData?.status === 'approved' || !userData?.status; // Fallback to approved if no status field (old accounts)
@@ -201,9 +203,28 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
               <div className={cardStyle}>
                 <div>
                   <h3 className="font-headline-md text-headline-md text-secondary flex items-center gap-2"><span className="material-symbols-outlined text-primary text-3xl">mic</span> INFORMACIÓN DE CONFERENCIAS</h3>
-                  <p className="font-body-md text-body-md text-on-surface-variant">Gestiona tus conferencias presenciales y virtuales.</p>
+                  <p className="font-body-md text-body-md text-on-surface-variant mb-4">Gestiona tus conferencias. Puedes enviar una invitación por correo al speaker o registrar los datos tú mismo.</p>
                 </div>
-                <button onClick={() => isApproved && setActiveForm('speaker')} className={isApproved ? btnStyle : disabledBtnStyle} disabled={!isApproved}>COMPLETAR</button>
+                
+                <div className="flex flex-col sm:flex-row gap-2 w-full">
+                  <button 
+                    onClick={() => isApproved && setIsInviteSpeakerOpen(true)} 
+                    className={isApproved ? "flex-1 bg-primary text-on-primary font-bold py-2.5 px-3 rounded-5px hover:brightness-110 active:scale-95 transition-all text-xs flex items-center justify-center gap-1" : disabledBtnStyle} 
+                    disabled={!isApproved}
+                  >
+                    <span className="material-symbols-outlined text-sm">mail</span>
+                    Enviar Invitación
+                  </button>
+                  
+                  <button 
+                    onClick={() => isApproved && setActiveForm('speaker')} 
+                    className={isApproved ? "flex-1 bg-surface-variant text-on-surface font-bold py-2.5 px-3 rounded-5px hover:bg-outline-variant/50 active:scale-95 transition-all text-xs border border-outline-variant flex items-center justify-center gap-1" : disabledBtnStyle} 
+                    disabled={!isApproved}
+                  >
+                    <span className="material-symbols-outlined text-sm">edit_note</span>
+                    Registrar Yo Mismo
+                  </button>
+                </div>
               </div>
 
               <div className={cardStyle}>
@@ -224,6 +245,13 @@ const SponsorDashboard = ({ userData, onBack, onStaffRegistration, onContact }) 
           <InteractiveMap onBack={() => setActiveForm(null)} sponsorData={userData} showHeader={true} />
         </div>
       )}
+
+      {/* Modal de Invitación a Conferencista */}
+      <InviteSpeakerModal 
+        isOpen={isInviteSpeakerOpen}
+        onClose={() => setIsInviteSpeakerOpen(false)}
+        sponsorData={userData}
+      />
     </div>
   );
 };
