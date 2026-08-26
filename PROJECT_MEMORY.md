@@ -100,6 +100,15 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
 **Última actualización: 26 de Agosto de 2026**
 
+- **Adición de Logos Madinisa y Sonax en Categoría Plata (`App.jsx` & `AdminSponsors.jsx`):**
+  - Se agregaron los logos oficiales de **Madinisa** (`/plata/madinisa.png`) y **Sonax** (`/plata/sonax.jpg`) en el reel de logos de la categoría **Plata**, ubicados al final de la categoría:
+    1. Fernández Sera
+    2. Sherwin-Williams
+    3. Casco
+    4. Midesa
+    5. **Madinisa**
+    6. **Sonax**
+
 - **Adición de Logos Holcim y Disensa en Categoría Oro (`App.jsx` & `AdminSponsors.jsx`):**
   - Se agregaron los logos oficiales de **Holcim** (`/oro/holcim.jpeg`) y **Disensa** (`/oro/disensa.jpeg`) en el reel de logos de la categoría **Oro**, ubicados exactamente después de **Armoconsa**:
     1. Plycem
