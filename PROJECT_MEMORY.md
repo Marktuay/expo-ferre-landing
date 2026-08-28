@@ -98,7 +98,16 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 26 de Agosto de 2026**
+**Última actualización: 28 de Agosto de 2026**
+
+- **Adición de Logo Sylvania en Categoría Diamante (`App.jsx` & `AdminSponsors.jsx`):**
+  - Se agregó el logo oficial de **Sylvania** (`/diamante/sylvania.jpg`) en el reel de logos de la categoría **Diamante**, ubicado inmediatamente después de **Importaciones Balladares**:
+    - ...
+    - BAC
+    - Importaciones Balladares
+    - **Sylvania**
+    - Cemex
+    - ...
 
 - **Adición de Logos Madinisa y Sonax en Categoría Plata (`App.jsx` & `AdminSponsors.jsx`):**
   - Se agregaron los logos oficiales de **Madinisa** (`/plata/madinisa.png`) y **Sonax** (`/plata/sonax.jpg`) en el reel de logos de la categoría **Plata**, ubicados al final de la categoría:
