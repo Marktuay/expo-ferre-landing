@@ -139,6 +139,7 @@ export default function App() {
     { url: '/diamante/nitrotel.png?v=1', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/logo-bac.jpeg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/balladares.png', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/sylvania.jpg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/cemex.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/canal.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/construrama.png', category: 'Diamante', order: 1, bgWhite: true },
