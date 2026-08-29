@@ -98,7 +98,17 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 28 de Agosto de 2026**
+**Última actualización: 29 de Agosto de 2026**
+
+- **Adición de Logo Tigo en Categoría Oro (`App.jsx` & `AdminSponsors.jsx`):**
+  - Se agregó el logo oficial de **Tigo** (`/oro/tigo.png`) en el reel de logos de la categoría **Oro**, ubicado inmediatamente antes de **JP Studio**:
+    1. Plycem
+    2. Sicsa
+    3. Armoconsa
+    4. Holcim
+    5. Disensa
+    6. **Tigo**
+    7. JP Studio / Technology
 
 - **Adición de Logo Sylvania en Categoría Diamante (`App.jsx` & `AdminSponsors.jsx`):**
   - Se agregó el logo oficial de **Sylvania** (`/diamante/sylvania.jpg`) en el reel de logos de la categoría **Diamante**, ubicado inmediatamente después de **Importaciones Balladares**:
