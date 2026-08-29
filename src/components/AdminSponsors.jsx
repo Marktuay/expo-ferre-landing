@@ -33,6 +33,7 @@ const OFFICIAL_SPONSORS = [
   { company: 'Armoconsa', category: 'Oro', logo: '/oro/armoconsa.png' },
   { company: 'Holcim', category: 'Oro', logo: '/oro/holcim.jpeg' },
   { company: 'Disensa', category: 'Oro', logo: '/oro/disensa.jpeg' },
+  { company: 'Tigo', category: 'Oro', logo: '/oro/tigo.png' },
   { company: 'JP Technology', category: 'Oro', logo: '/oro/logo-jp-technology.png' },
   { company: 'Casco', category: 'Plata', logo: '/plata/casco.png' },
   { company: 'Fernández Sera', category: 'Plata', logo: '/plata/ferdandezsera.png' },
