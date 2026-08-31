@@ -166,10 +166,10 @@ export default function SponsorActivity({ onBack }) {
                   {stands.map(stand => (
                     <div key={stand.id} className="border border-outline-variant rounded-md p-4 flex flex-col gap-2 relative">
                       <div className="flex justify-between items-start">
-                        <h3 className="font-bold text-lg">{stand.name}</h3>
+                        <h3 className="font-bold text-lg">{stand.name || (stand.id ? `Stand ${stand.id.replace('stand-', '')}` : 'Stand')}</h3>
                         <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-bold uppercase">{stand.status}</span>
                       </div>
-                      <p className="text-sm text-secondary"><strong>Tamaño:</strong> {stand.size}</p>
+                      <p className="text-sm text-secondary"><strong>Tamaño:</strong> {stand.size || stand.reservationDetails?.categoria || ''}</p>
                       <p className="text-sm text-secondary"><strong>Precio:</strong> {stand.price}</p>
 
                       {stand.logo && (

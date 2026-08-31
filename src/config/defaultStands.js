@@ -1,5 +1,6 @@
 import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { getEventBasePath } from './eventConfig';
+import { initialStandsList } from '../components/InteractiveMap';
 
 export const DEFAULT_OFFICIAL_STANDS = [
   {
@@ -368,10 +369,21 @@ export const seedOfficialStands = async (db) => {
   for (let i = 1; i <= 38; i++) {
     const standId = `stand-${i}`;
     const official = DEFAULT_OFFICIAL_STANDS.find(s => s.id === standId);
+    const meta = initialStandsList.find(s => s.id === standId);
     const refActive = doc(db, `${getEventBasePath()}/stands`, standId);
     const refBackup = doc(db, `${getEventBasePath()}/stands_backup`, standId);
 
-    const dataToSave = official || { id: standId, name: `Stand ${i}`, status: 'available', updatedAt: new Date() };
+    const baseInfo = {
+      id: standId,
+      name: meta?.name || `Stand ${i}`,
+      size: meta?.size || '',
+      price: meta?.price || '',
+      updatedAt: new Date()
+    };
+
+    const dataToSave = official 
+      ? { ...baseInfo, ...official } 
+      : { ...baseInfo, status: 'available' };
 
     await setDoc(refActive, dataToSave);
     await setDoc(refBackup, dataToSave);

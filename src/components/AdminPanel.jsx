@@ -3,7 +3,7 @@ import { collection, query, where, onSnapshot, doc, updateDoc, getDocs } from 'f
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import { seedOfficialStands } from '../config/defaultStands';
-import InteractiveMap from './InteractiveMap';
+import InteractiveMap, { initialStandsList } from './InteractiveMap';
 
 import { auth } from '../firebase';
 
@@ -38,11 +38,22 @@ export default function AdminPanel({ onBack, adminUser }) {
   useEffect(() => {
     const q = query(collection(db, `${getEventBasePath()}/stands`), where('status', '==', 'reserved'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const standsData = snapshot.docs.map(doc => doc.data());
+      const standsData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        const standId = doc.id || data.id;
+        const meta = initialStandsList.find(s => s.id === standId);
+        const standNum = standId ? standId.replace('stand-', '') : '';
+        return {
+          id: standId,
+          name: data.name || meta?.name || (standNum ? `Stand ${standNum}` : 'Stand'),
+          size: data.size || meta?.size || data.reservationDetails?.categoria || '',
+          ...data
+        };
+      });
       // Ordenar por número de stand
       standsData.sort((a, b) => {
-        const numA = parseInt(a.id.split('-')[1]);
-        const numB = parseInt(b.id.split('-')[1]);
+        const numA = parseInt((a.id || '').replace('stand-', '')) || 0;
+        const numB = parseInt((b.id || '').replace('stand-', '')) || 0;
         return numA - numB;
       });
       setReservedStands(standsData);
