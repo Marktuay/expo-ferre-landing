@@ -101,7 +101,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 **Última actualización: 29 de Agosto de 2026**
 
 - **Adición de Logo Tigo en Categoría Oro (`App.jsx` & `AdminSponsors.jsx`):**
-  - Se agregó el logo oficial de **Tigo** (`/oro/tigo.png`) en el reel de logos de la categoría **Oro**, ubicado inmediatamente antes de **JP Studio**, con una escala ampliada al **120%** (`scale: 1.2`):
+  - Se agregó el logo oficial de **Tigo** (`/oro/tigo.png`) en el reel de logos de la categoría **Oro**, ubicado inmediatamente antes de **JP Studio**, con una escala ampliada al **132%** (`scale: 1.32`):
     1. Plycem
     2. Sicsa
     3. Armoconsa
