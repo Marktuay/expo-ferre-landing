@@ -98,9 +98,16 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 29 de Agosto de 2026**
+**Última actualización: 31 de Agosto de 2026**
 
-- **Adición de Logo Tigo en Categoría Oro (`App.jsx` & `AdminSponsors.jsx`):**
+- **Corrección de Número y Tamaño de Stand en el Panel de Reservaciones (`AdminPanel.jsx`, `defaultStands.js`, `AdminSponsorDetails.jsx`, `SponsorActivity.jsx`):**
+  - **Diagnóstico:** Los documentos de estands precargados en Firestore contenían la propiedad `id` (ej. `'stand-1'`), pero carecían de la propiedad `name` (ej. `'Stand 1'`) y `size` (ej. `'Oro (4x3 mts)'`). Al renderizar la columna "Stand", el valor `{stand.name}` resultaba `undefined`, dejando la celda vacía en la tabla.
+  - **Solución:**
+    1. Se inyectó una función de extracción y *fallback* dinámico en `AdminPanel.jsx` asociando `doc.id` con `initialStandsList` de `InteractiveMap.jsx`. Ahora, si un registro no posee `name` explícito, se formatea automáticamente como **Stand 1**, **Stand 2**, etc. y se muestra su categoría/dimensiones.
+    2. Se actualizó la función `seedOfficialStands` en `defaultStands.js` para que guarde explícitamente `name`, `size` y `price` en Firestore.
+    3. Se agregaron *fallbacks* idénticos en `AdminSponsorDetails.jsx` y `SponsorActivity.jsx`.
+
+- **Aumento del Logo de Tigo en Categoría Oro (`App.jsx` & `AdminSponsors.jsx`):**
   - Se agregó el logo oficial de **Tigo** (`/oro/tigo.png`) en el reel de logos de la categoría **Oro**, ubicado inmediatamente antes de **JP Studio**, con una escala ampliada al **132%** (`scale: 1.32`):
     1. Plycem
     2. Sicsa
