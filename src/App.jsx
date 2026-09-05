@@ -166,6 +166,7 @@ export default function App() {
     { url: '/plata/midesa.png', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/madinisa.png', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/sonax.jpg', category: 'Plata', order: 3, bgWhite: true },
+    { url: '/plata/dataanalytics.jpg', category: 'Plata', order: 3, bgWhite: true },
   ];
   
   const sponsorLogos = initialPlaceholders;

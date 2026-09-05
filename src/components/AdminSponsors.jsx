@@ -43,7 +43,8 @@ const OFFICIAL_SPONSORS = [
   { company: 'Fernández Sera', category: 'Plata', logo: '/plata/ferdandezsera.png' },
   { company: 'Midesa', category: 'Plata', logo: '/plata/midesa.png' },
   { company: 'Madinisa', category: 'Plata', logo: '/plata/madinisa.png' },
-  { company: 'Sonax', category: 'Plata', logo: '/plata/sonax.jpg' }
+  { company: 'Sonax', category: 'Plata', logo: '/plata/sonax.jpg' },
+  { company: 'Dat Analytics', category: 'Plata', logo: '/plata/dataanalytics.jpg' }
 ];
 
 export default function AdminSponsors({ onBack }) {
