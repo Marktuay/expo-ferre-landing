@@ -100,6 +100,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
 **Última actualización: 05 de Septiembre de 2026**
 
+- **Fondo Blanco para Logo de Sherwin Williams en Categoría Plata (`App.jsx`):**
+  - Se habilitó la propiedad `bgWhite: true` para la tarjeta del logo de **Sherwin-Williams** (`/plata/logo-sherwin-williams.jpg`), garantizando que se renderice con un contenedor blanco brillante de contraste consistente igual al resto de marcas.
+
 - **Adición de Logo Dat Analytics en Categoría Plata (`App.jsx` & `AdminSponsors.jsx`):**
   - Se agregó el logo oficial de **Dat Analytics** (`/plata/dataanalytics.jpg`) al final del reel de la categoría **Plata**:
     1. Fernández Sera
