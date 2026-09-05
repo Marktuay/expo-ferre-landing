@@ -100,14 +100,15 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
 **Última actualización: 05 de Septiembre de 2026**
 
-- **Adición de Logos Incasa, Panelconsa y Steelmax en Categoría Diamante (`App.jsx` & `AdminSponsors.jsx`):**
-  - Se agregaron los logos oficiales de **Incasa** (`/diamante/incasa.png`), **Panelconsa** (`/diamante/panelconsa.png`) y **Steelmax** (`/diamante/steelmax.png`) al final del reel de la categoría **Diamante**:
+- **Adición de Logos Incasa, Panelconsa, Steelmax y Eaton en Categoría Diamante (`App.jsx` & `AdminSponsors.jsx`):**
+  - Se agregaron los logos oficiales de **Incasa** (`/diamante/incasa.png`), **Panelconsa** (`/diamante/panelconsa.png`), **Steelmax** (`/diamante/steelmax.png`) y **Eaton** (`/diamante/eaton.jpeg`) al final del reel de la categoría **Diamante**:
     - ...
     - Romax
     - Maximiza
     - **Incasa**
     - **Panelconsa**
     - **Steelmax**
+    - **Eaton**
 
 - **Corrección de Número y Tamaño de Stand en el Panel de Reservaciones (`AdminPanel.jsx`, `defaultStands.js`, `AdminSponsorDetails.jsx`, `SponsorActivity.jsx`):**
   - **Diagnóstico:** Los documentos de estands precargados en Firestore contenían la propiedad `id` (ej. `'stand-1'`), pero carecían de la propiedad `name` (ej. `'Stand 1'`) y `size` (ej. `'Oro (4x3 mts)'`). Al renderizar la columna "Stand", el valor `{stand.name}` resultaba `undefined`, dejando la celda vacía en la tabla.
