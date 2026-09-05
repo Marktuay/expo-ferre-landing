@@ -155,6 +155,7 @@ export default function App() {
     { url: '/diamante/eaton.jpeg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/oro/plycem%20.png', category: 'Oro', order: 2, bgWhite: true },
     { url: '/oro/sicsa.png', category: 'Oro', order: 2, bgWhite: true },
+    { url: '/oro/up.png', category: 'Oro', order: 2, bgWhite: true },
     { url: '/oro/armoconsa.png', category: 'Oro', order: 2, bgWhite: true },
     { url: '/oro/holcim.jpeg', category: 'Oro', order: 2, bgWhite: true },
     { url: '/oro/disensa.jpeg', category: 'Oro', order: 2, bgWhite: true },

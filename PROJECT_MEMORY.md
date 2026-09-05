@@ -415,3 +415,17 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **`PrivacyPolicy.jsx`** y **`TermsOfService.jsx`**: Documentos legales.
 
 ---
+
+### 🟢 Adición de Logo UP Digital (up.png) en Categoría Oro (`App.jsx` & `AdminSponsors.jsx`)
+- **Ubicación:** `public/oro/up.png`
+- **Posición:** Se insertó en la categoría **Oro** inmediatamente después de **Sicsa** (`/oro/sicsa.png`).
+- **Secuencia actualizada en Categoría Oro:**
+  1. Plycem (`/oro/plycem%20.png`)
+  2. Sicsa (`/oro/sicsa.png`)
+  3. **UP Digital** (`/oro/up.png`) 👈 *(Nuevo)*
+  4. Armoconsa (`/oro/armoconsa.png`)
+  5. Holcim (`/oro/holcim.jpeg`)
+  6. Disensa (`/oro/disensa.jpeg`)
+  7. Tigo (`/oro/tigo.png` - `scale: 1.32`)
+  8. JP Studio / Technology (`/oro/jp-studio-white.png`)
+

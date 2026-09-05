@@ -34,6 +34,7 @@ const OFFICIAL_SPONSORS = [
   { company: 'Eaton', category: 'Diamante', logo: '/diamante/eaton.jpeg' },
   { company: 'Plycem', category: 'Oro', logo: '/oro/plycem%20.png' },
   { company: 'Sicsa', category: 'Oro', logo: '/oro/sicsa.png' },
+  { company: 'UP Digital', category: 'Oro', logo: '/oro/up.png' },
   { company: 'Armoconsa', category: 'Oro', logo: '/oro/armoconsa.png' },
   { company: 'Holcim', category: 'Oro', logo: '/oro/holcim.jpeg' },
   { company: 'Disensa', category: 'Oro', logo: '/oro/disensa.jpeg' },
