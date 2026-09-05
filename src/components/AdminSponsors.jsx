@@ -31,6 +31,7 @@ const OFFICIAL_SPONSORS = [
   { company: 'Incasa', category: 'Diamante', logo: '/diamante/incasa.png' },
   { company: 'Panelconsa', category: 'Diamante', logo: '/diamante/panelconsa.png' },
   { company: 'Steelmax', category: 'Diamante', logo: '/diamante/steelmax.png' },
+  { company: 'Eaton', category: 'Diamante', logo: '/diamante/eaton.jpeg' },
   { company: 'Plycem', category: 'Oro', logo: '/oro/plycem%20.png' },
   { company: 'Sicsa', category: 'Oro', logo: '/oro/sicsa.png' },
   { company: 'Armoconsa', category: 'Oro', logo: '/oro/armoconsa.png' },
