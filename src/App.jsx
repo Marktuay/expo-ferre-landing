@@ -161,7 +161,7 @@ export default function App() {
     { url: '/oro/tigo.png', category: 'Oro', order: 2, scale: 1.32, bgWhite: true },
     { url: '/oro/jp-studio-white.png', category: 'Oro', order: 2, bgWhite: true },
     { url: '/plata/ferdandezsera.png', category: 'Plata', order: 3, bgWhite: true },
-    { url: '/plata/logo-sherwin-williams.jpg', category: 'Plata', order: 3 },
+    { url: '/plata/logo-sherwin-williams.jpg', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/casco.png', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/midesa.png', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/madinisa.png', category: 'Plata', order: 3, bgWhite: true },
