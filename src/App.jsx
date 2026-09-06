@@ -1046,65 +1046,65 @@ export default function App() {
                     className="relative group cursor-pointer"
                     onClick={() => setSelectedAward(award)}
                   >
-                    <div className="bg-white border border-gray-200/90 p-6 pt-10 rounded-2xl transition-all duration-300 group-hover:border-[#f39200] group-hover:shadow-2xl relative min-h-[240px] flex flex-col justify-between hover:-translate-y-1">
+                    <div className="bg-white border border-gray-200/90 p-7 pt-11 rounded-2xl transition-all duration-300 group-hover:border-[#f39200] group-hover:shadow-2xl relative min-h-[260px] flex flex-col justify-between hover:-translate-y-1">
                       <div className="absolute -top-4 left-6 px-4 py-1.5 bg-[#8c4900] text-white font-black text-sm rounded-lg shadow-md group-hover:bg-[#f39200] transition-colors">
                         {award.id}
                       </div>
                       <div>
-                        <h3 className="text-xl font-black text-[#1e293b] mb-1 group-hover:text-[#283474] transition-colors">
+                        <h3 className="text-2xl font-black text-[#1e293b] mb-1.5 group-hover:text-[#283474] transition-colors leading-snug">
                           {award.title}
                         </h3>
-                        <p className="text-sm font-bold text-[#8c4900] mb-3 group-hover:text-[#f39200] transition-colors">
+                        <p className="text-base font-extrabold text-[#8c4900] mb-3 group-hover:text-[#f39200] transition-colors">
                           {award.tagline}
                         </p>
-                        <p className="text-sm text-gray-600 leading-relaxed">
+                        <p className="text-base text-gray-700 leading-relaxed font-normal">
                           {award.summary}
                         </p>
                       </div>
 
-                      <div className="mt-6 pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-black text-[#8c4900] group-hover:text-[#f39200] transition-colors">
-                        <span className="flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-base">info</span> Ver información completa
+                      <div className="mt-6 pt-3.5 border-t border-gray-100 flex items-center justify-between text-sm font-black text-[#8c4900] group-hover:text-[#f39200] transition-colors">
+                        <span className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-lg">info</span> Ver información completa
                         </span>
-                        <span className="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
                       </div>
                     </div>
 
                     {/* Hover Tooltip Popup (Desktop Hover) */}
                     {award.details && (
                       <div className="hidden lg:block opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 absolute left-0 top-full mt-3 w-full z-50 pointer-events-none group-hover:pointer-events-auto">
-                        <div className="bg-white text-slate-800 p-6 rounded-2xl shadow-2xl border border-gray-200 backdrop-blur-lg relative">
+                        <div className="bg-white text-slate-800 p-7 rounded-2xl shadow-2xl border border-gray-200 backdrop-blur-lg relative">
                           <div className="absolute -top-3 left-10 w-5 h-5 bg-white rotate-45 border-t border-l border-gray-200"></div>
                           
-                          <div className="flex items-center justify-between border-b border-gray-100 pb-2.5 mb-3">
-                            <div className="flex items-center gap-2">
-                              <span className="bg-[#8c4900] text-white text-xs font-black px-2.5 py-0.5 rounded-md">{award.id}</span>
-                              <h4 className="font-black text-[#283474] text-base">{award.title}</h4>
+                          <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3.5">
+                            <div className="flex items-center gap-2.5">
+                              <span className="bg-[#8c4900] text-white text-sm font-black px-3 py-1 rounded-md">{award.id}</span>
+                              <h4 className="font-black text-[#283474] text-lg">{award.title}</h4>
                             </div>
-                            <span className="text-[11px] text-[#f39200] font-bold">Haz clic para ver más</span>
+                            <span className="text-xs text-[#f39200] font-black">Haz clic para ver más</span>
                           </div>
 
-                          <p className="text-xs text-gray-700 mb-3 italic font-medium bg-amber-50/80 p-2.5 rounded-lg border border-amber-100/80">
+                          <p className="text-sm text-gray-800 mb-3.5 italic font-medium bg-amber-50/90 p-3 rounded-xl border border-amber-100/90 leading-relaxed">
                             "{award.details.intro}"
                           </p>
 
-                          <div className="text-xs space-y-1 mb-3">
-                            <p className="font-bold text-[#8c4900]">¿A quién está dirigido?</p>
-                            <p className="text-gray-600 leading-snug">{award.details.target}</p>
+                          <div className="text-sm space-y-1 mb-3.5">
+                            <p className="font-black text-[#8c4900]">¿A quién está dirigido?</p>
+                            <p className="text-gray-700 leading-relaxed">{award.details.target}</p>
                           </div>
 
                           {award.details.criteria && (
-                            <div className="text-xs space-y-1">
-                              <p className="font-bold text-[#8c4900]">Criterios clave:</p>
-                              <ul className="space-y-1 pl-1">
+                            <div className="text-sm space-y-1">
+                              <p className="font-black text-[#8c4900]">Criterios clave:</p>
+                              <ul className="space-y-1.5 pl-1">
                                 {award.details.criteria.slice(0, 3).map((c, i) => (
-                                  <li key={i} className="flex items-start gap-1.5 text-gray-600 text-[11px]">
-                                    <span className="text-[#f39200] font-bold">•</span>
-                                    <span><strong className="text-gray-800">{c.label}:</strong> {c.text}</span>
+                                  <li key={i} className="flex items-start gap-2 text-gray-700 text-xs md:text-sm">
+                                    <span className="text-[#f39200] font-bold text-base">•</span>
+                                    <span><strong className="text-gray-900 font-bold">{c.label}:</strong> {c.text}</span>
                                   </li>
                                 ))}
                                 {award.details.criteria.length > 3 && (
-                                  <li className="text-[11px] text-[#8c4900] font-bold pt-0.5">
+                                  <li className="text-xs text-[#8c4900] font-black pt-1">
                                     + {award.details.criteria.length - 3} criterios más...
                                   </li>
                                 )}
@@ -1123,76 +1123,76 @@ export default function App() {
           {/* Modal Overlay for Full Details (Click / Mobile) */}
           {selectedAward && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
-              <div className="bg-white text-[#1e293b] rounded-2xl max-w-2xl w-full p-6 md:p-8 max-h-[90vh] overflow-y-auto shadow-2xl relative border border-gray-100">
+              <div className="bg-white text-[#1e293b] rounded-2xl max-w-3xl w-full p-7 md:p-10 max-h-[90vh] overflow-y-auto shadow-2xl relative border border-gray-100">
                 <button 
                   onClick={() => setSelectedAward(null)}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 p-2 rounded-full transition-colors flex items-center justify-center"
+                  className="absolute top-5 right-5 text-gray-400 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 p-2.5 rounded-full transition-colors flex items-center justify-center"
                 >
-                  <span className="material-symbols-outlined text-xl">close</span>
+                  <span className="material-symbols-outlined text-2xl">close</span>
                 </button>
 
-                <div className="inline-block bg-[#8c4900] text-white font-black px-3.5 py-1 rounded-lg text-xs tracking-wider uppercase mb-3 shadow-sm">
+                <div className="inline-block bg-[#8c4900] text-white font-black px-4 py-1.5 rounded-lg text-sm tracking-wider uppercase mb-3 shadow-sm">
                   Categoría {selectedAward.id}
                 </div>
 
-                <h3 className="text-2xl md:text-3xl font-black text-[#283474] mb-1">
+                <h3 className="text-3xl md:text-4xl font-black text-[#283474] mb-1.5">
                   {selectedAward.title}
                 </h3>
-                <p className="text-base md:text-lg font-bold text-[#8c4900] mb-4 italic">
+                <p className="text-lg md:text-xl font-bold text-[#8c4900] mb-5 italic">
                   "{selectedAward.tagline}"
                 </p>
 
-                <div className="space-y-5 text-gray-700 leading-relaxed border-t border-gray-100 pt-4">
-                  <p className="font-medium text-base bg-amber-50/80 p-4 rounded-xl border border-amber-100 text-amber-950">
+                <div className="space-y-6 text-gray-700 leading-relaxed border-t border-gray-100 pt-5">
+                  <p className="font-medium text-lg md:text-xl bg-amber-50/90 p-5 rounded-2xl border border-amber-100 text-amber-950 leading-relaxed">
                     {selectedAward.summary}
                   </p>
 
                   {selectedAward.details ? (
                     <>
                       <div>
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-[#8c4900] mb-1">Historia y Propósito</h4>
-                        <p className="text-gray-700 text-sm md:text-base leading-relaxed">{selectedAward.details.intro}</p>
+                        <h4 className="font-black text-sm md:text-base uppercase tracking-wider text-[#8c4900] mb-1.5">Historia y Propósito</h4>
+                        <p className="text-gray-700 text-base md:text-lg leading-relaxed">{selectedAward.details.intro}</p>
                       </div>
 
                       <div>
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-[#8c4900] mb-1">¿A quién está dirigido?</h4>
-                        <p className="text-gray-700 text-sm md:text-base leading-relaxed">{selectedAward.details.target}</p>
+                        <h4 className="font-black text-sm md:text-base uppercase tracking-wider text-[#8c4900] mb-1.5">¿A quién está dirigido?</h4>
+                        <p className="text-gray-700 text-base md:text-lg leading-relaxed">{selectedAward.details.target}</p>
                       </div>
 
                       <div>
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-[#8c4900] mb-2.5">Criterios de evaluación</h4>
-                        <ul className="grid grid-cols-1 gap-2.5 text-sm">
+                        <h4 className="font-black text-sm md:text-base uppercase tracking-wider text-[#8c4900] mb-3">Criterios de evaluación</h4>
+                        <ul className="grid grid-cols-1 gap-3 text-base md:text-lg">
                           {selectedAward.details.criteria.map((c, idx) => (
-                            <li key={idx} className="flex items-start gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                              <span className="material-symbols-outlined text-[#8c4900] text-xl mt-0.5 shrink-0">verified</span>
-                              <div>
-                                <strong className="text-gray-900 font-bold">{c.label}:</strong> <span className="text-gray-600">{c.text}</span>
+                            <li key={idx} className="flex items-start gap-3.5 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                              <span className="material-symbols-outlined text-[#8c4900] text-2xl mt-0.5 shrink-0">verified</span>
+                              <div className="leading-relaxed">
+                                <strong className="text-gray-900 font-bold">{c.label}:</strong> <span className="text-gray-700">{c.text}</span>
                               </div>
                             </li>
                           ))}
                         </ul>
                       </div>
 
-                      <div className="bg-[#283474] text-white p-5 rounded-xl shadow-sm flex items-start gap-3.5">
-                        <span className="material-symbols-outlined text-[#f39200] text-3xl shrink-0 mt-0.5">emoji_events</span>
+                      <div className="bg-[#283474] text-white p-6 rounded-2xl shadow-sm flex items-start gap-4">
+                        <span className="material-symbols-outlined text-[#f39200] text-4xl shrink-0 mt-0.5">emoji_events</span>
                         <div>
-                          <h5 className="font-bold text-xs uppercase tracking-wider text-[#f39200]">¿Qué queremos reconocer?</h5>
-                          <p className="text-sm md:text-base font-semibold mt-0.5 text-white">{selectedAward.details.recognition}</p>
+                          <h5 className="font-black text-sm uppercase tracking-wider text-[#f39200] mb-1">¿Qué queremos reconocer?</h5>
+                          <p className="text-base md:text-lg font-bold text-white leading-relaxed">{selectedAward.details.recognition}</p>
                         </div>
                       </div>
                     </>
                   ) : (
-                    <div className="p-6 text-center text-gray-500 bg-gray-50 rounded-xl">
-                      <span className="material-symbols-outlined text-4xl text-gray-400 mb-2">pending</span>
-                      <p className="font-medium text-sm">Los criterios detallados de esta categoría serán publicados próximamente.</p>
+                    <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-xl">
+                      <span className="material-symbols-outlined text-5xl text-gray-400 mb-2">pending</span>
+                      <p className="font-medium text-base">Los criterios detallados de esta categoría serán publicados próximamente.</p>
                     </div>
                   )}
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-gray-100 text-right">
+                <div className="mt-8 pt-5 border-t border-gray-100 text-right">
                   <button
                     onClick={() => setSelectedAward(null)}
-                    className="px-6 py-2.5 bg-[#283474] hover:bg-[#1e2756] text-white font-bold rounded-lg transition-colors shadow-md text-sm"
+                    className="px-8 py-3 bg-[#283474] hover:bg-[#1e2756] text-white font-black text-base rounded-xl transition-colors shadow-md"
                   >
                     Entendido / Cerrar
                   </button>
