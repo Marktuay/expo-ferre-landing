@@ -734,7 +734,7 @@ export default function App() {
                   muted={isVideoMuted}
                   playsInline
                 >
-                  <source src="/presentacion-ia-karen.mp4" type="video/mp4" />
+                  <source src="/tallerexpoferre.mp4" type="video/mp4" />
                 </video>
                 <button
                   onClick={() => {
