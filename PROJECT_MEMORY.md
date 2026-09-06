@@ -429,3 +429,15 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   7. Tigo (`/oro/tigo.png` - `scale: 1.32`)
   8. JP Studio / Technology (`/oro/jp-studio-white.png`)
 
+### 🏆 Rediseño de Sección "Premios a la Excelencia" (`App.jsx`)
+- **Estructura:** Se ajustó la sección a **3 categorías** principales (`grid-cols-1 md:grid-cols-3`).
+- **Categoría 01 - FERRETERÍA FAMILIAR:**
+  - **Título:** `01. FERRETERÍA FAMILIAR`
+  - **Subtítulo:** `El negocio que se construye en familia.`
+  - **Resumen:** `Reconocemos a las ferreterías que han logrado convertir un negocio familiar en un legado compartido...`
+- **Interactividad (Popups & Modales):**
+  - **Desktop:** Al hacer hover sobre la tarjeta, aparece un **tooltip/popup flotante** (`group-hover:opacity-100`) mostrando un extracto rápido del propósito, a quién está dirigido y criterios clave.
+  - **Mobile y Clic:** Al hacer clic en cualquier tarjeta, se despliega un **Modal interactivo completo** (`selectedAward`) con la historia, propósito, público objetivo, lista completa de criterios de evaluación con íconos y el distintivo de reconocimiento.
+- **Categorías 02 y 03:** Dejadas con estado *"Próximamente..."* listas para ser pobladas cuando el usuario proporcione su información oficial.
+
+

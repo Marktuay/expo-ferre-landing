@@ -94,6 +94,7 @@ export default function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [toastMessage, setToastMessage] = useState(null);
+  const [selectedAward, setSelectedAward] = useState(null);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -966,44 +967,214 @@ export default function App() {
         </section>
 
         {/* Awards */}
-        <section id="awards" className="py-stack-lg px-margin-mobile container mx-auto overflow-hidden rounded-5px">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-stack-lg gap-4">
+        <section id="awards" className="py-16 px-margin-mobile container mx-auto my-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
             <div>
-              <h2 className="font-headline-lg text-headline-lg text-secondary">PREMIOS A LA EXCELENCIA</h2>
-              <p className="font-body-lg text-body-lg text-on-surface-variant">Reconocemos la trayectoria y calidad de los ferreteros de la región.</p>
+              <h2 className="font-headline-lg text-3xl md:text-4xl font-black text-[#283474] tracking-wide uppercase">PREMIOS A LA EXCELENCIA</h2>
+              <p className="font-body-lg text-base md:text-lg text-gray-600 mt-1">Reconocemos la trayectoria y calidad de los ferreteros de la región.</p>
             </div>
-            <span className="font-label-sm text-primary font-bold tracking-[0.3em]">RECONOCIMIENTO 2026</span>
+            <span className="font-label-sm text-[#8c4900] font-black tracking-[0.3em] uppercase text-sm">RECONOCIMIENTO 2026</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-gutter-sm">
-            <div className="relative group">
-              <div className="bg-surface border border-outline-variant p-6 pt-12 transition-all group-hover:bg-primary-container/10 rounded-5px">
-                <div className="absolute -top-4 left-6 w-12 h-12 bg-primary flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform rounded-5px">01</div>
-                <h4 className="font-headline-md text-headline-md text-on-background mb-2">Ferretero del Año</h4>
-                <p className="font-body-md text-body-md text-on-surface-variant">Al negocio con mayor crecimiento e impacto comunitario.</p>
+
+          {(() => {
+            const awardsData = [
+              {
+                id: '01',
+                title: 'FERRETERÍA FAMILIAR',
+                tagline: 'El negocio que se construye en familia.',
+                summary: 'Reconocemos a las ferreterías que han logrado convertir un negocio familiar en un legado compartido, donde generaciones, valores y relaciones construyen juntos el futuro de la empresa.',
+                details: {
+                  intro: 'No importa únicamente cuántos años tenga la empresa, sino la historia familiar que existe detrás de ella y cómo esa familia ha logrado mantener, evolucionar y fortalecer el negocio.',
+                  target: 'Ferreterías donde exista una participación activa de la familia en la dirección, gestión o desarrollo del negocio.',
+                  criteria: [
+                    { label: 'Participación familiar', text: 'presencia activa de padres, hijos, hermanos u otros miembros de la familia.' },
+                    { label: 'Segunda generación', text: 'incorporación de nuevas generaciones al negocio.' },
+                    { label: 'Continuidad empresarial', text: 'existencia de una visión de permanencia y futuro.' },
+                    { label: 'Valores familiares', text: 'principios y cultura que forman parte de la manera de hacer negocios.' },
+                    { label: 'Relación con la comunidad', text: 'vínculo, servicio y aporte a su entorno.' },
+                    { label: 'Historia y legado', text: 'una trayectoria construida alrededor de la familia y el negocio.' }
+                  ],
+                  recognition: 'Una familia que no solamente heredó un negocio, sino que decidió hacerlo crecer.'
+                }
+              },
+              {
+                id: '02',
+                title: 'Categoría 02',
+                tagline: 'Próximamente...',
+                summary: 'La información y criterios de evaluación de esta categoría serán publicados próximamente.',
+                details: null
+              },
+              {
+                id: '03',
+                title: 'Categoría 03',
+                tagline: 'Próximamente...',
+                summary: 'La información y criterios de evaluación de esta categoría serán publicados próximamente.',
+                details: null
+              }
+            ];
+
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                {awardsData.map((award) => (
+                  <div 
+                    key={award.id} 
+                    className="relative group cursor-pointer"
+                    onClick={() => setSelectedAward(award)}
+                  >
+                    <div className="bg-white border border-gray-200/90 p-6 pt-10 rounded-2xl transition-all duration-300 group-hover:border-[#f39200] group-hover:shadow-2xl relative min-h-[240px] flex flex-col justify-between hover:-translate-y-1">
+                      <div className="absolute -top-4 left-6 px-4 py-1.5 bg-[#8c4900] text-white font-black text-sm rounded-lg shadow-md group-hover:bg-[#f39200] transition-colors">
+                        {award.id}
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black text-[#1e293b] mb-1 group-hover:text-[#283474] transition-colors">
+                          {award.title}
+                        </h3>
+                        <p className="text-sm font-bold text-[#8c4900] mb-3 group-hover:text-[#f39200] transition-colors">
+                          {award.tagline}
+                        </p>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          {award.summary}
+                        </p>
+                      </div>
+
+                      <div className="mt-6 pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-black text-[#8c4900] group-hover:text-[#f39200] transition-colors">
+                        <span className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-base">info</span> Ver información completa
+                        </span>
+                        <span className="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                      </div>
+                    </div>
+
+                    {/* Hover Tooltip Popup (Desktop Hover) */}
+                    {award.details && (
+                      <div className="hidden lg:block opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 absolute left-0 top-full mt-3 w-full z-50 pointer-events-none group-hover:pointer-events-auto">
+                        <div className="bg-white text-slate-800 p-6 rounded-2xl shadow-2xl border border-gray-200 backdrop-blur-lg relative">
+                          <div className="absolute -top-3 left-10 w-5 h-5 bg-white rotate-45 border-t border-l border-gray-200"></div>
+                          
+                          <div className="flex items-center justify-between border-b border-gray-100 pb-2.5 mb-3">
+                            <div className="flex items-center gap-2">
+                              <span className="bg-[#8c4900] text-white text-xs font-black px-2.5 py-0.5 rounded-md">{award.id}</span>
+                              <h4 className="font-black text-[#283474] text-base">{award.title}</h4>
+                            </div>
+                            <span className="text-[11px] text-[#f39200] font-bold">Haz clic para ver más</span>
+                          </div>
+
+                          <p className="text-xs text-gray-700 mb-3 italic font-medium bg-amber-50/80 p-2.5 rounded-lg border border-amber-100/80">
+                            "{award.details.intro}"
+                          </p>
+
+                          <div className="text-xs space-y-1 mb-3">
+                            <p className="font-bold text-[#8c4900]">¿A quién está dirigido?</p>
+                            <p className="text-gray-600 leading-snug">{award.details.target}</p>
+                          </div>
+
+                          {award.details.criteria && (
+                            <div className="text-xs space-y-1">
+                              <p className="font-bold text-[#8c4900]">Criterios clave:</p>
+                              <ul className="space-y-1 pl-1">
+                                {award.details.criteria.slice(0, 3).map((c, i) => (
+                                  <li key={i} className="flex items-start gap-1.5 text-gray-600 text-[11px]">
+                                    <span className="text-[#f39200] font-bold">•</span>
+                                    <span><strong className="text-gray-800">{c.label}:</strong> {c.text}</span>
+                                  </li>
+                                ))}
+                                {award.details.criteria.length > 3 && (
+                                  <li className="text-[11px] text-[#8c4900] font-bold pt-0.5">
+                                    + {award.details.criteria.length - 3} criterios más...
+                                  </li>
+                                )}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+
+          {/* Modal Overlay for Full Details (Click / Mobile) */}
+          {selectedAward && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+              <div className="bg-white text-[#1e293b] rounded-2xl max-w-2xl w-full p-6 md:p-8 max-h-[90vh] overflow-y-auto shadow-2xl relative border border-gray-100">
+                <button 
+                  onClick={() => setSelectedAward(null)}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 p-2 rounded-full transition-colors flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-xl">close</span>
+                </button>
+
+                <div className="inline-block bg-[#8c4900] text-white font-black px-3.5 py-1 rounded-lg text-xs tracking-wider uppercase mb-3 shadow-sm">
+                  Categoría {selectedAward.id}
+                </div>
+
+                <h3 className="text-2xl md:text-3xl font-black text-[#283474] mb-1">
+                  {selectedAward.title}
+                </h3>
+                <p className="text-base md:text-lg font-bold text-[#8c4900] mb-4 italic">
+                  "{selectedAward.tagline}"
+                </p>
+
+                <div className="space-y-5 text-gray-700 leading-relaxed border-t border-gray-100 pt-4">
+                  <p className="font-medium text-base bg-amber-50/80 p-4 rounded-xl border border-amber-100 text-amber-950">
+                    {selectedAward.summary}
+                  </p>
+
+                  {selectedAward.details ? (
+                    <>
+                      <div>
+                        <h4 className="font-bold text-xs uppercase tracking-wider text-[#8c4900] mb-1">Historia y Propósito</h4>
+                        <p className="text-gray-700 text-sm md:text-base leading-relaxed">{selectedAward.details.intro}</p>
+                      </div>
+
+                      <div>
+                        <h4 className="font-bold text-xs uppercase tracking-wider text-[#8c4900] mb-1">¿A quién está dirigido?</h4>
+                        <p className="text-gray-700 text-sm md:text-base leading-relaxed">{selectedAward.details.target}</p>
+                      </div>
+
+                      <div>
+                        <h4 className="font-bold text-xs uppercase tracking-wider text-[#8c4900] mb-2.5">Criterios de evaluación</h4>
+                        <ul className="grid grid-cols-1 gap-2.5 text-sm">
+                          {selectedAward.details.criteria.map((c, idx) => (
+                            <li key={idx} className="flex items-start gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                              <span className="material-symbols-outlined text-[#8c4900] text-xl mt-0.5 shrink-0">verified</span>
+                              <div>
+                                <strong className="text-gray-900 font-bold">{c.label}:</strong> <span className="text-gray-600">{c.text}</span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="bg-[#283474] text-white p-5 rounded-xl shadow-sm flex items-start gap-3.5">
+                        <span className="material-symbols-outlined text-[#f39200] text-3xl shrink-0 mt-0.5">emoji_events</span>
+                        <div>
+                          <h5 className="font-bold text-xs uppercase tracking-wider text-[#f39200]">¿Qué queremos reconocer?</h5>
+                          <p className="text-sm md:text-base font-semibold mt-0.5 text-white">{selectedAward.details.recognition}</p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="p-6 text-center text-gray-500 bg-gray-50 rounded-xl">
+                      <span className="material-symbols-outlined text-4xl text-gray-400 mb-2">pending</span>
+                      <p className="font-medium text-sm">Los criterios detallados de esta categoría serán publicados próximamente.</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-gray-100 text-right">
+                  <button
+                    onClick={() => setSelectedAward(null)}
+                    className="px-6 py-2.5 bg-[#283474] hover:bg-[#1e2756] text-white font-bold rounded-lg transition-colors shadow-md text-sm"
+                  >
+                    Entendido / Cerrar
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="relative group">
-              <div className="bg-surface border border-outline-variant p-6 pt-12 transition-all group-hover:bg-primary-container/10 rounded-5px">
-                <div className="absolute -top-4 left-6 w-12 h-12 bg-primary flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform rounded-5px">02</div>
-                <h4 className="font-headline-md text-headline-md text-on-background mb-2">Innovación Digital</h4>
-                <p className="font-body-md text-body-md text-on-surface-variant">Mejor implementación de e-commerce y pagos digitales.</p>
-              </div>
-            </div>
-            <div className="relative group">
-              <div className="bg-surface border border-outline-variant p-6 pt-12 transition-all group-hover:bg-primary-container/10 rounded-5px">
-                <div className="absolute -top-4 left-6 w-12 h-12 bg-primary flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform rounded-5px">03</div>
-                <h4 className="font-headline-md text-headline-md text-on-background mb-2">Trayectoria Oro</h4>
-                <p className="font-body-md text-body-md text-on-surface-variant">Premio a ferreterías con más de 25 años en el mercado.</p>
-              </div>
-            </div>
-            <div className="relative group">
-              <div className="bg-surface border border-outline-variant p-6 pt-12 transition-all group-hover:bg-primary-container/10 rounded-5px">
-                <div className="absolute -top-4 left-6 w-12 h-12 bg-primary flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform rounded-5px">04</div>
-                <h4 className="font-headline-md text-headline-md text-on-background mb-2">Sostenibilidad</h4>
-                <p className="font-body-md text-body-md text-on-surface-variant">Mejores prácticas de manejo de residuos y eficiencia.</p>
-              </div>
-            </div>
-          </div>
+          )}
         </section>
 
         {/* Location & Footer Info */}
