@@ -430,6 +430,7 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   8. JP Studio / Technology (`/oro/jp-studio-white.png`)
 
 ### 🏆 Rediseño de Sección "Premios a la Excelencia" (`App.jsx`)
+**Última actualización: 06 de Septiembre de 2026**
 - **Estructura:** Se ajustó la sección a **3 categorías** principales (`grid-cols-1 md:grid-cols-3`).
 - **Categoría 01 - FERRETERÍA FAMILIAR:**
   - **Título:** `01. FERRETERÍA FAMILIAR`
@@ -443,9 +444,11 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - **Título:** `03. FERRETERÍA PROMESA`
   - **Subtítulo:** `El futuro de la industria comienza con quienes se atreven a construirlo.`
   - **Resumen:** Reconocimiento a ferreterías jóvenes (menos de 5 años) o en proceso de transformación con visión, innovación y alto potencial de crecimiento.
-- **Interactividad (Popups & Modales):**
-  - **Desktop:** Al hacer hover sobre cualquiera de las 3 tarjetas, aparece un **tooltip/popup flotante** (`group-hover:opacity-100`) mostrando un extracto rápido del propósito, a quién está dirigido y criterios clave.
-  - **Mobile y Clic:** Al hacer clic en cualquier tarjeta, se despliega un **Modal interactivo completo** (`selectedAward`) con la historia, propósito, público objetivo, lista completa de 6-7 criterios de evaluación con íconos y el distintivo de reconocimiento.
+- **Interactividad & Tipografía:**
+  - **Ampliación Tipográfica:** Se incrementaron significativamente los tamaños de letra en las tarjetas (`text-2xl` para títulos, `text-base` para descripciones y subtítulos), tooltips flotantes (`text-[#283474] text-lg font-black`) y modales (`text-3xl/4xl` en encabezados y `text-base/lg` en criterios y párrafos explicativos) para garantizar legibilidad óptima y jerarquía visual.
+  - **Desktop (Hover Popup):** Al hacer hover sobre cualquiera de las 3 tarjetas, aparece un **tooltip/popup flotante** (`group-hover:opacity-100`) mostrando un extracto rápido del propósito, a quién está dirigido y criterios clave.
+  - **Mobile y Clic (Modal Interactivo):** Al hacer clic en cualquier tarjeta, se despliega un **Modal interactivo completo** (`selectedAward`) con la historia, propósito, público objetivo, lista completa de 6-7 criterios de evaluación con íconos y el distintivo de reconocimiento.
+
 
 
 
