@@ -434,10 +434,18 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Categoría 01 - FERRETERÍA FAMILIAR:**
   - **Título:** `01. FERRETERÍA FAMILIAR`
   - **Subtítulo:** `El negocio que se construye en familia.`
-  - **Resumen:** `Reconocemos a las ferreterías que han logrado convertir un negocio familiar en un legado compartido...`
+  - **Resumen:** Reconocimiento a ferreterías familiares con legado compartido y participación de generaciones.
+- **Categoría 02 - FERRETERÍA ORO:**
+  - **Título:** `02. FERRETERÍA ORO`
+  - **Subtítulo:** `25+ años construyendo historia.`
+  - **Resumen:** Reconocimiento a ferreterías con 25 años o más de operación continua, capacidad de evolución y confianza construida en el sector.
+- **Categoría 03 - FERRETERÍA PROMESA:**
+  - **Título:** `03. FERRETERÍA PROMESA`
+  - **Subtítulo:** `El futuro de la industria comienza con quienes se atreven a construirlo.`
+  - **Resumen:** Reconocimiento a ferreterías jóvenes (menos de 5 años) o en proceso de transformación con visión, innovación y alto potencial de crecimiento.
 - **Interactividad (Popups & Modales):**
-  - **Desktop:** Al hacer hover sobre la tarjeta, aparece un **tooltip/popup flotante** (`group-hover:opacity-100`) mostrando un extracto rápido del propósito, a quién está dirigido y criterios clave.
-  - **Mobile y Clic:** Al hacer clic en cualquier tarjeta, se despliega un **Modal interactivo completo** (`selectedAward`) con la historia, propósito, público objetivo, lista completa de criterios de evaluación con íconos y el distintivo de reconocimiento.
-- **Categorías 02 y 03:** Dejadas con estado *"Próximamente..."* listas para ser pobladas cuando el usuario proporcione su información oficial.
+  - **Desktop:** Al hacer hover sobre cualquiera de las 3 tarjetas, aparece un **tooltip/popup flotante** (`group-hover:opacity-100`) mostrando un extracto rápido del propósito, a quién está dirigido y criterios clave.
+  - **Mobile y Clic:** Al hacer clic en cualquier tarjeta, se despliega un **Modal interactivo completo** (`selectedAward`) con la historia, propósito, público objetivo, lista completa de 6-7 criterios de evaluación con íconos y el distintivo de reconocimiento.
+
 
 

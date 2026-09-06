@@ -999,17 +999,42 @@ export default function App() {
               },
               {
                 id: '02',
-                title: 'Categoría 02',
-                tagline: 'Próximamente...',
-                summary: 'La información y criterios de evaluación de esta categoría serán publicados próximamente.',
-                details: null
+                title: 'FERRETERÍA ORO',
+                tagline: '25+ años construyendo historia.',
+                summary: 'Un reconocimiento a las ferreterías que han convertido la trayectoria, la confianza y la capacidad de evolucionar en parte de su legado. Celebramos 25 años o más de historia vigentes en el mercado.',
+                details: {
+                  intro: 'Porque permanecer no es simplemente resistir al paso del tiempo. Es evolucionar, reinventarse y seguir construyendo. 25 años no son solamente trayectoria: son confianza construida.',
+                  target: 'Ferreterías con 25 años o más de operación, independientemente de su tamaño o modelo de negocio.',
+                  criteria: [
+                    { label: 'Trayectoria', text: '25+ años de existencia y operación continua.' },
+                    { label: 'Permanencia', text: 'capacidad de mantenerse y consolidarse a través del tiempo.' },
+                    { label: 'Evolución', text: 'adaptación a los cambios del mercado y las nuevas necesidades de los clientes.' },
+                    { label: 'Reputación', text: 'reconocimiento y confianza construida dentro de su comunidad.' },
+                    { label: 'Fidelidad de clientes', text: 'relaciones comerciales sostenidas a lo largo de los años.' },
+                    { label: 'Aporte al sector', text: 'contribución al crecimiento y fortalecimiento de la industria ferretera.' }
+                  ],
+                  recognition: 'No solamente los años cumplidos, sino todo lo que una empresa ha construido durante esos años. Miles de clientes, relaciones, decisiones, desafíos y aprendizajes.'
+                }
               },
               {
                 id: '03',
-                title: 'Categoría 03',
-                tagline: 'Próximamente...',
-                summary: 'La información y criterios de evaluación de esta categoría serán publicados próximamente.',
-                details: null
+                title: 'FERRETERÍA PROMESA',
+                tagline: 'El futuro de la industria comienza con quienes se atreven a construirlo.',
+                summary: 'Reconoce a aquellas ferreterías que están demostrando un potencial extraordinario para convertirse en referentes. Buscamos a la empresa que está haciendo las cosas diferente, creciendo e innovando.',
+                details: {
+                  intro: 'No buscamos solamente a la ferretería más nueva. Buscamos a esa empresa que está haciendo las cosas diferente, que está creciendo, innovando, profesionalizándose y marcando una nueva dirección.',
+                  target: 'Ferreterías jóvenes o nuevos negocios en proceso de transformación que estén demostrando visión, crecimiento, innovación y potencial de liderazgo dentro del sector.',
+                  criteria: [
+                    { label: 'Antigüedad', text: 'menos de 5 años en el mercado nicaragüense.' },
+                    { label: 'Crecimiento', text: 'crecimiento visible y sostenido año tras año.' },
+                    { label: 'Expansión', text: 'aumento de puntos de venta, cobertura, productos o servicios.' },
+                    { label: 'Reputación', text: 'percepción positiva y reconocimiento dentro del mercado.' },
+                    { label: 'Posicionamiento', text: 'presencia y reconocimiento alcanzado en poco tiempo.' },
+                    { label: 'Innovación', text: 'formas nuevas o diferentes de hacer negocio.' },
+                    { label: 'Impacto', text: 'reconocimiento y valor que genera en clientes, proveedores y comunidad.' }
+                  ],
+                  recognition: 'Una ferretería que todavía está escribiendo su historia, pero que ya está demostrando que tiene todo para convertirse en referente. Hoy es una promesa. Mañana puede ser parte de la historia.'
+                }
               }
             ];
 
