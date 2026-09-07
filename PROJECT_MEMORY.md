@@ -449,11 +449,11 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - **Desktop (Hover Popup):** Al hacer hover sobre cualquiera de las 3 tarjetas, aparece un **tooltip/popup flotante** (`group-hover:opacity-100`) mostrando un extracto rápido del propósito, a quién está dirigido y criterios clave.
   - **Mobile y Clic (Modal Interactivo):** Al hacer clic en cualquier tarjeta, se despliega un **Modal interactivo completo** (`selectedAward`) con la historia, propósito, público objetivo, lista completa de 6-7 criterios de evaluación con íconos y el distintivo de reconocimiento.
 
-### 🎬 Actualización y Ajuste de Video Hero (`App.jsx`)
-- **Video del Hero:** Se actualizó la etiqueta `<source>` para reproducir `/tallerexpoferre1.mp4`.
-- **Evaluación de Peso:** El archivo comprimido `tallerexpoferre1.mp4` pesa **44 MB** (reducido significativamente de los 199 MB originales, logrando una reducción del 78% en consumo de ancho de banda).
-- **Recorte de Franjas Negras Internas & Formato Smartphone 9:16:** El video MP4 fue exportado originalmente en lienzo horizontal 16:9 con barras negras laterales incrustadas en los píxeles del archivo. Se implementó una solución CSS avanzada combinando un contenedor vertical `aspect-[9/16]` con `scale-[1.78]` y `object-cover` que recorta las franjas negras incrustadas por completo.
-- **Reducción del 30% en Tamaño:** Se ajustaron las dimensiones del reproductor a `w-[200px] sm:w-[240px] md:w-[270px] lg:w-[300px] aspect-[9/16]` para ofrecer una escala compacta, equilibrada y alineada con la sección Hero.
+### 🎬 Actualización de Video Hero (`App.jsx`)
+- **Video del Hero:** Se reemplazó la fuente del video para reproducir `/expo-ferre-2026.mp4`.
+- **Evaluación de Peso:** El archivo `expo-ferre-2026.mp4` pesa **73 MB**.
+- **Contenedor Adaptativo:** Se reconfiguró el marco en `App.jsx` (`w-full max-w-lg md:max-w-xl` con `border-2 border-[#f39200]`) para adaptar automáticamente el diseño a la relación de aspecto limpia del nuevo video sin zooms ni recortes artificiales.
+
 
 
 

@@ -725,16 +725,16 @@ export default function App() {
               </div>
             </div>
             <div className="lg:col-span-5 flex justify-center items-center">
-              <div className="relative border-4 border-[#f39200] hard-shadow-orange rounded-3xl overflow-hidden shadow-2xl bg-black w-[200px] sm:w-[240px] md:w-[270px] lg:w-[300px] aspect-[9/16]">
+              <div className="bg-black/90 backdrop-blur-sm border-2 border-[#f39200] hard-shadow-orange rounded-2xl overflow-hidden relative flex items-center justify-center shadow-2xl w-full max-w-lg md:max-w-xl">
                 <video 
                   ref={videoRef}
-                  className="w-full h-full object-cover scale-[1.78] rounded-2xl" 
+                  className="w-full h-auto object-cover rounded-2xl" 
                   autoPlay 
                   loop 
                   muted={isVideoMuted}
                   playsInline
                 >
-                  <source src="/tallerexpoferre1.mp4" type="video/mp4" />
+                  <source src="/expo-ferre-2026.mp4" type="video/mp4" />
                 </video>
                 <button
                   onClick={() => {
@@ -743,9 +743,9 @@ export default function App() {
                       setIsVideoMuted(videoRef.current.muted);
                     }
                   }}
-                  className="absolute bottom-4 right-4 bg-black/70 hover:bg-black text-white p-3 rounded-full transition-colors flex items-center justify-center z-20 shadow-lg border border-white/20"
+                  className="absolute bottom-3 right-3 bg-black/70 hover:bg-black text-white p-2.5 rounded-full transition-colors flex items-center justify-center z-20 shadow-lg border border-white/20"
                 >
-                  <span className="material-symbols-outlined text-lg">
+                  <span className="material-symbols-outlined text-base">
                     {isVideoMuted ? 'volume_off' : 'volume_up'}
                   </span>
                 </button>
