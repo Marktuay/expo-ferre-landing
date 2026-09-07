@@ -724,11 +724,11 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="bg-[#d9d9d9]/80 backdrop-blur-sm border border-outline-variant hard-shadow-orange rounded-5px overflow-hidden relative flex items-center justify-center shadow-2xl w-[60%] min-w-[200px]">
+            <div className="lg:col-span-5 flex justify-center items-center">
+              <div className="bg-black/90 backdrop-blur-sm border-2 border-[#f39200] hard-shadow-orange rounded-2xl overflow-hidden relative flex items-center justify-center shadow-2xl w-full max-w-lg md:max-w-xl">
                 <video 
                   ref={videoRef}
-                  className="w-full h-auto object-contain" 
+                  className="w-full h-auto object-cover rounded-2xl" 
                   autoPlay 
                   loop 
                   muted={isVideoMuted}
@@ -743,9 +743,9 @@ export default function App() {
                       setIsVideoMuted(videoRef.current.muted);
                     }
                   }}
-                  className="absolute bottom-2 right-2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors flex items-center justify-center z-20 shadow-md"
+                  className="absolute bottom-3 right-3 bg-black/70 hover:bg-black text-white p-2.5 rounded-full transition-colors flex items-center justify-center z-20 shadow-lg border border-white/20"
                 >
-                  <span className="material-symbols-outlined text-sm">
+                  <span className="material-symbols-outlined text-base">
                     {isVideoMuted ? 'volume_off' : 'volume_up'}
                   </span>
                 </button>
