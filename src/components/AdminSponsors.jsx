@@ -86,11 +86,17 @@ export default function AdminSponsors({ onBack }) {
       // 2. Fusionar cuentas de usuarios registrados
       userResults.forEach(u => {
         let matchKey = u.id;
-        const uComp = (u.empresa || u.company || u.nombre || '').toLowerCase();
+        const uComp = (u.empresa || u.company || u.nombre || '').toLowerCase().trim();
+        const uEmail = (u.correo || u.email || '').toLowerCase().trim();
         
         for (const [key, item] of combinedMap.entries()) {
-          const itemComp = (item.empresa || item.company || item.nombre || '').toLowerCase();
-          if (itemComp && uComp && (itemComp.includes(uComp) || uComp.includes(itemComp))) {
+          const itemComp = (item.empresa || item.company || item.nombre || '').toLowerCase().trim();
+          const itemEmail = (item.correo || item.email || '').toLowerCase().trim();
+
+          const emailMatch = Boolean(uEmail && itemEmail && (uEmail === itemEmail));
+          const compMatch = Boolean(uComp.length > 0 && itemComp.length > 0 && (itemComp === uComp || itemComp.includes(uComp) || uComp.includes(itemComp)));
+
+          if (emailMatch || compMatch) {
             matchKey = key;
             break;
           }
@@ -108,20 +114,22 @@ export default function AdminSponsors({ onBack }) {
       // 3. Fusionar información de estands reservados
       standResults.forEach(st => {
         let match = null;
-        const stComp = (st.reservationDetails?.empresa || st.company || st.empresa || '').toLowerCase();
-        const stEmail = (st.reservationDetails?.correo || st.sponsorEmail || st.email || '').toLowerCase();
+        const stComp = (st.reservationDetails?.empresa || st.company || st.empresa || '').toLowerCase().trim();
+        const stEmail = (st.reservationDetails?.correo || st.sponsorEmail || st.email || '').toLowerCase().trim();
         const stContact = st.reservationDetails?.nombre ? `${st.reservationDetails.nombre} ${st.reservationDetails.apellido || ''}`.trim() : (st.contactName || st.contact || '');
         const stPhone = st.reservationDetails?.telefono || st.phone || '';
         const companyName = st.reservationDetails?.empresa || st.company || st.empresa || '';
+        const standName = st.name || (st.id ? `Stand ${st.id.replace('stand-', '')}` : 'Stand');
 
         for (const [key, item] of combinedMap.entries()) {
-          const itemEmail = (item.correo || item.email || '').toLowerCase();
-          const itemComp = (item.empresa || item.company || item.nombre || '').toLowerCase();
+          const itemEmail = (item.correo || item.email || '').toLowerCase().trim();
+          const itemComp = (item.empresa || item.company || item.nombre || '').toLowerCase().trim();
 
-          const emailMatch = stEmail && (itemEmail === stEmail || key === st.sponsorId);
-          const compMatch = stComp && itemComp && (itemComp.includes(stComp) || stComp.includes(itemComp));
+          const idMatch = Boolean(st.sponsorId && (key === st.sponsorId || item.id === st.sponsorId));
+          const emailMatch = Boolean(stEmail && itemEmail && (itemEmail === stEmail || key === st.sponsorId));
+          const compMatch = Boolean(stComp.length > 0 && itemComp.length > 0 && (itemComp === stComp || itemComp.includes(stComp) || stComp.includes(itemComp)));
 
-          if (emailMatch || compMatch) {
+          if (idMatch || emailMatch || compMatch) {
             match = item;
             break;
           }
@@ -129,7 +137,7 @@ export default function AdminSponsors({ onBack }) {
 
         if (match) {
           if (!match.standList) match.standList = [];
-          if (!match.standList.includes(st.name)) match.standList.push(st.name);
+          if (standName && !match.standList.includes(standName)) match.standList.push(standName);
           if (st.logo) match.logo = st.logo;
           if (companyName && companyName.trim()) match.empresa = companyName.trim();
           if (stEmail && (match.correo === 'Patrocinador Oficial' || !match.correo)) match.correo = stEmail;
@@ -146,11 +154,18 @@ export default function AdminSponsors({ onBack }) {
             telefono: stPhone || 'N/A',
             status: 'approved',
             createdAt: st.updatedAt?.toDate() || new Date(),
-            standList: [st.name],
+            standList: [standName],
             logo: st.logo
           });
         }
       });
+
+      // Asegurar que todos los standList estén limpios de valores falsy
+      for (const item of combinedMap.values()) {
+        if (item.standList) {
+          item.standList = item.standList.filter(Boolean);
+        }
+      }
 
       const finalResults = Array.from(combinedMap.values());
       finalResults.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));

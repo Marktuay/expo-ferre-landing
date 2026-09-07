@@ -98,7 +98,14 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 05 de Septiembre de 2026**
+**Última actualización: 07 de Septiembre de 2026**
+
+- **Filtrado de Stands y Edición de Patrocinadores en Vista 360 (`AdminSponsorDetails.jsx` & `AdminSponsors.jsx`):**
+  - **Corrección de Nombres y Cantidad de Stands en Directorio:** Se corrigió la función `updateCombined` en `AdminSponsors.jsx` para extraer de forma segura el nombre del estand (`standName = st.name || 'Stand ' + st.id`) y purgar elementos nulos en `standList`. Esto resolvió las etiquetas vacías `[  ]` que aparecían en la tabla para William Herrera (Sinsa), Sherwin-Williams, Megalineas, Grupo SUR, MIDESA, etc., mostrando ahora de forma precisa los nombres (ej. `Stand 1`, `Stand 2`) y la cantidad de estands reservados.
+  - **Corrección de Stands Reservados (Vista 360):** Se ajustó la consulta y filtro de `unsubStands` para verificar explícitamente que los estands tengan estatus reservado/vendido (`reserved`, `reserved_official`, `sold`) y prevenir comparaciones vacías con `.includes("")`. Ahora la Vista 360 muestra de forma exclusiva los estands que pertenecen al patrocinador seleccionado.
+  - **Edición de Información de Contacto, Password y Notificación por Correo:** Se agregó el botón de **"✏️ Editar Información"** y un modal dinámico para modificar los datos del patrocinador (Empresa, Nombre del contacto, Apellido, Correo Electrónico, Teléfono y **Contraseña / Password**). Al guardar:
+    1. Se actualizan las colecciones `users` y `events/2026/stands` en Firestore.
+    2. Se inyecta un documento en la colección `mail` (Trigger Email) para notificar automáticamente al nuevo usuario/contacto con sus datos y credenciales de acceso (Usuario/Correo y Contraseña).
 
 - **Fondo Blanco para Logo de Sherwin Williams en Categoría Plata (`App.jsx`):**
   - Se habilitó la propiedad `bgWhite: true` para la tarjeta del logo de **Sherwin-Williams** (`/plata/logo-sherwin-williams.jpg`), garantizando que se renderice con un contenedor blanco brillante de contraste consistente igual al resto de marcas.
