@@ -725,7 +725,7 @@ export default function App() {
               </div>
             </div>
             <div className="lg:col-span-5 flex justify-center items-center">
-              <div className="relative border-4 border-[#f39200] hard-shadow-orange rounded-3xl overflow-hidden shadow-2xl bg-black w-[280px] sm:w-[340px] md:w-[380px] lg:w-[420px] aspect-[9/16]">
+              <div className="relative border-4 border-[#f39200] hard-shadow-orange rounded-3xl overflow-hidden shadow-2xl bg-black w-[200px] sm:w-[240px] md:w-[270px] lg:w-[300px] aspect-[9/16]">
                 <video 
                   ref={videoRef}
                   className="w-full h-full object-cover scale-[1.78] rounded-2xl" 
