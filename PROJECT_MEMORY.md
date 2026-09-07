@@ -452,7 +452,8 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 ### 🎬 Actualización y Ajuste de Video Hero (`App.jsx`)
 - **Video del Hero:** Se actualizó la etiqueta `<source>` para reproducir `/tallerexpoferre1.mp4`.
 - **Evaluación de Peso:** El archivo comprimido `tallerexpoferre1.mp4` pesa **44 MB** (reducido significativamente de los 199 MB originales, logrando una reducción del 78% en consumo de ancho de banda).
-- **Ajuste de Marco Vertical y Aumento del +50% en Tamaño:** Se configuró el contenedor con `inline-block` y `border-4 border-[#f39200]` para que el marco naranja se adapte **100% ajustado al borde real de la relación vertical (9:16) del video**, eliminando por completo todas las barras negras laterales. Asimismo, se incrementó la altura del video en un 50% más (`h-[480px] sm:h-[550px] md:h-[620px] lg:h-[680px]`), logrando una presencia destacada y tipo tarjeta de teléfono en el Hero.
+- **Recorte de Franjas Negras Internas & Formato Smartphone 9:16:** El video MP4 fue exportado originalmente en lienzo horizontal 16:9 con barras negras laterales incrustadas en los píxeles del archivo. Se implementó una solución CSS avanzada combinando un contenedor vertical `aspect-[9/16]` (`lg:w-[420px]`) con `scale-[1.78]` y `object-cover`. Esto amplía la imagen exactamente lo necesario para recortar las franjas negras incrustadas por completo, haciendo que el marco naranja bordee el encuadre real del video y aumentando el tamaño en pantalla un 50% más.
+
 
 
 

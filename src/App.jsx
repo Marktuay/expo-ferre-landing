@@ -725,10 +725,10 @@ export default function App() {
               </div>
             </div>
             <div className="lg:col-span-5 flex justify-center items-center">
-              <div className="relative inline-block border-4 border-[#f39200] hard-shadow-orange rounded-3xl overflow-hidden shadow-2xl bg-black">
+              <div className="relative border-4 border-[#f39200] hard-shadow-orange rounded-3xl overflow-hidden shadow-2xl bg-black w-[280px] sm:w-[340px] md:w-[380px] lg:w-[420px] aspect-[9/16]">
                 <video 
                   ref={videoRef}
-                  className="h-[480px] sm:h-[550px] md:h-[620px] lg:h-[680px] w-auto max-w-full object-contain block rounded-2xl" 
+                  className="w-full h-full object-cover scale-[1.78] rounded-2xl" 
                   autoPlay 
                   loop 
                   muted={isVideoMuted}
