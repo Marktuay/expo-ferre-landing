@@ -450,8 +450,9 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - **Mobile y Clic (Modal Interactivo):** Al hacer clic en cualquier tarjeta, se despliega un **Modal interactivo completo** (`selectedAward`) con la historia, propósito, público objetivo, lista completa de 6-7 criterios de evaluación con íconos y el distintivo de reconocimiento.
 
 ### 🎬 Actualización de Video Hero (`App.jsx`)
-- **Video del Hero:** Se actualizó la etiqueta `<source>` para reproducir `/tallerexpoferre.mp4`.
-- **Evaluación de Peso:** El nuevo archivo `tallerexpoferre.mp4` pesa **199 MB** (el anterior `presentacion-ia-karen.mp4` pesaba 4.5 MB). Se recomienda comprimir este video a una resolución/bitrate optimizada para la web (~10 MB - 15 MB) para no penalizar la velocidad de carga en dispositivos móviles.
+- **Video del Hero:** Se actualizó la etiqueta `<source>` para reproducir `/tallerexpoferre1.mp4`.
+- **Evaluación de Peso:** El archivo comprimido `tallerexpoferre1.mp4` pesa **44 MB** (reducido significativamente de los 199 MB originales, logrando una reducción del 78% en consumo de ancho de banda).
+
 
 
 
