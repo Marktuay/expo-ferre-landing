@@ -768,7 +768,7 @@ export default function App() {
 
             <div className="flex flex-col gap-8 mb-8">
               <FadeIn direction="up">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="flex flex-col gap-8">
                   <div className="space-y-6 text-lg text-[#283474] font-medium bg-white p-8 md:p-10 rounded-xl shadow-sm border border-gray-100 w-full flex flex-col justify-center">
                     <p className="leading-relaxed">
                       <strong className="font-black">EXPO FERRE</strong> nace como la primera plataforma especializada del sector ferretero en Nicaragua para crear negocios, fortalecer, conectar y modernizar la industria a través de un espacio de alto nivel enfocado en la innovación, el comercio y las relaciones estratégicas.
@@ -780,8 +780,8 @@ export default function App() {
                       <strong className="font-black">EXPO FERRE</strong> impulsará oportunidades reales de posicionamiento, expansión comercial, generación de alianzas y conexión directa entre marcas y compradores estratégicos del sector.
                     </p>
                   </div>
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex items-center justify-center p-2">
-                    <img src="/map-expo-ferre-140826.svg" alt="Mapa de Expo Ferre" className="w-full h-auto object-contain max-h-[600px] hover:scale-105 transition-transform duration-300" />
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex items-center justify-center p-0 md:p-2 min-h-[350px] md:min-h-[500px]">
+                    <InteractiveMap showHeader={false} />
                   </div>
                 </div>
               </FadeIn>
