@@ -627,7 +627,7 @@ export default function App() {
                                       <img 
                                         src={logo.url} 
                                         alt={`Sponsor Diamante ${index}`} 
-                                        className="max-w-full max-h-full object-contain drop-shadow-lg" 
+                                        className="max-w-full max-h-full object-contain drop-shadow-lg" loading="lazy" 
                                         style={logo.scale ? { transform: `scale(${logo.scale})` } : undefined}
                                       />
                                     </div>
@@ -649,7 +649,7 @@ export default function App() {
                                       <img 
                                         src={logo.url} 
                                         alt={`Sponsor Oro ${index}`} 
-                                        className="max-w-full max-h-full object-contain drop-shadow-lg" 
+                                        className="max-w-full max-h-full object-contain drop-shadow-lg" loading="lazy" 
                                         style={logo.scale ? { transform: `scale(${logo.scale})` } : undefined}
                                       />
                                     </div>
@@ -671,7 +671,7 @@ export default function App() {
                                       <img 
                                         src={logo.url} 
                                         alt={`Sponsor Plata ${index}`} 
-                                        className="max-w-full max-h-full object-contain drop-shadow-lg" 
+                                        className="max-w-full max-h-full object-contain drop-shadow-lg" loading="lazy" 
                                         style={logo.scale ? { transform: `scale(${logo.scale})` } : undefined}
                                       />
                                     </div>
@@ -781,7 +781,7 @@ export default function App() {
                     </p>
                   </div>
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex items-center justify-center p-2">
-                    <img src="/mapahome.png" alt="Plano de Stands Expo Ferre" className="w-full h-auto object-contain max-h-[700px] hover:scale-[1.02] transition-transform duration-300" />
+                    <img src="/mapahome.png" alt="Plano de Stands Expo Ferre" loading="lazy" className="w-full h-auto object-contain max-h-[700px] hover:scale-[1.02] transition-transform duration-300" />
                   </div>
                 </div>
               </FadeIn>
