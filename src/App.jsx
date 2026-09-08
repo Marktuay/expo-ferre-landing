@@ -619,7 +619,7 @@ export default function App() {
                             <div className="flex items-stretch gap-4 md:gap-6 mx-6 md:mx-8">
                               <div className="flex flex-col items-end pt-1 border-r-2 border-white/30 pr-4 md:pr-6">
                                 <span className="text-white/50 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-1">Categoría</span>
-                                <span className="font-black uppercase tracking-widest text-sm md:text-base text-cyan-300 drop-shadow-md leading-none">Diamante</span>
+                                <span className="font-black uppercase tracking-widest text-lg md:text-xl text-cyan-300 drop-shadow-md leading-none">Diamante</span>
                               </div>
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Diamante').map((logo, index) => (
@@ -642,7 +642,7 @@ export default function App() {
                             <div className="flex items-stretch gap-4 md:gap-6 mx-6 md:mx-8">
                               <div className="flex flex-col items-end pt-1 border-r-2 border-white/30 pr-4 md:pr-6">
                                 <span className="text-white/50 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-1">Categoría</span>
-                                <span className="font-black uppercase tracking-widest text-sm md:text-base text-yellow-400 drop-shadow-md leading-none">Oro</span>
+                                <span className="font-black uppercase tracking-widest text-lg md:text-xl text-yellow-400 drop-shadow-md leading-none">Oro</span>
                               </div>
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Oro').map((logo, index) => (
@@ -665,7 +665,7 @@ export default function App() {
                             <div className="flex items-stretch gap-4 md:gap-6 mx-6 md:mx-8">
                               <div className="flex flex-col items-end pt-1 border-r-2 border-white/30 pr-4 md:pr-6">
                                 <span className="text-white/50 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-1">Categoría</span>
-                                <span className="font-black uppercase tracking-widest text-sm md:text-base text-gray-300 drop-shadow-md leading-none">Plata</span>
+                                <span className="font-black uppercase tracking-widest text-lg md:text-xl text-gray-300 drop-shadow-md leading-none">Plata</span>
                               </div>
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Plata').map((logo, index) => (
@@ -688,7 +688,7 @@ export default function App() {
                             <div className="flex items-stretch gap-4 md:gap-6 mx-6 md:mx-8">
                               <div className="flex flex-col items-end pt-1 border-r-2 border-white/30 pr-4 md:pr-6">
                                 <span className="text-white/50 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-1">Categoría</span>
-                                <span className="font-black uppercase tracking-widest text-sm md:text-base text-white/80 drop-shadow-md leading-none">Patrocinador</span>
+                                <span className="font-black uppercase tracking-widest text-lg md:text-xl text-white/80 drop-shadow-md leading-none">Patrocinador</span>
                               </div>
                               <div className="flex items-center gap-4 md:gap-6">
                                 {sponsorLogos.filter(l => l.category === 'Patrocinador').map((logo, index) => (
