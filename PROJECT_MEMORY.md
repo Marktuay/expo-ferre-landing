@@ -461,13 +461,15 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Evaluación de Peso:** El archivo `expo-ferre-2026.mp4` pesa **73 MB**.
 - **Contenedor Adaptativo:** Se reconfiguró el marco en `App.jsx` (`w-full max-w-lg md:max-w-xl` con `border-2 border-[#f39200]`) para adaptar automáticamente el diseño a la relación de aspecto limpia del nuevo video sin zooms ni recortes artificiales.
 
-
-
-
-
-
-
-
-
-
-
+### ⚪ Adición de Logo Monolit (monolit.png) en Categoría Plata (`App.jsx` & `AdminSponsors.jsx`)
+- **Ubicación:** `public/plata/monolit.png`
+- **Posición:** Se insertó al final de la categoría **Plata** de último lugar (después de Dat Analytics).
+- **Secuencia actualizada en Categoría Plata:**
+  1. Fernández Sera (`/plata/ferdandezsera.png`)
+  2. Sherwin-Williams (`/plata/logo-sherwin-williams.jpg`)
+  3. Casco (`/plata/casco.png`)
+  4. Midesa (`/plata/midesa.png`)
+  5. Madinisa (`/plata/madinisa.png`)
+  6. Sonax (`/plata/sonax.jpg`)
+  7. Dat Analytics (`/plata/dataanalytics.jpg`)
+  8. **Monolit** (`/plata/monolit.png`) 👈 *(Nuevo - de último)*
