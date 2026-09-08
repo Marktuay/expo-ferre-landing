@@ -727,7 +727,7 @@ export default function App() {
             <div className="lg:col-span-5 flex justify-center items-center">
               <div className="bg-black/90 backdrop-blur-sm border-2 border-[#f39200] hard-shadow-orange rounded-2xl overflow-hidden relative flex items-center justify-center shadow-2xl w-full max-w-lg md:max-w-xl">
                 <video 
-                  key="/expo-ferre-2026.mp4"
+                  key="/taller.mp4"
                   ref={videoRef}
                   className="w-full h-auto object-cover rounded-2xl" 
                   autoPlay 
@@ -735,7 +735,7 @@ export default function App() {
                   muted={isVideoMuted}
                   playsInline
                 >
-                  <source src="/expo-ferre-2026.mp4?v=2" type="video/mp4" />
+                  <source src="/taller.mp4" type="video/mp4" />
                 </video>
                 <button
                   onClick={() => {
