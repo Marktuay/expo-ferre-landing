@@ -781,7 +781,7 @@ export default function App() {
                     </p>
                   </div>
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex items-center justify-center p-2">
-                    <img src="/mapahome.png" alt="Plano de Stands Expo Ferre" loading="lazy" className="w-full h-auto object-contain max-h-[700px] hover:scale-[1.02] transition-transform duration-300" />
+                    <img src="/mapahome.jpg" alt="Plano de Stands Expo Ferre" loading="lazy" className="w-full h-auto object-contain max-h-[700px] hover:scale-[1.02] transition-transform duration-300" />
                   </div>
                 </div>
               </FadeIn>
@@ -792,7 +792,7 @@ export default function App() {
                     <div 
                       className="absolute inset-0 bg-cover bg-center brightness-[0.4]" 
                       style={{ 
-                        backgroundImage: "url('/Gemini_Generated_Image_z9fv1yz9fv1yz9fv.png')"
+                        backgroundImage: "url('/Gemini_Generated_Image_z9fv1yz9fv1yz9fv.jpg')"
                       }}
                     ></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-inverse-surface/90 via-inverse-surface/50 to-transparent"></div>
@@ -832,7 +832,7 @@ export default function App() {
                     <div 
                       className="absolute inset-0 bg-cover bg-center brightness-[0.4]" 
                       style={{ 
-                        backgroundImage: "url('/Gemini_Generated_Image_uj81j1uj81j1uj81.png')"
+                        backgroundImage: "url('/Gemini_Generated_Image_uj81j1uj81j1uj81.jpg')"
                       }}
                     ></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-inverse-surface/90 via-inverse-surface/50 to-transparent"></div>
@@ -867,7 +867,7 @@ export default function App() {
                     <div 
                       className="absolute inset-0 bg-cover bg-center brightness-[0.4]" 
                       style={{ 
-                        backgroundImage: "url('/Gemini_Generated_Image_97vehf97vehf97ve.png')"
+                        backgroundImage: "url('/Gemini_Generated_Image_97vehf97vehf97ve.jpg')"
                       }}
                     ></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-inverse-surface/90 via-inverse-surface/50 to-transparent"></div>
