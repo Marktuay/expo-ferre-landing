@@ -38,7 +38,7 @@ export default function InviteSpeakerModal({ isOpen, onClose, sponsorData }) {
       await addDoc(collection(db, 'mail'), {
         to: speakerEmail.trim(),
         message: {
-          subject: `Invitación de ${sponsorName} a presentar tu Conferencia en ExpoFerre 2026`,
+          subject: 'Invitación a Speaker / Conferencista',
           html: `
             <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
               <!-- Header Image -->
