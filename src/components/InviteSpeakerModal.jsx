@@ -46,9 +46,9 @@ export default function InviteSpeakerModal({ isOpen, onClose, sponsorData }) {
               
               <div style="padding: 30px;">
                 <h2 style="color: #0d47a1; margin-top: 0;">¡Hola ${speakerName.trim() || 'Estimado Conferencista'}!</h2>
-                <p><strong>${sponsorName}</strong> te ha invitado cordialmente como <strong>Speaker / Conferencista Oficial</strong> para participar en <strong>ExpoFerre 2026</strong>.</p>
-                
-                <p>Para registrar el título de tu presentación, tu trayectoria profesional, datos de contacto y fotografía, por favor completa el formulario oficial ingresando en el siguiente enlace:</p>
+                <p style="font-size: 15px; line-height: 1.6;">Soy Karen Torres y te doy la bienvenida a <strong>EXPO FERRE Nicaragua 2026</strong>.</p>
+                <p style="font-size: 15px; line-height: 1.6;">Para nosotros es un verdadero honor contar contigo como uno de nuestros speakers en esta primera edición. Estamos seguros de que tu experiencia y conferencia tendrán un impacto positivo en los dueños y principales tomadores de decisión del sector ferretero.</p>
+                <p style="font-size: 15px; line-height: 1.6;">Para registrar los datos de tu conferencia, te invitamos a ingresar al botón que encontrarás abajo.</p>
                 
                 <div style="text-align: center; margin: 35px 0;">
                   <a href="${inviteLink}" style="background-color: #f39200; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">🎙️ Registrar Mi Conferencia</a>
@@ -59,6 +59,8 @@ export default function InviteSpeakerModal({ isOpen, onClose, sponsorData }) {
                     "${customNote.trim()}"
                   </div>
                 ` : ''}
+
+                <p style="font-size: 15px; font-weight: bold; color: #0d47a1; margin-top: 25px;">¡Gracias por ser parte de este gran inicio! 🚀</p>
 
                 <p style="font-size: 13px; color: #666; margin-top: 30px;">Si el botón no abre automáticamente, copia y pega el siguiente enlace en tu navegador:<br/>
                 <a href="${inviteLink}" style="color: #0d47a1; word-break: break-all;">${inviteLink}</a></p>
@@ -83,7 +85,13 @@ export default function InviteSpeakerModal({ isOpen, onClose, sponsorData }) {
     }
   };
 
-  const whatsappMessage = encodeURIComponent(`Hola ${speakerName || ''}, te saluda ${sponsorName}. Te enviamos el enlace para registrar los datos de tu conferencia en ExpoFerre 2026: ${inviteLink}`);
+  const whatsappMessage = encodeURIComponent(`¡Hola ${speakerName.trim() || ''}! Soy Karen Torres y te doy la bienvenida a EXPO FERRE Nicaragua 2026.
+
+Para nosotros es un verdadero honor contar contigo como uno de nuestros speakers en esta primera edición. Estamos seguros de que tu experiencia y conferencia tendrán un impacto positivo en los dueños y principales tomadores de decisión del sector ferretero.
+
+Para registrar los datos de tu conferencia, ingresa en el siguiente enlace: ${inviteLink}
+
+¡Gracias por ser parte de este gran inicio! 🚀`);
   const whatsappUrl = `https://wa.me/?text=${whatsappMessage}`;
 
   return (

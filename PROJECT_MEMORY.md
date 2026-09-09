@@ -473,3 +473,7 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   6. Sonax (`/plata/sonax.jpg`)
   7. Dat Analytics (`/plata/dataanalytics.jpg`)
   8. **Monolit** (`/plata/monolit.png`) 👈 *(Nuevo - de último)*
+
+### 🎙️ Actualización del Mensaje de Invitación a Speakers (`InviteSpeakerModal.jsx`)
+- **Texto Personalizado:** Se actualizó el mensaje de bienvenida de Karen Torres para las invitaciones enviadas a los conferencistas.
+- **Canales Afectados:** Tanto la plantilla HTML del correo electrónico ( Trigger Email Firebase ) como el enlace preformateado para envío directo por WhatsApp incorporan ahora el nuevo saludo y cuerpo del mensaje.
