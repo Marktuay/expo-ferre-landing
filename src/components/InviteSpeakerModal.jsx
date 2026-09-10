@@ -21,8 +21,17 @@ export default function InviteSpeakerModal({ isOpen, onClose, sponsorData }) {
   const baseUrl = window.location.origin;
   const inviteLink = `${baseUrl}/?form=speaker&sponsorId=${encodeURIComponent(sponsorUid)}&sponsorName=${encodeURIComponent(sponsorName)}&sponsorEmail=${encodeURIComponent(sponsorEmail)}`;
 
+  const fullInvitationText = `¡Hola ${speakerName.trim() || ''}! Soy Karen Torres y te doy la bienvenida a EXPO FERRE Nicaragua 2026.
+
+Para nosotros es un verdadero honor contar contigo como uno de nuestros speakers en esta primera edición. Estamos seguros de que tu experiencia y conferencia tendrán un impacto positivo en los dueños y principales tomadores de decisión del sector ferretero.
+
+Para registrar los datos de tu conferencia, ingresa en el siguiente enlace:
+${inviteLink}
+
+¡Gracias por ser parte de este gran inicio! 🚀`;
+
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(inviteLink);
+    navigator.clipboard.writeText(fullInvitationText);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2500);
   };
@@ -115,6 +124,16 @@ Para registrar los datos de tu conferencia, ingresa en el siguiente enlace: ${in
 
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-6">
+          {/* Vista previa del mensaje */}
+          <div className="bg-amber-50/70 border border-amber-200 p-3.5 rounded-lg text-xs space-y-1.5 text-amber-950">
+            <p className="font-bold flex items-center gap-1.5 text-amber-900">
+              📌 Mensaje Oficial de Bienvenida (Karen Torres):
+            </p>
+            <p className="italic leading-relaxed text-slate-700 bg-white p-2.5 rounded border border-amber-200/60 shadow-sm">
+              "¡Hola {speakerName.trim() || '[Nombre]'}! Soy Karen Torres y te doy la bienvenida a EXPO FERRE Nicaragua 2026. Para nosotros es un verdadero honor contar contigo como uno de nuestros speakers..."
+            </p>
+          </div>
+
           {successMessage && (
             <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg text-sm flex items-center gap-2">
               <Check className="text-green-600 shrink-0" size={20} />
@@ -152,7 +171,7 @@ Para registrar los datos de tu conferencia, ingresa en el siguiente enlace: ${in
 
             <div>
               <label className="block text-sm font-bold text-on-surface mb-1">
-                Mensaje Personalizado <span className="text-xs font-normal text-secondary">(Opcional)</span>
+                Mensaje Personalizado / Nota adicional <span className="text-xs font-normal text-secondary">(Opcional)</span>
               </label>
               <textarea
                 rows={2}
@@ -187,7 +206,7 @@ Para registrar los datos de tu conferencia, ingresa en el siguiente enlace: ${in
               className="w-full bg-surface-container border border-outline-variant hover:bg-surface-variant text-on-surface font-bold py-2.5 px-4 rounded-md transition-colors flex items-center justify-center gap-2 text-xs"
             >
               {isCopied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
-              {isCopied ? '¡Enlace Copiado!' : 'Copiar Enlace Directo'}
+              {isCopied ? '¡Texto Copiado!' : 'Copiar Invitación Completa'}
             </button>
 
             <a
