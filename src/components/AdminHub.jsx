@@ -3,12 +3,14 @@ import { collection, query, where, getDocs, doc, updateDoc, serverTimestamp } fr
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
+import { exportConsolidatedBaseToExcel } from '../utils/exportConsolidatedExcel';
 
 export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const lastActivityRef = useRef(Date.now());
 
@@ -170,7 +172,24 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
             <h1 className="text-headline-md font-bold text-on-surface">Portal de Administración</h1>
             <p className="text-body-lg text-secondary">Selecciona el panel al que deseas acceder.</p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
+            <button 
+              disabled={isExporting}
+              onClick={async () => {
+                setIsExporting(true);
+                try {
+                  await exportConsolidatedBaseToExcel();
+                } catch (e) {
+                  alert("Hubo un error al generar el archivo Excel.");
+                } finally {
+                  setIsExporting(false);
+                }
+              }}
+              className="px-5 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors font-label-lg flex items-center gap-2 shadow-sm disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined">download</span>
+              {isExporting ? 'Exportando Excel...' : 'Descargar Base Consolidada (Excel)'}
+            </button>
             <button onClick={onBack} className="px-5 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2">
               <span className="material-symbols-outlined">home</span>
               Volver al menú
@@ -197,6 +216,28 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {adminUser.role === 'admin' && (
             <>
+              <button 
+                disabled={isExporting}
+                onClick={async () => {
+                  setIsExporting(true);
+                  try {
+                    await exportConsolidatedBaseToExcel();
+                  } catch (e) {
+                    alert("Hubo un error al generar el archivo Excel.");
+                  } finally {
+                    setIsExporting(false);
+                  }
+                }}
+                className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-emerald-500 hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group md:col-span-1"
+              >
+                <div className="w-16 h-16 bg-emerald-500/10 text-emerald-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">file_download</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface mb-2">Base Consolidada Excel</h3>
+                  <p className="text-secondary text-sm">Descarga toda la información (Preregistros, Patrocinadores, Invitados, Staff, Speakers) con los 8 campos oficiales.</p>
+                </div>
+              </button>
               <button 
                 onClick={() => onNavigate('adminSponsorsHub')}
                 className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group"

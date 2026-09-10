@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
+import { exportConsolidatedBaseToExcel } from '../utils/exportConsolidatedExcel';
+
 export default function AdminAttendanceReport({ onBack }) {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -194,11 +196,11 @@ export default function AdminAttendanceReport({ onBack }) {
           </div>
           <div className="flex gap-4">
             <button 
-              onClick={exportToExcel}
+              onClick={exportConsolidatedBaseToExcel} 
               className="px-5 py-2 bg-[#16a34a] text-white rounded-md hover:bg-[#15803d] transition-colors font-label-lg flex items-center gap-2"
             >
               <span className="material-symbols-outlined">download</span>
-              Exportar a Excel
+              Exportar Base Consolidada (Excel)
             </button>
             <button onClick={onBack} className="px-5 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2">
               <span className="material-symbols-outlined">arrow_back</span>

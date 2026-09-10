@@ -483,3 +483,16 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Solución Aplicada:**
   1. **En `AdminSponsorDetails.jsx`:** Se implementó una instancia secundaria de Firebase Auth (`initializeApp` secundario) que actualiza la contraseña anterior o crea el usuario automáticamente en Firebase Auth cuando el administrador modifica o asigna la contraseña.
   2. **En `AuthPage.jsx`:** Se añadió una lógica de contingencia durante el inicio de sesión. Si el inicio de sesión inicial en Firebase Auth falla, el sistema verifica Firestore; si los datos del patrocinador existen y la contraseña coincide con la asignada por el Administrador, crea el usuario en Firebase Auth y le permite ingresar de inmediato de forma transparente.
+
+### 📊 Exportación Consolidada de Base de Datos a Excel (`src/utils/exportConsolidatedExcel.js`)
+- **Funcionalidad:** Se creó una función unificada de exportación que consolida todos los registros del evento (Preregistros, Patrocinadores, Invitados VIP, Staff y Conferencistas).
+- **Campos Oficiales Incluidos:**
+  1. `Origen`
+  2. `Nombre`
+  3. `Correo`
+  4. `Empresa`
+  5. `Cantidad de empleados`
+  6. `Tipo de invitacion`
+  7. `Ciudad`
+  8. `Celular`
+- **Ubicación en UI:** Disponible desde el botón superior principal y la tarjeta dedicada en el **Portal de Administración** (`AdminHub.jsx`), así como en el **Reporte de Asistencia** (`AdminAttendanceReport.jsx`).
