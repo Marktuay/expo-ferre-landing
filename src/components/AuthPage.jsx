@@ -5,7 +5,7 @@ import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail
 } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp, addDoc, collection } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, addDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 export default function AuthPage({ onBack }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -52,8 +52,60 @@ export default function AuthPage({ onBack }) {
 
     try {
       if (isLogin) {
-        // Login flow
-        await signInWithEmailAndPassword(auth, email, password);
+        // Flow de inicio de sesión
+        const emailClean = email.trim().toLowerCase();
+        const passClean = password.trim();
+
+        try {
+          await signInWithEmailAndPassword(auth, emailClean, passClean);
+        } catch (loginErr) {
+          console.warn('Error inicial en Firebase Auth:', loginErr.code);
+
+          // Buscar si la cuenta fue creada/aprobada manualmente por administración en Firestore
+          let matchedData = null;
+          let matchedDocId = null;
+
+          const qCorreo = query(collection(db, 'users'), where('correo', '==', emailClean));
+          const snapCorreo = await getDocs(qCorreo);
+
+          if (!snapCorreo.empty) {
+            matchedDocId = snapCorreo.docs[0].id;
+            matchedData = snapCorreo.docs[0].data();
+          } else {
+            const qEmail = query(collection(db, 'users'), where('email', '==', emailClean));
+            const snapEmail = await getDocs(qEmail);
+            if (!snapEmail.empty) {
+              matchedDocId = snapEmail.docs[0].id;
+              matchedData = snapEmail.docs[0].data();
+            }
+          }
+
+          // Si el patrocinador existe en Firestore y la clave ingresada coincide con la asignada por el Admin
+          if (matchedData && matchedData.password && matchedData.password.trim() === passClean) {
+            try {
+              // Si no existía en Firebase Auth, crearlo en Auth para iniciar sesión automáticamente
+              const newUserCred = await createUserWithEmailAndPassword(auth, emailClean, passClean);
+              if (newUserCred.user) {
+                // Vincular o actualizar datos del patrocinador bajo su UID oficial de Auth
+                await setDoc(doc(db, 'users', newUserCred.user.uid), {
+                  ...matchedData,
+                  correo: emailClean,
+                  email: emailClean,
+                  status: 'approved',
+                  role: 'sponsor'
+                }, { merge: true });
+                return;
+              }
+            } catch (createErr) {
+              if (createErr.code === 'auth/email-already-in-use') {
+                setError('El usuario ya existe en el sistema de autenticación pero con otra clave previa. Haz clic en "¿Olvidaste tu contraseña?" para restablecerla.');
+                return;
+              }
+            }
+          }
+
+          throw loginErr;
+        }
       } else {
         // Register flow
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);

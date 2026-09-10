@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase';
+import { initializeApp, deleteApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword } from 'firebase/auth';
+import { db, firebaseConfig } from '../firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, setDoc, addDoc } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 
@@ -129,23 +131,78 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
     e.preventDefault();
     setSavingSponsor(true);
     try {
+      const newEmail = editForm.correo.trim();
+      const newPassword = editForm.password.trim();
+      const oldPassword = currentSponsor.password || '';
+      const oldEmail = currentSponsor.correo || currentSponsor.email || '';
+
       const updatedData = {
         empresa: editForm.empresa.trim(),
         nombre: editForm.nombre.trim(),
         apellido: editForm.apellido.trim(),
-        correo: editForm.correo.trim(),
-        email: editForm.correo.trim(),
+        correo: newEmail,
+        email: newEmail,
         telefono: editForm.telefono.trim(),
         phone: editForm.telefono.trim(),
-        password: editForm.password.trim(),
+        password: newPassword,
+        role: 'sponsor',
+        status: 'approved'
       };
 
-      // 1. Actualizar usuario en Firestore si posee ID de documento
+      // 1. Sincronizar / Actualizar la contraseña en Firebase Auth mediante una app secundaria
+      if (newEmail && newPassword) {
+        try {
+          const secondaryApp = initializeApp(firebaseConfig, `SecApp_Edit_${Date.now()}`);
+          const secondaryAuth = getAuth(secondaryApp);
+          let syncedInAuth = false;
+
+          // Intento A: Si teníamos contraseña anterior registrada en Firestore y cambió, intentar ingresar y actualizar
+          if (oldPassword && oldPassword !== newPassword) {
+            try {
+              const cred = await signInWithEmailAndPassword(secondaryAuth, oldEmail || newEmail, oldPassword);
+              await updatePassword(cred.user, newPassword);
+              syncedInAuth = true;
+            } catch (errOldAuth) {
+              console.warn('No se pudo autenticar en Firebase Auth con clave previa:', errOldAuth);
+            }
+          }
+
+          // Intento B: Si ya tenía la clave nueva en Auth, probar loguear con clave nueva
+          if (!syncedInAuth) {
+            try {
+              await signInWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
+              syncedInAuth = true;
+            } catch (errNewAuth) {
+              // No estaba en Auth con la clave nueva
+            }
+          }
+
+          // Intento C: Si el usuario NO existe en Firebase Auth, crearlo en Auth de una vez con la nueva clave
+          if (!syncedInAuth) {
+            try {
+              const userCred = await createUserWithEmailAndPassword(secondaryAuth, newEmail, newPassword);
+              if (userCred.user) {
+                // Guardar también con la llave UID de Auth en la colección 'users'
+                await setDoc(doc(db, 'users', userCred.user.uid), updatedData, { merge: true });
+                syncedInAuth = true;
+              }
+            } catch (errCreate) {
+              console.warn('No se pudo crear usuario en Auth:', errCreate);
+            }
+          }
+
+          deleteApp(secondaryApp);
+        } catch (secErr) {
+          console.error('Error gestionando autenticación secundaria:', secErr);
+        }
+      }
+
+      // 2. Actualizar usuario en Firestore si posee ID de documento
       if (currentSponsor.id) {
         await setDoc(doc(db, 'users', currentSponsor.id), updatedData, { merge: true });
       }
 
-      // 2. Sincronizar reservationDetails en todos los stands reservados por el cliente
+      // 3. Sincronizar reservationDetails en todos los stands reservados por el cliente
       if (stands && stands.length > 0) {
         for (const stand of stands) {
           if (stand.id) {

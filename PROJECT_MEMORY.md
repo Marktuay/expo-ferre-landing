@@ -477,3 +477,9 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 ### 🎙️ Actualización del Mensaje de Invitación a Speakers (`InviteSpeakerModal.jsx`)
 - **Texto Personalizado:** Se actualizó el mensaje de bienvenida de Karen Torres para las invitaciones enviadas a los conferencistas.
 - **Canales Afectados:** Tanto la plantilla HTML del correo electrónico ( Trigger Email Firebase ) como el enlace preformateado para envío directo por WhatsApp incorporan ahora el nuevo saludo y cuerpo del mensaje.
+
+### 🔐 Corrección y Sincronización de Contraseñas de Patrocinadores (`AdminSponsorDetails.jsx` & `AuthPage.jsx`)
+- **Causa Raíz:** Al editar o asignar una contraseña a un patrocinador en el panel de administración, la contraseña se guardaba en la base de datos Firestore (`users`), pero no se actualizaba ni creaba la credencial correspondiente en **Firebase Authentication** (servicio de identidad responsable del Login), provocando el mensaje de error *"Correo o contraseña incorrectos"*.
+- **Solución Aplicada:**
+  1. **En `AdminSponsorDetails.jsx`:** Se implementó una instancia secundaria de Firebase Auth (`initializeApp` secundario) que actualiza la contraseña anterior o crea el usuario automáticamente en Firebase Auth cuando el administrador modifica o asigna la contraseña.
+  2. **En `AuthPage.jsx`:** Se añadió una lógica de contingencia durante el inicio de sesión. Si el inicio de sesión inicial en Firebase Auth falla, el sistema verifica Firestore; si los datos del patrocinador existen y la contraseña coincide con la asignada por el Administrador, crea el usuario en Firebase Auth y le permite ingresar de inmediato de forma transparente.
