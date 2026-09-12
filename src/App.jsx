@@ -29,6 +29,7 @@ import AdminAttendanceReport from './components/AdminAttendanceReport';
 import AdminMarketingReport from './components/AdminMarketingReport';
 import AdminPushNotifications from './components/AdminPushNotifications';
 import InteractiveMap from './components/InteractiveMap';
+import ErrorBoundary from './components/ErrorBoundary';
 import SpeakerForm from './components/SpeakerForm';
 
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
@@ -773,23 +774,25 @@ export default function App() {
 
             <div className="flex flex-col gap-8 mb-8">
               <FadeIn direction="up">
-                <div className="flex flex-col gap-8">
-                  <div className="space-y-6 text-lg text-[#283474] font-medium bg-white p-8 md:p-10 rounded-xl shadow-sm border border-gray-100 w-full flex flex-col justify-center">
-                    <p className="leading-relaxed">
-                      <strong className="font-black">EXPO FERRE</strong> nace como la primera plataforma especializada del sector ferretero en Nicaragua para crear negocios, fortalecer, conectar y modernizar la industria a través de un espacio de alto nivel enfocado en la innovación, el comercio y las relaciones estratégicas.
-                    </p>
-                    <p className="leading-relaxed">
-                      El evento reunirá en un solo lugar a los principales tomadores de decisiones del canal ferretero: <strong className="font-black">propietarios de ferreterías, gerentes generales, gerentes de compras, distribuidores, importadores, cadenas ferreteras, marcas líderes y proveedores especializados</strong> de Nicaragua y Centroamérica.
-                    </p>
-                    <p className="leading-relaxed">
-                      <strong className="font-black">EXPO FERRE</strong> impulsará oportunidades reales de posicionamiento, expansión comercial, generación de alianzas y conexión directa entre marcas y compradores estratégicos del sector.
-                    </p>
-                  </div>
-                  <div id="plano-stands" className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex flex-col items-center justify-center p-0 md:p-2 min-h-[550px] md:min-h-[700px]">
-                    <InteractiveMap showHeader={false} />
-                  </div>
+                <div className="space-y-6 text-lg text-[#283474] font-medium bg-white p-8 md:p-10 rounded-xl shadow-sm border border-gray-100 w-full flex flex-col justify-center">
+                  <p className="leading-relaxed">
+                    <strong className="font-black">EXPO FERRE</strong> nace como la primera plataforma especializada del sector ferretero en Nicaragua para crear negocios, fortalecer, conectar y modernizar la industria a través de un espacio de alto nivel enfocado en la innovación, el comercio y las relaciones estratégicas.
+                  </p>
+                  <p className="leading-relaxed">
+                    El evento reunirá en un solo lugar a los principales tomadores de decisiones del canal ferretero: <strong className="font-black">propietarios de ferreterías, gerentes generales, gerentes de compras, distribuidores, importadores, cadenas ferreteras, marcas líderes y proveedores especializados</strong> de Nicaragua y Centroamérica.
+                  </p>
+                  <p className="leading-relaxed">
+                    <strong className="font-black">EXPO FERRE</strong> impulsará oportunidades reales de posicionamiento, expansión comercial, generación de alianzas y conexión directa entre marcas y compradores estratégicos del sector.
+                  </p>
                 </div>
               </FadeIn>
+
+              {/* Plano de Stands Interactivo fuera de animación para estabilidad de zoom */}
+              <div id="plano-stands" className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex flex-col items-center justify-center p-0 md:p-2 min-h-[550px] md:min-h-[700px]">
+                <ErrorBoundary>
+                  <InteractiveMap showHeader={false} />
+                </ErrorBoundary>
+              </div>
 
               <FadeIn direction="up" delay={100}>
                 <div className="w-full rounded-xl shadow-sm border border-outline-variant overflow-hidden flex flex-col relative">
