@@ -486,13 +486,11 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 
 ### 📊 Exportación Consolidada de Base de Datos a Excel (`src/utils/exportConsolidatedExcel.js`)
 - **Funcionalidad:** Se creó una función unificada de exportación que consolida todos los registros del evento (Preregistros, Patrocinadores, Invitados VIP, Staff y Conferencistas).
-- **Campos Oficiales Incluidos:**
-  1. `Origen`
-  2. `Nombre`
-  3. `Correo`
-  4. `Empresa`
-  5. `Cantidad de empleados`
-  6. `Tipo de invitacion`
-  7. `Ciudad`
-  8. `Celular`
+- **Campos Oficiales Incluidos:** Origen, Nombre, Correo, Empresa, Cantidad de empleados, Tipo de invitacion, Ciudad, Celular.
 - **Ubicación en UI:** Disponible desde el botón superior principal y la tarjeta dedicada en el **Portal de Administración** (`AdminHub.jsx`), así como en el **Reporte de Asistencia** (`AdminAttendanceReport.jsx`).
+
+### 🗺️ Restauración y Corrección de Altura del Mapa Interactivo (`InteractiveMap.jsx` & `App.jsx`)
+- **Causa Raíz:** En una actualización previa del Home, se había colocado temporalmente una imagen estática (`mapahome.jpg`) dentro del contenedor `#plano-stands` en lugar del mapa dinámico. Además, en el componente `InteractiveMap.jsx`, el contenedor raíz utilizaba únicamente la clase `h-full` sin una altura mínima explícita (`min-h`), lo que provocaba que al renderizarse en contenedores con flex/altura automática, la biblioteca de zoom (`react-zoom-pan-pinch`) colapsara a 0 píxeles de alto.
+- **Solución Aplicada:**
+  1. **En `InteractiveMap.jsx`:** Se aseguraron dimensiones mínimas garantizadas (`min-h-[550px] md:min-h-[700px]`) tanto en el contenedor principal como en la capa interactiva de zoom.
+  2. **En `App.jsx`:** Se reinstaló el componente `<InteractiveMap showHeader={false} />` interactivo completo dentro de la sección `#plano-stands` de la landing page pública, permitiendo a los usuarios navegar, hacer zoom y consultar la disponibilidad de los stands con sus respectivos pines y logos en tiempo real.

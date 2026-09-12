@@ -785,8 +785,8 @@ export default function App() {
                       <strong className="font-black">EXPO FERRE</strong> impulsará oportunidades reales de posicionamiento, expansión comercial, generación de alianzas y conexión directa entre marcas y compradores estratégicos del sector.
                     </p>
                   </div>
-                  <div id="plano-stands" className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex items-center justify-center p-2">
-                    <img src="/mapahome.jpg" alt="Plano de Stands Expo Ferre" loading="lazy" className="w-full h-auto object-contain max-h-[700px] hover:scale-[1.02] transition-transform duration-300" />
+                  <div id="plano-stands" className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex flex-col items-center justify-center p-0 md:p-2 min-h-[550px] md:min-h-[700px]">
+                    <InteractiveMap showHeader={false} />
                   </div>
                 </div>
               </FadeIn>

@@ -139,7 +139,7 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
   };
 
   return (
-    <div className="w-full bg-background rounded-5px border border-outline-variant overflow-hidden flex flex-col h-full">
+    <div className="w-full bg-background rounded-5px border border-outline-variant overflow-hidden flex flex-col h-full min-h-[550px] md:min-h-[700px]">
       {/* Cabecera del Mapa */}
       {showHeader && (
         <div className="bg-surface-container border-b border-outline-variant p-4 flex items-center justify-between z-10 relative shadow-sm">
@@ -186,7 +186,7 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
       )}
 
       {/* Contenedor del Mapa con Zoom */}
-      <div className="flex-1 bg-[#F5F5F7] relative overflow-hidden cursor-move">
+      <div className="flex-1 min-h-[500px] md:min-h-[650px] bg-[#F5F5F7] relative overflow-hidden cursor-move">
         <TransformWrapper
           initialScale={1.3}
           minScale={0.5}
@@ -203,7 +203,7 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
                 <button onClick={() => resetTransform()} className="p-2 hover:bg-surface-variant rounded-md text-on-surface transition-colors"><span className="material-symbols-outlined">fit_screen</span></button>
               </div>
 
-              <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
+              <TransformComponent wrapperStyle={{ width: "100%", height: "100%", minHeight: "500px" }} contentStyle={{ width: "100%", height: "100%" }}>
                 <div className="relative w-[1200px] h-[800px] md:w-[1600px] md:h-[1000px] max-w-none">
                   <img 
                     src="/map-expo-ferre-140826.svg" 
