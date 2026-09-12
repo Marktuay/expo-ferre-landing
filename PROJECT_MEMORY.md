@@ -494,3 +494,15 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Solución Aplicada:**
   1. **En `InteractiveMap.jsx`:** Se aseguraron dimensiones mínimas garantizadas (`min-h-[550px] md:min-h-[700px]`) tanto en el contenedor principal como en la capa interactiva de zoom.
   2. **En `App.jsx`:** Se reinstaló el componente `<InteractiveMap showHeader={false} />` interactivo completo dentro de la sección `#plano-stands` de la landing page pública, permitiendo a los usuarios navegar, hacer zoom y consultar la disponibilidad de los stands con sus respectivos pines y logos en tiempo real.
+
+### 🚨 Diagnóstico y Resolución del Incidente: Colapso del Mapa e Inestabilidad de Recarga (`12 de Septiembre de 2026`)
+- **Síntomas:** El mapa interactivo mostraba el mensaje de error *"No se pudo cargar este módulo en este momento"*, o en versiones anteriores provocaba un bucle infinito de recargas en el navegador.
+- **Causas Raíz Identificadas:**
+  1. **Bucle Infinito de Recarga (`ErrorBoundary.jsx`):** El capturador de errores ejecutaba `window.location.href = '/'` en su método `componentDidCatch`. Cualquier advertencia de renderizado o re-cálculo de dimensiones obligaba al navegador a recargar la página en un bucle continuo.
+  2. **Dependencia Circular en Módulos ES (`defaultStands.js` ↔ `InteractiveMap.jsx`):** `InteractiveMap.jsx` importaba `seedOfficialStands` desde `defaultStands.js`, mientras que `defaultStands.js` importaba `initialStandsList` desde `InteractiveMap.jsx`. Durante el empaquetado de producción, `initialStandsList` se evaluaba como `undefined` al ejecutarse `seedOfficialStands`, lanzando un `TypeError: Cannot read properties of undefined (reading 'find')`.
+  3. **Medición Inestable por Animaciones Opacidad (`App.jsx` + `react-zoom-pan-pinch`):** `<InteractiveMap />` estaba envuelto en `<FadeIn>`, el cual alteraba opacidad y dimensiones durante 700ms mientras `react-zoom-pan-pinch` intentaba calcular límites.
+- **Soluciones Definitivas Aplicadas:**
+  1. **Desvinculación Circular:** Se movió la definición de `initialStandsList` a [`src/config/defaultStands.js`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/config/defaultStands.js) y se re-exportó en [`InteractiveMap.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/InteractiveMap.jsx), eliminando la dependencia circular.
+  2. **ErrorBoundary Seguro:** Se reemplazó la redirección `window.location.href` por un fallback de UI estático que no reinicia el navegador ni la sesión del usuario.
+  3. **Aislamiento de Animaciones & Manejo Defensivo:** Se extrajo `#plano-stands` fuera de `<FadeIn>` en [`App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx), fijando dimensiones mínimas (`min-h-[550px] md:min-h-[700px]`) e introduciendo validaciones defensivas (`standName = stand.name || 'Stand ' + stand.id`) antes de cualquier `.replace()`.
+
