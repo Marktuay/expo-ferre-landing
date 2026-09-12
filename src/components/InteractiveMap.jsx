@@ -188,10 +188,11 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
       {/* Contenedor del Mapa con Zoom */}
       <div className="flex-1 min-h-[500px] md:min-h-[650px] bg-[#F5F5F7] relative overflow-hidden cursor-move">
         <TransformWrapper
-          initialScale={1.3}
-          minScale={0.5}
+          initialScale={0.85}
+          minScale={0.3}
           maxScale={4}
           centerOnInit={true}
+          limitToBounds={false}
           wheel={{ step: 0.1 }}
         >
           {({ zoomIn, zoomOut, resetTransform }) => (
@@ -215,6 +216,7 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
                   
                   {/* Capa Interactiva: Iteramos sobre los stands para crear "hotspots" y globos de mapa con logos */}
                   {stands.map((stand) => {
+                    if (!stand || !stand.x || !stand.y) return null;
                     const isSelected = selectedStand?.id === stand.id;
                     const isMine = auth.currentUser && stand.sponsorId === auth.currentUser.uid;
                     const hasLogo = Boolean(stand.logo);
