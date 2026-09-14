@@ -512,4 +512,12 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   2. **Desvinculación / Liberación Directa (`AdminSponsorDetails.jsx`):** Cada tarjeta de stand en la Vista 360 del Patrocinador incluye ahora un botón de eliminación/liberación (icono 🗑️) para liberar el estand y devolverlo a estado disponible de forma inmediata.
   3. **Mapa Interactivo con Autocompletado (`InteractiveMap.jsx`):** En el modal de reserva desde el mapa (modo admin), se agregó un selector de *"Patrocinador Registrado"*. Al elegir una empresa registrada, el formulario se autocompleta con sus datos y vincula el estand seleccionado a la cuenta existente.
 
+### 💾 Sistema de Respaldo Completo e Instantáneo en Firestore (`14 de Septiembre de 2026`)
+- **Módulo de Respaldo Unificado ([src/utils/firestoreBackup.js](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/utils/firestoreBackup.js)):**
+  - **`createFullFirestoreBackup(db)`**: Clona de forma síncrona e instantánea **todas las colecciones principales** de la plataforma (`users`, `stands`, `preregistrations`, `guests`, `staff`, `speakers`, `contacts`) hacia sus colecciones espejo `_backup` en Firestore. Guarda un registro inmutable indexado por `snapshotId` en `firestore_snapshots`.
+  - **`restoreFullFirestoreBackup(db)`**: Restaura todas las colecciones activas desde la copia de respaldo en Firestore.
+- **Integración UI Administrativa ([AdminHub.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx)):**
+  - Se agregaron las tarjetas **"💾 Respaldo Completo Firestore"** y **"🔄 Restaurar Firestore"** en el portal principal de administración, protegidas por la Clave Maestra de Seguridad (`2026`).
+
+
 
