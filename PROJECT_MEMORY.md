@@ -518,5 +518,19 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - Las cuentas de administrador estándar (`role === 'admin'`) y staff técnico (`role === 'tech_staff'`) conservan el 100% de sus funciones y privilegios administrativos intactos (Exportación Excel, Patrocinadores, Mensajes/Contacto, Gestión de Usuarios, Reporte Marketing, Preregistros, Invitados VIP, Escáner QR, Reporte Asistencia, Notificaciones Push), pero **no** tienen visibilidad ni capacidad de ejecutar copias o restauraciones de base de datos.
   - La verificación de seguridad valida la identidad de `marktuay@gmail.com` tanto al renderizar la UI como en la ejecución de los controladores de respaldo y envío de PIN.
 
+### 📬 Sistema de Notificaciones de Mensajes y Modal de Lectura Completa (`14 de Septiembre de 2026`)
+- **Notificaciones del Sistema en Tiempo Real ([AdminHub.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx) & [AdminContact.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminContact.jsx)):**
+  - **Insignia de Notificación en AdminHub:** Escucha en tiempo real la colección `contacts`. Renderiza un badge animado en rojo (`"X Nuevos"` / `"X sin leer"`) sobre la tarjeta de **Mensajes / Contacto** cuando existen consultas no leídas.
+  - **Notificación Flotante Toast:** Si llega un nuevo mensaje mientras el usuario está navegando en la bandeja de entrada, se dispara una alerta flotante en la esquina superior (`"🔔 Nuevo mensaje recibido de [Nombre]: [Asunto]"`).
+- **Modal Interactivo de Lectura Completa ([AdminContact.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminContact.jsx)):**
+  - Al hacer clic en cualquier fila o en el botón **"Abrir"**, se despliega el modal interactivo mostrando la información completa del remitente (Nombre, Empresa, Correo, Teléfono, Fecha y Hora) y el **cuerpo íntegro del mensaje** con formato y saltos de línea preservados (`whitespace-pre-wrap`).
+  - **Marcado Automático:** Al abrir el modal, el documento se actualiza automáticamente en Firestore a `read: true` (`status: 'read'`).
+  - **Acciones Rápidas Directas:**
+    - ✉️ **Responder por Correo:** Genera enlace `mailto:`.
+    - 💬 **WhatsApp Directo:** Abre conversación en `wa.me/` si el remitente ingresó teléfono.
+    - 🏷️ **Alternar Estado:** Permite marcar como leído o no leído manualmente.
+    - 🗑️ **Eliminar Mensaje:** Borrado seguro con confirmación previa.
+  - **Gestión Avanzada de Bandeja:** Incorpora pestañas de filtrado (`Todos`, `Sin Leer`, `Leídos`), buscador de texto en tiempo real y botón para **"Marcar todos como leídos"**.
+
 
 

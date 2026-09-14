@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { collection, query, where, getDocs, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
@@ -13,6 +13,7 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isBackingUp, setIsBackingUp] = useState(false);
+  const [unreadContactsCount, setUnreadContactsCount] = useState(0);
 
   // Estados para modal de PIN Maestro
   const [showPinModal, setShowPinModal] = useState(false);
@@ -29,6 +30,24 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
     (adminUser.username && adminUser.username.trim().toLowerCase() === MASTER_EMAIL) ||
     (adminUser.username && adminUser.username.trim().toLowerCase().includes('marktuay'))
   );
+
+  // Listener en tiempo real de mensajes de contacto sin leer
+  useEffect(() => {
+    if (!adminUser) return;
+    const qContacts = query(collection(db, `${getEventBasePath()}/contacts`));
+    const unsub = onSnapshot(qContacts, (snap) => {
+      let unread = 0;
+      snap.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (data.read !== true && data.status !== 'read') {
+          unread++;
+        }
+      });
+      setUnreadContactsCount(unread);
+    }, (err) => console.warn("Error escuchando mensajes sin leer:", err));
+
+    return () => unsub();
+  }, [adminUser]);
 
   useEffect(() => {
     if (!adminUser) return;
@@ -324,13 +343,29 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
 
               <button 
                 onClick={() => onNavigate('adminContact')}
-                className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group"
+                className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-primary hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group relative"
               >
-                <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                {unreadContactsCount > 0 && (
+                  <span className="absolute top-4 right-4 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md animate-bounce flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                    {unreadContactsCount} {unreadContactsCount === 1 ? 'Nuevo' : 'Nuevos'}
+                  </span>
+                )}
+                <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform relative">
                   <span className="material-symbols-outlined text-3xl">mail</span>
+                  {unreadContactsCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 border-2 border-white rounded-full"></span>
+                  )}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-on-surface mb-2">Mensajes / Contacto</h3>
+                  <h3 className="text-xl font-bold text-on-surface mb-2 flex items-center justify-center gap-2">
+                    Mensajes / Contacto
+                    {unreadContactsCount > 0 && (
+                      <span className="text-xs bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full font-bold">
+                        {unreadContactsCount} sin leer
+                      </span>
+                    )}
+                  </h3>
                   <p className="text-secondary text-sm">Visualiza los mensajes recibidos desde la página de contacto.</p>
                 </div>
               </button>
