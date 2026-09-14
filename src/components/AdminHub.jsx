@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import { exportConsolidatedBaseToExcel } from '../utils/exportConsolidatedExcel';
+import { createFullFirestoreBackup, restoreFullFirestoreBackup } from '../utils/firestoreBackup';
 
 export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }) {
   const [email, setEmail] = useState('');
@@ -11,6 +12,13 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isBackingUp, setIsBackingUp] = useState(false);
+
+  // Estados para modal de PIN Maestro
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [pinInput, setPinInput] = useState('');
+  const MASTER_PIN = '2026';
 
   const lastActivityRef = useRef(Date.now());
 
@@ -124,6 +132,48 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
       }
     } finally {
       setIsLoggingIn(false);
+    }
+  };
+
+  const handleExecuteBackup = async () => {
+    setIsBackingUp(true);
+    try {
+      const res = await createFullFirestoreBackup(db);
+      const details = Object.entries(res.summary).map(([k,v])=>`• ${k}: ${v} docs`).join('\n');
+      alert(`¡Respaldo Completo de Firestore creado con éxito!\n\nID Snapshot: ${res.snapshotId}\nTotal documentos protegidos: ${res.totalDocs}\n\nResumen por colección:\n${details}`);
+    } catch (err) {
+      console.error("Error creando respaldo:", err);
+      alert("Hubo un error al crear el respaldo de Firestore.");
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
+
+  const handleExecuteRestore = async () => {
+    setIsBackingUp(true);
+    try {
+      const res = await restoreFullFirestoreBackup(db);
+      const details = Object.entries(res.summary).map(([k,v])=>`• ${k}: ${v} docs`).join('\n');
+      alert(`¡Restauración Completa de Firestore finalizada!\n\nTotal documentos restaurados: ${res.totalDocs}\n\nResumen por colección:\n${details}`);
+    } catch (err) {
+      console.error("Error restaurando base de datos:", err);
+      alert("Hubo un error al restaurar Firestore.");
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
+
+  const handlePinSubmit = (e) => {
+    e.preventDefault();
+    if (pinInput === MASTER_PIN) {
+      setShowPinModal(false);
+      setPinInput('');
+      if (pendingAction === 'backup') handleExecuteBackup();
+      if (pendingAction === 'restore') handleExecuteRestore();
+      setPendingAction(null);
+    } else {
+      alert('Clave Maestra de Seguridad incorrecta.');
+      setPinInput('');
     }
   };
 
@@ -363,10 +413,102 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
                   <p className="text-secondary text-sm">Envía avisos masivos a la app móvil de los asistentes.</p>
                 </div>
               </button>
+
+              <button 
+                disabled={isBackingUp}
+                onClick={() => {
+                  setPendingAction('backup');
+                  setShowPinModal(true);
+                }}
+                className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-blue-600 hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group md:col-span-1 ${isBackingUp ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <div className="w-16 h-16 bg-blue-600/10 text-blue-700 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">cloud_sync</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface mb-2">Respaldo Completo Firestore</h3>
+                  <p className="text-secondary text-sm">Crea una copia de respaldo instantánea en tiempo real de TODAS las colecciones en Firestore.</p>
+                </div>
+              </button>
+
+              <button 
+                disabled={isBackingUp}
+                onClick={() => {
+                  setPendingAction('restore');
+                  setShowPinModal(true);
+                }}
+                className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-amber-600 hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group md:col-span-1 ${isBackingUp ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <div className="w-16 h-16 bg-amber-600/10 text-amber-700 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">restore</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface mb-2">Restaurar Firestore</h3>
+                  <p className="text-secondary text-sm">Restaura todas las colecciones desde la copia de respaldo almacenada en Firestore.</p>
+                </div>
+              </button>
             </>
           )}
         </div>
       </div>
+
+      {/* Modal de Validación de PIN Maestro para Respaldo */}
+      {showPinModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200">
+            <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mb-4 mx-auto">
+              <span className="material-symbols-outlined text-2xl">shield_lock</span>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-1 text-center">
+              {pendingAction === 'backup' ? 'Crear Respaldo Completo en Firestore' : 'Restaurar Base de Datos Firestore'}
+            </h3>
+            <p className="text-gray-600 text-sm mb-6 text-center">
+              {pendingAction === 'backup' 
+                ? 'Ingresa la Clave Maestra de Seguridad para autorizar el respaldo instantáneo de todas las colecciones.'
+                : '⚠️ ADVERTENCIA: Esta acción reemplazará los datos activos por los del respaldo. Ingresa la Clave Maestra.'
+              }
+            </p>
+            
+            <form onSubmit={handlePinSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 text-center">
+                  Clave Maestra de Seguridad
+                </label>
+                <input 
+                  type="password"
+                  required
+                  autoFocus
+                  value={pinInput}
+                  onChange={(e) => setPinInput(e.target.value)}
+                  placeholder="••••"
+                  className="w-full text-center text-2xl tracking-[0.5em] py-3 px-4 border-2 border-gray-300 rounded-xl focus:border-amber-500 focus:ring-4 focus:ring-amber-100 focus:outline-none font-mono transition-all"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPinModal(false);
+                    setPinInput('');
+                    setPendingAction(null);
+                  }}
+                  className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors text-sm"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 px-4 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-lg">verified_user</span>
+                  Autorizar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
