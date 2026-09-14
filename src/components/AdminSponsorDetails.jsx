@@ -4,6 +4,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, up
 import { db, firebaseConfig } from '../firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, setDoc, addDoc } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
+import { initialStandsList } from '../config/defaultStands';
 
 export default function AdminSponsorDetails({ sponsor, onBack }) {
   const [currentSponsor, setCurrentSponsor] = useState(sponsor);
@@ -11,6 +12,8 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
   const [staff, setStaff] = useState([]);
   const [speakers, setSpeakers] = useState([]);
   const [stands, setStands] = useState([]);
+  const [availableStands, setAvailableStands] = useState([]);
+  const [selectedStandsToAdd, setSelectedStandsToAdd] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Estados para modal de edición
@@ -75,31 +78,44 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
       setSpeakers(list);
     });
 
-    // Escuchar stands
+    // Escuchar todos los stands y separar los reservados de este patrocinador y los libres
     const qStands = query(collection(db, `${getEventBasePath()}/stands`));
     const unsubStands = onSnapshot(qStands, (snapshot) => {
-      const list = snapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(st => {
-          // Filtrar únicamente stands que estén reservados
-          const isReserved = st.status === 'reserved' || st.status === 'reserved_official' || st.status === 'sold';
-          if (!isReserved) return false;
+      const dbDocsMap = {};
+      snapshot.docs.forEach(d => {
+        dbDocsMap[d.id] = { id: d.id, ...d.data() };
+      });
 
-          const stEmail = (st.reservationDetails?.correo || st.sponsorEmail || st.email || '').toLowerCase().trim();
-          const stComp = (st.reservationDetails?.empresa || st.company || st.empresa || '').toLowerCase().trim();
-          
-          const idMatch = Boolean(sponsorId && st.sponsorId && st.sponsorId === sponsorId);
-          const emailMatch = Boolean(sponsorEmail && stEmail && stEmail === sponsorEmail);
-          const compMatch = Boolean(
-            sponsorCompany.length > 0 && 
-            stComp.length > 0 && 
-            (stComp === sponsorCompany || stComp.includes(sponsorCompany) || sponsorCompany.includes(stComp))
-          );
-          const nameMatch = Boolean(st.name && currentSponsor.standList && Array.isArray(currentSponsor.standList) && currentSponsor.standList.includes(st.name));
+      // Fusionar lista maestra de 38 stands con Firestore
+      const fullStands = initialStandsList.map(init => {
+        const dbData = dbDocsMap[init.id] || {};
+        return { ...init, ...dbData };
+      });
 
-          return idMatch || emailMatch || compMatch || nameMatch;
-        });
-      setStands(list);
+      // 1. Filtrar únicamente stands que estén reservados por este patrocinador
+      const reservedList = fullStands.filter(st => {
+        const isReserved = st.status === 'reserved' || st.status === 'reserved_official' || st.status === 'sold';
+        if (!isReserved) return false;
+
+        const stEmail = (st.reservationDetails?.correo || st.sponsorEmail || st.email || '').toLowerCase().trim();
+        const stComp = (st.reservationDetails?.empresa || st.company || st.empresa || '').toLowerCase().trim();
+        
+        const idMatch = Boolean(sponsorId && st.sponsorId && st.sponsorId === sponsorId);
+        const emailMatch = Boolean(sponsorEmail && stEmail && stEmail === sponsorEmail);
+        const compMatch = Boolean(
+          sponsorCompany.length > 0 && 
+          stComp.length > 0 && 
+          (stComp === sponsorCompany || stComp.includes(sponsorCompany) || sponsorCompany.includes(stComp))
+        );
+        const nameMatch = Boolean(st.name && currentSponsor.standList && Array.isArray(currentSponsor.standList) && currentSponsor.standList.includes(st.name));
+
+        return idMatch || emailMatch || compMatch || nameMatch;
+      });
+      setStands(reservedList);
+
+      // 2. Filtrar estands libres (disponibles para asignación)
+      const freeList = fullStands.filter(st => st.status !== 'reserved' && st.status !== 'reserved_official' && st.status !== 'sold');
+      setAvailableStands(freeList);
     });
 
     // Set loading false after a small delay
@@ -123,6 +139,7 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
       telefono: currentSponsor.telefono || currentSponsor.phone || '',
       password: currentSponsor.password || ''
     });
+    setSelectedStandsToAdd([]);
     setShowPassword(false);
     setIsEditingSponsor(true);
   };
@@ -218,6 +235,44 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
               }
             }, { merge: true });
           }
+        }
+      }
+
+      // 3.5 Asignar los nuevos estands libres seleccionados en el modal de edición
+      if (selectedStandsToAdd.length > 0) {
+        const addedNames = [];
+        for (const standId of selectedStandsToAdd) {
+          const targetStand = availableStands.find(s => s.id === standId) || {};
+          const sName = targetStand.name || `Stand ${standId.replace('stand-', '')}`;
+          addedNames.push(sName);
+
+          const standRef = doc(db, `${getEventBasePath()}/stands`, standId);
+          await setDoc(standRef, {
+            id: standId,
+            name: sName,
+            size: targetStand.size || '',
+            price: targetStand.price || '',
+            status: 'reserved',
+            sponsorId: currentSponsor.id,
+            sponsorEmail: newEmail,
+            logo: currentSponsor.logo || targetStand.logo || null,
+            reservationDetails: {
+              empresa: editForm.empresa.trim(),
+              nombre: editForm.nombre.trim(),
+              apellido: editForm.apellido.trim(),
+              correo: newEmail,
+              telefono: editForm.telefono.trim(),
+              categoria: targetStand.size || 'Plata'
+            },
+            updatedAt: new Date()
+          }, { merge: true });
+        }
+
+        if (currentSponsor.id) {
+          const currentList = Array.isArray(currentSponsor.standList) ? currentSponsor.standList : [];
+          const mergedList = Array.from(new Set([...currentList, ...addedNames]));
+          updatedData.standList = mergedList;
+          await setDoc(doc(db, 'users', currentSponsor.id), { standList: mergedList }, { merge: true });
         }
       }
 
@@ -358,22 +413,52 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
                 <p className="text-on-surface-variant italic">No tiene stands reservados.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {stands.map(stand => (
-                    <div key={stand.id} className="border border-outline-variant rounded-md p-4 flex flex-col gap-2 relative bg-white shadow-2xs">
-                      <div className="flex justify-between items-start">
-                        <h3 className="font-bold text-lg">{stand.name || (stand.id ? `Stand ${stand.id.replace('stand-', '')}` : 'Stand')}</h3>
-                        <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-bold uppercase">{stand.status}</span>
-                      </div>
-                      <p className="text-sm text-secondary"><strong>Tamaño:</strong> {stand.size || stand.reservationDetails?.categoria || ''}</p>
-                      <p className="text-sm text-secondary"><strong>Precio:</strong> {stand.price}</p>
-
-                      {stand.logo && (
-                        <div className="mt-2 w-12 h-12 rounded-full overflow-hidden border-2 border-primary absolute bottom-4 right-4 bg-white">
-                          <img src={stand.logo} alt="Logo stand" className="w-full h-full object-cover" />
+                  {stands.map(stand => {
+                    const standTitle = stand.name || (stand.id ? `Stand ${stand.id.replace('stand-', '')}` : 'Stand');
+                    return (
+                      <div key={stand.id} className="border border-outline-variant rounded-md p-4 flex flex-col gap-2 relative bg-white shadow-2xs">
+                        <div className="flex justify-between items-start">
+                          <h3 className="font-bold text-lg">{standTitle}</h3>
+                          <div className="flex items-center gap-2">
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-bold uppercase">{stand.status}</span>
+                            <button 
+                              type="button"
+                              onClick={async () => {
+                                if (window.confirm(`¿Deseas desvincular y liberar el ${standTitle} de este patrocinador?`)) {
+                                  try {
+                                    await updateDoc(doc(db, `${getEventBasePath()}/stands`, stand.id), {
+                                      status: 'available',
+                                      logo: null,
+                                      reservationData: null,
+                                      reservedBy: null,
+                                      sponsorId: null,
+                                      sponsorEmail: null
+                                    });
+                                    alert(`${standTitle} liberado exitosamente.`);
+                                  } catch (err) {
+                                    console.error('Error al liberar stand:', err);
+                                    alert('Error al liberar el stand.');
+                                  }
+                                }
+                              }}
+                              className="text-red-500 hover:text-red-700 p-1 text-xs font-bold flex items-center rounded hover:bg-red-50 transition-colors"
+                              title="Desvincular / Liberar este stand"
+                            >
+                              <span className="material-symbols-outlined text-base">delete</span>
+                            </button>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        <p className="text-sm text-secondary"><strong>Tamaño:</strong> {stand.size || stand.reservationDetails?.categoria || ''}</p>
+                        <p className="text-sm text-secondary"><strong>Precio:</strong> {stand.price}</p>
+
+                        {stand.logo && (
+                          <div className="mt-2 w-12 h-12 rounded-full overflow-hidden border-2 border-primary absolute bottom-4 right-4 bg-white">
+                            <img src={stand.logo} alt="Logo stand" className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -584,6 +669,65 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
                   </button>
                 </div>
                 <p className="text-xs text-on-surface-variant mt-1">El usuario utilizará su correo como nombre de usuario y esta contraseña para ingresar al portal.</p>
+              </div>
+
+              {/* Sección de Selección de Stands Libres */}
+              <div className="bg-surface-variant/30 p-4 rounded-xl border border-outline-variant/60 space-y-3 mt-4">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-bold text-secondary flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-primary text-lg">add_location_alt</span>
+                    Asignar Stands Adicionales (Stands Libres)
+                  </label>
+                  <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
+                    {availableStands.length} Disponibles
+                  </span>
+                </div>
+                <p className="text-xs text-on-surface-variant">
+                  Haz clic sobre los estands disponibles que desees asignar a esta empresa:
+                </p>
+
+                {availableStands.length === 0 ? (
+                  <p className="text-xs text-on-surface-variant italic py-2">No hay estands libres en este momento.</p>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1">
+                    {availableStands.map(st => {
+                      const isSelected = selectedStandsToAdd.includes(st.id);
+                      return (
+                        <button
+                          key={st.id}
+                          type="button"
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedStandsToAdd(selectedStandsToAdd.filter(id => id !== st.id));
+                            } else {
+                              setSelectedStandsToAdd([...selectedStandsToAdd, st.id]);
+                            }
+                          }}
+                          className={`p-2 rounded-lg border text-left text-xs font-medium transition-all flex flex-col justify-between cursor-pointer ${
+                            isSelected 
+                              ? 'bg-primary text-on-primary border-primary ring-2 ring-primary/40 shadow-sm' 
+                              : 'bg-white text-secondary border-outline-variant hover:border-primary hover:bg-primary/5'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <span className="font-bold">{st.name || `Stand ${st.id.replace('stand-', '')}`}</span>
+                            {isSelected && <span className="material-symbols-outlined text-xs">check_circle</span>}
+                          </div>
+                          <span className={`text-[10px] ${isSelected ? 'text-white/90' : 'text-on-surface-variant'}`}>
+                            {st.size || st.price || 'Disponible'}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {selectedStandsToAdd.length > 0 && (
+                  <div className="text-xs text-primary font-bold bg-primary/10 p-2.5 rounded-md flex items-center justify-between border border-primary/20">
+                    <span>Stands a agregar ({selectedStandsToAdd.length}):</span>
+                    <span className="font-mono">{selectedStandsToAdd.map(id => availableStands.find(s => s.id === id)?.name || `Stand ${id.replace('stand-', '')}`).join(', ')}</span>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant">

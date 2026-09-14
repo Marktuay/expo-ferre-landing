@@ -26,6 +26,9 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const [registeredSponsors, setRegisteredSponsors] = useState([]);
+  const [formValues, setFormValues] = useState({ nombre: '', apellido: '', correo: '', telefono: '', empresa: '', sponsorId: null, logo: null });
+
   useEffect(() => {
     const unsub = onSnapshot(collection(db, `${getEventBasePath()}/stands`), (snapshot) => {
       const standsData = snapshot.docs.map(doc => doc.data());
@@ -48,8 +51,21 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
       console.warn("InteractiveMap onSnapshot permission or network warning:", error);
     });
 
-    return () => unsub();
-  }, []);
+    let unsubUsers = () => {};
+    if (isAdmin) {
+      unsubUsers = onSnapshot(collection(db, 'users'), (snapshot) => {
+        const list = snapshot.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .filter(u => u.role === 'sponsor' || u.empresa || u.company);
+        setRegisteredSponsors(list);
+      });
+    }
+
+    return () => {
+      unsub();
+      unsubUsers();
+    };
+  }, [isAdmin]);
 
   const handleStandClick = (stand) => {
     if (stand.status === 'available' || isAdmin || (auth.currentUser && stand.sponsorId === auth.currentUser.uid)) {
@@ -355,35 +371,72 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
               e.preventDefault();
               const formData = new FormData(e.target);
               const data = Object.fromEntries(formData.entries());
+              if (formValues.sponsorId) data.sponsorId = formValues.sponsorId;
+              if (formValues.logo) data.logo = formValues.logo;
               setReservationData(data);
               setReservedStandId(selectedStand.id);
               setIsReservationModalOpen(false);
               setIsUploadLogoModalOpen(true);
             }}>
+              {isAdmin && registeredSponsors.length > 0 && (
+                <div className="flex flex-col gap-1.5 bg-amber-50 p-3 rounded-lg border border-amber-200">
+                  <label className="text-xs font-bold text-amber-900 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm">domain</span>
+                    Seleccionar Patrocinador Registrado (Autocompletar)
+                  </label>
+                  <select
+                    className="px-3 py-2 bg-white border border-amber-300 rounded-md text-xs text-amber-900 font-medium focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      if (!selectedId) return;
+                      const sp = registeredSponsors.find(s => s.id === selectedId);
+                      if (sp) {
+                        setFormValues({
+                          nombre: sp.nombre || '',
+                          apellido: sp.apellido || '',
+                          correo: sp.correo || sp.email || '',
+                          telefono: sp.telefono || sp.phone || '',
+                          empresa: sp.empresa || sp.company || '',
+                          sponsorId: sp.id,
+                          logo: sp.logo || null
+                        });
+                      }
+                    }}
+                  >
+                    <option value="">-- Seleccionar empresa registrada --</option>
+                    {registeredSponsors.map(sp => (
+                      <option key={sp.id} value={sp.id}>
+                        {sp.empresa || sp.company} ({sp.nombre} {sp.apellido})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
                   <label className="text-label-md font-medium text-on-surface">Nombre</label>
-                  <input name="nombre" required type="text" className="px-4 py-2 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md" placeholder="Ej. Juan" />
+                  <input name="nombre" value={formValues.nombre} onChange={(e) => setFormValues({ ...formValues, nombre: e.target.value })} required type="text" className="px-4 py-2 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md" placeholder="Ej. Juan" />
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-label-md font-medium text-on-surface">Apellido</label>
-                  <input name="apellido" required type="text" className="px-4 py-2 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md" placeholder="Ej. Pérez" />
+                  <input name="apellido" value={formValues.apellido} onChange={(e) => setFormValues({ ...formValues, apellido: e.target.value })} required type="text" className="px-4 py-2 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md" placeholder="Ej. Pérez" />
                 </div>
               </div>
               
               <div className="flex flex-col gap-1">
                 <label className="text-label-md font-medium text-on-surface">Correo Electrónico</label>
-                <input name="correo" required type="email" className="px-4 py-2 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md" placeholder="juan@ejemplo.com" />
+                <input name="correo" value={formValues.correo} onChange={(e) => setFormValues({ ...formValues, correo: e.target.value })} required type="email" className="px-4 py-2 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md" placeholder="juan@ejemplo.com" />
               </div>
               
               <div className="flex flex-col gap-1">
                 <label className="text-label-md font-medium text-on-surface">Teléfono</label>
-                <input name="telefono" required type="tel" className="px-4 py-2 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md" placeholder="+52 123 456 7890" />
+                <input name="telefono" value={formValues.telefono} onChange={(e) => setFormValues({ ...formValues, telefono: e.target.value })} required type="tel" className="px-4 py-2 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md" placeholder="+52 123 456 7890" />
               </div>
 
               <div className="flex flex-col gap-1">
                 <label className="text-label-md font-medium text-on-surface">Empresa</label>
-                <input name="empresa" required type="text" className="px-4 py-2 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md" placeholder="Ej. Ferretería El Toro" />
+                <input name="empresa" value={formValues.empresa} onChange={(e) => setFormValues({ ...formValues, empresa: e.target.value })} required type="text" className="px-4 py-2 bg-surface-variant/30 border border-outline-variant rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-body-md" placeholder="Ej. Ferretería El Toro" />
               </div>
 
               <div className="mt-4 flex justify-end gap-3 pt-2 border-t border-outline-variant">
