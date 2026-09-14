@@ -22,8 +22,13 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
 
   const lastActivityRef = useRef(Date.now());
 
-  // Correo maestro (fallback si no está en systemUsers pero tiene acceso en Firebase Auth)
+  // Correo maestro exclusivamente autorizado para respaldos
   const MASTER_EMAIL = 'marktuay@gmail.com';
+  const isMasterAdmin = adminUser && (
+    (adminUser.email && adminUser.email.trim().toLowerCase() === MASTER_EMAIL) ||
+    (adminUser.username && adminUser.username.trim().toLowerCase() === MASTER_EMAIL) ||
+    (adminUser.username && adminUser.username.trim().toLowerCase().includes('marktuay'))
+  );
 
   useEffect(() => {
     if (!adminUser) return;
@@ -136,6 +141,10 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
   };
 
   const handleExecuteBackup = async () => {
+    if (!isMasterAdmin) {
+      alert("Acceso restringido: Solo el Administrador Maestro (marktuay@gmail.com) puede ejecutar esta acción.");
+      return;
+    }
     setIsBackingUp(true);
     try {
       const res = await createFullFirestoreBackup(db);
@@ -150,6 +159,10 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
   };
 
   const handleExecuteRestore = async () => {
+    if (!isMasterAdmin) {
+      alert("Acceso restringido: Solo el Administrador Maestro (marktuay@gmail.com) puede ejecutar esta acción.");
+      return;
+    }
     setIsBackingUp(true);
     try {
       const res = await restoreFullFirestoreBackup(db);
@@ -165,6 +178,13 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
 
   const handlePinSubmit = (e) => {
     e.preventDefault();
+    if (!isMasterAdmin) {
+      alert("Acceso restringido: Operación reservada exclusivamente para el Administrador Maestro.");
+      setShowPinModal(false);
+      setPinInput('');
+      setPendingAction(null);
+      return;
+    }
     if (pinInput === MASTER_PIN) {
       setShowPinModal(false);
       setPinInput('');
@@ -413,7 +433,12 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
                   <p className="text-secondary text-sm">Envía avisos masivos a la app móvil de los asistentes.</p>
                 </div>
               </button>
+            </>
+          )}
 
+          {/* Opciones de Respaldo Exclusivas para Administrador Maestro (marktuay@gmail.com) */}
+          {isMasterAdmin && (
+            <>
               <button 
                 disabled={isBackingUp}
                 onClick={() => {

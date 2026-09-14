@@ -512,12 +512,11 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   2. **Desvinculación / Liberación Directa (`AdminSponsorDetails.jsx`):** Cada tarjeta de stand en la Vista 360 del Patrocinador incluye ahora un botón de eliminación/liberación (icono 🗑️) para liberar el estand y devolverlo a estado disponible de forma inmediata.
   3. **Mapa Interactivo con Autocompletado (`InteractiveMap.jsx`):** En el modal de reserva desde el mapa (modo admin), se agregó un selector de *"Patrocinador Registrado"*. Al elegir una empresa registrada, el formulario se autocompleta con sus datos y vincula el estand seleccionado a la cuenta existente.
 
-### 💾 Sistema de Respaldo Completo e Instantáneo en Firestore (`14 de Septiembre de 2026`)
-- **Módulo de Respaldo Unificado ([src/utils/firestoreBackup.js](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/utils/firestoreBackup.js)):**
-  - **`createFullFirestoreBackup(db)`**: Clona de forma síncrona e instantánea **todas las colecciones principales** de la plataforma (`users`, `stands`, `preregistrations`, `guests`, `staff`, `speakers`, `contacts`) hacia sus colecciones espejo `_backup` en Firestore. Guarda un registro inmutable indexado por `snapshotId` en `firestore_snapshots`.
-  - **`restoreFullFirestoreBackup(db)`**: Restaura todas las colecciones activas desde la copia de respaldo en Firestore.
-- **Integración UI Administrativa ([AdminHub.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx)):**
-  - Se agregaron las tarjetas **"💾 Respaldo Completo Firestore"** y **"🔄 Restaurar Firestore"** en el portal principal de administración, protegidas por la Clave Maestra de Seguridad (`2026`).
+### 🔐 Restricción Exclusiva de Respaldos al Super Admin Maestro (`14 de Septiembre de 2026`)
+- **Control de Acceso Estricto para Respaldos ([AdminHub.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx)):**
+  - Se restringió el acceso a las funciones y tarjetas UI de **"Respaldo Completo Firestore"** y **"Restaurar Firestore"** de forma exclusiva para la cuenta `marktuay@gmail.com` (Super Admin Maestro).
+  - Las cuentas de administrador estándar (`role === 'admin'`) y staff técnico (`role === 'tech_staff'`) conservan el 100% de sus funciones y privilegios administrativos intactos (Exportación Excel, Patrocinadores, Mensajes/Contacto, Gestión de Usuarios, Reporte Marketing, Preregistros, Invitados VIP, Escáner QR, Reporte Asistencia, Notificaciones Push), pero **no** tienen visibilidad ni capacidad de ejecutar copias o restauraciones de base de datos.
+  - La verificación de seguridad valida la identidad de `marktuay@gmail.com` tanto al renderizar la UI como en la ejecución de los controladores de respaldo y envío de PIN.
 
 
 
