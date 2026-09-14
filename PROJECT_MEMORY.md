@@ -504,5 +504,12 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Soluciones Definitivas Aplicadas:**
   1. **Desvinculación Circular:** Se movió la definición de `initialStandsList` a [`src/config/defaultStands.js`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/config/defaultStands.js) y se re-exportó en [`InteractiveMap.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/InteractiveMap.jsx), eliminando la dependencia circular.
   2. **ErrorBoundary Seguro:** Se reemplazó la redirección `window.location.href` por un fallback de UI estático que no reinicia el navegador ni la sesión del usuario.
-  3. **Aislamiento de Animaciones & Manejo Defensivo:** Se extrajo `#plano-stands` fuera de `<FadeIn>` en [`App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx), fijando dimensiones mínimas (`min-h-[550px] md:min-h-[700px]`) e introduciendo validaciones defensivas (`standName = stand.name || 'Stand ' + stand.id`) antes de cualquier `.replace()`.
+  3. **Aislamiento de Animaciones & Manejo Defensivo:** Se extrajo `#plano-stands` fuera de `<FadeIn>` en [`App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx), fijando dimensiones mínimas (`min-h-[550px] md:min-h-[700px]`) e introduciendo validaciones defensivas (`standName = stand.name || 'Stand ' + stand.id`) before any `.replace()`.
+
+### 📍 Asignación y Gestión de Múltiples Stands Libres para Patrocinadores (`14 de Septiembre de 2026`)
+- **Nuevas Capacidades Administrativas:**
+  1. **Modal de Edición de Patrocinador (`AdminSponsorDetails.jsx`):** Se integró la sección *"Asignar Stands Adicionales (Stands Libres)"* que muestra en tiempo real todos los estands disponibles en la feria. Al marcar uno o varios estands y hacer clic en *"Guardar Cambios"*, los estands se asignan automáticamente a la empresa actual sin crear usuarios duplicados.
+  2. **Desvinculación / Liberación Directa (`AdminSponsorDetails.jsx`):** Cada tarjeta de stand en la Vista 360 del Patrocinador incluye ahora un botón de eliminación/liberación (icono 🗑️) para liberar el estand y devolverlo a estado disponible de forma inmediata.
+  3. **Mapa Interactivo con Autocompletado (`InteractiveMap.jsx`):** En el modal de reserva desde el mapa (modo admin), se agregó un selector de *"Patrocinador Registrado"*. Al elegir una empresa registrada, el formulario se autocompleta con sus datos y vincula el estand seleccionado a la cuenta existente.
+
 
