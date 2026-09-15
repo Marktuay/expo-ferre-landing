@@ -241,7 +241,6 @@ export default function App() {
       setCurrentView('landing');
       setIsMobileMenuOpen(false);
       setAdminUser(null);
-      setSponsorUser(null);
       setCurrentUserData(null);
       setCurrentUser(null);
     }
