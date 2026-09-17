@@ -532,5 +532,9 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     - 🗑️ **Eliminar Mensaje:** Borrado seguro con confirmación previa.
   - **Gestión Avanzada de Bandeja:** Incorpora pestañas de filtrado (`Todos`, `Sin Leer`, `Leídos`), buscador de texto en tiempo real y botón para **"Marcar todos como leídos"**.
 
+### 🏷️ Incorporación de Logo EMTOP en Patrocinadores Diamante (`17 de Septiembre de 2026`)
+- Se integró el archivo de logo [`public/diamante/emtop.png`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/public/diamante/emtop.png) en el carrusel/reel de la Landing Page ([`src/App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx)) y en la lista de patrocinadores oficiales ([`src/components/AdminSponsors.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsors.jsx)).
+- Se posicionó inmediatamente después del logo de **Importaciones Balladares** en la categoría **Diamante**, con contenedor estilizado 16:9 y fondo blanco.
+
 
 
