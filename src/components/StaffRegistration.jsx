@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { db, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
+import { DEFAULT_OFFICIAL_STANDS } from '../config/defaultStands';
 
 const StaffRegistration = ({ onBack }) => {
   const [formState, setFormState] = useState('idle');
@@ -25,6 +26,7 @@ const StaffRegistration = ({ onBack }) => {
       
       try {
         let calculatedMax = 0;
+        const cleanEmail = (user.email || '').toLowerCase().trim();
 
         // 1. Obtener datos de la empresa y categoría desde el documento de usuario en Firestore (users/${user.uid})
         try {
@@ -34,7 +36,17 @@ const StaffRegistration = ({ onBack }) => {
             const companyName = uData.empresa || uData.company || uData.nombre || uData.name || '';
             setSponsorCompany(companyName);
             
-            const cat = (uData.category || uData.sponsorCategory || uData.type || '').toLowerCase();
+            const cat = (
+              uData.categoria || 
+              uData.category || 
+              uData.sponsorCategory || 
+              uData.type || 
+              uData.categoriaStand || 
+              uData.standCategory || 
+              uData.reservationDetails?.categoria || 
+              ''
+            ).toLowerCase();
+            
             if (cat.includes('diamante')) calculatedMax = 10;
             else if (cat.includes('oro')) calculatedMax = 6;
             else if (cat.includes('plata')) calculatedMax = 4;
@@ -43,35 +55,67 @@ const StaffRegistration = ({ onBack }) => {
           console.warn("No se pudo obtener el perfil de usuario:", e);
         }
 
-        // 2. Si no hay categoría definida en el perfil, buscar en los stands reservados
+        // 2. Si no hay categoría en el perfil, buscar en los stands reservados en Firestore
         if (calculatedMax === 0) {
-          const qStands = query(collection(db, `${getEventBasePath()}/stands`), where('sponsorId', '==', user.uid));
-          const standsSnapshot = await getDocs(qStands);
-          
-          standsSnapshot.forEach(d => {
-            const standData = d.data();
-            const size = (standData.size || standData.category || standData.type || '').toLowerCase();
-            if (size.includes('diamante')) {
-              calculatedMax = Math.max(calculatedMax, 10);
-            } else if (size.includes('oro')) {
-              calculatedMax = Math.max(calculatedMax, 6);
-            } else if (size.includes('plata')) {
-              calculatedMax = Math.max(calculatedMax, 4);
-            }
+          // A. Buscar por sponsorId (UID)
+          const qStandsUid = query(collection(db, `${getEventBasePath()}/stands`), where('sponsorId', '==', user.uid));
+          const snapUid = await getDocs(qStandsUid);
+          snapUid.forEach(d => {
+            const sd = d.data();
+            const size = (sd.categoria || sd.category || sd.size || sd.type || sd.reservationDetails?.categoria || sd.reservationDetails?.size || '').toLowerCase();
+            if (size.includes('diamante')) calculatedMax = Math.max(calculatedMax, 10);
+            else if (size.includes('oro')) calculatedMax = Math.max(calculatedMax, 6);
+            else if (size.includes('plata')) calculatedMax = Math.max(calculatedMax, 4);
           });
+
+          // B. Buscar también por sponsorEmail
+          if (calculatedMax === 0 && cleanEmail) {
+            const qStandsEmail = query(collection(db, `${getEventBasePath()}/stands`), where('sponsorEmail', '==', cleanEmail));
+            const snapEmail = await getDocs(qStandsEmail);
+            snapEmail.forEach(d => {
+              const sd = d.data();
+              const size = (sd.categoria || sd.category || sd.size || sd.type || sd.reservationDetails?.categoria || sd.reservationDetails?.size || '').toLowerCase();
+              if (size.includes('diamante')) calculatedMax = Math.max(calculatedMax, 10);
+              else if (size.includes('oro')) calculatedMax = Math.max(calculatedMax, 6);
+              else if (size.includes('plata')) calculatedMax = Math.max(calculatedMax, 4);
+            });
+          }
+        }
+
+        // 3. Buscar en la configuración oficial de stands por defecto si coincide con el correo
+        if (calculatedMax === 0 && cleanEmail) {
+          const officialStand = DEFAULT_OFFICIAL_STANDS.find(s => 
+            (s.sponsorEmail && s.sponsorEmail.toLowerCase().trim() === cleanEmail) ||
+            (s.reservationDetails?.correo && s.reservationDetails.correo.toLowerCase().trim() === cleanEmail)
+          );
+          if (officialStand) {
+            const cat = (officialStand.reservationDetails?.categoria || officialStand.size || '').toLowerCase();
+            if (cat.includes('diamante')) calculatedMax = 10;
+            else if (cat.includes('oro')) calculatedMax = 6;
+            else if (cat.includes('plata')) calculatedMax = 4;
+          }
         }
         
-        // 3. Fallback seguro: Si no se encuentra categoría explícita ni stand aún, asignar 4 acreditaciones por defecto (Categoría Plata) para no bloquear al usuario
+        // 4. Fallback seguro: Si no se encuentra categoría explícita ni stand aún, asignar 4 acreditaciones por defecto
         if (calculatedMax === 0) {
           calculatedMax = 4;
         }
 
         setMaxStaff(calculatedMax);
 
-        // Contar staff actual ya registrado por este patrocinador
-        const qStaff = query(collection(db, `${getEventBasePath()}/staff`), where('sponsorId', '==', user.uid));
-        const staffSnapshot = await getDocs(qStaff);
-        setStaffCount(staffSnapshot.size);
+        // Contar staff actual ya registrado por este patrocinador (por UID o por Email)
+        const staffIds = new Set();
+        const qStaffUid = query(collection(db, `${getEventBasePath()}/staff`), where('sponsorId', '==', user.uid));
+        const snapStaffUid = await getDocs(qStaffUid);
+        snapStaffUid.forEach(d => staffIds.add(d.id));
+
+        if (cleanEmail) {
+          const qStaffEmail = query(collection(db, `${getEventBasePath()}/staff`), where('sponsorEmail', '==', cleanEmail));
+          const snapStaffEmail = await getDocs(qStaffEmail);
+          snapStaffEmail.forEach(d => staffIds.add(d.id));
+        }
+
+        setStaffCount(staffIds.size);
         
       } catch (error) {
         console.error("Error fetching limit data:", error);

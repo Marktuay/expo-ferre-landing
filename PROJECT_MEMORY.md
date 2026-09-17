@@ -536,5 +536,10 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - Se integró el archivo de logo [`public/diamante/emtop.png`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/public/diamante/emtop.png) en el carrusel/reel de la Landing Page ([`src/App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx)) y en la lista de patrocinadores oficiales ([`src/components/AdminSponsors.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsors.jsx)).
 - Se posicionó inmediatamente después del logo de **Importaciones Balladares** en la categoría **Diamante**, con contenedor estilizado 16:9 y fondo blanco.
 
+### 👥 Corrección en Detección de Límites de Staff por Categoría (`17 de Septiembre de 2026`)
+- **Problema:** En [`src/components/StaffRegistration.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/StaffRegistration.jsx), algunos patrocinadores Diamante (como Ferretería Noelito) o con stands asignados por email/oficiales caían erróneamente en el *fallback* de Plata (4 personas) en vez de recibir sus 10 cupos de staff oficiales.
+- **Causa:** La consulta únicamente leía el campo en inglés `category` y buscaba stands filtrando exclusivamente por el UID de Auth (`sponsorId == user.uid`), ignorando el campo en español `categoria`, la categoría dentro de `reservationDetails`, y las asignaciones oficiales vinculadas por correo (`sponsorEmail`).
+- **Solución:** Se amplió la detección para evaluar campos en español (`categoria`, `categoriaStand`, `reservationDetails.categoria`), consultar los stands tanto por `sponsorId` como por `sponsorEmail`, y cotejar con la configuración oficial `DEFAULT_OFFICIAL_STANDS`. Ahora los patrocinadores Diamante reciben correctamente sus **10 acreditaciones de staff** garantizadas.
+
 
 
