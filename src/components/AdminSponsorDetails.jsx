@@ -20,13 +20,15 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
   const [isEditingSponsor, setIsEditingSponsor] = useState(false);
   const [savingSponsor, setSavingSponsor] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isProcessingLogo, setIsProcessingLogo] = useState(false);
   const [editForm, setEditForm] = useState({
     empresa: '',
     nombre: '',
     apellido: '',
     correo: '',
     telefono: '',
-    password: ''
+    password: '',
+    logo: ''
   });
 
   useEffect(() => {
@@ -130,6 +132,74 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
     };
   }, [currentSponsor]);
 
+  const processImageFile = async (file) => {
+    if (!file) return null;
+    if (file.type === 'image/svg+xml') {
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve(ev.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    } else {
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 250;
+            const MAX_HEIGHT = 250;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/png'));
+          };
+          img.onerror = reject;
+          img.src = event.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.match(/(image\/(jpeg|jpg|png|svg\+xml))/i)) {
+      alert('Formato inválido. Por favor, sube una imagen en formato JPG, PNG o SVG.');
+      return;
+    }
+
+    try {
+      setIsProcessingLogo(true);
+      const dataUrl = await processImageFile(file);
+      setEditForm(prev => ({ ...prev, logo: dataUrl }));
+    } catch (err) {
+      console.error('Error al procesar logo:', err);
+      alert('Hubo un error al procesar la imagen del logo.');
+    } finally {
+      setIsProcessingLogo(false);
+    }
+  };
+
   const handleOpenEdit = () => {
     setEditForm({
       empresa: currentSponsor.empresa || currentSponsor.company || '',
@@ -137,7 +207,8 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
       apellido: currentSponsor.apellido || '',
       correo: currentSponsor.correo || currentSponsor.email || '',
       telefono: currentSponsor.telefono || currentSponsor.phone || '',
-      password: currentSponsor.password || ''
+      password: currentSponsor.password || '',
+      logo: currentSponsor.logo || ''
     });
     setSelectedStandsToAdd([]);
     setShowPassword(false);
@@ -162,6 +233,7 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
         telefono: editForm.telefono.trim(),
         phone: editForm.telefono.trim(),
         password: newPassword,
+        logo: editForm.logo || null,
         role: 'sponsor',
         status: 'approved'
       };
@@ -219,12 +291,13 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
         await setDoc(doc(db, 'users', currentSponsor.id), updatedData, { merge: true });
       }
 
-      // 3. Sincronizar reservationDetails en todos los stands reservados por el cliente
+      // 3. Sincronizar reservationDetails y logo en todos los stands reservados por el cliente
       if (stands && stands.length > 0) {
         for (const stand of stands) {
           if (stand.id) {
             const standRef = doc(db, `${getEventBasePath()}/stands`, stand.id);
             await setDoc(standRef, {
+              logo: editForm.logo || null,
               reservationDetails: {
                 ...(stand.reservationDetails || {}),
                 empresa: editForm.empresa.trim(),
@@ -255,7 +328,7 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
             status: 'reserved',
             sponsorId: currentSponsor.id,
             sponsorEmail: newEmail,
-            logo: currentSponsor.logo || targetStand.logo || null,
+            logo: editForm.logo || currentSponsor.logo || targetStand.logo || null,
             reservationDetails: {
               empresa: editForm.empresa.trim(),
               nombre: editForm.nombre.trim(),
@@ -354,19 +427,30 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
         </button>
         
         <div className="mb-10 bg-white p-6 rounded-lg shadow-sm border border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="flex-1">
-            <div className="bg-primary text-on-primary inline-block px-3 py-1 font-label-sm text-label-xs uppercase tracking-widest clip-industrial mb-2">VISTA 360 DEL PATROCINADOR</div>
-            <h1 className="font-headline-md text-headline-md text-secondary flex items-center gap-2 flex-wrap">
-              {currentSponsor.empresa}
-              {currentSponsor.status === 'pending' ? (
-                <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-yellow-400 align-middle ml-2">Pendiente</span>
-              ) : (
-                <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-green-400 align-middle ml-2">Aprobado</span>
-              )}
-            </h1>
-            <p className="text-on-surface-variant mt-1">
-              <strong>Contacto:</strong> {currentSponsor.nombre} {currentSponsor.apellido} | <strong>Email:</strong> {currentSponsor.correo} | <strong>Teléfono:</strong> {currentSponsor.telefono}
-            </p>
+          <div className="flex-1 flex items-center gap-5">
+            {currentSponsor.logo ? (
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 border-primary/30 bg-white shadow-xs p-1 flex items-center justify-center shrink-0">
+                <img src={currentSponsor.logo} alt={currentSponsor.empresa} className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl border-2 border-dashed border-outline-variant bg-surface-variant/40 flex items-center justify-center shrink-0 text-on-surface-variant">
+                <span className="material-symbols-outlined text-3xl opacity-60">storefront</span>
+              </div>
+            )}
+            <div>
+              <div className="bg-primary text-on-primary inline-block px-3 py-1 font-label-sm text-label-xs uppercase tracking-widest clip-industrial mb-2">VISTA 360 DEL PATROCINADOR</div>
+              <h1 className="font-headline-md text-headline-md text-secondary flex items-center gap-2 flex-wrap">
+                {currentSponsor.empresa}
+                {currentSponsor.status === 'pending' ? (
+                  <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-yellow-400 align-middle ml-2">Pendiente</span>
+                ) : (
+                  <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-green-400 align-middle ml-2">Aprobado</span>
+                )}
+              </h1>
+              <p className="text-on-surface-variant mt-1">
+                <strong>Contacto:</strong> {currentSponsor.nombre} {currentSponsor.apellido} | <strong>Email:</strong> {currentSponsor.correo} | <strong>Teléfono:</strong> {currentSponsor.telefono}
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
@@ -669,6 +753,65 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
                   </button>
                 </div>
                 <p className="text-xs text-on-surface-variant mt-1">El usuario utilizará su correo como nombre de usuario y esta contraseña para ingresar al portal.</p>
+              </div>
+
+              {/* Sección de Logo del Patrocinador */}
+              <div className="bg-surface-variant/20 p-4 rounded-xl border border-outline-variant/60 space-y-3">
+                <label className="block text-sm font-bold text-secondary flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-primary text-lg">image</span>
+                  Logo del Patrocinador (Para Mapa Interactivo y Stands)
+                </label>
+                
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <div className="w-24 h-24 rounded-xl border-2 border-dashed border-outline-variant bg-white flex items-center justify-center overflow-hidden shrink-0 shadow-2xs relative">
+                    {editForm.logo ? (
+                      <img src={editForm.logo} alt="Logo" className="w-full h-full object-contain p-1" />
+                    ) : (
+                      <div className="text-center p-2 text-on-surface-variant/50 flex flex-col items-center">
+                        <span className="material-symbols-outlined text-3xl">add_photo_alternate</span>
+                        <span className="text-[10px]">Sin logo</span>
+                      </div>
+                    )}
+                    {isProcessingLogo && (
+                      <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 space-y-2 w-full">
+                    <input 
+                      type="file" 
+                      id="sponsor-logo-upload"
+                      accept="image/png, image/jpeg, image/jpg, image/svg+xml"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label 
+                        htmlFor="sponsor-logo-upload"
+                        className="cursor-pointer px-3.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-md font-bold text-xs flex items-center gap-1.5 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-base">upload</span>
+                        {editForm.logo ? 'Cambiar Logo' : 'Subir Logo'}
+                      </label>
+
+                      {editForm.logo && (
+                        <button
+                          type="button"
+                          onClick={() => setEditForm(prev => ({ ...prev, logo: '' }))}
+                          className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-md font-bold text-xs flex items-center gap-1.5 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-base">delete</span>
+                          Quitar Logo
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-on-surface-variant">
+                      Formatos recomendados: PNG (fondo transparente), SVG o JPG. Se optimizará automáticamente para mostrarse en el mapa de stands.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Sección de Selección de Stands Libres */}

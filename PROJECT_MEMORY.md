@@ -541,5 +541,9 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Causa:** La consulta únicamente leía el campo en inglés `category` y buscaba stands filtrando exclusivamente por el UID de Auth (`sponsorId == user.uid`), ignorando el campo en español `categoria`, la categoría dentro de `reservationDetails`, y las asignaciones oficiales vinculadas por correo (`sponsorEmail`).
 - **Solución:** Se amplió la detección para evaluar campos en español (`categoria`, `categoriaStand`, `reservationDetails.categoria`), consultar los stands tanto por `sponsorId` como por `sponsorEmail`, y cotejar con la configuración oficial `DEFAULT_OFFICIAL_STANDS`. Ahora los patrocinadores Diamante reciben correctamente sus **10 acreditaciones de staff** garantizadas.
 
-
-
+### 🖼️ Carga y Sincronización de Logos para Patrocinadores desde Edición (`18 de Septiembre de 2026`)
+- **Objetivo:** Permitir a los administradores subir o actualizar el logo del patrocinador directamente desde el modal *"Editar Información del Patrocinador"* en [`src/components/AdminSponsorDetails.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsorDetails.jsx), garantizando que dicho logo se muestre automáticamente en el mapa interactivo y en las tarjetas de stands.
+- **Implementación Técnica:**
+  - **Componente de Carga & Vista Previa:** Integrado en el formulario de edición con soporte para PNG, JPG y SVG. Procesa y optimiza automáticamente las imágenes a Base64 (máx. 250x250 píxeles vía Canvas HTML5) evitando sobrecargar Firestore.
+  - **Sincronización Bidireccional:** Al guardar los cambios, el logo se almacena en el documento del patrocinador en `users/${sponsorId}` y se actualiza en todos los stands reservados por dicha empresa en `events/2026/stands` (así como en los nuevos stands asignados durante la edición).
+  - **Visualización en Vista 360:** Se agregó el avatar/logo visual en el encabezado principal de la ficha 360 del patrocinador.
