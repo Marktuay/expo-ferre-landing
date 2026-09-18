@@ -547,3 +547,7 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - **Componente de Carga & Vista Previa:** Integrado en el formulario de edición con soporte para PNG, JPG y SVG. Procesa y optimiza automáticamente las imágenes a Base64 (máx. 250x250 píxeles vía Canvas HTML5) evitando sobrecargar Firestore.
   - **Sincronización Bidireccional:** Al guardar los cambios, el logo se almacena en el documento del patrocinador en `users/${sponsorId}` y se actualiza en todos los stands reservados por dicha empresa en `events/2026/stands` (así como en los nuevos stands asignados durante la edición).
   - **Visualización en Vista 360:** Se agregó el avatar/logo visual en el encabezado principal de la ficha 360 del patrocinador.
+
+### 🏷️ Incorporación de Logo Zaratoga en Categoría Oro (`18 de Septiembre de 2026`)
+- Se agregó el logo [`public/oro/zaratoga.jpeg`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/public/oro/zaratoga.jpeg) dentro de la categoría **Oro** en el carrusel de la Landing Page ([`src/App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx)) y en el listado de patrocinadores oficiales ([`src/components/AdminSponsors.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsors.jsx)).
+- Se ubicó inmediatamente después del logo de **Tigo**.
