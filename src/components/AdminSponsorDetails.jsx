@@ -5,6 +5,7 @@ import { db, firebaseConfig } from '../firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, setDoc, addDoc } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 import { initialStandsList } from '../config/defaultStands';
+import CreateSpeakerModal from './CreateSpeakerModal';
 
 export default function AdminSponsorDetails({ sponsor, onBack }) {
   const [currentSponsor, setCurrentSponsor] = useState(sponsor);
@@ -16,8 +17,9 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
   const [selectedStandsToAdd, setSelectedStandsToAdd] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Estados para modal de edición
+  // Estados para modal de edición y alta de conferencia
   const [isEditingSponsor, setIsEditingSponsor] = useState(false);
+  const [isCreatingSpeaker, setIsCreatingSpeaker] = useState(false);
   const [savingSponsor, setSavingSponsor] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isProcessingLogo, setIsProcessingLogo] = useState(false);
@@ -620,9 +622,19 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
 
           {/* CONFERENCIAS */}
           <section className="bg-surface rounded-lg shadow-sm border border-outline-variant overflow-hidden">
-            <div className="bg-surface-variant px-6 py-4 border-b border-outline-variant flex items-center gap-3">
-              <span className="material-symbols-outlined text-primary text-2xl">mic</span>
-              <h2 className="font-headline-sm font-bold text-secondary">Conferencias ({speakers.length})</h2>
+            <div className="bg-surface-variant px-6 py-4 border-b border-outline-variant flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-primary text-2xl">mic</span>
+                <h2 className="font-headline-sm font-bold text-secondary">Conferencias ({speakers.length})</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCreatingSpeaker(true)}
+                className="px-3 py-1.5 bg-primary text-on-primary font-bold rounded-md hover:brightness-110 text-xs flex items-center gap-1.5 transition-all shadow-xs"
+              >
+                <span className="material-symbols-outlined text-base">add</span>
+                Registrar Conferencia
+              </button>
             </div>
             <div className="overflow-x-auto p-4">
               {speakers.length === 0 ? (
@@ -903,6 +915,13 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
           </div>
         </div>
       )}
+
+      {/* MODAL DE ALTA DE CONFERENCIA */}
+      <CreateSpeakerModal 
+        isOpen={isCreatingSpeaker}
+        onClose={() => setIsCreatingSpeaker(false)}
+        initialSponsor={currentSponsor}
+      />
     </main>
   );
 }

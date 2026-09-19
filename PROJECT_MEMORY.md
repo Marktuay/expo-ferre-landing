@@ -551,3 +551,10 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 ### 🏷️ Incorporación de Logo Zaratoga en Categoría Oro (`18 de Septiembre de 2026`)
 - Se agregó el logo [`public/oro/zaratoga.jpeg`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/public/oro/zaratoga.jpeg) dentro de la categoría **Oro** en el carrusel de la Landing Page ([`src/App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx)) y en el listado de patrocinadores oficiales ([`src/components/AdminSponsors.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsors.jsx)).
 - Se ubicó inmediatamente después del logo de **Tigo**.
+
+### 🎙️ Registro de Conferencias para Administradores (`19 de Septiembre de 2026`)
+- **Problema:** En el panel de administración no existía una interfaz para que los administradores registraran ponencias/conferencias directamente a nombre de los patrocinadores.
+- **Implementación:**
+  - Se creó el componente [`src/components/CreateSpeakerModal.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/CreateSpeakerModal.jsx) con selector dinámico de empresas patrocinadoras, carga y compresión de foto de conferencista, selección múltiple de formatos (Panel, Conferencia, Entrevista, Caso de éxito), título, resumen y autorización de contenido.
+  - **Módulo General de Conferencias ([`src/components/AdminSpeakers.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSpeakers.jsx)):** Se agregó el botón **"➕ Nueva Conferencia"**, buscador en tiempo real por speaker/tema/patrocinador, y visualización enriquecida con foto de perfil y gafete imprimible.
+  - **Vista 360 del Patrocinador ([`src/components/AdminSponsorDetails.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsorDetails.jsx)):** Se añadió el botón **"➕ Registrar Conferencia"** en la sección de conferencias para dar de alta ponencias asociadas automáticamente al patrocinador activo con 1 clic.
