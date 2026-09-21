@@ -571,3 +571,9 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     - 👥 **Modalidad & Cupo:** Presencial · Máx. 40 Personas
     - 🏆 **Beneficios:** Certificación por Certifier + Acceso a material
 
+### 🧭 Actualización de Navegación: Botón "Taller Master Ferretero" (`21 de Septiembre de 2026`)
+- **Cambio en Menú (Desktop y Móvil):** Se reemplazó el botón *"Plano de Stands"* por **"Taller Master Ferretero"** en [`src/App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx).
+- **Iconografía:** Se incorporó el icono `construction` correspondiente a la temática industrial/taller utilizada en el Hero.
+- **Interacción:** Al hacer clic, navega y desplaza suavemente la vista directamente a la sección del taller (`#taller-master-ferretero`).
+
+

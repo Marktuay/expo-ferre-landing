@@ -390,8 +390,8 @@ export default function App() {
             <button onClick={() => setCurrentView('landing')} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
               <span className="material-symbols-outlined text-[22px]">home</span> Inicio
             </button>
-            <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'plano-stands', 100); }} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
-              <span className="material-symbols-outlined text-[22px]">map</span> Plano de Stands
+            <button onClick={() => { setCurrentView('landing'); setTimeout(() => { const el = document.getElementById('taller-master-ferretero'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else window.scrollTo({ top: 0, behavior: 'smooth' }); }, 100); }} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
+              <span className="material-symbols-outlined text-[22px]">construction</span> Taller Master Ferretero
             </button>
             <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'awards', 100); }} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
               <span className="material-symbols-outlined text-[22px]">emoji_events</span> Premios
@@ -495,8 +495,8 @@ export default function App() {
             <button onClick={() => { setCurrentView('landing'); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
               <span className="material-symbols-outlined text-[24px]">home</span> Inicio
             </button>
-            <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'plano-stands', 100); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
-              <span className="material-symbols-outlined text-[24px]">map</span> Plano de Stands
+            <button onClick={() => { setCurrentView('landing'); setTimeout(() => { const el = document.getElementById('taller-master-ferretero'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else window.scrollTo({ top: 0, behavior: 'smooth' }); }, 100); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
+              <span className="material-symbols-outlined text-[24px]">construction</span> Taller Master Ferretero
             </button>
             <button onClick={() => { setCurrentView('sponsorDashboard'); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
               <span className="material-symbols-outlined text-[24px]">military_tech</span> Patrocinadores
@@ -713,7 +713,7 @@ export default function App() {
               </div>
             </div>
           )}
-          <div className="relative z-10 container mx-auto grid grid-cols-1 lg:grid-cols-12 gap-stack-lg items-center mt-10">
+          <div id="taller-master-ferretero" className="relative z-10 container mx-auto grid grid-cols-1 lg:grid-cols-12 gap-stack-lg items-center mt-10 scroll-mt-32">
             <div className="lg:col-span-7 text-white space-y-stack-sm">
               <FadeIn>
                 <div className="bg-[#f39200] text-black font-bold inline-flex items-center gap-1.5 px-3.5 py-1 rounded-md text-xs uppercase tracking-widest clip-industrial mb-3 shadow-md">
