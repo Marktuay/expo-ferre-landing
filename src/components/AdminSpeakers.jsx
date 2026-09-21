@@ -10,7 +10,9 @@ export default function AdminSpeakers({ onBack }) {
   const [loading, setLoading] = useState(true);
   const [printItems, setPrintItems] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [speakerToEdit, setSpeakerToEdit] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [previewPhoto, setPreviewPhoto] = useState(null);
 
   useEffect(() => {
     const q = query(collection(db, `${getEventBasePath()}/speakers`));
@@ -64,11 +66,14 @@ export default function AdminSpeakers({ onBack }) {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h1 className="text-headline-md font-bold text-on-surface">Conferencias</h1>
-            <p className="text-body-lg text-secondary">Registro y gestión oficial de conferencias y ponencias.</p>
+            <p className="text-body-lg text-secondary">Registro y gestión oficial de conferencias, ponencias y speakers.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <button 
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => {
+                setSpeakerToEdit(null);
+                setShowCreateModal(true);
+              }}
               className="px-5 py-2 bg-primary text-on-primary border border-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 shadow-xs"
             >
               <span className="material-symbols-outlined">add_circle</span>
@@ -97,7 +102,8 @@ export default function AdminSpeakers({ onBack }) {
                   Instagram: s.instagram || '',
                   Tema: s.titulo || s.tema || '',
                   Formato: Array.isArray(s.formatos) ? s.formatos.join(', ') : (s.formato || ''),
-                  AutorizaCompartir: s.autorizaCompartir || ''
+                  AutorizaCompartir: s.autorizaCompartir || '',
+                  TieneFoto: s.foto ? 'SÍ' : 'NO'
                 }));
                 const worksheet = XLSX.utils.json_to_sheet(dataToExport);
                 const workbook = XLSX.utils.book_new();
@@ -173,9 +179,19 @@ export default function AdminSpeakers({ onBack }) {
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             {speaker.foto ? (
-                              <img src={speaker.foto} alt={speakerName} className="w-9 h-9 rounded-full object-cover border border-outline-variant shrink-0" />
+                              <button
+                                type="button"
+                                onClick={() => setPreviewPhoto({ url: speaker.foto, name: speakerName })}
+                                className="relative group cursor-pointer shrink-0"
+                                title="Ver foto ampliada"
+                              >
+                                <img src={speaker.foto} alt={speakerName} className="w-10 h-10 rounded-full object-cover border border-outline-variant group-hover:scale-105 transition-transform" />
+                                <div className="absolute inset-0 bg-black/30 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
+                                  <span className="material-symbols-outlined text-xs">zoom_in</span>
+                                </div>
+                              </button>
                             ) : (
-                              <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                              <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0 border border-primary/20">
                                 {speaker.nombre?.charAt(0) || 'S'}
                               </div>
                             )}
@@ -208,13 +224,25 @@ export default function AdminSpeakers({ onBack }) {
                           {speaker.createdAt?.toLocaleDateString ? speaker.createdAt.toLocaleDateString() : ''}
                         </td>
                         <td className="p-4 text-center">
-                          <button 
-                            onClick={() => setPrintItems([speaker])}
-                            className="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors inline-flex items-center justify-center"
-                            title="Imprimir Gafete"
-                          >
-                            <span className="material-symbols-outlined text-lg">print</span>
-                          </button>
+                          <div className="flex items-center justify-center gap-1">
+                            <button 
+                              onClick={() => {
+                                setSpeakerToEdit(speaker);
+                                setShowCreateModal(true);
+                              }}
+                              className="p-1.5 text-secondary hover:text-primary hover:bg-surface-variant/60 rounded-lg transition-colors inline-flex items-center justify-center"
+                              title="Editar Conferencia / Subir Foto"
+                            >
+                              <span className="material-symbols-outlined text-lg">edit</span>
+                            </button>
+                            <button 
+                              onClick={() => setPrintItems([speaker])}
+                              className="p-1.5 text-primary hover:bg-primary/10 rounded-lg transition-colors inline-flex items-center justify-center"
+                              title="Imprimir Gafete"
+                            >
+                              <span className="material-symbols-outlined text-lg">print</span>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -226,11 +254,36 @@ export default function AdminSpeakers({ onBack }) {
         </div>
       </div>
 
-      {/* Modal para Crear Conferencia como Administrador */}
-      <CreateSpeakerModal 
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-      />
+      {/* Modal para Crear o Editar Conferencia */}
+      {showCreateModal && (
+        <CreateSpeakerModal 
+          isOpen={showCreateModal}
+          speakerToEdit={speakerToEdit}
+          onClose={() => {
+            setShowCreateModal(false);
+            setSpeakerToEdit(null);
+          }}
+        />
+      )}
+
+      {/* Modal para ver foto ampliada */}
+      {previewPhoto && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer"
+          onClick={() => setPreviewPhoto(null)}
+        >
+          <div className="bg-white p-4 rounded-2xl max-w-sm w-full text-center space-y-3" onClick={e => e.stopPropagation()}>
+            <img src={previewPhoto.url} alt={previewPhoto.name} className="w-full h-72 object-cover rounded-xl shadow-md" />
+            <h4 className="font-bold text-base text-secondary">{previewPhoto.name}</h4>
+            <button 
+              onClick={() => setPreviewPhoto(null)}
+              className="px-4 py-2 bg-surface-variant hover:bg-surface-variant/80 rounded-lg text-xs font-bold text-secondary transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

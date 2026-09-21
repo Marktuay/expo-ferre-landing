@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Mic, Send } from 'lucide-react';
+import { Mic, Send, Upload, Trash2, CheckCircle2, FileText, Image as ImageIcon, Building2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { db, storage, auth } from '../firebase';
+import { db, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 
 const SpeakerForm = ({ onClose }) => {
   const [formState, setFormState] = useState('idle');
   const [registeredSpeakerId, setRegisteredSpeakerId] = useState(null);
+  
+  // File and preview states
+  const [fotoData, setFotoData] = useState(null);
+  const [logoData, setLogoData] = useState(null);
+  const [cvName, setCvName] = useState('');
+  const [uploadingFoto, setUploadingFoto] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   const urlParams = new URLSearchParams(window.location.search);
   const urlSponsorId = urlParams.get('sponsorId') || null;
@@ -18,6 +25,80 @@ const SpeakerForm = ({ onClose }) => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Helper to compress images client-side to lightweight base64 JPEG/PNG
+  const processImageFile = async (file, maxDim = 500) => {
+    if (!file) return null;
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxDim) {
+              height *= maxDim / width;
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width *= maxDim / height;
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        };
+        img.onerror = (err) => reject(new Error('No se pudo procesar la imagen'));
+        img.src = event.target.result;
+      };
+      reader.onerror = (err) => reject(new Error('Error al leer archivo'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploadingFoto(true);
+      const base64 = await processImageFile(file, 600);
+      setFotoData(base64);
+    } catch (err) {
+      console.error('Error al procesar foto del speaker:', err);
+      alert('Hubo un problema al cargar la foto. Por favor intente con otra imagen (JPG, PNG o WEBP).');
+    } finally {
+      setUploadingFoto(false);
+    }
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploadingLogo(true);
+      const base64 = await processImageFile(file, 400);
+      setLogoData(base64);
+    } catch (err) {
+      console.error('Error al procesar logo:', err);
+      alert('Hubo un problema al cargar el logo. Intente nuevamente.');
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleCvUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCvName(file.name);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormState('submitting');
@@ -27,24 +108,39 @@ const SpeakerForm = ({ onClose }) => {
       const user = auth.currentUser;
       
       const formatos = [];
-      const checkboxes = e.target.querySelectorAll('input[type="checkbox"]:checked');
+      const checkboxes = e.target.querySelectorAll('input[name="formatos"]:checked');
       checkboxes.forEach(cb => formatos.push(cb.value));
 
+      if (formatos.length === 0) {
+        alert('Por favor selecciona al menos un formato de participación (Panel, Conferencia, etc.).');
+        setFormState('idle');
+        return;
+      }
+
+      const emailVal = formData.get('email')?.trim().toLowerCase() || '';
+      const tituloVal = formData.get('titulo')?.trim() || '';
+
       const data = {
-        nombre: formData.get('nombre'),
-        apellido: formData.get('apellido'),
-        cargo: formData.get('cargo'),
-        email: formData.get('email'),
-        empresa: formData.get('empresa'),
-        tamanoEmpresa: formData.get('tamanoEmpresa'),
-        telefono: formData.get('telefono'),
-        linkedin: formData.get('linkedin') || '',
-        facebook: formData.get('facebook') || '',
-        instagram: formData.get('instagram') || '',
+        nombre: formData.get('nombre')?.trim() || '',
+        apellido: formData.get('apellido')?.trim() || '',
+        cargo: formData.get('cargo')?.trim() || '',
+        email: emailVal,
+        correo: emailVal,
+        empresa: formData.get('empresa')?.trim() || '',
+        tamanoEmpresa: formData.get('tamanoEmpresa') || '',
+        telefono: formData.get('telefono')?.trim() || '',
+        linkedin: formData.get('linkedin')?.trim() || '',
+        facebook: formData.get('facebook')?.trim() || '',
+        instagram: formData.get('instagram')?.trim() || '',
         formatos: formatos,
-        titulo: formData.get('titulo'),
-        resumen: formData.get('resumen'),
-        autorizaCompartir: formData.get('auth'),
+        formato: formatos.join(', '),
+        titulo: tituloVal,
+        tema: tituloVal,
+        resumen: formData.get('resumen')?.trim() || '',
+        autorizaCompartir: formData.get('auth') || 'si',
+        foto: fotoData || null,
+        logo: logoData || null,
+        cvNombre: cvName || null,
         createdAt: serverTimestamp(),
         sponsorId: user ? user.uid : (urlSponsorId || null),
         sponsorEmail: user ? user.email : (urlSponsorEmail || null),
@@ -58,7 +154,7 @@ const SpeakerForm = ({ onClose }) => {
     } catch (error) {
       console.error('Error saving speaker:', error);
       setFormState('idle');
-      alert('Hubo un error al guardar los datos. Intente nuevamente.');
+      alert('Hubo un error al guardar los datos. Intente nuevamente: ' + error.message);
     }
   };
 
@@ -89,19 +185,21 @@ const SpeakerForm = ({ onClose }) => {
           )}
         </div>
 
-        <div className="bg-white p-8 md:p-12 rounded-lg shadow-sm border border-outline-variant">
+        <div className="bg-white p-6 md:p-10 rounded-xl shadow-sm border border-outline-variant">
           {formState === 'success' ? (
-            <div className="bg-white p-8 rounded-lg border border-outline-variant text-center flex flex-col items-center gap-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                <span className="material-symbols-outlined text-4xl">check_circle</span>
+            <div className="bg-white p-6 md:p-8 rounded-lg text-center flex flex-col items-center gap-6">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 shadow-xs">
+                <CheckCircle2 size={36} />
               </div>
               <div>
-                <h3 className="font-bold text-2xl mb-2 text-primary">¡Registro completado!</h3>
-                <p className="text-secondary mb-6">El código QR para la acreditación del conferencista ha sido generado.</p>
+                <h3 className="font-bold text-2xl mb-2 text-primary">¡Registro completado con éxito!</h3>
+                <p className="text-secondary mb-6 max-w-md mx-auto">
+                  La información de la conferencia y del conferencista ha sido registrada satisfactoriamente.
+                </p>
                 
-                <div className="bg-surface-variant p-6 rounded-lg inline-block border border-outline mb-6">
-                  <QRCodeSVG value={registeredSpeakerId} size={180} level="M" />
-                  <p className="mt-4 text-sm font-mono text-secondary">ID: {registeredSpeakerId}</p>
+                <div className="bg-surface-variant p-6 rounded-xl inline-block border border-outline mb-6 shadow-xs">
+                  <QRCodeSVG value={registeredSpeakerId || 'EXPOFERRE-SPEAKER'} size={180} level="M" />
+                  <p className="mt-4 text-xs font-mono text-secondary font-bold">CÓDIGO: {registeredSpeakerId}</p>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
@@ -109,132 +207,272 @@ const SpeakerForm = ({ onClose }) => {
                     onClick={() => {
                       setFormState('idle');
                       setRegisteredSpeakerId(null);
+                      setFotoData(null);
+                      setLogoData(null);
+                      setCvName('');
                     }}
                     className="px-6 py-3 bg-surface border border-outline-variant rounded-md text-primary font-bold hover:bg-surface-variant transition-colors"
                   >
                     Registrar Otro Conferencista
                   </button>
-                  <button 
-                    onClick={onClose}
-                    className="px-6 py-3 bg-primary text-on-primary rounded-md font-bold hover:bg-primary-container hover:text-on-primary-container transition-colors"
-                  >
-                    Volver al Panel
-                  </button>
+                  {onClose && (
+                    <button 
+                      onClick={onClose}
+                      className="px-6 py-3 bg-primary text-on-primary rounded-md font-bold hover:bg-primary-container hover:text-on-primary-container transition-colors"
+                    >
+                      Volver al Panel
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
               
-              {/* Datos Personales y Profesionales */}
+              {/* DATOS PERSONALES Y PROFESIONALES */}
               <div className="space-y-4">
-                <h3 className="font-headline-sm text-secondary border-b pb-2">Datos Personales y Profesionales</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Nombre <span className="text-error">*</span></label>
-                    <input name="nombre" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                <h3 className="font-headline-sm font-bold text-secondary border-b pb-2 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary">person</span>
+                  Datos del Conferencista
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">Nombre <span className="text-error">*</span></label>
+                    <input name="nombre" required type="text" placeholder="Ej. Juan" className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm" />
                   </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Apellido <span className="text-error">*</span></label>
-                    <input name="apellido" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                  <div className="space-y-1.5">
+                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">Apellido <span className="text-error">*</span></label>
+                    <input name="apellido" required type="text" placeholder="Ej. Pérez" className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm" />
                   </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Cargo <span className="text-error">*</span></label>
-                    <input name="cargo" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                  <div className="space-y-1.5">
+                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">Cargo / Especialidad <span className="text-error">*</span></label>
+                    <input name="cargo" required type="text" placeholder="Ej. Director Técnico / Especialista" className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm" />
                   </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Email <span className="text-error">*</span></label>
-                    <input name="email" required type="email" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                  <div className="space-y-1.5">
+                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">Email <span className="text-error">*</span></label>
+                    <input name="email" required type="email" placeholder="speaker@empresa.com" className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm" />
                   </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Empresa <span className="text-error">*</span></label>
-                    <input name="empresa" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                  <div className="space-y-1.5">
+                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">Empresa que Representa <span className="text-error">*</span></label>
+                    <input name="empresa" required type="text" placeholder="Nombre comercial de la empresa" className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm" />
                   </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Tamaño de empresa <span className="text-error">*</span></label>
-                    <select name="tamanoEmpresa" required className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface">
-                      <option value="">Seleccione...</option>
-                      <option value="1-10">1 - 10</option>
-                      <option value="11-50">11 - 50</option>
-                      <option value="51-200">51 - 200</option>
-                      <option value="201-500">201 - 500</option>
-                      <option value="500+">Más de 500</option>
+                  <div className="space-y-1.5">
+                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">Tamaño de empresa <span className="text-error">*</span></label>
+                    <select name="tamanoEmpresa" required className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface text-sm">
+                      <option value="">Seleccione tamaño...</option>
+                      <option value="1-10">1 - 10 colaboradores</option>
+                      <option value="11-50">11 - 50 colaboradores</option>
+                      <option value="51-200">51 - 200 colaboradores</option>
+                      <option value="201-500">201 - 500 colaboradores</option>
+                      <option value="500+">Más de 500 colaboradores</option>
                     </select>
                   </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Número telefónico <span className="text-error">*</span></label>
-                    <input name="telefono" required type="tel" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                  <div className="space-y-1.5 md:col-span-2">
+                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">Número Telefónico / WhatsApp <span className="text-error">*</span></label>
+                    <input name="telefono" required type="tel" placeholder="+505 8888 8888" className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm" />
                   </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">LinkedIn (Opcional)</label>
-                    <input name="linkedin" type="url" placeholder="https://linkedin.com/in/..." className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                </div>
+
+                {/* Redes Sociales */}
+                <div className="pt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant">LinkedIn (Opcional)</label>
+                    <input name="linkedin" type="url" placeholder="https://linkedin.com/in/..." className="w-full p-2.5 bg-surface-container rounded-lg border border-outline text-xs outline-none focus:border-primary" />
                   </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Facebook personal/empresa (Opcional)</label>
-                    <input name="facebook" type="url" placeholder="https://facebook.com/..." className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant">Facebook (Opcional)</label>
+                    <input name="facebook" type="url" placeholder="https://facebook.com/..." className="w-full p-2.5 bg-surface-container rounded-lg border border-outline text-xs outline-none focus:border-primary" />
                   </div>
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Instagram personal/empresa (Opcional)</label>
-                    <input name="instagram" type="text" placeholder="https://instagram.com/..." className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant">Instagram (Opcional)</label>
+                    <input name="instagram" type="text" placeholder="@usuario" className="w-full p-2.5 bg-surface-container rounded-lg border border-outline text-xs outline-none focus:border-primary" />
                   </div>
                 </div>
               </div>
 
-              {/* Datos de la participación */}
-              <div className="space-y-4 pt-4">
-                <h3 className="font-headline-sm text-secondary border-b pb-2">Participación en Agenda</h3>
-                <div className="grid grid-cols-1 gap-6">
+              {/* FOTO, LOGO Y CV (CARGA DE ARCHIVOS) */}
+              <div className="space-y-4 pt-2">
+                <h3 className="font-headline-sm font-bold text-secondary border-b pb-2 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary">photo_camera</span>
+                  Fotografía y Archivos
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* FOTO DEL SPEAKER */}
+                  <div className={`p-4 rounded-xl border-2 border-dashed transition-all flex flex-col items-center justify-between text-center ${fotoData ? 'bg-primary/5 border-primary/40' : 'bg-surface-container border-outline hover:border-primary'}`}>
+                    <div className="w-full flex flex-col items-center">
+                      <div className="w-20 h-20 rounded-full border-2 border-white shadow-sm overflow-hidden bg-surface-variant/40 flex items-center justify-center mb-2 shrink-0">
+                        {uploadingFoto ? (
+                          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        ) : fotoData ? (
+                          <img src={fotoData} alt="Foto Speaker" className="w-full h-full object-cover" />
+                        ) : (
+                          <ImageIcon className="text-on-surface-variant/50" size={32} />
+                        )}
+                      </div>
+                      <p className="font-bold text-xs text-secondary">Foto del Speaker</p>
+                      <p className="text-[11px] text-on-surface-variant mb-3">Formato JPG, PNG o WEBP</p>
+                    </div>
+
+                    <div className="w-full flex items-center justify-center gap-2">
+                      <input 
+                        type="file" 
+                        id="speaker-foto-input" 
+                        accept="image/*" 
+                        onChange={handleFotoUpload} 
+                        className="hidden" 
+                      />
+                      <label 
+                        htmlFor="speaker-foto-input" 
+                        className="cursor-pointer px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-bold hover:brightness-110 flex items-center gap-1 transition-all shadow-xs"
+                      >
+                        <Upload size={13} />
+                        {fotoData ? 'Cambiar Foto' : 'Subir Foto'}
+                      </label>
+                      {fotoData && (
+                        <button 
+                          type="button" 
+                          onClick={() => setFotoData(null)}
+                          className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors" 
+                          title="Eliminar foto"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* LOGO DE LA EMPRESA */}
+                  <div className={`p-4 rounded-xl border-2 border-dashed transition-all flex flex-col items-center justify-between text-center ${logoData ? 'bg-primary/5 border-primary/40' : 'bg-surface-container border-outline hover:border-primary'}`}>
+                    <div className="w-full flex flex-col items-center">
+                      <div className="w-20 h-20 rounded-lg border-2 border-white shadow-sm overflow-hidden bg-surface-variant/40 flex items-center justify-center mb-2 p-1 shrink-0">
+                        {uploadingLogo ? (
+                          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        ) : logoData ? (
+                          <img src={logoData} alt="Logo Empresa" className="max-w-full max-h-full object-contain" />
+                        ) : (
+                          <Building2 className="text-on-surface-variant/50" size={32} />
+                        )}
+                      </div>
+                      <p className="font-bold text-xs text-secondary">Logo Empresa</p>
+                      <p className="text-[11px] text-on-surface-variant mb-3">Opcional (PNG/JPG)</p>
+                    </div>
+
+                    <div className="w-full flex items-center justify-center gap-2">
+                      <input 
+                        type="file" 
+                        id="speaker-logo-input" 
+                        accept="image/*" 
+                        onChange={handleLogoUpload} 
+                        className="hidden" 
+                      />
+                      <label 
+                        htmlFor="speaker-logo-input" 
+                        className="cursor-pointer px-3 py-1.5 bg-secondary text-white rounded-lg text-xs font-bold hover:brightness-110 flex items-center gap-1 transition-all shadow-xs"
+                      >
+                        <Upload size={13} />
+                        {logoData ? 'Cambiar Logo' : 'Subir Logo'}
+                      </label>
+                      {logoData && (
+                        <button 
+                          type="button" 
+                          onClick={() => setLogoData(null)}
+                          className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors" 
+                          title="Eliminar logo"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* CURRÍCULUM / PERFIL */}
+                  <div className={`p-4 rounded-xl border-2 border-dashed transition-all flex flex-col items-center justify-between text-center ${cvName ? 'bg-primary/5 border-primary/40' : 'bg-surface-container border-outline hover:border-primary'}`}>
+                    <div className="w-full flex flex-col items-center">
+                      <div className="w-20 h-20 rounded-lg border-2 border-white shadow-sm overflow-hidden bg-surface-variant/40 flex items-center justify-center mb-2 shrink-0">
+                        <FileText className={cvName ? 'text-primary' : 'text-on-surface-variant/50'} size={32} />
+                      </div>
+                      <p className="font-bold text-xs text-secondary">Currículum / Bio</p>
+                      <p className="text-[11px] text-on-surface-variant mb-3 line-clamp-1 max-w-[150px]" title={cvName || 'PDF o Documento'}>
+                        {cvName || 'PDF o Documento (Opcional)'}
+                      </p>
+                    </div>
+
+                    <div className="w-full flex items-center justify-center gap-2">
+                      <input 
+                        type="file" 
+                        id="speaker-cv-input" 
+                        accept=".pdf,.doc,.docx" 
+                        onChange={handleCvUpload} 
+                        className="hidden" 
+                      />
+                      <label 
+                        htmlFor="speaker-cv-input" 
+                        className="cursor-pointer px-3 py-1.5 bg-surface-variant text-secondary border border-outline-variant rounded-lg text-xs font-bold hover:bg-surface-variant/80 flex items-center gap-1 transition-all shadow-xs"
+                      >
+                        <Upload size={13} />
+                        {cvName ? 'Cambiar' : 'Adjuntar'}
+                      </label>
+                      {cvName && (
+                        <button 
+                          type="button" 
+                          onClick={() => setCvName('')}
+                          className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors" 
+                          title="Eliminar archivo"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* DETALLES DE LA CONFERENCIA */}
+              <div className="space-y-4 pt-2">
+                <h3 className="font-headline-sm font-bold text-secondary border-b pb-2 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary">campaign</span>
+                  Detalles de la Ponencia
+                </h3>
+                
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Formato de participación * (Múltiple)</label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">
+                      Formato de participación <span className="text-error">* (Puede seleccionar varios)</span>
+                    </label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-1">
                       {['Panel', 'Conferencia', 'Entrevista', 'Caso de éxito'].map(fmt => (
-                        <label key={fmt} className="flex items-center gap-2 bg-surface-container p-3 rounded-md border border-outline hover:border-primary transition-colors cursor-pointer">
-                          <input name="formatos" type="checkbox" className="w-4 h-4 accent-primary" value={fmt} />
-                          <span className="font-body-md text-on-surface">{fmt}</span>
+                        <label key={fmt} className="flex items-center gap-2 bg-surface-container p-3 rounded-lg border border-outline hover:border-primary transition-colors cursor-pointer select-none">
+                          <input name="formatos" type="checkbox" className="w-4 h-4 accent-primary" value={fmt} defaultChecked={fmt === 'Conferencia'} />
+                          <span className="font-body-md text-sm text-on-surface font-medium">{fmt}</span>
                         </label>
                       ))}
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Título de la Conferencia/Entrevista/Caso <span className="text-error">*</span></label>
-                    <input name="titulo" required type="text" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
+                  <div className="space-y-1.5">
+                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">Título de la Conferencia / Ponencia <span className="text-error">*</span></label>
+                    <input name="titulo" required type="text" placeholder="Ej. Innovación y Transformación en la Ferretería Moderna" className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm font-medium" />
                   </div>
                   
-                  <div className="space-y-2">
-                    <label className="font-label-md text-on-surface font-bold">Resumen de la conferencia * (Max 100 palabras)</label>
-                    <textarea name="resumen" required rows="3" className="w-full p-3 bg-surface-container rounded-md border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"></textarea>
-                  </div>
-                  
-                  {/* Archivos */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                    <div className="bg-surface-container border-2 border-dashed border-outline rounded-md p-6 text-center hover:border-primary transition-all">
-                      <span className="material-symbols-outlined text-4xl text-primary mb-2">description</span>
-                      <p className="font-label-sm font-bold text-secondary mb-2">Currículum <span className="text-error">*</span></p>
-                      <input required type="file" className="text-xs text-on-surface-variant w-full" />
-                    </div>
-                    <div className="bg-surface-container border-2 border-dashed border-outline rounded-md p-6 text-center hover:border-primary transition-all">
-                      <span className="material-symbols-outlined text-4xl text-primary mb-2">image</span>
-                      <p className="font-label-sm font-bold text-secondary mb-2">Foto Conferencista <span className="text-error">*</span></p>
-                      <input required type="file" accept="image/*" className="text-xs text-on-surface-variant w-full" />
-                    </div>
-                    <div className="bg-surface-container border-2 border-dashed border-outline rounded-md p-6 text-center hover:border-primary transition-all">
-                      <span className="material-symbols-outlined text-4xl text-primary mb-2">business_center</span>
-                      <p className="font-label-sm font-bold text-secondary mb-2">Logo Empresa</p>
-                      <input type="file" accept="image/*" className="text-xs text-on-surface-variant w-full" />
-                    </div>
+                  <div className="space-y-1.5">
+                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">Resumen de la conferencia <span className="text-error">* (Máximo 100 palabras)</span></label>
+                    <textarea name="resumen" required rows="3" placeholder="Describa brevemente los puntos clave y objetivo de la presentación..." className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm resize-none"></textarea>
                   </div>
 
-                  <div className="space-y-2 pt-2">
-                    <label className="font-label-md text-on-surface font-bold">¿Brinda autorización de compartir su presentación con los asistentes posterior al evento? <span className="text-error">*</span></label>
+                  <div className="space-y-2 pt-2 bg-surface-variant/30 p-4 rounded-xl border border-outline-variant">
+                    <label className="font-label-md text-on-surface font-bold text-xs">
+                      ¿Brinda autorización de compartir su presentación con los asistentes posterior al evento? <span className="text-error">*</span>
+                    </label>
                     <div className="flex gap-6 mt-2">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input required type="radio" name="auth" value="si" className="w-4 h-4 accent-primary" />
-                        <span className="font-body-md">Sí, autorizo</span>
+                      <label className="flex items-center gap-2 cursor-pointer text-sm">
+                        <input required type="radio" name="auth" value="si" defaultChecked className="w-4 h-4 accent-primary" />
+                        <span className="font-medium">Sí, autorizo</span>
                       </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
+                      <label className="flex items-center gap-2 cursor-pointer text-sm">
                         <input required type="radio" name="auth" value="no" className="w-4 h-4 accent-primary" />
-                        <span className="font-body-md">No autorizo</span>
+                        <span className="font-medium">No autorizo</span>
                       </label>
                     </div>
                   </div>
@@ -242,17 +480,21 @@ const SpeakerForm = ({ onClose }) => {
                 </div>
               </div>
 
+              {/* BOTÓN DE ENVÍO */}
               <div className="pt-6 border-t border-outline-variant flex justify-end">
                 <button 
                   type="submit" 
-                  disabled={formState === 'submitting'}
-                  className="w-full md:w-auto px-8 py-3 bg-primary text-on-primary font-bold rounded-md hover:bg-primary-fixed transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  disabled={formState === 'submitting' || uploadingFoto || uploadingLogo}
+                  className="w-full md:w-auto px-10 py-3.5 bg-primary text-on-primary font-bold rounded-xl hover:brightness-110 transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed text-base"
                 >
                   {formState === 'submitting' ? (
-                    <span className="material-symbols-outlined animate-spin">progress_activity</span>
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Guardando conferencia...</span>
+                    </>
                   ) : (
                     <>
-                      <Send size={20} /> Enviar Registro
+                      <Send size={18} /> Enviar Registro
                     </>
                   )}
                 </button>

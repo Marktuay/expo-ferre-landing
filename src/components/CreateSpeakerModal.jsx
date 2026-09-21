@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
-import { collection, addDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
-import { Mic, X, Save, Image, CheckCircle, Upload } from 'lucide-react';
+import { Mic, X, Save, Upload, Trash2, Edit3 } from 'lucide-react';
 
-export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = null, onSuccess }) {
+export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = null, speakerToEdit = null, onSuccess }) {
   const [sponsorsList, setSponsorsList] = useState([]);
   const [loadingSponsors, setLoadingSponsors] = useState(true);
   const [saving, setSaving] = useState(false);
   const [fotoPreview, setFotoPreview] = useState(null);
+  const [uploadingFoto, setUploadingFoto] = useState(false);
 
   const [formData, setFormData] = useState({
     sponsorId: '',
@@ -35,8 +36,30 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
   useEffect(() => {
     if (!isOpen) return;
 
-    // Si viene un patrocinador preseleccionado (ej. desde Vista 360)
-    if (initialSponsor) {
+    if (speakerToEdit) {
+      setFormData({
+        sponsorId: speakerToEdit.sponsorId || '',
+        sponsorCompany: speakerToEdit.sponsorCompany || speakerToEdit.empresa || '',
+        sponsorEmail: speakerToEdit.sponsorEmail || speakerToEdit.email || speakerToEdit.correo || '',
+        nombre: speakerToEdit.nombre || '',
+        apellido: speakerToEdit.apellido || '',
+        cargo: speakerToEdit.cargo || '',
+        email: speakerToEdit.email || speakerToEdit.correo || '',
+        telefono: speakerToEdit.telefono || '',
+        empresa: speakerToEdit.empresa || speakerToEdit.sponsorCompany || '',
+        tamanoEmpresa: speakerToEdit.tamanoEmpresa || '51-200',
+        linkedin: speakerToEdit.linkedin || '',
+        facebook: speakerToEdit.facebook || '',
+        instagram: speakerToEdit.instagram || '',
+        titulo: speakerToEdit.titulo || speakerToEdit.tema || '',
+        resumen: speakerToEdit.resumen || '',
+        formatos: Array.isArray(speakerToEdit.formatos) ? speakerToEdit.formatos : (speakerToEdit.formato ? [speakerToEdit.formato] : ['Conferencia']),
+        autorizaCompartir: speakerToEdit.autorizaCompartir || 'si',
+        foto: speakerToEdit.foto || null,
+        cvNombre: speakerToEdit.cvNombre || ''
+      });
+      setFotoPreview(speakerToEdit.foto || null);
+    } else if (initialSponsor) {
       setFormData(prev => ({
         ...prev,
         sponsorId: initialSponsor.id || '',
@@ -44,6 +67,9 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
         sponsorEmail: initialSponsor.correo || initialSponsor.email || '',
         empresa: initialSponsor.empresa || initialSponsor.company || ''
       }));
+      setFotoPreview(null);
+    } else {
+      setFotoPreview(null);
     }
 
     // Cargar lista de patrocinadores desde Firestore
@@ -67,8 +93,7 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
         list.sort((a, b) => a.empresa.localeCompare(b.empresa));
         setSponsorsList(list);
 
-        // Si no hay sponsor inicial y hay lista, seleccionar el primero por defecto
-        if (!initialSponsor && list.length > 0) {
+        if (!speakerToEdit && !initialSponsor && list.length > 0) {
           setFormData(prev => ({
             ...prev,
             sponsorId: prev.sponsorId || list[0].id,
@@ -85,7 +110,7 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
     };
 
     fetchSponsors();
-  }, [isOpen, initialSponsor]);
+  }, [isOpen, initialSponsor, speakerToEdit]);
 
   if (!isOpen) return null;
 
@@ -125,10 +150,10 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
     return await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (event) => {
-        const img = new window.Image();
+        const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_DIM = 400;
+          const MAX_DIM = 500;
           let width = img.width;
           let height = img.height;
 
@@ -149,10 +174,10 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
           ctx.drawImage(img, 0, 0, width, height);
           resolve(canvas.toDataURL('image/jpeg', 0.85));
         };
-        img.onerror = reject;
+        img.onerror = (err) => reject(new Error('No se pudo procesar la imagen'));
         img.src = event.target.result;
       };
-      reader.onerror = reject;
+      reader.onerror = (err) => reject(new Error('Error al leer el archivo'));
       reader.readAsDataURL(file);
     });
   };
@@ -161,11 +186,15 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
     const file = e.target.files?.[0];
     if (!file) return;
     try {
+      setUploadingFoto(true);
       const base64 = await processImageFile(file);
       setFotoPreview(base64);
       setFormData(prev => ({ ...prev, foto: base64 }));
     } catch (err) {
       console.error('Error al procesar foto:', err);
+      alert('No se pudo procesar la foto seleccionada. Intente con otra imagen JPG o PNG.');
+    } finally {
+      setUploadingFoto(false);
     }
   };
 
@@ -179,20 +208,23 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
     setSaving(true);
     try {
       const user = auth.currentUser;
+      const emailVal = formData.email.trim().toLowerCase();
+      const tituloVal = formData.titulo.trim();
+
       const speakerDoc = {
         nombre: formData.nombre.trim(),
         apellido: formData.apellido.trim(),
         cargo: formData.cargo.trim(),
-        email: formData.email.trim().toLowerCase(),
-        correo: formData.email.trim().toLowerCase(),
+        email: emailVal,
+        correo: emailVal,
         telefono: formData.telefono.trim(),
         empresa: formData.empresa.trim(),
         tamanoEmpresa: formData.tamanoEmpresa,
         linkedin: formData.linkedin.trim(),
         facebook: formData.facebook.trim(),
         instagram: formData.instagram.trim(),
-        titulo: formData.titulo.trim(),
-        tema: formData.titulo.trim(),
+        titulo: tituloVal,
+        tema: tituloVal,
         resumen: formData.resumen.trim(),
         formatos: formData.formatos,
         formato: formData.formatos.join(', '),
@@ -201,24 +233,39 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
         cvNombre: formData.cvNombre || null,
         sponsorId: formData.sponsorId || (initialSponsor ? initialSponsor.id : null),
         sponsorCompany: formData.sponsorCompany || (initialSponsor ? initialSponsor.empresa : 'Patrocinador Oficial'),
-        sponsorEmail: formData.sponsorEmail || (initialSponsor ? (initialSponsor.correo || initialSponsor.email) : null),
-        createdAt: serverTimestamp(),
-        registeredByAdmin: user ? user.email : 'admin'
+        sponsorEmail: formData.sponsorEmail || (initialSponsor ? (initialSponsor.correo || initialSponsor.email) : null)
       };
 
-      const docRef = await addDoc(collection(db, `${getEventBasePath()}/speakers`), speakerDoc);
-
-      alert(`¡Conferencia "${formData.titulo}" registrada exitosamente a nombre de ${formData.sponsorCompany}!`);
+      if (speakerToEdit?.id) {
+        // Actualizar speaker existente
+        await updateDoc(doc(db, `${getEventBasePath()}/speakers`, speakerToEdit.id), {
+          ...speakerDoc,
+          updatedAt: serverTimestamp(),
+          updatedBy: user ? user.email : 'admin'
+        });
+        alert(`¡Conferencia "${formData.titulo}" actualizada exitosamente!`);
+        if (onSuccess) onSuccess({ id: speakerToEdit.id, ...speakerDoc });
+      } else {
+        // Crear nuevo speaker
+        const docRef = await addDoc(collection(db, `${getEventBasePath()}/speakers`), {
+          ...speakerDoc,
+          createdAt: serverTimestamp(),
+          registeredByAdmin: user ? user.email : 'admin'
+        });
+        alert(`¡Conferencia "${formData.titulo}" registrada exitosamente a nombre de ${formData.sponsorCompany}!`);
+        if (onSuccess) onSuccess({ id: docRef.id, ...speakerDoc });
+      }
       
-      if (onSuccess) onSuccess({ id: docRef.id, ...speakerDoc });
       onClose();
     } catch (err) {
-      console.error('Error registrando conferencia:', err);
-      alert('Hubo un error al registrar la conferencia: ' + err.message);
+      console.error('Error guardando conferencia:', err);
+      alert('Hubo un error al guardar la conferencia: ' + err.message);
     } finally {
       setSaving(false);
     }
   };
+
+  const isEditing = !!speakerToEdit?.id;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
@@ -227,11 +274,15 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
         <div className="p-6 bg-secondary text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
-              <Mic size={22} />
+              {isEditing ? <Edit3 size={22} /> : <Mic size={22} />}
             </div>
             <div>
-              <h3 className="font-headline-sm font-bold text-lg leading-tight">Registrar Nueva Conferencia</h3>
-              <p className="text-xs text-white/80">Alta administrativa de conferencistas y ponencias</p>
+              <h3 className="font-headline-sm font-bold text-lg leading-tight">
+                {isEditing ? 'Editar Conferencia' : 'Registrar Nueva Conferencia'}
+              </h3>
+              <p className="text-xs text-white/80">
+                {isEditing ? 'Actualiza los datos del conferencista y ponencia' : 'Alta administrativa de conferencistas y ponencias'}
+              </p>
             </div>
           </div>
           <button 
@@ -248,45 +299,36 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
           <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 space-y-3">
             <label className="block text-sm font-bold text-primary flex items-center gap-1.5">
               <span className="material-symbols-outlined text-lg">corporate_fare</span>
-              Empresa Patrocinadora que Presenta la Conferencia *
+              Empresa / Patrocinador que auspicia la Conferencia *
             </label>
             
-            {initialSponsor ? (
-              <div className="bg-white p-3 rounded-lg border border-primary/30 font-bold text-secondary text-sm flex items-center justify-between">
-                <span>{initialSponsor.empresa || initialSponsor.company || initialSponsor.nombre}</span>
-                <span className="text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-mono">
-                  {initialSponsor.correo || initialSponsor.email}
-                </span>
-              </div>
+            {loadingSponsors ? (
+              <div className="text-xs text-secondary italic">Cargando lista de patrocinadores...</div>
             ) : (
               <select
-                required
                 value={formData.sponsorId}
                 onChange={handleSponsorChange}
-                disabled={loadingSponsors}
-                className="w-full p-2.5 bg-white border border-outline-variant rounded-md focus:ring-2 focus:ring-primary focus:outline-none text-sm text-secondary font-medium"
+                required
+                className="w-full p-2.5 bg-white border border-outline-variant rounded-md text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
               >
-                {loadingSponsors ? (
-                  <option value="">Cargando patrocinadores...</option>
-                ) : (
-                  sponsorsList.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.empresa} {s.contacto ? `(${s.contacto})` : ''} - {s.correo}
-                    </option>
-                  ))
-                )}
+                <option value="">-- Seleccionar Patrocinador Registrado --</option>
+                {sponsorsList.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.empresa} ({s.contacto || s.correo || 'Patrocinador'})
+                  </option>
+                ))}
               </select>
             )}
             <p className="text-[11px] text-on-surface-variant">
-              La conferencia quedará vinculada formalmente a este patrocinador en la agenda y gafetes oficiales.
+              Esta conferencia quedará vinculada automáticamente a este patrocinador en su vista 360 y panel de actividad.
             </p>
           </div>
 
-          {/* DATOS DEL SPEAKER */}
+          {/* DATOS PERSONALES DEL SPEAKER */}
           <div className="space-y-4">
             <h4 className="text-sm font-bold text-secondary uppercase tracking-wider border-b pb-1 flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-primary text-base">person</span>
-              Datos del Conferencista (Speaker)
+              <span className="material-symbols-outlined text-primary text-base">badge</span>
+              Datos del Conferencista
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -321,7 +363,7 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
                   required 
                   value={formData.cargo} 
                   onChange={e => setFormData({ ...formData, cargo: e.target.value })}
-                  placeholder="Ej. Director de Innovación"
+                  placeholder="Ej. Gerente de Innovación"
                   className="w-full p-2.5 border border-outline-variant rounded-md text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                 />
               </div>
@@ -364,27 +406,29 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
             </div>
 
             {/* FOTO DEL SPEAKER */}
-            <div className="bg-surface-variant/20 p-3 rounded-lg border border-outline-variant/60 flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full border-2 border-dashed border-outline-variant bg-white flex items-center justify-center overflow-hidden shrink-0">
-                {fotoPreview ? (
-                  <img src={fotoPreview} alt="Foto" className="w-full h-full object-cover" />
+            <div className="bg-surface-variant/20 p-4 rounded-xl border border-outline-variant/60 flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full border-2 border-dashed border-outline-variant bg-white flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                {uploadingFoto ? (
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                ) : fotoPreview ? (
+                  <img src={fotoPreview} alt="Foto Speaker" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="material-symbols-outlined text-on-surface-variant/40 text-2xl">account_circle</span>
+                  <span className="material-symbols-outlined text-on-surface-variant/40 text-3xl">account_circle</span>
                 )}
               </div>
               <div className="flex-1">
-                <label className="block text-xs font-bold text-secondary mb-1">Foto del Conferencista (Opcional)</label>
+                <label className="block text-xs font-bold text-secondary mb-1">Foto del Conferencista (JPG/PNG)</label>
                 <input 
                   type="file" 
                   id="admin-speaker-foto"
-                  accept="image/jpeg, image/png, image/jpg"
+                  accept="image/*"
                   onChange={handleFotoUpload}
                   className="hidden"
                 />
                 <div className="flex items-center gap-2">
                   <label 
                     htmlFor="admin-speaker-foto"
-                    className="cursor-pointer px-3 py-1 bg-white hover:bg-surface-variant text-secondary border border-outline-variant rounded font-bold text-xs flex items-center gap-1 transition-colors"
+                    className="cursor-pointer px-3 py-1.5 bg-white hover:bg-surface-variant text-secondary border border-outline-variant rounded-md font-bold text-xs flex items-center gap-1.5 transition-colors shadow-2xs"
                   >
                     <Upload size={13} />
                     {fotoPreview ? 'Cambiar Foto' : 'Subir Foto'}
@@ -396,8 +440,9 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
                         setFotoPreview(null);
                         setFormData(prev => ({ ...prev, foto: null }));
                       }}
-                      className="text-xs text-red-500 hover:text-red-700 font-bold"
+                      className="px-2 py-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 font-bold rounded flex items-center gap-1 transition-colors"
                     >
+                      <Trash2 size={13} />
                       Quitar
                     </button>
                   )}
@@ -503,8 +548,8 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
             </button>
             <button
               type="submit"
-              disabled={saving}
-              className="px-5 py-2 bg-primary text-on-primary font-bold rounded-md hover:brightness-110 transition-all text-sm flex items-center gap-2 disabled:opacity-50"
+              disabled={saving || uploadingFoto}
+              className="px-6 py-2.5 bg-primary text-on-primary font-bold rounded-lg hover:brightness-110 transition-all text-sm flex items-center gap-2 disabled:opacity-50 shadow-xs"
             >
               {saving ? (
                 <>
@@ -514,7 +559,7 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
               ) : (
                 <>
                   <Save size={16} />
-                  Guardar Conferencia
+                  {isEditing ? 'Actualizar Conferencia' : 'Guardar Conferencia'}
                 </>
               )}
             </button>
