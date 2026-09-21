@@ -340,6 +340,19 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
                 </div>
               </button>
 
+              <button 
+                onClick={() => onNavigate('adminJury')}
+                className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-[#f39200] hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group"
+              >
+                <div className="w-16 h-16 bg-[#f39200]/10 text-[#f39200] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-3xl">military_tech</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-on-surface mb-2">Premios y Jurado</h3>
+                  <p className="text-secondary text-sm">Invitar jurados calificadores, ver nominaciones y ranking de ferreterías.</p>
+                </div>
+              </button>
+
 
               <button 
                 onClick={() => onNavigate('adminContact')}

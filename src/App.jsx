@@ -31,6 +31,8 @@ import AdminPushNotifications from './components/AdminPushNotifications';
 import InteractiveMap from './components/InteractiveMap';
 import ErrorBoundary from './components/ErrorBoundary';
 import SpeakerForm from './components/SpeakerForm';
+import JudgeEvaluationForm from './components/JudgeEvaluationForm';
+import AdminJury from './components/AdminJury';
 
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -68,6 +70,9 @@ export default function App() {
   const [currentView, setCurrentView] = useState(() => {
     if (window.location.search.includes('form=speaker') || window.location.search.includes('speaker=register')) {
       return 'speakerRegistration';
+    }
+    if (window.location.search.includes('form=jurado') || window.location.search.includes('form=judge')) {
+      return 'judgeEvaluation';
     }
     if (window.location.hash) {
       return 'landing';
@@ -1518,6 +1523,14 @@ export default function App() {
 
       {currentView === 'speakerRegistration' && (
         <SpeakerForm onClose={() => setCurrentView('landing')} />
+      )}
+
+      {currentView === 'judgeEvaluation' && (
+        <JudgeEvaluationForm onClose={() => setCurrentView('landing')} />
+      )}
+
+      {currentView === 'adminJury' && (
+        <AdminJury onBack={() => setCurrentView('adminHub')} />
       )}
 
       {/* Footer */}

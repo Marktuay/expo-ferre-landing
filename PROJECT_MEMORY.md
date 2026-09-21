@@ -571,12 +571,25 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     - 👥 **Modalidad & Cupo:** Presencial · Máx. 40 Personas
     - 🏆 **Beneficios:** Certificación por Certifier + Acceso a material
 
-### 🧭 Actualización de Navegación y Media Kit: Botón "Taller Master Ferretero" (`21 de Septiembre de 2026`)
-- **Cambio en Menú (Desktop y Móvil):** Se reemplazó el botón *"Plano de Stands"* por **"Taller Master Ferretero"** en [`src/App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx).
-- **Iconografía:** Se incorporó el icono `construction` (<span className="material-symbols-outlined">construction</span>) correspondiente a la temática industrial/taller utilizada en el Hero.
-- **Enlace de Descarga Media Kit:**
-  - El botón del menú de navegación (escritorio y móvil) ahora enlaza y descarga directamente el archivo oficial [`public/mediakit.pdf`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/public/mediakit.pdf) con el nombre `MediaKit-Master-Ferretero-ExpoFerre2026.pdf`.
-  - Se agregó un botón de llamada a la acción (CTA) destacado **"📥 Descargar Media Kit (PDF)"** dentro de la tarjeta del taller en la sección Hero de [`src/App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx).
+### 🏆 Sistema de Jurado Calificador y Evaluación de Premios a la Excelencia (`21 de Septiembre de 2026`)
+- **Objetivo:** Permitir a los administradores generar y enviar enlaces personalizados para el Jurado Calificador vía WhatsApp o correo electrónico, y ofrecer una página privada confidencial para nominar y calificar 5 ferreterías por categoría con la metodología oficial del 1 al 5.
+- **Componentes Creados:**
+  1. **[`src/components/JudgeEvaluationForm.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/JudgeEvaluationForm.jsx):**
+     - Portal confidencial de evaluación (`?form=jurado` o `?form=judge`).
+     - Metodología oficial y escala visual interactiva del 1 al 5 (1 = Bajo / poca evidencia, 2 = En desarrollo, 3 = Buen nivel, 4 = Alto nivel, 5 = Sobresaliente).
+     - **3 Categorías con criterios oficiales:**
+       - **01. Ferretería Familiar:** Trayectoria familiar, Continuidad generacional, Reputación, Reconocimiento sectorial, Adaptación (5 slots de ferreterías, máx 25 pts).
+       - **02. Ferretería Oro (25+ años):** Antigüedad, Trayectoria, Reputación, Reconocimiento sectorial, Evolución, Expansión (5 slots de ferreterías, máx 30 pts).
+       - **03. Ferretería Promesa (<5 años):** Antigüedad, Crecimiento, Reputación, Posicionamiento, Diferenciación, Potencial de liderazgo (5 slots de ferreterías, máx 30 pts).
+     - Cálculo en tiempo real de subtotales por ferretería y almacenamiento en Firestore (`events/2026/juryEvaluations`).
+  2. **[`src/components/InviteJudgeModal.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/InviteJudgeModal.jsx):**
+     - Modal de generación de invitaciones con solo ingresar el nombre del jurado (y teléfono/correo opcional).
+     - Botón para copiar enlace directo, botón de envío directo a **WhatsApp** (`wa.me`) con mensaje pre-redactado de bienvenida formal, y envío de correo vía Firebase Trigger Email (`collection(db, 'mail')`).
+  3. **[`src/components/AdminJury.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminJury.jsx):**
+     - Módulo de administración con KPIs en vivo, ranking consolidado de ferreterías más votadas por categoría, detalle de evaluaciones de cada jurado, historial de invitaciones y exportación a Excel multi-hoja (`Evaluaciones_Jurado_Premios_ExpoFerre_2026.xlsx`).
+  4. **[`src/components/AdminHub.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx) & [`src/App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx):**
+     - Integración de la tarjeta **"🏆 Premios y Jurado"** en el Hub de administración y enrutamiento reactivo en `App.jsx`.
+
 
 
 
