@@ -70,7 +70,6 @@ export default function JudgeEvaluationForm({ onClose }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submittedId, setSubmittedId] = useState('');
-  const [showJudgeInfoEdit, setShowJudgeInfoEdit] = useState(!initialJudgeName);
 
   const createEmptyCategoryData = () => {
     return Array.from({ length: 5 }, (_, i) => ({
@@ -128,8 +127,8 @@ export default function JudgeEvaluationForm({ onClose }) {
 
   const handleSubmit = async () => {
     if (!judgeName.trim()) {
-      setShowJudgeInfoEdit(true);
-      alert('Por favor, ingresa tu nombre como Jurado Calificador.');
+      alert('Por favor, ingresa tu nombre completo en la parte superior.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -218,54 +217,48 @@ export default function JudgeEvaluationForm({ onClose }) {
     <main className="min-h-screen bg-[#f1f5f9] text-slate-900 pt-36 md:pt-44 pb-20 px-3 sm:px-6">
       <div className="max-w-2xl mx-auto">
         
-        {/* ENCABEZADO COMPACTO */}
+        {/* ENCABEZADO COMPACTO CON DATOS FIJOS DEL JURADO */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm mb-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-[#f39200] flex items-center justify-center font-bold">
-                <Award size={20} />
-              </div>
-              <div>
-                <h1 className="text-lg font-black text-slate-900 leading-tight">
-                  Premios a la Excelencia Ferretera
-                </h1>
-                <p className="text-xs text-slate-500">Comité Calificador · ExpoFerre 2026</p>
-              </div>
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-[#f39200] flex items-center justify-center font-bold shrink-0">
+              <Award size={20} />
             </div>
-
-            <button 
-              onClick={() => setShowJudgeInfoEdit(!showJudgeInfoEdit)}
-              className="text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors"
-            >
-              <User size={13} /> {judgeName ? judgeName.split(' ')[0] : 'Mis Datos'}
-            </button>
+            <div>
+              <h1 className="text-lg font-black text-slate-900 leading-tight">
+                Premios a la Excelencia Ferretera
+              </h1>
+              <p className="text-xs text-slate-500">Comité Calificador Oficial · ExpoFerre 2026</p>
+            </div>
           </div>
 
-          {/* Panel Desplegable de Datos del Jurado */}
-          {showJudgeInfoEdit && (
-            <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3 animate-in fade-in duration-150">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Tu Nombre Completo *</label>
-                <input 
-                  type="text" 
-                  value={judgeName} 
-                  onChange={(e) => setJudgeName(e.target.value)}
-                  placeholder="Ej. Ing. Carlos Mendoza"
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-900 font-semibold focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#f39200]"
-                />
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Empresa / Institución (Opcional)</label>
-                <input 
-                  type="text" 
-                  value={judgeCompany} 
-                  onChange={(e) => setJudgeCompany(e.target.value)}
-                  placeholder="Ej. Cámara de Comercio"
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#f39200]"
-                />
-              </div>
+          {/* Campos Fijos y Visibles del Jurado */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Nombre del Jurado <span className="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                value={judgeName} 
+                onChange={(e) => setJudgeName(e.target.value)}
+                placeholder="Ej. Ing. Carlos Mendoza"
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#f39200]"
+                required
+              />
             </div>
-          )}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                Empresa o Institución (Opcional)
+              </label>
+              <input 
+                type="text" 
+                value={judgeCompany} 
+                onChange={(e) => setJudgeCompany(e.target.value)}
+                placeholder="Ej. Cámara de Comercio / Empresa"
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#f39200]"
+              />
+            </div>
+          </div>
         </div>
 
         {/* BARRA DE PASOS / CATEGORÍAS (3 PASOS) */}
