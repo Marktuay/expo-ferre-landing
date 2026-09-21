@@ -390,9 +390,15 @@ export default function App() {
             <button onClick={() => setCurrentView('landing')} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
               <span className="material-symbols-outlined text-[22px]">home</span> Inicio
             </button>
-            <button onClick={() => { setCurrentView('landing'); setTimeout(() => { const el = document.getElementById('taller-master-ferretero'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else window.scrollTo({ top: 0, behavior: 'smooth' }); }, 100); }} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
+            <a 
+              href="/mediakit.pdf" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              download="MediaKit-Master-Ferretero-ExpoFerre2026.pdf"
+              className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg cursor-pointer"
+            >
               <span className="material-symbols-outlined text-[22px]">construction</span> Taller Master Ferretero
-            </button>
+            </a>
             <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'awards', 100); }} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
               <span className="material-symbols-outlined text-[22px]">emoji_events</span> Premios
             </button>
@@ -495,9 +501,16 @@ export default function App() {
             <button onClick={() => { setCurrentView('landing'); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
               <span className="material-symbols-outlined text-[24px]">home</span> Inicio
             </button>
-            <button onClick={() => { setCurrentView('landing'); setTimeout(() => { const el = document.getElementById('taller-master-ferretero'); if (el) el.scrollIntoView({ behavior: 'smooth' }); else window.scrollTo({ top: 0, behavior: 'smooth' }); }, 100); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
+            <a 
+              href="/mediakit.pdf" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              download="MediaKit-Master-Ferretero-ExpoFerre2026.pdf"
+              onClick={() => setIsMobileMenuOpen(false)} 
+              className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors cursor-pointer"
+            >
               <span className="material-symbols-outlined text-[24px]">construction</span> Taller Master Ferretero
-            </button>
+            </a>
             <button onClick={() => { setCurrentView('sponsorDashboard'); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
               <span className="material-symbols-outlined text-[24px]">military_tech</span> Patrocinadores
             </button>
@@ -761,6 +774,20 @@ export default function App() {
                     <span className="font-semibold text-white">Certificación Certifier + Material</span>
                   </div>
                 </div>
+              </div>
+
+              {/* Botón Descargar Media Kit */}
+              <div className="pt-2">
+                <a 
+                  href="/mediakit.pdf" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  download="MediaKit-Master-Ferretero-ExpoFerre2026.pdf"
+                  className="inline-flex items-center gap-2 bg-[#f39200] hover:bg-[#d98200] text-black font-black px-5 py-2.5 rounded-xl transition-all shadow-lg hover:scale-105 active:scale-95 text-sm uppercase tracking-wider"
+                >
+                  <span className="material-symbols-outlined text-lg">download</span>
+                  Descargar Media Kit (PDF)
+                </a>
               </div>
             </div>
             <div className="lg:col-span-5 flex justify-center items-center">
