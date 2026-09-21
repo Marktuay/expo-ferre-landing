@@ -166,7 +166,8 @@ export default function AdminJury({ onBack }) {
   };
 
   return (
-    <div className="pt-24 md:pt-28 pb-20 px-4 md:px-8 max-w-7xl mx-auto min-h-screen">
+    <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48 font-sans">
+      <div className="max-w-7xl mx-auto pb-16">
       
       {/* Botón Volver y Encabezado */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
@@ -488,6 +489,7 @@ export default function AdminJury({ onBack }) {
         onClose={() => setIsInviteModalOpen(false)}
       />
 
+      </div>
     </div>
   );
 }

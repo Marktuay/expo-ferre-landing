@@ -215,7 +215,7 @@ export default function JudgeEvaluationForm({ onClose }) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 pt-24 md:pt-28 pb-24 px-4 md:px-8">
+    <main className="min-h-screen bg-slate-950 text-slate-100 pt-40 md:pt-48 pb-24 px-4 md:px-8">
       <div className="max-w-4xl mx-auto">
         
         {/* Cabecera Principal */}
