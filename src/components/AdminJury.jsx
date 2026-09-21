@@ -40,9 +40,9 @@ export default function AdminJury({ onBack }) {
     };
   }, []);
 
-  // Calcular Rankings Consolidados por Categoría
+  // Calcular Rankings Consolidados por Categoría (Por cantidad de nominaciones)
   const calculateRanking = (catId) => {
-    const storesMap = {}; // { 'Nombre': { nombre, ciudad, totalScore, nominationsCount, avgScore } }
+    const storesMap = {}; // { 'Nombre': { name, city, nominationsCount, judges: [] } }
 
     evaluations.forEach(ev => {
       const catSlots = ev.evaluations?.[catId] || [];
@@ -50,35 +50,25 @@ export default function AdminJury({ onBack }) {
         const name = (slot.nombreFerreteria || '').trim();
         if (!name) return;
 
-        const score = Object.values(slot.scores || {}).reduce((a, b) => a + (Number(b) || 0), 0);
         const normKey = name.toLowerCase();
 
         if (!storesMap[normKey]) {
           storesMap[normKey] = {
             name: name,
             city: slot.ciudad || 'N/D',
-            totalScore: 0,
             nominationsCount: 0,
             judges: []
           };
         }
 
-        storesMap[normKey].totalScore += score;
         storesMap[normKey].nominationsCount += 1;
-        storesMap[normKey].judges.push({
-          judgeName: ev.judgeName,
-          score: score
-        });
+        storesMap[normKey].judges.push(ev.judgeName);
       });
     });
 
-    const list = Object.values(storesMap).map(item => ({
-      ...item,
-      avgScore: item.nominationsCount > 0 ? (item.totalScore / item.nominationsCount).toFixed(1) : 0
-    }));
-
-    // Ordenar de mayor a menor puntaje
-    list.sort((a, b) => b.totalScore - a.totalScore);
+    const list = Object.values(storesMap);
+    // Ordenar de mayor a menor número de nominaciones
+    list.sort((a, b) => b.nominationsCount - a.nominationsCount);
     return list;
   };
 
@@ -98,22 +88,19 @@ export default function AdminJury({ onBack }) {
       const XLSX = await import('xlsx');
       const wb = XLSX.utils.book_new();
 
-      // Hoja 1: Resumen de Evaluaciones Recibidas
+      // Hoja 1: Resumen de Nominaciones Recibidas
       const evalsData = [];
       evaluations.forEach(ev => {
         ['familiar', 'oro', 'promesa'].forEach(cat => {
           const slots = ev.evaluations?.[cat] || [];
           slots.forEach(slot => {
             if (slot.nombreFerreteria?.trim()) {
-              const score = Object.values(slot.scores || {}).reduce((a, b) => a + (Number(b) || 0), 0);
               evalsData.push({
                 'Jurado': ev.judgeName,
                 'Empresa / Institución': ev.judgeCompany || 'N/D',
-                'Teléfono': ev.judgePhone || 'N/D',
                 'Categoría': cat === 'familiar' ? '01. Ferretería Familiar' : cat === 'oro' ? '02. Ferretería Oro' : '03. Ferretería Promesa',
                 'Ferretería Nominada': slot.nombreFerreteria,
                 'Ciudad / Departamento': slot.ciudad || 'N/D',
-                'Puntaje Asignado': score,
                 'Fecha Registro': ev.submittedAtStr || 'N/D'
               });
             }
@@ -121,16 +108,15 @@ export default function AdminJury({ onBack }) {
         });
       });
       const wsEvals = XLSX.utils.json_to_sheet(evalsData);
-      XLSX.utils.book_append_sheet(wb, wsEvals, "Evaluaciones Detalladas");
+      XLSX.utils.book_append_sheet(wb, wsEvals, "Nominaciones Detalladas");
 
       // Hoja 2: Ranking Ferretería Familiar
       const wsFam = XLSX.utils.json_to_sheet(rankingFamiliar.map((item, idx) => ({
         'Posición': idx + 1,
         'Ferretería': item.name,
         'Ciudad': item.city,
-        'Puntaje Total': item.totalScore,
-        'Nominaciones (Votos)': item.nominationsCount,
-        'Promedio por Jurado': item.avgScore
+        'Total Nominaciones': item.nominationsCount,
+        'Jurados que la nominaron': item.judges.join(', ')
       })));
       XLSX.utils.book_append_sheet(wb, wsFam, "Ranking Familiar");
 
@@ -139,9 +125,8 @@ export default function AdminJury({ onBack }) {
         'Posición': idx + 1,
         'Ferretería': item.name,
         'Ciudad': item.city,
-        'Puntaje Total': item.totalScore,
-        'Nominaciones (Votos)': item.nominationsCount,
-        'Promedio por Jurado': item.avgScore
+        'Total Nominaciones': item.nominationsCount,
+        'Jurados que la nominaron': item.judges.join(', ')
       })));
       XLSX.utils.book_append_sheet(wb, wsOro, "Ranking Oro");
 
@@ -150,13 +135,12 @@ export default function AdminJury({ onBack }) {
         'Posición': idx + 1,
         'Ferretería': item.name,
         'Ciudad': item.city,
-        'Puntaje Total': item.totalScore,
-        'Nominaciones (Votos)': item.nominationsCount,
-        'Promedio por Jurado': item.avgScore
+        'Total Nominaciones': item.nominationsCount,
+        'Jurados que la nominaron': item.judges.join(', ')
       })));
       XLSX.utils.book_append_sheet(wb, wsProm, "Ranking Promesa");
 
-      XLSX.writeFile(wb, `Evaluaciones_Jurado_Premios_ExpoFerre_2026.xlsx`);
+      XLSX.writeFile(wb, `Nominaciones_Jurado_Premios_ExpoFerre_2026.xlsx`);
     } catch (e) {
       console.error("Error exporting jury excel:", e);
       alert("Hubo un error al generar el archivo Excel.");
@@ -319,9 +303,8 @@ export default function AdminJury({ onBack }) {
                         <th className="py-3 px-4 w-16 text-center">Pos.</th>
                         <th className="py-3 px-4">Ferretería</th>
                         <th className="py-3 px-4">Ciudad</th>
-                        <th className="py-3 px-4 text-center">Votos (Jurados)</th>
-                        <th className="py-3 px-4 text-center">Promedio</th>
-                        <th className="py-3 px-4 text-right">Puntaje Total</th>
+                        <th className="py-3 px-4 text-center">Nominaciones (Votos)</th>
+                        <th className="py-3 px-4 text-right">Jurados</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -337,15 +320,12 @@ export default function AdminJury({ onBack }) {
                             {store.city}
                           </td>
                           <td className="py-3 px-4 text-center">
-                            <span className="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-xs font-bold">
-                              {store.nominationsCount} {store.nominationsCount === 1 ? 'jurado' : 'jurados'}
+                            <span className="bg-amber-100 text-amber-900 px-3 py-1 rounded-full text-xs font-black">
+                              {store.nominationsCount} {store.nominationsCount === 1 ? 'voto' : 'votos'}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-center font-semibold text-gray-700">
-                            {store.avgScore} pts
-                          </td>
-                          <td className="py-3 px-4 text-right font-black text-base text-[#f39200]">
-                            {store.totalScore} pts
+                          <td className="py-3 px-4 text-right text-xs text-gray-500 max-w-xs truncate">
+                            {store.judges.join(', ')}
                           </td>
                         </tr>
                       ))}
@@ -388,39 +368,34 @@ export default function AdminJury({ onBack }) {
                 {/* Resumen de Nominaciones */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
-                    { catId: 'familiar', title: 'Ferretería Familiar' },
-                    { catId: 'oro', title: 'Ferretería Oro' },
-                    { catId: 'promesa', title: 'Ferretería Promesa' }
+                    { catId: 'familiar', title: '01. Ferretería Familiar' },
+                    { catId: 'oro', title: '02. Ferretería Oro' },
+                    { catId: 'promesa', title: '03. Ferretería Promesa' }
                   ].map(c => {
                     const nominated = (ev.evaluations?.[c.catId] || []).filter(s => s.nombreFerreteria?.trim());
                     return (
                       <div key={c.catId} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                        <span className="font-bold text-xs text-gray-700 block mb-2">{c.title}</span>
+                        <span className="font-bold text-xs text-gray-800 block mb-2">{c.title}</span>
                         {nominated.length === 0 ? (
                           <span className="text-xs text-gray-400 italic">Sin nominaciones</span>
                         ) : (
-                          <ul className="space-y-1.5 text-xs">
-                            {nominated.map((s, idx) => {
-                              const score = Object.values(s.scores || {}).reduce((a, b) => a + (Number(b) || 0), 0);
-                              return (
-                                <li key={idx} className="flex items-center justify-between font-medium text-gray-800">
-                                  <span className="truncate max-w-[140px]">• {s.nombreFerreteria}</span>
-                                  <span className="font-bold text-[#f39200]">{score} pts</span>
-                                </li>
-                              );
-                            })}
+                          <ul className="space-y-2 text-xs">
+                            {nominated.map((s, idx) => (
+                              <li key={idx} className="bg-white p-2 rounded-lg border border-gray-200/80 flex items-center justify-between gap-2">
+                                <span className="font-bold text-gray-900 truncate">• {s.nombreFerreteria}</span>
+                                {s.ciudad?.trim() && (
+                                  <span className="text-[10px] text-gray-500 shrink-0 bg-gray-100 px-1.5 py-0.5 rounded">
+                                    {s.ciudad}
+                                  </span>
+                                )}
+                              </li>
+                            ))}
                           </ul>
                         )}
                       </div>
                     );
                   })}
                 </div>
-
-                {ev.generalObservations && (
-                  <div className="mt-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700">
-                    <strong>Observaciones:</strong> "{ev.generalObservations}"
-                  </div>
-                )}
               </div>
             ))
           )}

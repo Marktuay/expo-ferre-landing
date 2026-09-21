@@ -589,13 +589,13 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
      - Módulo de administración con KPIs en vivo, ranking consolidado de ferreterías más votadas por categoría, detalle de evaluaciones de cada jurado, historial de invitaciones y exportación a Excel multi-hoja (`Evaluaciones_Jurado_Premios_ExpoFerre_2026.xlsx`).
   4. **[`src/components/AdminHub.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx) & [`src/App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx):**
      - Integración de la tarjeta **"🏆 Premios y Jurado"** en el Hub de administración y enrutamiento reactivo en `App.jsx`.
-  5. **Rediseño UX Ultra-Compacto e Intuitivo ([`JudgeEvaluationForm.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/JudgeEvaluationForm.jsx)):**
-     - Simplificación orientada a usuarios con poca familiaridad tecnológica:
-       - Estructura guiada en **3 Pasos** (1 categoría por paso con indicador de progreso `X de 5 listas`).
-       - Formato de **acordeón interactivo** donde solo se expande la ferretería que se está evaluando, eliminando el scroll kilométrico.
-       - Guía de escala compacta de 1 línea (`1: Bajo ... 5: Sobresaliente`).
-       - Botones táctiles de gran tamaño (44px) del 1 al 5 con feedback visual inmediato.
-       - Flujo continuo con botón *"Listo, Siguiente Ferretería"*.
+  5. **Simplificación Directa de Nominaciones ([`JudgeEvaluationForm.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/JudgeEvaluationForm.jsx)):**
+     - Se eliminaron las puntuaciones numéricas de criterios individuales para maximizar la velocidad y simplicidad para el jurado.
+     - Cada una de las 3 categorías contiene únicamente **5 casillas directas** con 2 campos:
+       1. **Nombre de la Ferretería**
+       2. **Ciudad / Departamento**
+     - En el panel de administración ([`AdminJury.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminJury.jsx)), el ranking calcula automáticamente las ferreterías más nominadas por conteo total de votos de los jurados.
+
 
 
 
