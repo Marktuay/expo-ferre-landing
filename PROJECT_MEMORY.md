@@ -558,3 +558,16 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - Se creó el componente [`src/components/CreateSpeakerModal.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/CreateSpeakerModal.jsx) con selector dinámico de empresas patrocinadoras, carga y compresión de foto de conferencista, selección múltiple de formatos (Panel, Conferencia, Entrevista, Caso de éxito), título, resumen y autorización de contenido.
   - **Módulo General de Conferencias ([`src/components/AdminSpeakers.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSpeakers.jsx)):** Se agregó el botón **"➕ Nueva Conferencia"**, buscador en tiempo real por speaker/tema/patrocinador, y visualización enriquecida con foto de perfil y gafete imprimible.
   - **Vista 360 del Patrocinador ([`src/components/AdminSponsorDetails.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsorDetails.jsx)):** Se añadió el botón **"➕ Registrar Conferencia"** en la sección de conferencias para dar de alta ponencias asociadas automáticamente al patrocinador activo con 1 clic.
+
+### 🛠️ Actualización de la Sección Hero: Taller "Master Ferretero - Modelo de las 7P" (`21 de Septiembre de 2026`)
+- **Objetivo:** Reemplazar el texto genérico de feria en la columna izquierda del Hero de la Landing Page ([`src/App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx)) por la información oficial del Taller Intensivo **"Master Ferretero"**, conservando el reproductor de video a la derecha.
+- **Detalles incorporados:**
+  - **Insignia / Badge:** `MASTER FERRETERO` con icono industrial.
+  - **Titular Principal:** `EL MODELO DE LAS 7P APLICADO A LA FERRETERÍA`
+  - **Párrafo Descriptivo:** *"Taller intensivo diseñado para transformar la gestión comercial de las ferreterías, pasando de decisiones empíricas a un modelo estructurado y basado en datos."*
+  - **Tarjetas de Información Clave:**
+    - 📅 **Fecha:** 16 de Octubre de 2026
+    - ⏱️ **Horario & Duración:** 8:00 AM a 5:00 PM (8 Horas)
+    - 👥 **Modalidad & Cupo:** Presencial · Máx. 40 Personas
+    - 🏆 **Beneficios:** Certificación por Certifier + Acceso a material
+

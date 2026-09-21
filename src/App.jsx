@@ -716,18 +716,50 @@ export default function App() {
           <div className="relative z-10 container mx-auto grid grid-cols-1 lg:grid-cols-12 gap-stack-lg items-center mt-10">
             <div className="lg:col-span-7 text-white space-y-stack-sm">
               <FadeIn>
-                <div className="bg-[#f39200] text-white inline-block px-4 py-1 font-label-sm text-label-sm uppercase tracking-widest clip-industrial mb-4">CONSTRUYENDO EL FUTURO</div>
-                <h1 className="font-headline-xl text-headline-xl lg:text-7xl leading-tight text-white drop-shadow-lg">IMPULSANDO Y CONECTANDO LA INDUSTRIA FERRETERA</h1>
-                <p className="font-body-lg text-body-lg max-w-xl opacity-90 mt-4 text-surface-container-lowest drop-shadow-md">Más que una feria, somos la plataforma que reúne a los principales actores del sector ferretero para fomentar la innovación, fortalecer relaciones comerciales y generar nuevas oportunidades de negocio que impulsan el crecimiento de la industria.</p>
-              </FadeIn>
-              <div className="flex gap-4 pt-4">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary-fixed-dim">calendar_today</span>
-                  <span className="font-label-sm">17 de Octubre, 2026</span>
+                <div className="bg-[#f39200] text-black font-bold inline-flex items-center gap-1.5 px-3.5 py-1 rounded-md text-xs uppercase tracking-widest clip-industrial mb-3 shadow-md">
+                  <span className="material-symbols-outlined text-sm">construction</span>
+                  MASTER FERRETERO
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary-fixed-dim">location_on</span>
-                  <span className="font-label-sm">Centro de Convenciones Crowne Plaza</span>
+                <h1 className="font-headline-xl text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-white drop-shadow-lg tracking-tight">
+                  EL MODELO DE LAS 7P APLICADO A LA FERRETERÍA
+                </h1>
+                <p className="font-body-lg text-base sm:text-lg max-w-xl opacity-90 mt-3 text-slate-200 drop-shadow-md leading-relaxed">
+                  Taller intensivo diseñado para transformar la gestión comercial de las ferreterías, pasando de decisiones empíricas a un modelo estructurado y basado en datos.
+                </p>
+              </FadeIn>
+
+              {/* Badges de Información del Taller */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-3 text-sm">
+                <div className="flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/10 shadow-sm">
+                  <span className="material-symbols-outlined text-[#f39200] text-xl shrink-0">calendar_month</span>
+                  <div>
+                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Fecha</span>
+                    <span className="font-semibold text-white">16 de Octubre de 2026</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/10 shadow-sm">
+                  <span className="material-symbols-outlined text-[#f39200] text-xl shrink-0">schedule</span>
+                  <div>
+                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Horario & Duración</span>
+                    <span className="font-semibold text-white">8:00 AM a 5:00 PM (8 Horas)</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/10 shadow-sm">
+                  <span className="material-symbols-outlined text-[#f39200] text-xl shrink-0">groups</span>
+                  <div>
+                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Modalidad & Cupo</span>
+                    <span className="font-semibold text-white">Presencial · Máx. 40 Personas</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/10 shadow-sm">
+                  <span className="material-symbols-outlined text-[#f39200] text-xl shrink-0">workspace_premium</span>
+                  <div>
+                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Beneficios</span>
+                    <span className="font-semibold text-white">Certificación Certifier + Material</span>
+                  </div>
                 </div>
               </div>
             </div>
