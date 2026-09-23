@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, onSnapshot } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import PrintableBadgeList from './PrintableBadgeList';
@@ -50,6 +50,19 @@ export default function AdminSpeakers({ onBack }) {
     const email = (s.email || s.correo || '').toLowerCase();
     return name.includes(term) || comp.includes(term) || title.includes(term) || email.includes(term);
   });
+
+  const handleDeleteSpeaker = async (speaker) => {
+    const speakerName = `${speaker.nombre || ''} ${speaker.apellido || ''}`.trim() || 'este conferencista';
+    if (!window.confirm(`¿Estás seguro de eliminar la conferencia de "${speakerName}"? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+    try {
+      await deleteDoc(doc(db, `${getEventBasePath()}/speakers`, speaker.id));
+    } catch (err) {
+      console.error('Error al eliminar conferencia:', err);
+      alert('Hubo un error al eliminar: ' + err.message);
+    }
+  };
 
   if (printItems) {
     return (
@@ -266,6 +279,13 @@ export default function AdminSpeakers({ onBack }) {
                               title="Imprimir Gafete"
                             >
                               <span className="material-symbols-outlined text-lg">print</span>
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteSpeaker(speaker)}
+                              className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors inline-flex items-center justify-center"
+                              title="Eliminar Conferencia"
+                            >
+                              <span className="material-symbols-outlined text-lg">delete</span>
                             </button>
                           </div>
                         </td>
