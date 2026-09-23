@@ -32,14 +32,14 @@ export default function BadgeTemplate({ data, roleLabel, colorClass }) {
           {fullName}
         </h2>
         
-        {company && (
+        {company && company.toLowerCase() !== 'independiente' && company.toLowerCase() !== 'n/a' && company.toLowerCase() !== 'ninguna' && (
           <div className="text-lg font-semibold text-secondary mb-1 line-clamp-1 w-full">
             {company}
           </div>
         )}
         
         {position && (
-          <div className="text-sm text-on-surface-variant line-clamp-1 w-full">
+          <div className="text-sm font-medium text-on-surface-variant line-clamp-1 w-full">
             {position}
           </div>
         )}

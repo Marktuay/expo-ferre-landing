@@ -4,12 +4,14 @@ import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import PrintableBadgeList from './PrintableBadgeList';
 import CreateSpeakerModal from './CreateSpeakerModal';
+import InviteSpeakerModal from './InviteSpeakerModal';
 
 export default function AdminSpeakers({ onBack }) {
   const [speakers, setSpeakers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [printItems, setPrintItems] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [speakerToEdit, setSpeakerToEdit] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [previewPhoto, setPreviewPhoto] = useState(null);
@@ -66,7 +68,7 @@ export default function AdminSpeakers({ onBack }) {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h1 className="text-headline-md font-bold text-on-surface">Conferencias</h1>
-            <p className="text-body-lg text-secondary">Registro y gestión oficial de conferencias, ponencias y speakers.</p>
+            <p className="text-body-lg text-secondary">Registro y gestión oficial de conferencias, ponencias y speakers (Patrocinados e Independientes).</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <button 
@@ -74,10 +76,17 @@ export default function AdminSpeakers({ onBack }) {
                 setSpeakerToEdit(null);
                 setShowCreateModal(true);
               }}
-              className="px-5 py-2 bg-primary text-on-primary border border-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 shadow-xs"
+              className="px-4 py-2 bg-primary text-on-primary border border-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 shadow-xs text-sm"
             >
-              <span className="material-symbols-outlined">add_circle</span>
+              <span className="material-symbols-outlined text-base">add_circle</span>
               Nueva Conferencia
+            </button>
+            <button 
+              onClick={() => setShowInviteModal(true)}
+              className="px-4 py-2 bg-amber-600 text-white border border-amber-600 rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 shadow-xs text-sm"
+            >
+              <span className="material-symbols-outlined text-base">forward_to_inbox</span>
+              Invitar Conferencista
             </button>
             <button 
               onClick={() => setPrintItems(filteredSpeakers)}
@@ -91,10 +100,11 @@ export default function AdminSpeakers({ onBack }) {
               import('xlsx').then(XLSX => {
                 const dataToExport = filteredSpeakers.map(s => ({
                   Fecha: s.createdAt?.toLocaleDateString ? s.createdAt.toLocaleDateString() + ' ' + s.createdAt.toLocaleTimeString() : 'N/A',
-                  Patrocinador: s.sponsorCompany || s.empresa || '',
+                  Tipo: s.sponsorId ? 'Auspiciado por Patrocinador' : 'Independiente / Organización',
+                  Patrocinador_Entidad: s.sponsorCompany || (s.sponsorId ? s.empresa : 'Organización ExpoFerre 2026'),
                   Nombre: `${s.nombre || ''} ${s.apellido || ''}`.trim(),
                   Cargo: s.cargo || '',
-                  Empresa: s.empresa || '',
+                  Empresa: s.empresa || 'Independiente',
                   Email: s.email || s.correo || '',
                   Teléfono: s.telefono || '',
                   LinkedIn: s.linkedin || '',
@@ -108,7 +118,7 @@ export default function AdminSpeakers({ onBack }) {
                 const worksheet = XLSX.utils.json_to_sheet(dataToExport);
                 const workbook = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Conferencias");
-                XLSX.writeFile(workbook, "Conferencias.xlsx");
+                XLSX.writeFile(workbook, "Conferencias_ExpoFerre_2026.xlsx");
               });
             }} className="px-4 py-2 bg-[#217346] text-white border border-[#217346] rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 text-sm">
               <span className="material-symbols-outlined text-base">download</span>
@@ -128,7 +138,7 @@ export default function AdminSpeakers({ onBack }) {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar por speaker, título de ponencia, patrocinador o correo..."
+            placeholder="Buscar por speaker, título de ponencia, empresa, patrocinador o correo..."
             className="w-full text-sm outline-none bg-transparent text-secondary"
           />
           {searchTerm && (
@@ -144,7 +154,7 @@ export default function AdminSpeakers({ onBack }) {
               <thead>
                 <tr className="bg-surface-variant/30 border-b border-outline-variant text-xs uppercase tracking-wider text-secondary">
                   <th className="p-4 font-bold">Speaker</th>
-                  <th className="p-4 font-bold">Patrocinador / Empresa</th>
+                  <th className="p-4 font-bold">Auspicio / Entidad</th>
                   <th className="p-4 font-bold">Título de la Ponencia</th>
                   <th className="p-4 font-bold">Formato</th>
                   <th className="p-4 font-bold">Contacto</th>
@@ -172,7 +182,15 @@ export default function AdminSpeakers({ onBack }) {
                   filteredSpeakers.map((speaker) => {
                     const speakerName = `${speaker.nombre || ''} ${speaker.apellido || ''}`.trim();
                     const formats = Array.isArray(speaker.formatos) ? speaker.formatos.join(', ') : (speaker.formato || 'Conferencia');
-                    const sponsor = speaker.sponsorCompany || speaker.empresa || 'Patrocinador';
+                    
+                    const isIndependent = !speaker.sponsorId || 
+                      speaker.sponsorCompany?.toLowerCase().includes('independiente') || 
+                      speaker.sponsorCompany?.toLowerCase().includes('organización') ||
+                      speaker.sponsorCompany?.toLowerCase().includes('expoferre');
+
+                    const displaySponsor = isIndependent 
+                      ? (speaker.empresa && speaker.empresa.toLowerCase() !== 'independiente' ? speaker.empresa : '🏛️ ExpoFerre (Org / Independiente)')
+                      : (speaker.sponsorCompany || speaker.empresa || 'Patrocinador');
 
                     return (
                       <tr key={speaker.id} className="border-b border-outline-variant hover:bg-surface-variant/10 transition-colors">
@@ -202,9 +220,16 @@ export default function AdminSpeakers({ onBack }) {
                           </div>
                         </td>
                         <td className="p-4">
-                          <span className="font-semibold text-xs text-secondary bg-surface-variant/60 px-2 py-1 rounded">
-                            {sponsor}
-                          </span>
+                          {isIndependent ? (
+                            <span className="inline-flex items-center gap-1 font-semibold text-xs text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md">
+                              {displaySponsor}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 font-semibold text-xs text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-md">
+                              <span className="material-symbols-outlined text-xs">handshake</span>
+                              {displaySponsor}
+                            </span>
+                          )}
                         </td>
                         <td className="p-4 max-w-xs">
                           <div className="font-medium text-xs text-secondary line-clamp-2" title={speaker.titulo || speaker.tema}>
@@ -263,6 +288,15 @@ export default function AdminSpeakers({ onBack }) {
             setShowCreateModal(false);
             setSpeakerToEdit(null);
           }}
+        />
+      )}
+
+      {/* Modal para Invitar Conferencista (Link / WhatsApp / Email) */}
+      {showInviteModal && (
+        <InviteSpeakerModal
+          isOpen={showInviteModal}
+          sponsorData={{ empresa: 'Organización ExpoFerre 2026', email: 'contacto@expoferrenicaragua.com' }}
+          onClose={() => setShowInviteModal(false)}
         />
       )}
 

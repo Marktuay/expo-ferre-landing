@@ -207,14 +207,17 @@ const SpeakerForm = ({ onClose }) => {
       const finalFotoUrl = await uploadImageSmart(fotoFileObj, fotoData, 'speaker_photos');
       const finalLogoUrl = await uploadImageSmart(logoFileObj, logoData, 'speaker_logos');
 
+      const empresaVal = formData.get('empresa')?.trim() || 'Independiente';
+      const tamanoEmpresaVal = formData.get('tamanoEmpresa') || 'independiente';
+
       const data = {
         nombre: formData.get('nombre')?.trim() || '',
         apellido: formData.get('apellido')?.trim() || '',
         cargo: formData.get('cargo')?.trim() || '',
         email: emailVal,
         correo: emailVal,
-        empresa: formData.get('empresa')?.trim() || '',
-        tamanoEmpresa: formData.get('tamanoEmpresa') || '',
+        empresa: empresaVal,
+        tamanoEmpresa: tamanoEmpresaVal,
         telefono: formData.get('telefono')?.trim() || '',
         linkedin: formData.get('linkedin')?.trim() || '',
         facebook: formData.get('facebook')?.trim() || '',
@@ -231,7 +234,7 @@ const SpeakerForm = ({ onClose }) => {
         createdAt: serverTimestamp(),
         sponsorId: user ? user.uid : (urlSponsorId || null),
         sponsorEmail: user ? user.email : (urlSponsorEmail || null),
-        sponsorCompany: urlSponsorName || (user ? user.email : 'Patrocinador Oficial')
+        sponsorCompany: urlSponsorName || (user ? user.email : 'Conferencista Independiente / ExpoFerre 2026')
       };
       
       const docRef = await addDoc(collection(db, `${getEventBasePath()}/speakers`), data);
@@ -343,13 +346,20 @@ const SpeakerForm = ({ onClose }) => {
                     <input name="email" required type="email" placeholder="speaker@empresa.com" className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">Empresa que Representa <span className="text-error">*</span></label>
-                    <input name="empresa" required type="text" placeholder="Nombre comercial de la empresa" className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm" />
+                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">
+                      Empresa / Institución <span className="text-on-surface-variant font-normal normal-case">(o "Independiente")</span>
+                    </label>
+                    <input 
+                      name="empresa" 
+                      type="text" 
+                      placeholder="Ej. Independiente / Consultor / Nombre Comercial" 
+                      className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm" 
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">Tamaño de empresa <span className="text-error">*</span></label>
-                    <select name="tamanoEmpresa" required className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface text-sm">
-                      <option value="">Seleccione tamaño...</option>
+                    <label className="font-label-md text-on-surface font-bold text-xs uppercase tracking-wider">Tamaño de empresa / Entorno</label>
+                    <select name="tamanoEmpresa" className="w-full p-3 bg-surface-container rounded-lg border border-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-on-surface text-sm">
+                      <option value="independiente">Profesional Independiente / N/A</option>
                       <option value="1-10">1 - 10 colaboradores</option>
                       <option value="11-50">11 - 50 colaboradores</option>
                       <option value="51-200">51 - 200 colaboradores</option>

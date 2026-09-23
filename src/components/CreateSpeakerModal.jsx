@@ -132,8 +132,10 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
     } else {
       setFormData(prev => ({
         ...prev,
-        sponsorId: selectedId,
-        sponsorCompany: selectedId ? 'Patrocinador' : ''
+        sponsorId: '',
+        sponsorCompany: 'Organización ExpoFerre 2026',
+        sponsorEmail: '',
+        empresa: prev.empresa || 'Independiente'
       }));
     }
   };
@@ -361,11 +363,11 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
 
         {/* Modal Body */}
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6 flex-1">
-          {/* SELECCIÓN DE PATROCINADOR */}
+          {/* SELECCIÓN DE PATROCINADOR U ORGANIZACIÓN */}
           <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 space-y-3">
             <label className="block text-sm font-bold text-primary flex items-center gap-1.5">
               <span className="material-symbols-outlined text-lg">corporate_fare</span>
-              Empresa / Patrocinador que auspicia la Conferencia *
+              Auspiciador / Entidad de la Conferencia
             </label>
             
             {loadingSponsors ? (
@@ -374,19 +376,20 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
               <select
                 value={formData.sponsorId}
                 onChange={handleSponsorChange}
-                required
                 className="w-full p-2.5 bg-white border border-outline-variant rounded-md text-sm font-medium focus:ring-2 focus:ring-primary focus:outline-none"
               >
-                <option value="">-- Seleccionar Patrocinador Registrado --</option>
+                <option value="">-- Conferencista Independiente / Invitado por la Organización (ExpoFerre) --</option>
                 {sponsorsList.map(s => (
                   <option key={s.id} value={s.id}>
-                    {s.empresa} ({s.contacto || s.correo || 'Patrocinador'})
+                    Patrocinador: {s.empresa} ({s.contacto || s.correo || 'Patrocinador'})
                   </option>
                 ))}
               </select>
             )}
             <p className="text-[11px] text-on-surface-variant">
-              Esta conferencia quedará vinculada automáticamente a este patrocinador en su vista 360 y panel de actividad.
+              {formData.sponsorId 
+                ? 'Esta conferencia quedará vinculada automáticamente al patrocinador seleccionado.' 
+                : 'Esta conferencia se registrará como Conferencia Oficial / Speaker Independiente de la Organización.'}
             </p>
           </div>
 
@@ -423,13 +426,13 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-secondary mb-1">Cargo / Puesto *</label>
+                <label className="block text-xs font-bold text-secondary mb-1">Cargo / Especialidad *</label>
                 <input 
                   type="text" 
                   required 
                   value={formData.cargo} 
                   onChange={e => setFormData({ ...formData, cargo: e.target.value })}
-                  placeholder="Ej. Gerente de Innovación"
+                  placeholder="Ej. Especialista / Consultor / Director"
                   className="w-full p-2.5 border border-outline-variant rounded-md text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                 />
               </div>
@@ -459,13 +462,14 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-secondary mb-1">Empresa Representada *</label>
+                <label className="block text-xs font-bold text-secondary mb-1">
+                  Empresa / Institución <span className="font-normal text-on-surface-variant">(o "Independiente")</span>
+                </label>
                 <input 
                   type="text" 
-                  required 
                   value={formData.empresa} 
                   onChange={e => setFormData({ ...formData, empresa: e.target.value })}
-                  placeholder="Ej. Sinsa / Marca"
+                  placeholder="Ej. Independiente / Consultor / Marca"
                   className="w-full p-2.5 border border-outline-variant rounded-md text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                 />
               </div>
