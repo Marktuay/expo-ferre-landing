@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Mic, Send, Upload, Trash2, CheckCircle2, FileText, Image as ImageIcon, Building2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { db, auth } from '../firebase';
+import { db, storage, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getEventBasePath } from '../config/eventConfig';
 
 const SpeakerForm = ({ onClose }) => {
@@ -11,10 +12,13 @@ const SpeakerForm = ({ onClose }) => {
   
   // File and preview states
   const [fotoData, setFotoData] = useState(null);
+  const [fotoFileObj, setFotoFileObj] = useState(null);
   const [logoData, setLogoData] = useState(null);
+  const [logoFileObj, setLogoFileObj] = useState(null);
   const [cvName, setCvName] = useState('');
   const [uploadingFoto, setUploadingFoto] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [isDraggingFoto, setIsDraggingFoto] = useState(false);
 
   const urlParams = new URLSearchParams(window.location.search);
   const urlSponsorId = urlParams.get('sponsorId') || null;
@@ -25,63 +29,120 @@ const SpeakerForm = ({ onClose }) => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Helper to compress images client-side to lightweight base64 JPEG/PNG
+  // Robust client-side image compression
   const processImageFile = async (file, maxDim = 500) => {
     if (!file) return null;
+    
+    // Si es SVG, devolver como dataURL directo
+    if (file.type === 'image/svg+xml') {
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve(ev.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
     return await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      
+      img.onload = () => {
+        try {
+          URL.revokeObjectURL(url);
           const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
+          let width = img.naturalWidth || img.width;
+          let height = img.naturalHeight || img.height;
 
           if (width > height) {
             if (width > maxDim) {
-              height *= maxDim / width;
+              height = Math.round((height * maxDim) / width);
               width = maxDim;
             }
           } else {
             if (height > maxDim) {
-              width *= maxDim / height;
+              width = Math.round((width * maxDim) / height);
               height = maxDim;
             }
           }
+
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
+
+          const isPng = file.type === 'image/png';
+          if (!isPng) {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+          }
+
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.85));
-        };
-        img.onerror = (err) => reject(new Error('No se pudo procesar la imagen'));
-        img.src = event.target.result;
+          const mime = isPng ? 'image/png' : 'image/jpeg';
+          const quality = isPng ? undefined : 0.85;
+          const dataUrl = canvas.toDataURL(mime, quality);
+          resolve(dataUrl);
+        } catch (e) {
+          reject(e);
+        }
       };
-      reader.onerror = (err) => reject(new Error('Error al leer archivo'));
-      reader.readAsDataURL(file);
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        // Fallback a FileReader si ObjectURL falla
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const fallbackImg = new Image();
+          fallbackImg.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = fallbackImg.width;
+            let height = fallbackImg.height;
+            if (width > maxDim || height > maxDim) {
+              const ratio = Math.min(maxDim / width, maxDim / height);
+              width = Math.round(width * ratio);
+              height = Math.round(height * ratio);
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(fallbackImg, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.85));
+          };
+          fallbackImg.onerror = () => reject(new Error('Formato de imagen no soportado'));
+          fallbackImg.src = event.target.result;
+        };
+        reader.onerror = () => reject(new Error('Error al leer el archivo'));
+        reader.readAsDataURL(file);
+      };
+
+      img.src = url;
     });
   };
 
-  const handleFotoUpload = async (e) => {
-    const file = e.target.files?.[0];
+  const handleFotoFile = async (file) => {
     if (!file) return;
     try {
       setUploadingFoto(true);
+      setFotoFileObj(file);
       const base64 = await processImageFile(file, 600);
       setFotoData(base64);
     } catch (err) {
       console.error('Error al procesar foto del speaker:', err);
-      alert('Hubo un problema al cargar la foto. Por favor intente con otra imagen (JPG, PNG o WEBP).');
+      alert('No se pudo procesar la foto. Por favor intente con otra imagen JPG o PNG.');
     } finally {
       setUploadingFoto(false);
     }
   };
 
-  const handleLogoUpload = async (e) => {
+  const handleFotoUpload = (e) => {
     const file = e.target.files?.[0];
+    if (file) handleFotoFile(file);
+  };
+
+  const handleLogoFile = async (file) => {
     if (!file) return;
     try {
       setUploadingLogo(true);
+      setLogoFileObj(file);
       const base64 = await processImageFile(file, 400);
       setLogoData(base64);
     } catch (err) {
@@ -92,11 +153,33 @@ const SpeakerForm = ({ onClose }) => {
     }
   };
 
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) handleLogoFile(file);
+  };
+
   const handleCvUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       setCvName(file.name);
     }
+  };
+
+  // Helper to upload to Firebase Storage with automatic fallback to base64
+  const uploadImageSmart = async (fileObj, base64Data, pathPrefix) => {
+    if (!base64Data) return null;
+    if (storage && fileObj) {
+      try {
+        const cleanName = (fileObj.name || 'image.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
+        const storageRef = ref(storage, `${getEventBasePath()}/${pathPrefix}/${Date.now()}_${cleanName}`);
+        const snapshot = await uploadBytes(storageRef, fileObj);
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        return downloadUrl;
+      } catch (err) {
+        console.warn('Firebase Storage upload omitted or restricted, fallback to optimized Base64:', err);
+      }
+    }
+    return base64Data;
   };
 
   const handleSubmit = async (e) => {
@@ -120,6 +203,10 @@ const SpeakerForm = ({ onClose }) => {
       const emailVal = formData.get('email')?.trim().toLowerCase() || '';
       const tituloVal = formData.get('titulo')?.trim() || '';
 
+      // Upload or resolve photo and logo URLs
+      const finalFotoUrl = await uploadImageSmart(fotoFileObj, fotoData, 'speaker_photos');
+      const finalLogoUrl = await uploadImageSmart(logoFileObj, logoData, 'speaker_logos');
+
       const data = {
         nombre: formData.get('nombre')?.trim() || '',
         apellido: formData.get('apellido')?.trim() || '',
@@ -138,8 +225,8 @@ const SpeakerForm = ({ onClose }) => {
         tema: tituloVal,
         resumen: formData.get('resumen')?.trim() || '',
         autorizaCompartir: formData.get('auth') || 'si',
-        foto: fotoData || null,
-        logo: logoData || null,
+        foto: finalFotoUrl || null,
+        logo: finalLogoUrl || null,
         cvNombre: cvName || null,
         createdAt: serverTimestamp(),
         sponsorId: user ? user.uid : (urlSponsorId || null),
@@ -208,7 +295,9 @@ const SpeakerForm = ({ onClose }) => {
                       setFormState('idle');
                       setRegisteredSpeakerId(null);
                       setFotoData(null);
+                      setFotoFileObj(null);
                       setLogoData(null);
+                      setLogoFileObj(null);
                       setCvName('');
                     }}
                     className="px-6 py-3 bg-surface border border-outline-variant rounded-md text-primary font-bold hover:bg-surface-variant transition-colors"
@@ -300,7 +389,23 @@ const SpeakerForm = ({ onClose }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* FOTO DEL SPEAKER */}
-                  <div className={`p-4 rounded-xl border-2 border-dashed transition-all flex flex-col items-center justify-between text-center ${fotoData ? 'bg-primary/5 border-primary/40' : 'bg-surface-container border-outline hover:border-primary'}`}>
+                  <div 
+                    onDragOver={(e) => { e.preventDefault(); setIsDraggingFoto(true); }}
+                    onDragLeave={() => setIsDraggingFoto(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDraggingFoto(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) handleFotoFile(file);
+                    }}
+                    className={`p-4 rounded-xl border-2 border-dashed transition-all flex flex-col items-center justify-between text-center ${
+                      isDraggingFoto 
+                        ? 'bg-primary/15 border-primary scale-102' 
+                        : fotoData 
+                          ? 'bg-primary/5 border-primary/40' 
+                          : 'bg-surface-container border-outline hover:border-primary'
+                    }`}
+                  >
                     <div className="w-full flex flex-col items-center">
                       <div className="w-20 h-20 rounded-full border-2 border-white shadow-sm overflow-hidden bg-surface-variant/40 flex items-center justify-center mb-2 shrink-0">
                         {uploadingFoto ? (
@@ -312,7 +417,7 @@ const SpeakerForm = ({ onClose }) => {
                         )}
                       </div>
                       <p className="font-bold text-xs text-secondary">Foto del Speaker</p>
-                      <p className="text-[11px] text-on-surface-variant mb-3">Formato JPG, PNG o WEBP</p>
+                      <p className="text-[11px] text-on-surface-variant mb-3">JPG, PNG o WEBP</p>
                     </div>
 
                     <div className="w-full flex items-center justify-center gap-2">
@@ -320,6 +425,7 @@ const SpeakerForm = ({ onClose }) => {
                         type="file" 
                         id="speaker-foto-input" 
                         accept="image/*" 
+                        onClick={(e) => { e.target.value = null; }}
                         onChange={handleFotoUpload} 
                         className="hidden" 
                       />
@@ -333,7 +439,10 @@ const SpeakerForm = ({ onClose }) => {
                       {fotoData && (
                         <button 
                           type="button" 
-                          onClick={() => setFotoData(null)}
+                          onClick={() => {
+                            setFotoData(null);
+                            setFotoFileObj(null);
+                          }}
                           className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors" 
                           title="Eliminar foto"
                         >
@@ -364,6 +473,7 @@ const SpeakerForm = ({ onClose }) => {
                         type="file" 
                         id="speaker-logo-input" 
                         accept="image/*" 
+                        onClick={(e) => { e.target.value = null; }}
                         onChange={handleLogoUpload} 
                         className="hidden" 
                       />
@@ -377,7 +487,10 @@ const SpeakerForm = ({ onClose }) => {
                       {logoData && (
                         <button 
                           type="button" 
-                          onClick={() => setLogoData(null)}
+                          onClick={() => {
+                            setLogoData(null);
+                            setLogoFileObj(null);
+                          }}
                           className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors" 
                           title="Eliminar logo"
                         >
@@ -404,6 +517,7 @@ const SpeakerForm = ({ onClose }) => {
                         type="file" 
                         id="speaker-cv-input" 
                         accept=".pdf,.doc,.docx" 
+                        onClick={(e) => { e.target.value = null; }}
                         onChange={handleCvUpload} 
                         className="hidden" 
                       />

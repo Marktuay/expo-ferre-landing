@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { db, auth } from '../firebase';
+import { db, storage, auth } from '../firebase';
 import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getEventBasePath } from '../config/eventConfig';
 import { Mic, X, Save, Upload, Trash2, Edit3 } from 'lucide-react';
 
@@ -9,6 +10,7 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
   const [loadingSponsors, setLoadingSponsors] = useState(true);
   const [saving, setSaving] = useState(false);
   const [fotoPreview, setFotoPreview] = useState(null);
+  const [fotoFileObj, setFotoFileObj] = useState(null);
   const [uploadingFoto, setUploadingFoto] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -59,6 +61,7 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
         cvNombre: speakerToEdit.cvNombre || ''
       });
       setFotoPreview(speakerToEdit.foto || null);
+      setFotoFileObj(null);
     } else if (initialSponsor) {
       setFormData(prev => ({
         ...prev,
@@ -68,8 +71,10 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
         empresa: initialSponsor.empresa || initialSponsor.company || ''
       }));
       setFotoPreview(null);
+      setFotoFileObj(null);
     } else {
       setFotoPreview(null);
+      setFotoFileObj(null);
     }
 
     // Cargar lista de patrocinadores desde Firestore
@@ -89,7 +94,6 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
           });
         });
 
-        // Ordenar alfabéticamente por empresa
         list.sort((a, b) => a.empresa.localeCompare(b.empresa));
         setSponsorsList(list);
 
@@ -147,38 +151,84 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
 
   const processImageFile = async (file) => {
     if (!file) return null;
+    
+    if (file.type === 'image/svg+xml') {
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve(ev.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
     return await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          URL.revokeObjectURL(url);
           const canvas = document.createElement('canvas');
           const MAX_DIM = 500;
-          let width = img.width;
-          let height = img.height;
+          let width = img.naturalWidth || img.width;
+          let height = img.naturalHeight || img.height;
 
           if (width > height) {
             if (width > MAX_DIM) {
-              height *= MAX_DIM / width;
+              height = Math.round((height * MAX_DIM) / width);
               width = MAX_DIM;
             }
           } else {
             if (height > MAX_DIM) {
-              width *= MAX_DIM / height;
+              width = Math.round((width * MAX_DIM) / height);
               height = MAX_DIM;
             }
           }
+
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
+
+          const isPng = file.type === 'image/png';
+          if (!isPng) {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+          }
+
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.85));
-        };
-        img.onerror = (err) => reject(new Error('No se pudo procesar la imagen'));
-        img.src = event.target.result;
+          const mime = isPng ? 'image/png' : 'image/jpeg';
+          const quality = isPng ? undefined : 0.85;
+          resolve(canvas.toDataURL(mime, quality));
+        } catch (e) {
+          reject(e);
+        }
       };
-      reader.onerror = (err) => reject(new Error('Error al leer el archivo'));
-      reader.readAsDataURL(file);
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const fallbackImg = new Image();
+          fallbackImg.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = fallbackImg.width;
+            let height = fallbackImg.height;
+            if (width > 500 || height > 500) {
+              const ratio = Math.min(500 / width, 500 / height);
+              width = Math.round(width * ratio);
+              height = Math.round(height * ratio);
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(fallbackImg, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.85));
+          };
+          fallbackImg.onerror = () => reject(new Error('Formato de imagen no soportado'));
+          fallbackImg.src = event.target.result;
+        };
+        reader.onerror = () => reject(new Error('Error al leer archivo'));
+        reader.readAsDataURL(file);
+      };
+      img.src = url;
     });
   };
 
@@ -187,6 +237,7 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
     if (!file) return;
     try {
       setUploadingFoto(true);
+      setFotoFileObj(file);
       const base64 = await processImageFile(file);
       setFotoPreview(base64);
       setFormData(prev => ({ ...prev, foto: base64 }));
@@ -196,6 +247,21 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
     } finally {
       setUploadingFoto(false);
     }
+  };
+
+  const uploadFotoSmart = async () => {
+    if (!formData.foto) return null;
+    if (storage && fotoFileObj) {
+      try {
+        const cleanName = (fotoFileObj.name || 'speaker.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
+        const storageRef = ref(storage, `${getEventBasePath()}/speaker_photos/${Date.now()}_${cleanName}`);
+        const snapshot = await uploadBytes(storageRef, fotoFileObj);
+        return await getDownloadURL(snapshot.ref);
+      } catch (err) {
+        console.warn('Fallback a Base64 en CreateSpeakerModal:', err);
+      }
+    }
+    return formData.foto;
   };
 
   const handleSubmit = async (e) => {
@@ -210,6 +276,8 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
       const user = auth.currentUser;
       const emailVal = formData.email.trim().toLowerCase();
       const tituloVal = formData.titulo.trim();
+
+      const finalFotoUrl = await uploadFotoSmart();
 
       const speakerDoc = {
         nombre: formData.nombre.trim(),
@@ -229,7 +297,7 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
         formatos: formData.formatos,
         formato: formData.formatos.join(', '),
         autorizaCompartir: formData.autorizaCompartir,
-        foto: formData.foto || null,
+        foto: finalFotoUrl || null,
         cvNombre: formData.cvNombre || null,
         sponsorId: formData.sponsorId || (initialSponsor ? initialSponsor.id : null),
         sponsorCompany: formData.sponsorCompany || (initialSponsor ? initialSponsor.empresa : 'Patrocinador Oficial'),
@@ -237,7 +305,6 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
       };
 
       if (speakerToEdit?.id) {
-        // Actualizar speaker existente
         await updateDoc(doc(db, `${getEventBasePath()}/speakers`, speakerToEdit.id), {
           ...speakerDoc,
           updatedAt: serverTimestamp(),
@@ -246,7 +313,6 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
         alert(`¡Conferencia "${formData.titulo}" actualizada exitosamente!`);
         if (onSuccess) onSuccess({ id: speakerToEdit.id, ...speakerDoc });
       } else {
-        // Crear nuevo speaker
         const docRef = await addDoc(collection(db, `${getEventBasePath()}/speakers`), {
           ...speakerDoc,
           createdAt: serverTimestamp(),
@@ -422,6 +488,7 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
                   type="file" 
                   id="admin-speaker-foto"
                   accept="image/*"
+                  onClick={(e) => { e.target.value = null; }}
                   onChange={handleFotoUpload}
                   className="hidden"
                 />
@@ -438,6 +505,7 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
                       type="button"
                       onClick={() => {
                         setFotoPreview(null);
+                        setFotoFileObj(null);
                         setFormData(prev => ({ ...prev, foto: null }));
                       }}
                       className="px-2 py-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 font-bold rounded flex items-center gap-1 transition-colors"

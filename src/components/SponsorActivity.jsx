@@ -274,14 +274,32 @@ export default function SponsorActivity({ onBack }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {speakers.map(s => (
-                      <tr key={s.id} className="border-b border-outline-variant hover:bg-surface-variant/30">
-                        <td className="p-3">{s.nombre} {s.apellido}</td>
-                        <td className="p-3 font-bold">{s.titulo}</td>
-                        <td className="p-3">{s.email}</td>
-                        <td className="p-3">{s.formatos?.join(', ')}</td>
-                      </tr>
-                    ))}
+                    {speakers.map(s => {
+                      const speakerName = `${s.nombre || ''} ${s.apellido || ''}`.trim();
+                      return (
+                        <tr key={s.id} className="border-b border-outline-variant hover:bg-surface-variant/30">
+                          <td className="p-3">
+                            <div className="flex items-center gap-2.5">
+                              {s.foto ? (
+                                <img src={s.foto} alt={speakerName} className="w-8 h-8 rounded-full object-cover border border-outline-variant shrink-0" />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                                  {s.nombre?.charAt(0) || 'S'}
+                                </div>
+                              )}
+                              <span className="font-medium text-sm text-on-surface">{speakerName}</span>
+                            </div>
+                          </td>
+                          <td className="p-3 font-bold text-sm text-secondary">{s.titulo || s.tema}</td>
+                          <td className="p-3 text-xs text-on-surface-variant">{s.email || s.correo}</td>
+                          <td className="p-3 text-xs">
+                            <span className="bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full">
+                              {Array.isArray(s.formatos) ? s.formatos.join(', ') : (s.formato || 'Conferencia')}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
