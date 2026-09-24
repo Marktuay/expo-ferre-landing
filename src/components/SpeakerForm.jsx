@@ -3,7 +3,7 @@ import { Mic, Send, Upload, Trash2, CheckCircle2, FileText, Image as ImageIcon, 
 import { QRCodeSVG } from 'qrcode.react';
 import { db, storage, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { signInAnonymously } from 'firebase/auth';
 import { getEventBasePath } from '../config/eventConfig';
 
 const SpeakerForm = ({ onClose }) => {
@@ -172,7 +172,17 @@ const SpeakerForm = ({ onClose }) => {
     
     try {
       const formData = new FormData(e.target);
-      const user = auth.currentUser;
+      
+      // Asegurar que haya una sesión activa (autónoma o anónima) para cumplir con reglas de seguridad
+      let user = auth.currentUser;
+      if (!user) {
+        try {
+          const anonCred = await signInAnonymously(auth);
+          user = anonCred.user;
+        } catch (anonErr) {
+          console.warn("Anonymous auth not available or not required:", anonErr);
+        }
+      }
       
       const formatos = [];
       const checkboxes = e.target.querySelectorAll('input[name="formatos"]:checked');
@@ -214,17 +224,12 @@ const SpeakerForm = ({ onClose }) => {
         cvNombre: cvName || null,
         createdAt: serverTimestamp(),
         sponsorId: user ? user.uid : (urlSponsorId || null),
-        sponsorEmail: user ? user.email : (urlSponsorEmail || null),
-        sponsorCompany: urlSponsorName || (user ? user.email : 'Conferencista Independiente / ExpoFerre 2026')
+        sponsorEmail: user?.email || (urlSponsorEmail || null),
+        sponsorCompany: urlSponsorName || (user?.email ? user.email : 'Conferencista Independiente / ExpoFerre 2026')
       };
       
-      // Timeout safety wrapper (12s max) to guarantee the UI never freezes
-      const savePromise = addDoc(collection(db, `${getEventBasePath()}/speakers`), data);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('El servidor tardó en responder. Verifique su conexión.')), 12000)
-      );
-      
-      const docRef = await Promise.race([savePromise, timeoutPromise]);
+      // Guardar directamente en Firestore
+      const docRef = await addDoc(collection(db, `${getEventBasePath()}/speakers`), data);
       
       // Enviar correo de confirmación de forma asíncrona sin bloquear la pantalla de éxito
       if (emailVal) {
@@ -257,7 +262,7 @@ const SpeakerForm = ({ onClose }) => {
     } catch (error) {
       console.error('Error saving speaker:', error);
       setFormState('idle');
-      alert('Hubo un error al guardar los datos: ' + error.message);
+      alert('Hubo un inconveniente al guardar: ' + (error.message || error.code || 'Error desconocido'));
     }
   };
 
