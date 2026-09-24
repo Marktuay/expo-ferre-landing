@@ -34,6 +34,8 @@ const InteractiveMap = lazy(() => import('./components/InteractiveMap'));
 const SpeakerForm = lazy(() => import('./components/SpeakerForm'));
 const JudgeEvaluationForm = lazy(() => import('./components/JudgeEvaluationForm'));
 const AdminJury = lazy(() => import('./components/AdminJury'));
+const AdminDirectInvites = lazy(() => import('./components/AdminDirectInvites'));
+const DirectInviteRegistration = lazy(() => import('./components/DirectInviteRegistration'));
 
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -47,6 +49,7 @@ const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
         }
       });
     }, { threshold: 0.1 });
+
     const currentRef = domRef.current;
     if (currentRef) observer.observe(currentRef);
     return () => { if (currentRef) observer.unobserve(currentRef); };
@@ -69,6 +72,9 @@ const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
 
 export default function App() {
   const [currentView, setCurrentView] = useState(() => {
+    if (window.location.search.includes('invite=') || window.location.search.includes('form=invite')) {
+      return 'directInviteRegistration';
+    }
     if (window.location.search.includes('form=speaker') || window.location.search.includes('speaker=register')) {
       return 'speakerRegistration';
     }
@@ -1539,6 +1545,14 @@ export default function App() {
 
         {currentView === 'adminJury' && (
           <AdminJury onBack={() => setCurrentView('adminHub')} />
+        )}
+
+        {currentView === 'adminDirectInvites' && (
+          <AdminDirectInvites onBack={() => setCurrentView('adminHub')} adminUser={adminUser} />
+        )}
+
+        {currentView === 'directInviteRegistration' && (
+          <DirectInviteRegistration onClose={() => setCurrentView('landing')} />
         )}
       </Suspense>
 
