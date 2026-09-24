@@ -77,7 +77,13 @@ export default function App() {
     if (window.location.hash) {
       return 'landing';
     }
-    return localStorage.getItem('expoFerre_currentView') || 'landing';
+    const saved = localStorage.getItem('expoFerre_currentView');
+    const savedAdmin = localStorage.getItem('expoFerre_adminUser');
+    // Si la vista guardada es de administración pero no hay sesión de admin, mostrar siempre la landing
+    if (saved && (saved.startsWith('admin') || saved === 'escaner') && !savedAdmin) {
+      return 'landing';
+    }
+    return saved || 'landing';
   });
 
   useEffect(() => {
@@ -223,9 +229,6 @@ export default function App() {
         }
       } else {
         setCurrentUserData(null);
-        setAdminUser(null);
-        localStorage.removeItem('expoFerre_adminUser');
-        localStorage.removeItem('expoFerre_currentView');
       }
       setAuthLoading(false);
     });
