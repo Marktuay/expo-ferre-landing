@@ -54,6 +54,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     2. *Reservaciones:* Panel con dos pestañas (Lista de stands reservados y **Mapa Interactivo** para administrar reservas y ocupación gráficamente).
     3. *Conferencias:* Charlas propuestas.
     4. *Staff:* Personal acreditado por los patrocinadores.
+  - **Invitaciones Directas (Pases de Uso Único):** Módulo administrativo (`AdminDirectInvites.jsx` y `DirectInviteRegistration.jsx`) para generar enlaces criptográficos de registro único que se autodestruyen al ser utilizados. Captura Nombre, Apellido, Correo, Celular, Ciudad, Empresa y Cantidad de Personal, emitiendo un Gafete Oficial con Código QR en pantalla y enviando automáticamente el correo de confirmación con el Speech Oficial.
   - **Check-In (Escáner QR):** Módulo funcional utilizando la cámara del dispositivo para escanear Códigos QR, buscar asistentes en la base de datos y registrar su asistencia en tiempo real con estadísticas.
 - **Exportación:** Todas las tablas de administración tienen la capacidad de exportar sus datos a archivos Excel (`.xlsx`), incluyendo las últimas adiciones de campos (ej. Teléfono en Leads).
 
