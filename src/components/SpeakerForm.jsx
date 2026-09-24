@@ -332,12 +332,11 @@ const SpeakerForm = ({ onClose }) => {
                 {/* TARJETA DEL GAFETE OFICIAL DEL CONFERENCISTA */}
                 <div className="bg-gradient-to-b from-surface-container to-surface-variant/30 p-6 md:p-8 rounded-2xl border-2 border-primary/30 inline-block shadow-md max-w-sm w-full mx-auto text-center">
                   
-                  {/* Foto del Speaker si existe */}
-                  {fotoData && (
-                    <div className="w-24 h-24 rounded-full border-4 border-white shadow-md mx-auto mb-3 overflow-hidden bg-white">
-                      <img src={fotoData} alt="Speaker" className="w-full h-full object-cover" />
-                    </div>
-                  )}
+                  {/* Badge de Rol: CONFERENCISTA */}
+                  <div className="inline-flex items-center gap-1.5 bg-primary text-on-primary font-black text-xs px-4 py-1.5 rounded-full mb-4 uppercase tracking-widest shadow-xs">
+                    <Mic size={14} />
+                    CONFERENCISTA
+                  </div>
 
                   {/* Nombre del Conferencista */}
                   <h4 className="font-black text-xl text-primary mb-1 uppercase tracking-wide">
@@ -352,28 +351,14 @@ const SpeakerForm = ({ onClose }) => {
                   )}
 
                   {/* Nombre de la Empresa */}
-                  <div className="inline-block bg-primary/10 text-primary font-black text-xs px-3.5 py-1.5 rounded-full mb-4 border border-primary/20 uppercase tracking-wider">
+                  <div className="inline-block bg-primary/10 text-primary font-black text-xs px-3.5 py-1.5 rounded-full mb-5 border border-primary/20 uppercase tracking-wider">
                     🏢 {registeredSpeakerData?.empresa || 'Independiente'}
                   </div>
 
-                  {/* Título de la Conferencia */}
-                  {registeredSpeakerData?.titulo && (
-                    <div className="bg-white p-3 rounded-lg border border-outline/30 mb-4 text-left shadow-2xs">
-                      <p className="text-[10px] uppercase font-bold text-secondary tracking-wider">Conferencia:</p>
-                      <p className="text-xs font-semibold text-on-surface line-clamp-2">
-                        "{registeredSpeakerData.titulo}"
-                      </p>
-                    </div>
-                  )}
-
                   {/* Código QR */}
-                  <div className="bg-white p-4 rounded-xl inline-block border border-outline/30 shadow-xs mb-3">
+                  <div className="bg-white p-4 rounded-xl inline-block border border-outline/30 shadow-xs">
                     <QRCodeSVG value={registeredSpeakerId || 'EXPOFERRE-SPEAKER'} size={180} level="M" />
                   </div>
-                  
-                  <p className="text-xs font-mono text-secondary font-bold tracking-wider">
-                    CÓDIGO: <span className="text-primary font-black">{registeredSpeakerId}</span>
-                  </p>
                 </div>
                 
                 {/* Botón único para volver al inicio */}
