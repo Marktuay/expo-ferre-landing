@@ -165,23 +165,6 @@ const SpeakerForm = ({ onClose }) => {
     }
   };
 
-  // Helper to upload to Firebase Storage with automatic fallback to base64
-  const uploadImageSmart = async (fileObj, base64Data, pathPrefix) => {
-    if (!base64Data) return null;
-    if (storage && fileObj) {
-      try {
-        const cleanName = (fileObj.name || 'image.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
-        const storageRef = ref(storage, `${getEventBasePath()}/${pathPrefix}/${Date.now()}_${cleanName}`);
-        const snapshot = await uploadBytes(storageRef, fileObj);
-        const downloadUrl = await getDownloadURL(snapshot.ref);
-        return downloadUrl;
-      } catch (err) {
-        console.warn('Firebase Storage upload omitted or restricted, fallback to optimized Base64:', err);
-      }
-    }
-    return base64Data;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormState('submitting');
@@ -202,11 +185,6 @@ const SpeakerForm = ({ onClose }) => {
 
       const emailVal = formData.get('email')?.trim().toLowerCase() || '';
       const tituloVal = formData.get('titulo')?.trim() || '';
-
-      // Upload or resolve photo and logo URLs
-      const finalFotoUrl = await uploadImageSmart(fotoFileObj, fotoData, 'speaker_photos');
-      const finalLogoUrl = await uploadImageSmart(logoFileObj, logoData, 'speaker_logos');
-
       const empresaVal = formData.get('empresa')?.trim() || 'Independiente';
       const tamanoEmpresaVal = formData.get('tamanoEmpresa') || 'independiente';
 
@@ -228,8 +206,8 @@ const SpeakerForm = ({ onClose }) => {
         tema: tituloVal,
         resumen: formData.get('resumen')?.trim() || '',
         autorizaCompartir: formData.get('auth') || 'si',
-        foto: finalFotoUrl || null,
-        logo: finalLogoUrl || null,
+        foto: fotoData || null,
+        logo: logoData || null,
         cvNombre: cvName || null,
         createdAt: serverTimestamp(),
         sponsorId: user ? user.uid : (urlSponsorId || null),

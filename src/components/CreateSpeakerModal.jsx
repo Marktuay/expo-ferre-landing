@@ -251,21 +251,6 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
     }
   };
 
-  const uploadFotoSmart = async () => {
-    if (!formData.foto) return null;
-    if (storage && fotoFileObj) {
-      try {
-        const cleanName = (fotoFileObj.name || 'speaker.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
-        const storageRef = ref(storage, `${getEventBasePath()}/speaker_photos/${Date.now()}_${cleanName}`);
-        const snapshot = await uploadBytes(storageRef, fotoFileObj);
-        return await getDownloadURL(snapshot.ref);
-      } catch (err) {
-        console.warn('Fallback a Base64 en CreateSpeakerModal:', err);
-      }
-    }
-    return formData.foto;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.formatos || formData.formatos.length === 0) {
@@ -279,8 +264,6 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
       const emailVal = formData.email.trim().toLowerCase();
       const tituloVal = formData.titulo.trim();
 
-      const finalFotoUrl = await uploadFotoSmart();
-
       const speakerDoc = {
         nombre: formData.nombre.trim(),
         apellido: formData.apellido.trim(),
@@ -288,8 +271,8 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
         email: emailVal,
         correo: emailVal,
         telefono: formData.telefono.trim(),
-        empresa: formData.empresa.trim(),
-        tamanoEmpresa: formData.tamanoEmpresa,
+        empresa: formData.empresa.trim() || 'Independiente',
+        tamanoEmpresa: formData.tamanoEmpresa || 'independiente',
         linkedin: formData.linkedin.trim(),
         facebook: formData.facebook.trim(),
         instagram: formData.instagram.trim(),
@@ -299,10 +282,10 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
         formatos: formData.formatos,
         formato: formData.formatos.join(', '),
         autorizaCompartir: formData.autorizaCompartir,
-        foto: finalFotoUrl || null,
+        foto: formData.foto || null,
         cvNombre: formData.cvNombre || null,
         sponsorId: formData.sponsorId || (initialSponsor ? initialSponsor.id : null),
-        sponsorCompany: formData.sponsorCompany || (initialSponsor ? initialSponsor.empresa : 'Patrocinador Oficial'),
+        sponsorCompany: formData.sponsorCompany || (initialSponsor ? initialSponsor.empresa : 'Organización ExpoFerre 2026'),
         sponsorEmail: formData.sponsorEmail || (initialSponsor ? (initialSponsor.correo || initialSponsor.email) : null)
       };
 
