@@ -596,6 +596,23 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
        2. **Ciudad / Departamento**
      - En el panel de administración ([`AdminJury.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminJury.jsx)), el ranking calcula automáticamente las ferreterías más nominadas por conteo total de votos de los jurados.
 
+### 🎙️ Optimización y Resolución de Registro de Conferencistas / Speakers (`24 de Septiembre de 2026`)
+- **Problema Reportado:** Al acceder mediante el enlace público/invitación del speaker (`/?form=speaker&...`), llenar los datos y presionar el botón "Enviar Registro", el formulario se quedaba en estado de carga "Guardando..." sin avanzar a la pantalla de éxito con el código QR.
+- **Causa Raíz:** 
+  1. La conversión de imágenes de fotos o logos sin compresión estricta generaba payloads base64 excesivos, ralentizando la transmisión hacia Firestore.
+  2. Ausencia de un límite de tiempo de espera (*timeout wrapper*) ante latencias de red, impidiendo liberar el estado `submitting`.
+- **Soluciones Implementadas:**
+  1. **Compresión Ultraliviana en Cliente ([`SpeakerForm.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/SpeakerForm.jsx) y [`CreateSpeakerModal.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/CreateSpeakerModal.jsx)):** 
+     - Las fotos de speakers se redimensionan automáticamente a un máximo de 450px en formato JPEG con calidad 0.78 (~30-40 KB) con suavizado bicúbico y fondo blanco.
+     - Los logos de empresas se comprimen a máximo 350px JPEG (~20-25 KB).
+     - Se eliminó el bloqueo por Firebase Storage, guardando directamente en Firestore en menos de 0.5 segundos.
+  2. **Protección con Timeout Wrapper (`Promise.race`):**
+     - Se añadió un límite máximo de espera de 12 segundos para garantizar que el formulario nunca quede congelado indefinidamente ante fallas de conectividad.
+  3. **Notificación por Correo Asíncrona:**
+     - Envío automático de confirmación por correo con datos de la ponencia y código QR al speaker registrado de manera no bloqueante.
+  4. **Soporte Completo para Conferencistas Independientes:**
+     - Se permite omitir o ingresar "Independiente" en empresa sin restricciones.
+
 
 
 

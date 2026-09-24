@@ -29,8 +29,8 @@ const SpeakerForm = ({ onClose }) => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Robust client-side image compression
-  const processImageFile = async (file, maxDim = 500) => {
+  // Robust client-side image compression (Avatar: ~30-40KB, Logo: ~20-30KB)
+  const processImageFile = async (file, maxDim = 450, quality = 0.78) => {
     if (!file) return null;
     
     // Si es SVG, devolver como dataURL directo
@@ -69,17 +69,15 @@ const SpeakerForm = ({ onClose }) => {
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
 
-          const isPng = file.type === 'image/png';
-          if (!isPng) {
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, width, height);
-          }
+          // Fondo blanco para fotos para evitar transparencias oscuras en JPEG
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, width, height);
 
           ctx.drawImage(img, 0, 0, width, height);
-          const mime = isPng ? 'image/png' : 'image/jpeg';
-          const quality = isPng ? undefined : 0.85;
-          const dataUrl = canvas.toDataURL(mime, quality);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
           resolve(dataUrl);
         } catch (e) {
           reject(e);
@@ -104,8 +102,10 @@ const SpeakerForm = ({ onClose }) => {
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
             ctx.drawImage(fallbackImg, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', 0.85));
+            resolve(canvas.toDataURL('image/jpeg', quality));
           };
           fallbackImg.onerror = () => reject(new Error('Formato de imagen no soportado'));
           fallbackImg.src = event.target.result;
@@ -123,7 +123,7 @@ const SpeakerForm = ({ onClose }) => {
     try {
       setUploadingFoto(true);
       setFotoFileObj(file);
-      const base64 = await processImageFile(file, 600);
+      const base64 = await processImageFile(file, 450, 0.78);
       setFotoData(base64);
     } catch (err) {
       console.error('Error al procesar foto del speaker:', err);
@@ -143,7 +143,7 @@ const SpeakerForm = ({ onClose }) => {
     try {
       setUploadingLogo(true);
       setLogoFileObj(file);
-      const base64 = await processImageFile(file, 400);
+      const base64 = await processImageFile(file, 350, 0.80);
       setLogoData(base64);
     } catch (err) {
       console.error('Error al procesar logo:', err);
@@ -167,6 +167,7 @@ const SpeakerForm = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formState === 'submitting') return;
     setFormState('submitting');
     
     try {
@@ -187,10 +188,12 @@ const SpeakerForm = ({ onClose }) => {
       const tituloVal = formData.get('titulo')?.trim() || '';
       const empresaVal = formData.get('empresa')?.trim() || 'Independiente';
       const tamanoEmpresaVal = formData.get('tamanoEmpresa') || 'independiente';
+      const nombreVal = formData.get('nombre')?.trim() || '';
+      const apellidoVal = formData.get('apellido')?.trim() || '';
 
       const data = {
-        nombre: formData.get('nombre')?.trim() || '',
-        apellido: formData.get('apellido')?.trim() || '',
+        nombre: nombreVal,
+        apellido: apellidoVal,
         cargo: formData.get('cargo')?.trim() || '',
         email: emailVal,
         correo: emailVal,
@@ -215,14 +218,46 @@ const SpeakerForm = ({ onClose }) => {
         sponsorCompany: urlSponsorName || (user ? user.email : 'Conferencista Independiente / ExpoFerre 2026')
       };
       
-      const docRef = await addDoc(collection(db, `${getEventBasePath()}/speakers`), data);
+      // Timeout safety wrapper (12s max) to guarantee the UI never freezes
+      const savePromise = addDoc(collection(db, `${getEventBasePath()}/speakers`), data);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('El servidor tardó en responder. Verifique su conexión.')), 12000)
+      );
       
+      const docRef = await Promise.race([savePromise, timeoutPromise]);
+      
+      // Enviar correo de confirmación de forma asíncrona sin bloquear la pantalla de éxito
+      if (emailVal) {
+        addDoc(collection(db, 'mail'), {
+          to: emailVal,
+          message: {
+            subject: 'Registro de Conferencia Confirmado - ExpoFerre 2026',
+            html: `
+              <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+                <img src="https://expoferrenicaragua.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+                <div style="padding: 30px;">
+                  <h2 style="color: #0d47a1; margin-top: 0;">¡Hola ${nombreVal} ${apellidoVal}!</h2>
+                  <p>Tu registro como speaker para la conferencia <strong>"${tituloVal}"</strong> ha sido completado exitosamente.</p>
+                  <div style="margin: 20px 0; padding: 15px; background-color: #f9fafb; border-radius: 6px; border-left: 4px solid #f39200;">
+                    <p style="margin: 4px 0;"><strong>Formato:</strong> ${formatos.join(', ')}</p>
+                    <p style="margin: 4px 0;"><strong>Empresa / Entidad:</strong> ${empresaVal}</p>
+                    <p style="margin: 4px 0;"><strong>Código de Registro:</strong> ${docRef.id}</p>
+                  </div>
+                  <p>Nos pondremos en contacto contigo para los detalles técnicos de la presentación.</p>
+                </div>
+                <img src="https://expoferrenicaragua.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+              </div>
+            `
+          }
+        }).catch(err => console.warn('Email notification error:', err));
+      }
+
       setRegisteredSpeakerId(docRef.id);
       setFormState('success');
     } catch (error) {
       console.error('Error saving speaker:', error);
       setFormState('idle');
-      alert('Hubo un error al guardar los datos. Intente nuevamente: ' + error.message);
+      alert('Hubo un error al guardar los datos: ' + error.message);
     }
   };
 

@@ -151,7 +151,7 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
     });
   };
 
-  const processImageFile = async (file) => {
+  const processImageFile = async (file, maxDim = 450, quality = 0.78) => {
     if (!file) return null;
     
     if (file.type === 'image/svg+xml') {
@@ -170,36 +170,32 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
         try {
           URL.revokeObjectURL(url);
           const canvas = document.createElement('canvas');
-          const MAX_DIM = 500;
           let width = img.naturalWidth || img.width;
           let height = img.naturalHeight || img.height;
 
           if (width > height) {
-            if (width > MAX_DIM) {
-              height = Math.round((height * MAX_DIM) / width);
-              width = MAX_DIM;
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
             }
           } else {
-            if (height > MAX_DIM) {
-              width = Math.round((width * MAX_DIM) / height);
-              height = MAX_DIM;
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
             }
           }
 
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
 
-          const isPng = file.type === 'image/png';
-          if (!isPng) {
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, width, height);
-          }
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, width, height);
 
           ctx.drawImage(img, 0, 0, width, height);
-          const mime = isPng ? 'image/png' : 'image/jpeg';
-          const quality = isPng ? undefined : 0.85;
-          resolve(canvas.toDataURL(mime, quality));
+          resolve(canvas.toDataURL('image/jpeg', quality));
         } catch (e) {
           reject(e);
         }
@@ -213,16 +209,18 @@ export default function CreateSpeakerModal({ isOpen, onClose, initialSponsor = n
             const canvas = document.createElement('canvas');
             let width = fallbackImg.width;
             let height = fallbackImg.height;
-            if (width > 500 || height > 500) {
-              const ratio = Math.min(500 / width, 500 / height);
+            if (width > maxDim || height > maxDim) {
+              const ratio = Math.min(maxDim / width, maxDim / height);
               width = Math.round(width * ratio);
               height = Math.round(height * ratio);
             }
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
             ctx.drawImage(fallbackImg, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', 0.85));
+            resolve(canvas.toDataURL('image/jpeg', quality));
           };
           fallbackImg.onerror = () => reject(new Error('Formato de imagen no soportado'));
           fallbackImg.src = event.target.result;
