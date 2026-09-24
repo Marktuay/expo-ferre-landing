@@ -146,6 +146,15 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 ¡Será un verdadero honor contar con tu presencia! 🚀`;
   };
 
+  const getWhatsAppUrl = (invite) => {
+    const text = encodeURIComponent(getWhatsAppSpeech(invite));
+    let phoneClean = (invite.telefono || '').replace(/[^0-9]/g, '');
+    if (phoneClean && phoneClean.length === 8) {
+      phoneClean = '505' + phoneClean;
+    }
+    return phoneClean ? `https://wa.me/${phoneClean}?text=${text}` : `https://wa.me/?text=${text}`;
+  };
+
   const handleCopyWhatsApp = (invite) => {
     const text = getWhatsAppSpeech(invite);
     navigator.clipboard.writeText(text);
@@ -490,17 +499,39 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
                         {/* Acciones */}
                         <td className="p-4 text-center">
-                          <div className="flex items-center justify-center gap-1.5">
-                            {/* WhatsApp Speech */}
+                          <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                            {/* Abrir WhatsApp Directo */}
+                            {isUsed ? (
+                              <button
+                                disabled
+                                className="px-2.5 py-1.5 bg-gray-100 text-gray-400 rounded-lg text-xs font-bold opacity-40 cursor-not-allowed flex items-center gap-1"
+                              >
+                                <ExternalLink size={14} />
+                                <span>WhatsApp</span>
+                              </button>
+                            ) : (
+                              <a
+                                href={getWhatsAppUrl(inv)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-xs cursor-pointer"
+                                title="Abrir chat de WhatsApp con el mensaje oficial listo"
+                              >
+                                <ExternalLink size={14} />
+                                <span>Enviar WhatsApp</span>
+                              </a>
+                            )}
+
+                            {/* Copiar Speech WhatsApp */}
                             <button
                               type="button"
                               onClick={() => handleCopyWhatsApp(inv)}
                               disabled={isUsed}
-                              className="p-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed"
-                              title="Copiar Invitación para WhatsApp"
+                              className="p-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed"
+                              title="Copiar texto completo de invitación para WhatsApp"
                             >
-                              {isWaCopied ? <Check size={14} className="text-emerald-700" /> : <Send size={14} />}
-                              <span>{isWaCopied ? '¡Copiado!' : 'WhatsApp'}</span>
+                              {isWaCopied ? <Check size={14} className="text-emerald-700" /> : <Copy size={14} />}
+                              <span className="hidden sm:inline">{isWaCopied ? '¡Copiado!' : 'Copiar Texto'}</span>
                             </button>
 
                             {/* Enviar Correo */}
@@ -508,11 +539,11 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                               type="button"
                               onClick={() => setEmailModal({ open: true, invite: { ...inv, targetEmail: inv.email || '' } })}
                               disabled={isUsed}
-                              className="p-2 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="p-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed"
                               title="Enviar por Correo Oficial"
                             >
                               <Mail size={14} />
-                              <span>Correo</span>
+                              <span className="hidden sm:inline">Correo</span>
                             </button>
 
                             {/* Copiar Enlace Directo */}
@@ -520,7 +551,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                               type="button"
                               onClick={() => handleCopyLinkOnly(inv)}
                               disabled={isUsed}
-                              className="p-2 bg-surface text-secondary hover:text-primary hover:bg-surface-variant border border-outline-variant rounded-lg transition-colors text-xs font-bold disabled:opacity-30"
+                              className="p-1.5 bg-surface text-secondary hover:text-primary hover:bg-surface-variant border border-outline-variant rounded-lg transition-colors text-xs font-bold disabled:opacity-30"
                               title="Copiar solo el enlace"
                             >
                               {isLinkCopied ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
@@ -530,7 +561,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                             <button
                               type="button"
                               onClick={() => handleDeleteInvite(inv)}
-                              className="p-2 text-error hover:bg-error/10 rounded-lg transition-colors"
+                              className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors"
                               title="Eliminar Enlace"
                             >
                               <Trash2 size={16} />
