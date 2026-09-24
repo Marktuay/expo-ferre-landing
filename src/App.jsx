@@ -1,38 +1,39 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { Briefcase, Users, Building2, UserCheck, LineChart, Target, Tag, ShoppingCart, Truck, ClipboardList, Archive, Plane, Cog } from 'lucide-react';
 import './index.css';
-import SponsorDashboard from './components/SponsorDashboard';
-import AdminPanel from './components/AdminPanel';
-import PrivacyPolicy from './components/PrivacyPolicy';
-import TermsOfService from './components/TermsOfService';
-import ContactPage from './components/ContactPage';
-import StaffRegistration from './components/StaffRegistration';
-import AuthPage from './components/AuthPage';
 import { auth, db } from './firebase';
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, addDoc, setDoc, serverTimestamp, query, where, getDocs, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { getEventBasePath } from './config/eventConfig';
 import { QRCodeSVG } from 'qrcode.react';
-import ScannerModule from './components/ScannerModule';
-import AdminHub from './components/AdminHub';
-import AdminSponsorsHub from './components/AdminSponsorsHub';
-import AdminGlobalLeads from './components/AdminGlobalLeads';
-import AdminPreRegistrations from './components/AdminPreRegistrations';
-import AdminSponsors from './components/AdminSponsors';
-import AdminContact from './components/AdminContact';
-import AdminSpeakers from './components/AdminSpeakers';
-import AdminStaff from './components/AdminStaff';
-import AdminGuests from './components/AdminGuests';
-import AdminUsers from './components/AdminUsers';
-import AdminCheckIn from './components/AdminCheckIn';
-import AdminAttendanceReport from './components/AdminAttendanceReport';
-import AdminMarketingReport from './components/AdminMarketingReport';
-import AdminPushNotifications from './components/AdminPushNotifications';
-import InteractiveMap from './components/InteractiveMap';
 import ErrorBoundary from './components/ErrorBoundary';
-import SpeakerForm from './components/SpeakerForm';
-import JudgeEvaluationForm from './components/JudgeEvaluationForm';
-import AdminJury from './components/AdminJury';
+
+const SponsorDashboard = lazy(() => import('./components/SponsorDashboard'));
+const AdminPanel = lazy(() => import('./components/AdminPanel'));
+const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./components/TermsOfService'));
+const ContactPage = lazy(() => import('./components/ContactPage'));
+const StaffRegistration = lazy(() => import('./components/StaffRegistration'));
+const AuthPage = lazy(() => import('./components/AuthPage'));
+const ScannerModule = lazy(() => import('./components/ScannerModule'));
+const AdminHub = lazy(() => import('./components/AdminHub'));
+const AdminSponsorsHub = lazy(() => import('./components/AdminSponsorsHub'));
+const AdminGlobalLeads = lazy(() => import('./components/AdminGlobalLeads'));
+const AdminPreRegistrations = lazy(() => import('./components/AdminPreRegistrations'));
+const AdminSponsors = lazy(() => import('./components/AdminSponsors'));
+const AdminContact = lazy(() => import('./components/AdminContact'));
+const AdminSpeakers = lazy(() => import('./components/AdminSpeakers'));
+const AdminStaff = lazy(() => import('./components/AdminStaff'));
+const AdminGuests = lazy(() => import('./components/AdminGuests'));
+const AdminUsers = lazy(() => import('./components/AdminUsers'));
+const AdminCheckIn = lazy(() => import('./components/AdminCheckIn'));
+const AdminAttendanceReport = lazy(() => import('./components/AdminAttendanceReport'));
+const AdminMarketingReport = lazy(() => import('./components/AdminMarketingReport'));
+const AdminPushNotifications = lazy(() => import('./components/AdminPushNotifications'));
+const InteractiveMap = lazy(() => import('./components/InteractiveMap'));
+const SpeakerForm = lazy(() => import('./components/SpeakerForm'));
+const JudgeEvaluationForm = lazy(() => import('./components/JudgeEvaluationForm'));
+const AdminJury = lazy(() => import('./components/AdminJury'));
 
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -808,6 +809,7 @@ export default function App() {
                   loop 
                   muted={isVideoMuted}
                   playsInline
+                  preload="metadata"
                 >
                   <source src="/taller.mp4" type="video/mp4" />
                 </video>
@@ -1410,131 +1412,137 @@ export default function App() {
       )}
 
 
-      {currentView === 'adminHub' && (
-        <AdminHub 
-          onBack={() => setCurrentView('landing')} 
-          onNavigate={(view) => setCurrentView(view)} 
-          adminUser={adminUser}
-          setAdminUser={setAdminUser}
-        />
-      )}
-
-      {currentView === 'adminCheckIn' && (
-        <AdminCheckIn onBack={(view) => setCurrentView(view || 'adminHub')} />
-      )}
-
-      {currentView === 'adminAttendanceReport' && (
-        <AdminAttendanceReport onBack={() => setCurrentView('adminHub')} />
-      )}
-
-      {currentView === 'adminMarketingReport' && (
-        <AdminMarketingReport onBack={() => setCurrentView('adminHub')} />
-      )}
-
-      {currentView === 'adminSponsorsHub' && (
-        <AdminSponsorsHub onBack={() => setCurrentView('adminHub')} onNavigate={(v) => setCurrentView(v)} adminUser={adminUser} />
-      )}
-
-      {currentView === 'adminPanel' && (
-        <AdminPanel onBack={() => setCurrentView('adminSponsorsHub')} adminUser={adminUser} />
-      )}
-
-
-      {currentView === 'adminGlobalLeads' && (
-        <AdminGlobalLeads onBack={() => setCurrentView('adminSponsorsHub')} />
-      )}
-      {currentView === 'adminPreRegistrations' && (
-        <AdminPreRegistrations onBack={() => setCurrentView('adminHub')} adminUser={adminUser} />
-      )}
-      {currentView === 'adminPushNotifications' && (
-        <AdminPushNotifications onBack={() => setCurrentView('adminHub')} />
-      )}
-
-      {currentView === 'adminContact' && (
-        <AdminContact onBack={() => setCurrentView('adminHub')} />
-      )}
-
-      {currentView === 'adminSponsors' && (
-        <AdminSponsors onBack={() => setCurrentView('adminSponsorsHub')} />
-      )}
-
-      {currentView === 'adminSpeakers' && (
-        <AdminSpeakers onBack={() => setCurrentView('adminSponsorsHub')} />
-      )}
-
-      {currentView === 'adminStaff' && (
-        <AdminStaff onBack={() => setCurrentView('adminSponsorsHub')} />
-      )}
-
-      {currentView === 'adminGuests' && (
-        <AdminGuests onBack={() => setCurrentView('adminSponsorsHub')} />
-      )}
-
-      {currentView === 'adminUsers' && (
-        <AdminUsers onBack={() => setCurrentView('adminHub')} />
-      )}
-
-      {currentView === 'escaner' && (
-        adminUser ? (
-          <ScannerModule onBack={() => setCurrentView('adminHub')} />
-        ) : (
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center bg-surface">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      }>
+        {currentView === 'adminHub' && (
           <AdminHub 
             onBack={() => setCurrentView('landing')} 
             onNavigate={(view) => setCurrentView(view)} 
             adminUser={adminUser}
             setAdminUser={setAdminUser}
           />
-        )
-      )}
+        )}
 
-      {currentView === 'sponsorDashboard' && (
-        authLoading ? (
-          <div className="min-h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-[#283474] border-t-transparent rounded-full animate-spin"></div></div>
-        ) : currentUser ? (
-          <SponsorDashboard 
-            userData={currentUserData}
-            onBack={() => setCurrentView('landing')}
-            onStaffRegistration={() => setCurrentView('staffRegistration')}
-            onContact={() => setCurrentView('contactPage')}
-          />
-        ) : (
-          <AuthPage onBack={() => setCurrentView('landing')} />
-        )
-      )}
+        {currentView === 'adminCheckIn' && (
+          <AdminCheckIn onBack={(view) => setCurrentView(view || 'adminHub')} />
+        )}
 
-      {currentView === 'privacyPolicy' && (
-        <PrivacyPolicy />
-      )}
+        {currentView === 'adminAttendanceReport' && (
+          <AdminAttendanceReport onBack={() => setCurrentView('adminHub')} />
+        )}
 
-      {currentView === 'termsOfService' && (
-        <TermsOfService />
-      )}
+        {currentView === 'adminMarketingReport' && (
+          <AdminMarketingReport onBack={() => setCurrentView('adminHub')} />
+        )}
 
-      {currentView === 'contactPage' && (
-        <ContactPage />
-      )}
+        {currentView === 'adminSponsorsHub' && (
+          <AdminSponsorsHub onBack={() => setCurrentView('adminHub')} onNavigate={(v) => setCurrentView(v)} adminUser={adminUser} />
+        )}
 
-      {currentView === 'staffRegistration' && (
-        authLoading ? (
-          <div className="min-h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-[#283474] border-t-transparent rounded-full animate-spin"></div></div>
-        ) : currentUser ? (
-          <StaffRegistration onBack={() => setCurrentView(currentUser ? 'sponsorDashboard' : 'landing')} />
-        ) : (
-          <AuthPage onBack={() => setCurrentView('landing')} />
-        )
-      )}
+        {currentView === 'adminPanel' && (
+          <AdminPanel onBack={() => setCurrentView('adminSponsorsHub')} adminUser={adminUser} />
+        )}
 
-      {currentView === 'speakerRegistration' && (
-        <SpeakerForm onClose={() => setCurrentView('landing')} />
-      )}
 
-      {currentView === 'judgeEvaluation' && (
-        <JudgeEvaluationForm onClose={() => setCurrentView('landing')} />
-      )}
+        {currentView === 'adminGlobalLeads' && (
+          <AdminGlobalLeads onBack={() => setCurrentView('adminSponsorsHub')} />
+        )}
+        {currentView === 'adminPreRegistrations' && (
+          <AdminPreRegistrations onBack={() => setCurrentView('adminHub')} adminUser={adminUser} />
+        )}
+        {currentView === 'adminPushNotifications' && (
+          <AdminPushNotifications onBack={() => setCurrentView('adminHub')} />
+        )}
 
-      {currentView === 'adminJury' && (
-        <AdminJury onBack={() => setCurrentView('adminHub')} />
-      )}
+        {currentView === 'adminContact' && (
+          <AdminContact onBack={() => setCurrentView('adminHub')} />
+        )}
+
+        {currentView === 'adminSponsors' && (
+          <AdminSponsors onBack={() => setCurrentView('adminSponsorsHub')} />
+        )}
+
+        {currentView === 'adminSpeakers' && (
+          <AdminSpeakers onBack={() => setCurrentView('adminSponsorsHub')} />
+        )}
+
+        {currentView === 'adminStaff' && (
+          <AdminStaff onBack={() => setCurrentView('adminSponsorsHub')} />
+        )}
+
+        {currentView === 'adminGuests' && (
+          <AdminGuests onBack={() => setCurrentView('adminSponsorsHub')} />
+        )}
+
+        {currentView === 'adminUsers' && (
+          <AdminUsers onBack={() => setCurrentView('adminHub')} />
+        )}
+
+        {currentView === 'escaner' && (
+          adminUser ? (
+            <ScannerModule onBack={() => setCurrentView('adminHub')} />
+          ) : (
+            <AdminHub 
+              onBack={() => setCurrentView('landing')} 
+              onNavigate={(view) => setCurrentView(view)} 
+              adminUser={adminUser}
+              setAdminUser={setAdminUser}
+            />
+          )
+        )}
+
+        {currentView === 'sponsorDashboard' && (
+          authLoading ? (
+            <div className="min-h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-[#283474] border-t-transparent rounded-full animate-spin"></div></div>
+          ) : currentUser ? (
+            <SponsorDashboard 
+              userData={currentUserData}
+              onBack={() => setCurrentView('landing')}
+              onStaffRegistration={() => setCurrentView('staffRegistration')}
+              onContact={() => setCurrentView('contactPage')}
+            />
+          ) : (
+            <AuthPage onBack={() => setCurrentView('landing')} />
+          )
+        )}
+
+        {currentView === 'privacyPolicy' && (
+          <PrivacyPolicy />
+        )}
+
+        {currentView === 'termsOfService' && (
+          <TermsOfService />
+        )}
+
+        {currentView === 'contactPage' && (
+          <ContactPage />
+        )}
+
+        {currentView === 'staffRegistration' && (
+          authLoading ? (
+            <div className="min-h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-[#283474] border-t-transparent rounded-full animate-spin"></div></div>
+          ) : currentUser ? (
+            <StaffRegistration onBack={() => setCurrentView(currentUser ? 'sponsorDashboard' : 'landing')} />
+          ) : (
+            <AuthPage onBack={() => setCurrentView('landing')} />
+          )
+        )}
+
+        {currentView === 'speakerRegistration' && (
+          <SpeakerForm onClose={() => setCurrentView('landing')} />
+        )}
+
+        {currentView === 'judgeEvaluation' && (
+          <JudgeEvaluationForm onClose={() => setCurrentView('landing')} />
+        )}
+
+        {currentView === 'adminJury' && (
+          <AdminJury onBack={() => setCurrentView('adminHub')} />
+        )}
+      </Suspense>
 
       {/* Footer */}
       <footer className="w-full bg-inverse-surface border-t-4 border-primary p-stack-lg relative z-10">
