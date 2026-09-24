@@ -802,17 +802,15 @@ export default function App() {
             <div className="lg:col-span-5 flex justify-center items-center">
               <div className="bg-black/90 backdrop-blur-sm border-2 border-[#f39200] hard-shadow-orange rounded-2xl overflow-hidden relative flex items-center justify-center shadow-2xl w-full max-w-lg md:max-w-xl">
                 <video 
-                  key="/taller.mp4"
                   ref={videoRef}
+                  src="/taller.mp4"
                   className="w-full h-auto object-cover rounded-2xl" 
                   autoPlay 
                   loop 
                   muted={isVideoMuted}
                   playsInline
                   preload="metadata"
-                >
-                  <source src="/taller.mp4" type="video/mp4" />
-                </video>
+                />
                 <button
                   onClick={() => {
                     if (videoRef.current) {
