@@ -610,8 +610,12 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
      - Se añadió un límite máximo de espera de 12 segundos para garantizar que el formulario nunca quede congelado indefinidamente ante fallas de conectividad.
   3. **Notificación por Correo Asíncrona:**
      - Envío automático de confirmación por correo con datos de la ponencia y código QR al speaker registrado de manera no bloqueante.
-  4. **Soporte Completo para Conferencistas Independientes:**
-     - Se permite omitir o ingresar "Independiente" en empresa sin restricciones.
+  5. **Pantalla de Éxito Enriquecida y Navegación Limpia ([`SpeakerForm.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/SpeakerForm.jsx)):**
+     - La tarjeta de confirmación ahora muestra el gafete completo del conferencista: Foto de perfil, Nombre completo en tipografía destacada, Cargo, Insignia de Empresa / Entidad, Título de la Ponencia, y el Código QR con su identificador alfanumérico.
+     - Se removió el botón "Registrar Otro Conferencista" (función exclusiva del administrador).
+     - El botón de salida se configuró como "Finalizar y Volver al Inicio" con redirección limpia a la Landing Page principal.
+  6. **Ajuste de Reglas de Seguridad en Firestore:**
+     - Se añadieron reglas explícitas para `speakers` (`allow get, create: if true; allow list, update, delete: if request.auth != null;`) y `juryEvaluations` asegurando que los formularios públicos operen sin requerir inicio de sesión previo.
 
 
 

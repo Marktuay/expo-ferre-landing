@@ -9,6 +9,7 @@ import { getEventBasePath } from '../config/eventConfig';
 const SpeakerForm = ({ onClose }) => {
   const [formState, setFormState] = useState('idle');
   const [registeredSpeakerId, setRegisteredSpeakerId] = useState(null);
+  const [registeredSpeakerData, setRegisteredSpeakerData] = useState(null);
   const [submitStatus, setSubmitStatus] = useState('');
   const [submitError, setSubmitError] = useState('');
   
@@ -270,6 +271,15 @@ const SpeakerForm = ({ onClose }) => {
       }
 
       setRegisteredSpeakerId(docRef.id);
+      setRegisteredSpeakerData({
+        id: docRef.id,
+        nombre: `${nombreVal} ${apellidoVal}`.trim(),
+        cargo: formData.get('cargo')?.trim() || '',
+        empresa: empresaVal,
+        titulo: tituloVal,
+        formato: formatos.join(', '),
+        foto: fotoData
+      });
       setFormState('success');
     } catch (error) {
       console.error('Error saving speaker:', error);
@@ -309,44 +319,78 @@ const SpeakerForm = ({ onClose }) => {
 
         <div className="bg-white p-6 md:p-10 rounded-xl shadow-sm border border-outline-variant">
           {formState === 'success' ? (
-            <div className="bg-white p-6 md:p-8 rounded-lg text-center flex flex-col items-center gap-6">
+            <div className="bg-white p-4 md:p-6 rounded-lg text-center flex flex-col items-center gap-6">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 shadow-xs">
                 <CheckCircle2 size={36} />
               </div>
-              <div>
-                <h3 className="font-bold text-2xl mb-2 text-primary">¡Registro completado con éxito!</h3>
-                <p className="text-secondary mb-6 max-w-md mx-auto">
-                  La información de la conferencia y del conferencista ha sido registrada satisfactoriamente.
+              <div className="w-full">
+                <h3 className="font-bold text-2xl mb-1 text-primary">¡Registro completado con éxito!</h3>
+                <p className="text-secondary mb-6 max-w-md mx-auto text-sm">
+                  La conferencia y el perfil del conferencista han sido confirmados satisfactoriamente.
                 </p>
                 
-                <div className="bg-surface-variant p-6 rounded-xl inline-block border border-outline mb-6 shadow-xs">
-                  <QRCodeSVG value={registeredSpeakerId || 'EXPOFERRE-SPEAKER'} size={180} level="M" />
-                  <p className="mt-4 text-xs font-mono text-secondary font-bold">CÓDIGO: {registeredSpeakerId}</p>
+                {/* TARJETA DEL GAFETE OFICIAL DEL CONFERENCISTA */}
+                <div className="bg-gradient-to-b from-surface-container to-surface-variant/30 p-6 md:p-8 rounded-2xl border-2 border-primary/30 inline-block shadow-md max-w-sm w-full mx-auto text-center">
+                  
+                  {/* Foto del Speaker si existe */}
+                  {fotoData && (
+                    <div className="w-24 h-24 rounded-full border-4 border-white shadow-md mx-auto mb-3 overflow-hidden bg-white">
+                      <img src={fotoData} alt="Speaker" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+
+                  {/* Nombre del Conferencista */}
+                  <h4 className="font-black text-xl text-primary mb-1 uppercase tracking-wide">
+                    {registeredSpeakerData?.nombre || 'Conferencista'}
+                  </h4>
+
+                  {/* Cargo */}
+                  {registeredSpeakerData?.cargo && (
+                    <p className="text-xs font-bold text-secondary uppercase tracking-wider mb-2">
+                      {registeredSpeakerData.cargo}
+                    </p>
+                  )}
+
+                  {/* Nombre de la Empresa */}
+                  <div className="inline-block bg-primary/10 text-primary font-black text-xs px-3.5 py-1.5 rounded-full mb-4 border border-primary/20 uppercase tracking-wider">
+                    🏢 {registeredSpeakerData?.empresa || 'Independiente'}
+                  </div>
+
+                  {/* Título de la Conferencia */}
+                  {registeredSpeakerData?.titulo && (
+                    <div className="bg-white p-3 rounded-lg border border-outline/30 mb-4 text-left shadow-2xs">
+                      <p className="text-[10px] uppercase font-bold text-secondary tracking-wider">Conferencia:</p>
+                      <p className="text-xs font-semibold text-on-surface line-clamp-2">
+                        "{registeredSpeakerData.titulo}"
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Código QR */}
+                  <div className="bg-white p-4 rounded-xl inline-block border border-outline/30 shadow-xs mb-3">
+                    <QRCodeSVG value={registeredSpeakerId || 'EXPOFERRE-SPEAKER'} size={180} level="M" />
+                  </div>
+                  
+                  <p className="text-xs font-mono text-secondary font-bold tracking-wider">
+                    CÓDIGO: <span className="text-primary font-black">{registeredSpeakerId}</span>
+                  </p>
                 </div>
                 
-                <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
+                {/* Botón único para volver al inicio */}
+                <div className="flex justify-center mt-8">
                   <button 
                     onClick={() => {
-                      setFormState('idle');
-                      setRegisteredSpeakerId(null);
-                      setFotoData(null);
-                      setFotoFileObj(null);
-                      setLogoData(null);
-                      setLogoFileObj(null);
-                      setCvName('');
+                      if (onClose) {
+                        onClose();
+                      } else {
+                        window.location.href = '/';
+                      }
                     }}
-                    className="px-6 py-3 bg-surface border border-outline-variant rounded-md text-primary font-bold hover:bg-surface-variant transition-colors"
+                    className="px-8 py-3.5 bg-primary text-on-primary rounded-xl font-bold hover:brightness-110 transition-all shadow-md flex items-center justify-center gap-2 text-base cursor-pointer"
                   >
-                    Registrar Otro Conferencista
+                    <span className="material-symbols-outlined text-lg">home</span>
+                    Finalizar y Volver al Inicio
                   </button>
-                  {onClose && (
-                    <button 
-                      onClick={onClose}
-                      className="px-6 py-3 bg-primary text-on-primary rounded-md font-bold hover:bg-primary-container hover:text-on-primary-container transition-colors"
-                    >
-                      Volver al Panel
-                    </button>
-                  )}
                 </div>
               </div>
             </div>
