@@ -104,55 +104,56 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
       // 1. Iniciar sesión con Firebase Auth
       await signInWithEmailAndPassword(auth, email.trim(), password);
 
-      // 2. Asignar sesión de administrador a todas las cuentas autenticadas
       const cleanEmail = email.trim().toLowerCase();
-      
-      // Buscar primero si existe registro en systemUsers por username o email
-      let q = query(
-        collection(db, `${getEventBasePath()}/systemUsers`), 
-        where('username', '==', cleanEmail)
-      );
-      let querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        const q2 = query(
+      let role = 'admin';
+      const nameParts = cleanEmail.split('@')[0];
+      let username = nameParts.charAt(0).toUpperCase() + nameParts.slice(1);
+      let userId = cleanEmail;
+
+      // 2. Intentar buscar en systemUsers de forma no bloqueante
+      try {
+        let q = query(
           collection(db, `${getEventBasePath()}/systemUsers`), 
-          where('email', '==', cleanEmail)
+          where('username', '==', cleanEmail)
         );
-        querySnapshot = await getDocs(q2);
-      }
-      
-      if (!querySnapshot.empty) {
-        let foundUser = null;
-        querySnapshot.forEach((docSnap) => {
-          const userData = docSnap.data();
-          foundUser = { 
-            id: docSnap.id, 
-            username: userData.username || userData.email || cleanEmail, 
-            role: userData.role || 'admin', 
-            email: cleanEmail 
-          };
-        });
-        if (foundUser) {
-          setAdminUser(foundUser);
-          return;
+        let querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          const q2 = query(
+            collection(db, `${getEventBasePath()}/systemUsers`), 
+            where('email', '==', cleanEmail)
+          );
+          querySnapshot = await getDocs(q2);
         }
+        
+        if (!querySnapshot.empty) {
+          querySnapshot.forEach((docSnap) => {
+            const userData = docSnap.data();
+            userId = docSnap.id;
+            username = userData.username || userData.email || username;
+            role = userData.role || 'admin';
+          });
+        }
+      } catch (firestoreErr) {
+        console.warn("Consulta a systemUsers omitida:", firestoreErr);
       }
 
-      // Fallback universal: toda cuenta autenticada con éxito en Firebase Auth ingresa como Administrador
-      const nameParts = cleanEmail.split('@')[0];
-      const formattedName = nameParts.charAt(0).toUpperCase() + nameParts.slice(1);
       setAdminUser({ 
-        username: formattedName, 
-        role: 'admin', 
+        id: userId,
+        username: username, 
+        role: role, 
         email: cleanEmail 
       });
     } catch (err) {
       console.error('Error logging in:', err);
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-email') {
         setError('Correo o contraseña incorrectos.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Acceso bloqueado temporalmente por demasiados intentos. Espera unos minutos.');
+      } else if (err.code === 'auth/network-request-failed') {
+        setError('Error de red: No se pudo conectar a los servidores de autenticación.');
       } else {
-        setError('Hubo un error de conexión. Intenta de nuevo.');
+        setError(`Error (${err.code || 'conexión'}): ${err.message || 'Intente de nuevo.'}`);
       }
     } finally {
       setIsLoggingIn(false);
