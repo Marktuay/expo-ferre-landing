@@ -9,6 +9,8 @@ import { getEventBasePath } from '../config/eventConfig';
 const SpeakerForm = ({ onClose }) => {
   const [formState, setFormState] = useState('idle');
   const [registeredSpeakerId, setRegisteredSpeakerId] = useState(null);
+  const [submitStatus, setSubmitStatus] = useState('');
+  const [submitError, setSubmitError] = useState('');
   
   // File and preview states
   const [fotoData, setFotoData] = useState(null);
@@ -27,6 +29,12 @@ const SpeakerForm = ({ onClose }) => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Pre-autenticar de forma anónima en segundo plano para que la conexión esté lista al enviar
+    if (!auth.currentUser) {
+      signInAnonymously(auth).catch(err => {
+        console.warn("Pre-auth anónima omitida:", err.message);
+      });
+    }
   }, []);
 
   // Robust client-side image compression (Avatar: ~30-40KB, Logo: ~20-30KB)
@@ -169,11 +177,14 @@ const SpeakerForm = ({ onClose }) => {
     e.preventDefault();
     if (formState === 'submitting') return;
     setFormState('submitting');
+    setSubmitError('');
+    setSubmitStatus('Preparando información...');
     
     try {
       const formData = new FormData(e.target);
       
-      // Asegurar que haya una sesión activa (autónoma o anónima) para cumplir con reglas de seguridad
+      // 1. Asegurar sesión activa (anónima si es invitado externo)
+      setSubmitStatus('Conectando con el servidor...');
       let user = auth.currentUser;
       if (!user) {
         try {
@@ -228,10 +239,11 @@ const SpeakerForm = ({ onClose }) => {
         sponsorCompany: urlSponsorName || (user?.email ? user.email : 'Conferencista Independiente / ExpoFerre 2026')
       };
       
-      // Guardar directamente en Firestore
+      // 2. Guardar en Firestore
+      setSubmitStatus('Guardando conferencia...');
       const docRef = await addDoc(collection(db, `${getEventBasePath()}/speakers`), data);
       
-      // Enviar correo de confirmación de forma asíncrona sin bloquear la pantalla de éxito
+      // 3. Enviar correo de confirmación de forma asíncrona sin bloquear la pantalla de éxito
       if (emailVal) {
         addDoc(collection(db, 'mail'), {
           to: emailVal,
@@ -262,7 +274,9 @@ const SpeakerForm = ({ onClose }) => {
     } catch (error) {
       console.error('Error saving speaker:', error);
       setFormState('idle');
-      alert('Hubo un inconveniente al guardar: ' + (error.message || error.code || 'Error desconocido'));
+      const msg = error.code ? `Error (${error.code}): ${error.message}` : (error.message || 'Error desconocido');
+      setSubmitError(msg);
+      alert('Hubo un inconveniente al guardar los datos:\n' + msg);
     }
   };
 
@@ -622,17 +636,31 @@ const SpeakerForm = ({ onClose }) => {
                 </div>
               </div>
 
+              {/* MENSAJE DE ERROR SI OCURRE */}
+              {submitError && (
+                <div className="p-4 bg-error-container text-on-error-container border border-error/30 rounded-xl text-xs flex items-center gap-3">
+                  <span className="material-symbols-outlined text-error text-lg shrink-0">error</span>
+                  <div className="flex-1">
+                    <p className="font-bold mb-0.5">No se pudo completar el registro:</p>
+                    <p className="font-mono">{submitError}</p>
+                  </div>
+                </div>
+              )}
+
               {/* BOTÓN DE ENVÍO */}
-              <div className="pt-6 border-t border-outline-variant flex justify-end">
+              <div className="pt-6 border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-xs text-on-surface-variant">
+                  {uploadingFoto || uploadingLogo ? '⏳ Procesando archivos adjuntos...' : 'Por favor verifique que los campos obligatorios (*) estén completos.'}
+                </p>
                 <button 
                   type="submit" 
                   disabled={formState === 'submitting' || uploadingFoto || uploadingLogo}
-                  className="w-full md:w-auto px-10 py-3.5 bg-primary text-on-primary font-bold rounded-xl hover:brightness-110 transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed text-base"
+                  className="w-full sm:w-auto px-10 py-3.5 bg-primary text-on-primary font-bold rounded-xl hover:brightness-110 transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed text-base shrink-0"
                 >
                   {formState === 'submitting' ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Guardando conferencia...</span>
+                      <span>{submitStatus || 'Guardando conferencia...'}</span>
                     </>
                   ) : (
                     <>
