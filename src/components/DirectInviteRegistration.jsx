@@ -141,7 +141,7 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
             subject: '¡Registro Confirmado! Tu Pase Oficial y Código QR para EXPO FERRE 2026',
             html: `
               <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
-                <img src="https://expoferrenicaragua.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+                <img src="${inviteData?.headerBannerUrl || inviteData?.bannerUrl || 'https://expoferrenicaragua.com/email-header.png'}" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
                 
                 <div style="padding: 32px 24px;">
                   <h2 style="color: #0d47a1; margin-top: 0; font-size: 22px;">¡Estimado(a) ${cleanNombre} ${cleanApellido}!</h2>
@@ -156,6 +156,7 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
                     <p style="margin: 6px 0; font-size: 14px;">🏢 <strong>Empresa:</strong> ${cleanEmpresa}</p>
                     <p style="margin: 6px 0; font-size: 14px;">📍 <strong>Ciudad:</strong> ${cleanCiudad}</p>
                     <p style="margin: 6px 0; font-size: 14px;">🏷️ <strong>Pase:</strong> Invitado Especial / Acceso Directo</p>
+                    ${inviteData?.sponsorName ? `<p style="margin: 6px 0; font-size: 14px; color: #d97706;">⭐ <strong>Cortesía de:</strong> ${inviteData.sponsorName} ${inviteData.sponsorStands ? `(Stand ${inviteData.sponsorStands})` : ''}</p>` : ''}
                     <p style="margin: 6px 0; font-size: 14px; font-family: monospace;">🎟️ <strong>Código de Registro:</strong> <strong>${attendeeId}</strong></p>
                   </div>
 
@@ -179,7 +180,7 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
                   </p>
                 </div>
                 
-                <img src="https://expoferrenicaragua.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+                <img src="${inviteData?.footerBannerUrl || 'https://expoferrenicaragua.com/email-footer.png'}" alt="Marcas y Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
               </div>
             `
           }
