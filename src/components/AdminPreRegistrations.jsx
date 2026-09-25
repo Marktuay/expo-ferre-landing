@@ -165,7 +165,7 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
 
                 <div style="margin: 25px 0; padding: 20px; background-color: #f9fafb; border-radius: 8px; border-left: 4px solid #f39200;">
                   <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.6;">
-                    <li>📅 <strong>Fecha:</strong> Sábado 17 de octubre de 2026</li>
+                    <li>📅 <strong>Fecha:</strong> 16 y 17 de Octubre de 2026</li>
                     <li>📍 <strong>Lugar:</strong> Hotel Crowne Plaza – Salón Gran Darío</li>
                     <li>🕢 <strong>Registro:</strong> 7:30 a. m.</li>
                     <li>🕗 <strong>Evento:</strong> 8:00 a. m. – 5:00 p. m.</li>

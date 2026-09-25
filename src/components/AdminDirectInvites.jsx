@@ -137,6 +137,9 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
 
 Es un gusto saludarte y extenderte una invitación especial y personalizada para ser parte del encuentro más importante de la industria ferretera y de la construcción en el país.
 
+📅 Fecha: 16 y 17 de Octubre de 2026
+📍 Lugar: Centro de Convenciones Crowne Plaza, Managua
+
 Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
 
 🔗 ${link}

@@ -1294,7 +1294,7 @@ export default function App() {
                 <div className="flex items-start gap-4">
                   <span className="material-symbols-outlined text-primary-fixed text-3xl">event</span>
                   <div>
-                    <p className="font-headline-md text-headline-md text-white">Sábado 17 de Octubre, 2026</p>
+                    <p className="font-headline-md text-headline-md text-white">16 y 17 de Octubre de 2026</p>
                     <p className="font-body-md text-surface-variant">Registro 7:30am | Inicia 8:00am a 5:00pm | Finalizando con Cóctel</p>
                   </div>
                 </div>
