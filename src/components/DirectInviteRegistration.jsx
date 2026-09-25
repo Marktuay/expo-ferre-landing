@@ -165,8 +165,8 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
                   </div>
 
                   <div style="background-color: #eff6ff; border-left: 4px solid #0d47a1; padding: 14px; border-radius: 4px; margin-top: 20px; text-align: left;">
-                    <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 24 y 25 de Octubre, 2026</p>
-                    <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Olof Palme, Managua.</p>
+                    <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 16 y 17 de Octubre, 2026</p>
+                    <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza, Managua.</p>
                   </div>
 
                   <p style="font-size: 14px; line-height: 1.6; color: #374151; margin-top: 28px;">

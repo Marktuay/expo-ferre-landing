@@ -214,8 +214,8 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                 </div>
 
                 <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 6px; text-align: left;">
-                  <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 24 y 25 de Octubre, 2026</p>
-                  <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Olof Palme, Managua.</p>
+                  <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 16 y 17 de Octubre, 2026</p>
+                  <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza, Managua.</p>
                 </div>
 
                 <p style="font-size: 15px; font-weight: bold; color: #0d47a1; margin-top: 28px;">
