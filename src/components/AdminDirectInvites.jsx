@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { collection, query, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import React, { useState, useEffect, useRef } from 'react';
+import { collection, query, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import { 
@@ -18,7 +18,11 @@ import {
   Building2, 
   User, 
   X,
-  FileSpreadsheet
+  FileSpreadsheet,
+  FileUp,
+  Download,
+  AlertCircle,
+  Users
 } from 'lucide-react';
 
 export default function AdminDirectInvites({ onBack, adminUser }) {
@@ -27,13 +31,20 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'used'
 
-  // Modal para Crear Nueva Invitación
+  // Modal para Crear Nueva Invitación Individual
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [guestName, setGuestName] = useState('');
   const [guestCompany, setGuestCompany] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+
+  // Modal para Carga Masiva (Excel)
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkData, setBulkData] = useState([]);
+  const [isBulkSaving, setIsBulkSaving] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
+  const fileInputRef = useRef(null);
 
   // Modal para Enviar Correo Directo
   const [emailModal, setEmailModal] = useState({ open: false, invite: null });
@@ -107,6 +118,144 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
       alert('Error al generar la invitación: ' + err.message);
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  // Descargar Plantilla Oficial de Excel para Carga Masiva
+  const handleDownloadTemplate = () => {
+    import('xlsx').then((XLSX) => {
+      const templateData = [
+        {
+          Nombre: "Carlos Mendoza",
+          Empresa: "Ferretería El Roble",
+          Correo: "carlos@ejemplo.com",
+          Telefono: "88887777"
+        },
+        {
+          Nombre: "María Silva",
+          Empresa: "Distribuidora Central",
+          Correo: "maria@ejemplo.com",
+          Telefono: "87654321"
+        }
+      ];
+
+      const worksheet = XLSX.utils.json_to_sheet(templateData);
+      worksheet['!cols'] = [
+        { wch: 25 },
+        { wch: 30 },
+        { wch: 30 },
+        { wch: 20 }
+      ];
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Plantilla_Invitados");
+      XLSX.writeFile(workbook, "Plantilla_Carga_Masiva_Invitaciones_ExpoFerre.xlsx");
+    });
+  };
+
+  // Procesar archivo Excel/CSV subido
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const XLSX = await import('xlsx');
+        const bstr = evt.target.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const rawData = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+        if (!rawData || rawData.length === 0) {
+          alert('El archivo Excel está vacío o no tiene un formato válido.');
+          return;
+        }
+
+        // Mapeo flexible e insensible a mayúsculas/minúsculas de cabeceras
+        const parsedRows = rawData.map((row, index) => {
+          const keys = Object.keys(row);
+          const findVal = (candidates) => {
+            const match = keys.find(k => candidates.some(c => k.toLowerCase().trim().includes(c)));
+            return match ? String(row[match]).trim() : '';
+          };
+
+          const nombre = findVal(['nombre', 'name', 'invitado', 'contacto', 'persona']);
+          const empresa = findVal(['empresa', 'company', 'negocio', 'ferreteria']);
+          const correo = findVal(['correo', 'email', 'mail', 'e-mail']);
+          const telefono = findVal(['telefono', 'teléfono', 'celular', 'phone', 'movil', 'móvil', 'tel']);
+
+          return {
+            rowNum: index + 2,
+            nombre,
+            empresa,
+            email: correo.toLowerCase(),
+            telefono
+          };
+        }).filter(r => r.nombre || r.empresa || r.email || r.telefono);
+
+        if (parsedRows.length === 0) {
+          alert('No se detectaron contactos con datos válidos en el archivo.');
+          return;
+        }
+
+        setBulkData(parsedRows);
+        setShowBulkModal(true);
+      } catch (err) {
+        console.error('Error al procesar archivo Excel:', err);
+        alert('Error al leer el archivo Excel: ' + err.message);
+      }
+    };
+    reader.readAsBinaryString(file);
+    e.target.value = null;
+  };
+
+  // Guardar Lote de Invitaciones Directas en Firestore
+  const handleConfirmBulkUpload = async () => {
+    if (!bulkData || bulkData.length === 0) return;
+    setIsBulkSaving(true);
+    setBulkProgress({ current: 0, total: bulkData.length });
+
+    try {
+      const adminEmail = adminUser?.email || auth.currentUser?.email || 'admin';
+      const total = bulkData.length;
+      const chunkSize = 400; // límite seguro bajo los 500 de Firestore batch
+
+      for (let i = 0; i < total; i += chunkSize) {
+        const chunk = bulkData.slice(i, i + chunkSize);
+        const batch = writeBatch(db);
+
+        chunk.forEach((item) => {
+          const tokenId = generateUniqueToken();
+          const inviteRef = doc(db, `${getEventBasePath()}/directInvites`, tokenId);
+          
+          batch.set(inviteRef, {
+            token: tokenId,
+            nombre: item.nombre || null,
+            empresa: item.empresa || null,
+            email: item.email || null,
+            telefono: item.telefono || null,
+            status: 'pending',
+            createdBy: adminEmail,
+            createdAt: serverTimestamp(),
+            isBulkImport: true
+          });
+        });
+
+        await batch.commit();
+        setBulkProgress({ current: Math.min(i + chunkSize, total), total });
+      }
+
+      setShowBulkModal(false);
+      setBulkData([]);
+      alert(`¡Éxito! Se generaron correctamente ${total} invitaciones directas con enlaces únicos de un solo uso.`);
+    } catch (err) {
+      console.error('Error al guardar lote de invitaciones:', err);
+      alert('Error al procesar la carga masiva: ' + err.message);
+    } finally {
+      setIsBulkSaving(false);
+      setBulkProgress({ current: 0, total: 0 });
     }
   };
 
@@ -316,12 +465,37 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".xlsx, .xls, .csv"
+              className="hidden"
+            />
+
             <button
               onClick={() => setShowCreateModal(true)}
               className="px-4 py-2.5 bg-primary text-on-primary rounded-xl font-bold hover:brightness-110 transition-all flex items-center gap-2 text-sm shadow-sm cursor-pointer"
             >
               <Plus size={18} />
               Nueva Invitación
+            </button>
+
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center gap-2 text-sm shadow-sm cursor-pointer"
+            >
+              <FileUp size={18} />
+              Carga Masiva (Excel)
+            </button>
+
+            <button
+              onClick={handleDownloadTemplate}
+              className="px-3 py-2.5 bg-white border border-outline-variant text-secondary rounded-xl font-bold hover:bg-surface-variant transition-all flex items-center gap-1.5 text-xs cursor-pointer shadow-2xs"
+              title="Descargar formato de ejemplo para Excel"
+            >
+              <Download size={16} />
+              Plantilla
             </button>
 
             <button
@@ -738,6 +912,134 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                 </>
               )}
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Vista Previa y Confirmación de Carga Masiva (Excel) */}
+      {showBulkModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-outline-variant overflow-hidden animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
+            
+            {/* Header */}
+            <div className="bg-blue-600 p-5 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <FileUp size={22} />
+                <div>
+                  <h3 className="font-bold text-base">Carga Masiva de Invitaciones</h3>
+                  <p className="text-white/80 text-xs">Vista previa de contactos detectados</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  if (!isBulkSaving) {
+                    setShowBulkModal(false);
+                    setBulkData([]);
+                  }
+                }} 
+                disabled={isBulkSaving}
+                className="p-1 hover:bg-white/20 rounded-full text-white disabled:opacity-50 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Contenido / Tabla de Vista Previa */}
+            <div className="p-6 space-y-4 overflow-y-auto flex-1">
+              
+              <div className="bg-blue-50 border border-blue-200 text-blue-950 p-4 rounded-xl text-xs flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <Users size={18} className="text-blue-600 shrink-0" />
+                  <span>
+                    Se detectaron <strong>{bulkData.length} contactos válidos</strong> en el archivo.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDownloadTemplate}
+                  className="text-blue-700 underline font-bold hover:text-blue-900 shrink-0 cursor-pointer"
+                >
+                  Descargar plantilla
+                </button>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-200 text-amber-900 p-3.5 rounded-xl text-xs flex items-start gap-2.5">
+                <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                <p>
+                  A cada contacto se le generará un <strong>enlace único de un solo uso</strong> que quedará listo en la tabla para compartir directamente por WhatsApp o Correo.
+                </p>
+              </div>
+
+              {/* Tabla con scroll */}
+              <div className="border border-outline-variant rounded-xl overflow-hidden shadow-2xs">
+                <div className="max-h-64 overflow-y-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead className="bg-surface-variant/70 sticky top-0 border-b border-outline-variant text-secondary">
+                      <tr>
+                        <th className="p-3 font-bold text-center w-12">#</th>
+                        <th className="p-3 font-bold">Nombre</th>
+                        <th className="p-3 font-bold">Empresa</th>
+                        <th className="p-3 font-bold">Correo</th>
+                        <th className="p-3 font-bold">Teléfono / WhatsApp</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant/60">
+                      {bulkData.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-surface-variant/20 transition-colors">
+                          <td className="p-2.5 text-center font-mono text-secondary">{idx + 1}</td>
+                          <td className="p-2.5 font-bold text-on-surface">{item.nombre || <span className="text-slate-400 italic">Sin nombre</span>}</td>
+                          <td className="p-2.5 text-on-surface">{item.empresa || <span className="text-slate-400 italic">Sin empresa</span>}</td>
+                          <td className="p-2.5 font-mono text-slate-600">{item.email || <span className="text-slate-400 italic">Sin correo</span>}</td>
+                          <td className="p-2.5 font-mono text-slate-600">{item.telefono || <span className="text-slate-400 italic">Sin teléfono</span>}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Barra de Progreso al Guardar */}
+              {isBulkSaving && (
+                <div className="space-y-2 pt-2">
+                  <div className="flex justify-between text-xs font-bold text-on-surface">
+                    <span>Generando enlaces de invitación...</span>
+                    <span>{bulkProgress.current} / {bulkProgress.total}</span>
+                  </div>
+                  <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                    <div 
+                      className="bg-blue-600 h-full transition-all duration-200"
+                      style={{ width: `${(bulkProgress.current / (bulkProgress.total || 1)) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-surface-variant/30 border-t border-outline-variant flex items-center justify-end gap-3 shrink-0">
+              <button
+                type="button"
+                disabled={isBulkSaving}
+                onClick={() => {
+                  setShowBulkModal(false);
+                  setBulkData([]);
+                }}
+                className="py-2.5 px-4 bg-white border border-outline-variant hover:bg-surface text-on-surface font-bold rounded-xl text-xs transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isBulkSaving || bulkData.length === 0}
+                onClick={handleConfirmBulkUpload}
+                className="py-2.5 px-5 bg-blue-600 text-white font-bold rounded-xl text-xs hover:bg-blue-700 transition-all shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+              >
+                <FileUp size={16} />
+                {isBulkSaving ? `Importando (${bulkProgress.current}/${bulkProgress.total})...` : `Generar ${bulkData.length} Invitaciones`}
+              </button>
+            </div>
+
           </div>
         </div>
       )}

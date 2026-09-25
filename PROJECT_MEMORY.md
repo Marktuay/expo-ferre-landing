@@ -55,6 +55,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     3. *Conferencias:* Charlas propuestas.
     4. *Staff:* Personal acreditado por los patrocinadores.
   - **Invitaciones Directas (Pases de Uso Único):** Módulo administrativo (`AdminDirectInvites.jsx` y `DirectInviteRegistration.jsx`) para generar enlaces criptográficos de registro único que se autodestruyen al ser utilizados. Captura Nombre, Apellido, Correo, Celular, Ciudad, Empresa y Cantidad de Personal, emitiendo un Gafete Oficial con Código QR en pantalla y enviando automáticamente el correo de confirmación con el Speech Oficial.
+    - **Carga Masiva (Excel / CSV):** Permite subir lotes de contactos con procesamiento en navegador, vista previa con validación, barra de progreso y escritura en `writeBatch` (lotes atómicos) en Firestore.
+    - **Descarga de Plantilla:** Botón para generar y descargar `Plantilla_Carga_Masiva_Invitaciones_ExpoFerre.xlsx` con el formato exacto requerido.
   - **Check-In (Escáner QR):** Módulo funcional utilizando la cámara del dispositivo para escanear Códigos QR, buscar asistentes en la base de datos y registrar su asistencia en tiempo real con estadísticas.
 - **Exportación:** Todas las tablas de administración tienen la capacidad de exportar sus datos a archivos Excel (`.xlsx`), incluyendo las últimas adiciones de campos (ej. Teléfono en Leads).
 
