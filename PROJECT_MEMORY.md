@@ -57,51 +57,35 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   - **Invitaciones Directas (Pases de Uso Único):** Módulo administrativo (`AdminDirectInvites.jsx` y `DirectInviteRegistration.jsx`) para generar enlaces criptográficos de registro único que se autodestruyen al ser utilizados. Captura Nombre, Apellido, Correo, Celular, Ciudad, Empresa y Cantidad de Personal, emitiendo un Gafete Oficial con Código QR en pantalla y enviando automáticamente el correo de confirmación con el Speech Oficial.
     - **Carga Masiva (Excel / CSV):** Permite subir lotes de contactos con procesamiento en navegador, vista previa con validación, barra de progreso y escritura en `writeBatch` (lotes atómicos) en Firestore.
     - **Descarga de Plantilla:** Botón para generar y descargar `Plantilla_Carga_Masiva_Invitaciones_ExpoFerre.xlsx` con el formato exacto requerido.
+    - **Co-Branding por Patrocinador (Header y Footer Multi-Marcas):** Soporte de doble arte: Header (`1200x450px`, invitación + patrocinador + stands) y Footer (`1200x250px`, cinta de marcas representadas/aliadas). Integración directa en pantalla de registro, correos de confirmación y gafetes oficiales.
+    - **Base de Stands Confirmada:** 35 stands reservados correspondientes a 27 empresas patrocinadoras activas.
   - **Check-In (Escáner QR):** Módulo funcional utilizando la cámara del dispositivo para escanear Códigos QR, buscar asistentes en la base de datos y registrar su asistencia en tiempo real con estadísticas.
 - **Exportación:** Todas las tablas de administración tienen la capacidad de exportar sus datos a archivos Excel (`.xlsx`), incluyendo las últimas adiciones de campos (ej. Teléfono en Leads).
 
 ---
 
-## 🚀 Roadmap (Siguientes Pasos Pendientes)
-
-### 1. Integración de WhatsApp API (Gateway Open Source)
-- **Objetivo:** Enviar un mensaje automatizado con el código QR y los detalles logísticos del evento cada vez que alguien se registre.
-- **Estado:** En pausa a la espera de que el cliente adquiera y configure una Máquina Virtual (Google Cloud `e2-medium` recomendada) con el número de WhatsApp usando un API como *Evolution API* o *Baileys*.
-
-### 2. Cuentas Demo de Patrocinadores (Auto-destruibles)
-- **Refactorización de Logos (Reel):** Se restauró el comportamiento de scroll horizontal infinito (marquee) para los logos de los patrocinadores, pero ahora están agrupados por categoría (Diamante, Oro, Plata, Apoyan).
-- **Diseño de Logos:** Los textos indicadores de categoría se hicieron más pequeños y se alinearon a la parte superior (top) junto a la línea divisoria vertical. Se re-inyectaron logos de prueba (placeholders) de manera temporal para poder previsualizar el diseño mientras la base de datos está vacía y confirmar formato con el cliente.
-- **Hero Video:** Se reemplazó el video a `presentacion-ia-karen.mp4` (4.7mb), escalado al 60%, sin controles del navegador, con un botón personalizado para mutear/desmutear. Todo esto ya está en la rama `main` de GitHub.
-
-### Progreso Actual y Pendientes
-- **Cuentas y Limpieza Demo:**
-  - (Pendiente) Migración y scripts para las cuentas temporales o demos con `isDemo`.
-  - (Pendiente) Job de limpieza periódica de usuarios demostrativos.
-
-- **Preregistros y Google Sheets:**
-  - **Sincronización en Tiempo Real:** Se implementó una integración en `App.jsx` que envía silenciosamente un POST al Webhook (Google Apps Script) cada vez que un visitante completa exitosamente su registro, alimentando de manera automática y gratuita un Google Sheet con los datos del visitante (Nombre, Empresa, Email, Teléfono, UTMs, etc.).
-
-- **WhatsApp API:** (Pendiente) Integrar el envío del QR, a la espera de la configuración de la VM.
-- **Correos:** (Pendiente) Aviso automático para el estatus de pre-registro -> patrocinador.
-- **Logos de Patrocinadores:** (Completado) 
-  - Se configuró formato 16:9 con Tailwind `aspect-video` para estandarización.
-  - Se activaron y publicaron logos Diamante (incluyendo la incorporación de **BAC Credomatic** `/diamante/logo-bac.jpeg` ubicado justo antes de Noelito), Oro y Plata reales.
-  - Se optimizó la animación del reel a 55s y se añadió un espaciador de 50vw para garantizar que los patrocinadores principales entren elegante y completamente visibles desde el inicio al cargar la página.
-  - Se reordenó la categoría Diamante para priorizar a Sinsa.
-
-## Próximos pasos
-- Subir los logos faltantes de Oro, Plata o Apoyan (cuando el diseñador los provea) y habilitar su carga en `App.jsx`.
-- Iniciar con el backend/Firebase para Cuentas Demo o migración de correos según priorice el cliente.
-
-### 3. Envío Automático de Correo (Migración a Patrocinador)
-- **Objetivo:** Enviar un correo electrónico de bienvenida automático a los usuarios cuando un administrador los migre de Preregistro a Patrocinador oficial.
-- **Mecanismo propuesto:** Inyectar un documento en la colección `mail` (Trigger Email de Firebase) al completar la migración en `AdminPreRegistrations.jsx`. El correo usará una plantilla HTML personalizada que incluirá un encabezado gráfico (banner), saludo, credenciales de acceso e información logística.
-- **Estado:** En espera del diseño del banner del encabezado por parte del cliente. Plan de implementación y estructura visual acordados.
-
----
-
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 07 de Septiembre de 2026**
+**Última actualización: 24 de Septiembre de 2026**
+
+- **Unificación de Fechas Oficiales del Evento:**
+  - Se corrigieron y unificaron todas las fechas a **16 y 17 de Octubre de 2026** en:
+    - Landing page (`App.jsx` footer y sección del taller).
+    - Módulo de Prerregistros y correo de aprobación (`AdminPreRegistrations.jsx`).
+    - Invitaciones directas, speech de WhatsApp y correos (`AdminDirectInvites.jsx` y `DirectInviteRegistration.jsx`).
+    - Sede oficial: **Centro de Convenciones Crowne Plaza, Managua** (Salón Gran Darío).
+
+- **Carga Masiva de Contactos y Plantillas Excel para Invitaciones Directas:**
+  - Procesamiento ultra rápido en el navegador con `xlsx`.
+  - Validaciones de columnas flexibles (`Nombre`, `Empresa`, `Correo`, `Telefono`, `Patrocinador`).
+  - Lotes atómicos (`writeBatch`) en Firestore capaces de procesar bases de 300+ contactos en segundos.
+  - Botón de descarga de plantilla oficial con ejemplos.
+
+- **Diseño y Arquitectura de Co-Branding para Patrocinadores:**
+  - Soporte de 2 piezas de arte por patrocinador:
+    1. **Header Banner (`1200x450px`):** Co-branding ExpoFerre + Patrocinador + Stand asignado + Fecha/Lugar.
+    2. **Footer Banner (`1200x250px`):** Franja de logos de marcas representadas en exhibición.
+  - Campos `headerBannerUrl`, `footerBannerUrl`, `sponsorName`, `sponsorStands` conectados dinámicamente a la pantalla de registro, gafete y plantilla de correo.
+  - Lista de 27 patrocinadores verificada en base de datos en vivo (35 stands reservados en total).
 
 - **Filtrado de Stands y Edición de Patrocinadores en Vista 360 (`AdminSponsorDetails.jsx` & `AdminSponsors.jsx`):**
   - **Corrección de Nombres y Cantidad de Stands en Directorio:** Se corrigió la función `updateCombined` en `AdminSponsors.jsx` para extraer de forma segura el nombre del estand (`standName = st.name || 'Stand ' + st.id`) y purgar elementos nulos en `standList`. Esto resolvió las etiquetas vacías `[  ]` que aparecían en la tabla para William Herrera (Sinsa), Sherwin-Williams, Megalineas, Grupo SUR, MIDESA, etc., mostrando ahora de forma precisa los nombres (ej. `Stand 1`, `Stand 2`) y la cantidad de estands reservados.
