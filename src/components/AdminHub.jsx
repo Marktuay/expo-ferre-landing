@@ -14,6 +14,7 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
   const [isExporting, setIsExporting] = useState(false);
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [unreadContactsCount, setUnreadContactsCount] = useState(0);
+  const [directInvitesStats, setDirectInvitesStats] = useState({ total: 0, sent: 0, pending: 0, withEmail: 0 });
 
   // Estados para modal de PIN Maestro
   const [showPinModal, setShowPinModal] = useState(false);
@@ -31,7 +32,7 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
     (adminUser.username && adminUser.username.trim().toLowerCase().includes('marktuay'))
   );
 
-  // Listener en tiempo real de mensajes de contacto sin leer
+  // Listener en tiempo real de mensajes de contacto sin leer e invitaciones directas
   useEffect(() => {
     if (!adminUser) return;
     const qContacts = query(collection(db, `${getEventBasePath()}/contacts`));
@@ -46,7 +47,30 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
       setUnreadContactsCount(unread);
     }, (err) => console.warn("Error escuchando mensajes sin leer:", err));
 
-    return () => unsub();
+    const qDirect = query(collection(db, `${getEventBasePath()}/directInvites`));
+    const unsubDirect = onSnapshot(qDirect, (snap) => {
+      let total = 0;
+      let sent = 0;
+      let pending = 0;
+      let withEmail = 0;
+
+      snap.forEach((d) => {
+        const data = d.data();
+        total++;
+        const email = (data.email || '').trim();
+        const hasEmail = email.includes('@');
+        if (hasEmail) withEmail++;
+        if (data.emailSent || data.emailSentAt) sent++;
+        if (hasEmail && !data.emailSentAt && data.status === 'pending') pending++;
+      });
+
+      setDirectInvitesStats({ total, sent, pending, withEmail });
+    }, (err) => console.warn("Error escuchando directInvites stats:", err));
+
+    return () => {
+      unsub();
+      unsubDirect();
+    };
   }, [adminUser]);
 
   useEffect(() => {
@@ -343,14 +367,35 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
 
               <button 
                 onClick={() => onNavigate('adminDirectInvites')}
-                className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-indigo-600 hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group"
+                className="bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-indigo-600 hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group relative"
               >
+                {directInvitesStats.total > 0 && (
+                  <span className={`absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1 ${
+                    directInvitesStats.pending > 0
+                      ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                      : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                  }`}>
+                    <span className={`w-2 h-2 rounded-full ${directInvitesStats.pending > 0 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`}></span>
+                    {directInvitesStats.sent} / {directInvitesStats.withEmail} enviados
+                  </span>
+                )}
+
                 <div className="w-16 h-16 bg-indigo-500/10 text-indigo-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-3xl">forward_to_inbox</span>
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-on-surface mb-2">Invitaciones Directas</h3>
-                  <p className="text-secondary text-sm">Genera enlaces de registro exclusivo que se autodestruyen al ser utilizados.</p>
+                  <p className="text-secondary text-sm">Directorio de patrocinadores, listas por marca y envío masivo co-brandeado.</p>
+                  
+                  {directInvitesStats.total > 0 && (
+                    <div className="mt-3 pt-3 border-t border-outline-variant/60 flex items-center justify-between text-xs font-bold text-secondary gap-3">
+                      <span>Total: <strong className="text-on-surface">{directInvitesStats.total}</strong></span>
+                      <span className="text-emerald-700">Enviados: <strong>{directInvitesStats.sent}</strong></span>
+                      {directInvitesStats.pending > 0 && (
+                        <span className="text-amber-700">Pendientes: <strong>{directInvitesStats.pending}</strong></span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </button>
 

@@ -982,10 +982,20 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     return sp.toLowerCase().includes(term) || stands.includes(term);
   });
 
-  // Métricas
+  // Métricas Globales
   const totalInvitesCount = invites.length;
   const totalPendingCount = invites.filter(i => i.status === 'pending').length;
   const totalUsedCount = invites.filter(i => i.status === 'used').length;
+
+  // Métricas Detalladas del Medidor de Correos
+  const totalWithValidEmail = invites.filter(i => isValidEmailAddress(i.email)).length;
+  const totalEmailsSent = invites.filter(i => i.emailSent || i.emailSentAt).length;
+  const totalEmailsPending = invites.filter(i => isValidEmailAddress(i.email) && !i.emailSentAt && i.status === 'pending').length;
+  const totalRegisteredFromEmail = invites.filter(i => (i.emailSent || i.emailSentAt) && i.status === 'used').length;
+  const totalWithoutValidEmail = totalInvitesCount - totalWithValidEmail;
+  
+  const emailCoveragePercent = totalWithValidEmail > 0 ? Math.round((totalEmailsSent / totalWithValidEmail) * 100) : 0;
+  const emailConversionPercent = totalEmailsSent > 0 ? Math.round((totalRegisteredFromEmail / (totalEmailsSent || 1)) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
@@ -1076,14 +1086,146 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
           </div>
         </div>
 
-        {/* Tarjetas de Métricas Globales */}
+        {/* 📊 MEDIDOR VISUAL & MONITOR DE DESPACHO DE CORREOS */}
+        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white p-6 rounded-3xl shadow-xl border border-slate-700/50 space-y-5 relative overflow-hidden">
+          
+          {/* Background Ambient Glow */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 relative z-10">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold shrink-0 shadow-inner">
+                <MailCheck size={26} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg md:text-xl font-black text-white tracking-wide">
+                    Medidor de Despacho & Seguimiento de Correos
+                  </h2>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    En Vivo
+                  </span>
+                </div>
+                <p className="text-slate-300 text-xs">
+                  {totalEmailsSent} de {totalWithValidEmail} invitados con correo han recibido su invitación oficial co-brandeada ({emailCoveragePercent}% de cobertura).
+                </p>
+              </div>
+            </div>
+
+            {/* Botón de Despacho Global */}
+            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              <button
+                onClick={() => handleOpenBulkEmailModal('all')}
+                disabled={totalEmailsPending === 0}
+                className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transform active:scale-95"
+              >
+                <SendHorizontal size={15} className="text-slate-950" />
+                <span>Despachar Masivo a Pendientes ({totalEmailsPending})</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Barra Medidora / Termómetro de Cobertura */}
+          <div className="space-y-2 relative z-10 bg-black/30 p-4 rounded-2xl border border-white/10">
+            <div className="flex justify-between items-end text-xs">
+              <div className="flex items-center gap-4">
+                <span className="font-black text-2xl text-white">{emailCoveragePercent}%</span>
+                <span className="text-slate-300 text-xs font-medium">Progreso Global de Envíos</span>
+              </div>
+              <div className="flex items-center gap-3 text-[11px] font-bold text-slate-300">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                  Enviados: {totalEmailsSent}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                  Pendientes: {totalEmailsPending}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                  Sin Correo: {totalWithoutValidEmail}
+                </span>
+              </div>
+            </div>
+
+            {/* Barra Segmentada */}
+            <div className="w-full h-4 bg-slate-800 rounded-full overflow-hidden flex border border-white/10 shadow-inner">
+              <div
+                className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full transition-all duration-500"
+                style={{ width: `${totalInvitesCount > 0 ? (totalEmailsSent / totalInvitesCount) * 100 : 0}%` }}
+                title={`Enviados: ${totalEmailsSent}`}
+              />
+              <div
+                className="bg-gradient-to-r from-amber-500 to-amber-400 h-full transition-all duration-500"
+                style={{ width: `${totalInvitesCount > 0 ? (totalEmailsPending / totalInvitesCount) * 100 : 0}%` }}
+                title={`Pendientes con correo: ${totalEmailsPending}`}
+              />
+              <div
+                className="bg-slate-600 h-full transition-all duration-500"
+                style={{ width: `${totalInvitesCount > 0 ? (totalWithoutValidEmail / totalInvitesCount) * 100 : 0}%` }}
+                title={`Sin correo o inválido: ${totalWithoutValidEmail}`}
+              />
+            </div>
+          </div>
+
+          {/* 4 Píldoras Métricas Clave */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10 text-xs">
+            <div className="bg-white/5 border border-white/10 p-3 rounded-xl flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold shrink-0">
+                <Check size={16} />
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block">Correos Enviados</span>
+                <span className="text-base font-black text-white">{totalEmailsSent}</span>
+              </div>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 p-3 rounded-xl flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold shrink-0">
+                <Clock size={16} />
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block">Listos p/ Enviar</span>
+                <span className="text-base font-black text-white">{totalEmailsPending}</span>
+              </div>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 p-3 rounded-xl flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold shrink-0">
+                <CheckCircle2 size={16} />
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block">Gafetes Emitidos</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-base font-black text-white">{totalRegisteredFromEmail}</span>
+                  <span className="text-[10px] text-emerald-400 font-bold">({emailConversionPercent}% tasa)</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 p-3 rounded-xl flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-slate-500/20 text-slate-300 flex items-center justify-center font-bold shrink-0">
+                <AlertTriangle size={16} />
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block">Sin Correo Válido</span>
+                <span className="text-base font-black text-white">{totalWithoutValidEmail}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Tarjetas de Métricas Globales Secundarias */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-white p-5 rounded-2xl border border-outline-variant shadow-2xs flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-              <Send size={24} />
+              <Users size={24} />
             </div>
             <div>
-              <p className="text-xs font-bold text-secondary uppercase tracking-wider">Total Enlaces Generados</p>
+              <p className="text-xs font-bold text-secondary uppercase tracking-wider">Total Enlaces / Invitados</p>
               <p className="text-2xl font-black text-on-surface">{totalInvitesCount}</p>
             </div>
           </div>
@@ -1186,17 +1328,44 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                           </div>
                         </td>
 
-                        {/* Métricas */}
+                        {/* Métricas e Indicador de Correo */}
                         <td className="p-4 text-center">
                           {(() => {
                             const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general');
                             const genUsed = genInv.filter(i => i.status === 'used').length;
+                            const genWithEmail = genInv.filter(i => isValidEmailAddress(i.email)).length;
+                            const genEmailSent = genInv.filter(i => i.emailSent || i.emailSentAt).length;
+                            const genPending = genInv.length - genUsed;
+                            const genCoverage = genWithEmail > 0 ? Math.round((genEmailSent / genWithEmail) * 100) : 0;
+
                             return (
-                              <div>
-                                <span className="font-bold text-base text-on-surface">{genInv.length}</span>
-                                <div className="text-[11px] text-slate-500">
-                                  <span className="text-green-600 font-bold">{genUsed}</span> reg. / <span className="text-amber-600 font-bold">{genInv.length - genUsed}</span> pend.
+                              <div className="space-y-1.5 min-w-[120px]">
+                                <div>
+                                  <span className="font-bold text-base text-on-surface">{genInv.length}</span>
+                                  <div className="text-[11px] text-slate-500">
+                                    <span className="text-green-600 font-bold">{genUsed}</span> reg. / <span className="text-amber-600 font-bold">{genPending}</span> pend.
+                                  </div>
                                 </div>
+
+                                {genInv.length > 0 && (
+                                  <div className="bg-white/80 p-1.5 rounded-lg border border-amber-200/80 text-[10px] space-y-1">
+                                    <div className="flex justify-between items-center font-bold text-slate-700">
+                                      <span className="flex items-center gap-1">
+                                        <Mail size={10} className="text-amber-600" />
+                                        {genEmailSent}/{genWithEmail}
+                                      </span>
+                                      <span className={genCoverage === 100 ? 'text-emerald-700 font-black' : 'text-slate-600'}>
+                                        {genCoverage}%
+                                      </span>
+                                    </div>
+                                    <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden flex">
+                                      <div 
+                                        className="bg-emerald-500 h-full transition-all" 
+                                        style={{ width: `${genWithEmail > 0 ? (genEmailSent / genWithEmail) * 100 : 0}%` }} 
+                                      />
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             );
                           })()}
@@ -1359,14 +1528,44 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                             </div>
                           </td>
 
-                          {/* Métricas de Invitados */}
+                          {/* Métricas e Indicador de Correo */}
                           <td className="p-4 text-center">
-                            <div>
-                              <span className="font-bold text-base text-on-surface">{spInvites.length}</span>
-                              <div className="text-[11px] text-slate-500">
-                                <span className="text-green-600 font-bold">{spUsed}</span> reg. / <span className="text-amber-600 font-bold">{spPending}</span> pend.
-                              </div>
-                            </div>
+                            {(() => {
+                              const spWithEmail = spInvites.filter(i => isValidEmailAddress(i.email)).length;
+                              const spEmailSent = spInvites.filter(i => i.emailSent || i.emailSentAt).length;
+                              const spCoverage = spWithEmail > 0 ? Math.round((spEmailSent / spWithEmail) * 100) : 0;
+
+                              return (
+                                <div className="space-y-1.5 min-w-[120px]">
+                                  <div>
+                                    <span className="font-bold text-base text-on-surface">{spInvites.length}</span>
+                                    <div className="text-[11px] text-slate-500">
+                                      <span className="text-green-600 font-bold">{spUsed}</span> reg. / <span className="text-amber-600 font-bold">{spPending}</span> pend.
+                                    </div>
+                                  </div>
+
+                                  {spInvites.length > 0 && (
+                                    <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-[10px] space-y-1">
+                                      <div className="flex justify-between items-center font-bold text-slate-700">
+                                        <span className="flex items-center gap-1">
+                                          <Mail size={10} className="text-amber-600" />
+                                          {spEmailSent}/{spWithEmail}
+                                        </span>
+                                        <span className={spCoverage === 100 ? 'text-emerald-700 font-black' : 'text-slate-600'}>
+                                          {spCoverage}%
+                                        </span>
+                                      </div>
+                                      <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden flex">
+                                        <div 
+                                          className="bg-emerald-500 h-full transition-all" 
+                                          style={{ width: `${spWithEmail > 0 ? (spEmailSent / spWithEmail) * 100 : 0}%` }} 
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </td>
 
                           {/* Acciones de Carga y Gestión */}

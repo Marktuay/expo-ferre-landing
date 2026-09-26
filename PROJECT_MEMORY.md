@@ -664,3 +664,10 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Sanitización y Validación RFC:** Filtro estricto de sintaxis de correo que descarta registros mal formados antes del envío para reducir la tasa de rebotes.
 - **Control de Detención en Vivo:** Botón de parada de emergencia (`🛑 Detener Envío`) que suspende la cola de despacho de forma segura en cualquier momento sin perder los correos ya procesados.
 - **Auditoría de Errores Descargable:** Resumen interactivo post-envío con desglose de fallos y botón `[📋 Copiar Fallidos]` para corregir bases de datos.
+
+### 📊 Medidor Visual & Monitor de Despacho de Correos a la Vista (`26 de Septiembre de 2026`)
+- **Widget de Termómetro Global (`AdminDirectInvites.jsx`):** Banner estilizado con barra segmentada tricolor (Verde = Enviados, Ámbar = Pendientes, Gris = Sin correo) con indicador de porcentaje de cobertura en tiempo real y botón de despacho masivo global (`Despachar Masivo a Pendientes`).
+- **Píldoras de Rendimiento:** Desglose en vivo de Correos Enviados, Listos por Enviar, Gafetes Emitidos post-envío (tasa de conversión/efectividad) y Registros sin correo válido.
+- **Micro-Medidores por Fila de Patrocinador:** Cada marca en el directorio muestra su propio contador `X/Y enviados` y barra de progreso de cobertura individual.
+- **Insignia y Métricas en Tiempo Real en el Hub (`AdminHub.jsx`):** La tarjeta de *Invitaciones Directas* en el panel principal incluye un badge dinámico con el conteo de enviados y pendientes en vivo.
+
