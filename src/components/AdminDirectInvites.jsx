@@ -732,7 +732,57 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     singleSponsorFileInputRef.current?.click();
   };
 
-  // Procesar archivo Excel/CSV subido
+  // Helper para hacer coincidir el nombre de una pestaña de Excel con un patrocinador
+  const matchSheetToSponsor = (sheetName) => {
+    if (!sheetName) return null;
+    const clean = sheetName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    
+    // Ignorar pestañas genéricas comunes
+    if (['hoja 1', 'hoja1', 'sheet 1', 'sheet1', 'datos', 'general', 'invitados', 'contactos', 'resumen'].includes(clean)) {
+      return null;
+    }
+
+    // 1. Buscar coincidencia exacta o parcial en sponsorsMap
+    const allSponsorNames = Object.keys(sponsorsMap);
+    for (const sp of allSponsorNames) {
+      const cleanSp = sp.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+      if (clean === cleanSp || clean.includes(cleanSp) || cleanSp.includes(clean)) {
+        return sp;
+      }
+    }
+
+    // 2. Coincidencias por palabras clave frecuentes
+    if (clean.includes('sur')) return 'Grupo SUR';
+    if (clean.includes('fernandez') || clean.includes('sera')) return 'Fernández Sera';
+    if (clean.includes('balladares')) return 'Importaciones Balladares';
+    if (clean.includes('sicsa') || clean.includes('siccsa')) return 'Sicsa Nicaragua';
+    if (clean.includes('sinsa')) return 'Sinsa';
+    if (clean.includes('cemex')) return 'CEMEX';
+    if (clean.includes('lafise')) return 'LAFISE';
+    if (clean.includes('bac')) return 'BAC Credomatic';
+    if (clean.includes('indenicsa')) return 'Indenicsa';
+    if (clean.includes('plycem')) return 'Plycem';
+    if (clean.includes('casco')) return 'Casco';
+    if (clean.includes('midesa')) return 'MIDESA';
+    if (clean.includes('noelito')) return 'Ferretería Noelito';
+    if (clean.includes('sherwin')) return 'Sherwin-Williams';
+    if (clean.includes('armoconsa')) return 'ARMOCONSA';
+    if (clean.includes('extel')) return 'Extel';
+    if (clean.includes('megalina') || clean.includes('megalinea')) return 'Megalineas';
+    if (clean.includes('amanco') || clean.includes('wavin')) return 'Amanco Wavin';
+    if (clean.includes('disensa')) return 'Disensa';
+    if (clean.includes('monolit')) return 'Monolit';
+    if (clean.includes('rinsa')) return 'RINSA';
+    if (clean.includes('madinisa')) return 'Madinisa';
+    if (clean.includes('incasa')) return 'INCASA';
+    if (clean.includes('eaton')) return 'Eaton';
+    if (clean.includes('baratogo') || clean.includes('tucasa')) return 'Baratogo';
+
+    // 3. Fallback: Usar el nombre de la pestaña limpio
+    return sheetName.trim();
+  };
+
+  // Procesar archivo Excel/CSV subido (Soporta múltiples pestañas por patrocinador en un solo archivo)
   const handleFileUpload = (e, forcedSponsor = null) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -747,13 +797,24 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
         const wb = XLSX.read(bstr, { type: 'binary' });
 
         let parsedRows = [];
+        const isMultiSheetWorkbook = wb.SheetNames.length > 1;
 
-        // Estrategia: Recorrer todas las hojas hasta encontrar contactos válidos
+        // Recorrer TODAS las hojas del libro Excel
         for (const wsname of wb.SheetNames) {
           const ws = wb.Sheets[wsname];
           if (!ws) continue;
 
-          // 1. Obtener matriz de filas crudas (array de arrays)
+          // Detectar patrocinador de la pestaña si no está forzado a un sponsor específico
+          let detectedSheetSponsor = null;
+          if (forcedSponsor) {
+            detectedSheetSponsor = forcedSponsor;
+          } else if (targetedUploadSponsor) {
+            detectedSheetSponsor = targetedUploadSponsor;
+          } else {
+            detectedSheetSponsor = matchSheetToSponsor(wsname) || (selectedSponsorFilter !== 'all' && selectedSponsorFilter !== 'general' ? selectedSponsorFilter : null);
+          }
+
+          // 1. Obtener matriz de filas crudas
           const rawRows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
           if (!rawRows || rawRows.length === 0) continue;
 
@@ -770,8 +831,9 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
             }
           }
 
+          let sheetParsed = [];
+
           if (headerRowIndex !== -1) {
-            // Parsear con la cabecera detectada
             const headers = rawRows[headerRowIndex].map(h => String(h).trim());
             const dataRows = rawRows.slice(headerRowIndex + 1);
 
@@ -788,73 +850,76 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
             const idxTelefono = findColIdx(['telefono', 'celular', 'phone', 'movil', 'tel', 'ws', 'whatsapp', 'cel', 'numero', 'contacto']);
             const idxPatrocinador = findColIdx(['patrocinador', 'sponsor', 'anfitrion', 'marca', 'proveedor']);
 
-            const sheetParsed = dataRows.map((row, index) => {
+            sheetParsed = dataRows.map((row, index) => {
               const nombre = idxNombre !== -1 ? String(row[idxNombre] || '').trim() : '';
               const empresa = idxEmpresa !== -1 ? String(row[idxEmpresa] || '').trim() : '';
               const correo = idxCorreo !== -1 ? String(row[idxCorreo] || '').trim().toLowerCase() : '';
               const telefono = idxTelefono !== -1 ? String(row[idxTelefono] || '').trim() : '';
-              const patrocinador = idxPatrocinador !== -1 ? String(row[idxPatrocinador] || '').trim() : '';
+              const colPatrocinador = idxPatrocinador !== -1 ? String(row[idxPatrocinador] || '').trim() : '';
+
+              const finalSponsor = colPatrocinador || detectedSheetSponsor || (sponsorTarget !== 'auto' && sponsorTarget !== 'general' ? sponsorTarget : '');
 
               return {
+                sheetName: wsname,
                 rowNum: headerRowIndex + index + 2,
                 nombre,
                 empresa,
                 email: correo,
                 telefono,
-                patrocinador: patrocinador || (sponsorTarget !== 'auto' && sponsorTarget !== 'general' ? sponsorTarget : '')
+                patrocinador: finalSponsor
               };
             }).filter(r => r.nombre || r.empresa || r.email || r.telefono);
+          } else {
+            // Heurística de celda
+            sheetParsed = rawRows.slice(1).map((row, index) => {
+              let emailFound = '';
+              let phoneFound = '';
+              let textCols = [];
 
-            if (sheetParsed.length > 0) {
-              parsedRows = sheetParsed;
-              break;
-            }
+              row.forEach(cell => {
+                const str = String(cell).trim();
+                if (!str) return;
+                if (str.includes('@') && str.includes('.')) {
+                  emailFound = str.toLowerCase();
+                } else if (/^[+]?[\d\s-]{7,15}$/.test(str.replace(/\s+/g, ''))) {
+                  phoneFound = str;
+                } else if (str.length > 1) {
+                  textCols.push(str);
+                }
+              });
+
+              const nombre = textCols[0] || '';
+              const empresa = textCols[1] || '';
+              const finalSponsor = detectedSheetSponsor || (sponsorTarget !== 'auto' && sponsorTarget !== 'general' ? sponsorTarget : '');
+
+              return {
+                sheetName: wsname,
+                rowNum: index + 2,
+                nombre,
+                empresa,
+                email: emailFound,
+                telefono: phoneFound,
+                patrocinador: finalSponsor
+              };
+            }).filter(r => r.nombre || r.empresa || r.email || r.telefono);
           }
 
-          // 3. Fallback: Parseo por heurística de contenido de celda
-          const fallbackParsed = rawRows.slice(1).map((row, index) => {
-            let emailFound = '';
-            let phoneFound = '';
-            let textCols = [];
-
-            row.forEach(cell => {
-              const str = String(cell).trim();
-              if (!str) return;
-              if (str.includes('@') && str.includes('.')) {
-                emailFound = str.toLowerCase();
-              } else if (/^[+]?[\d\s-]{7,15}$/.test(str.replace(/\s+/g, ''))) {
-                phoneFound = str;
-              } else if (str.length > 1) {
-                textCols.push(str);
-              }
-            });
-
-            const nombre = textCols[0] || '';
-            const empresa = textCols[1] || '';
-
-            return {
-              rowNum: index + 2,
-              nombre,
-              empresa,
-              email: emailFound,
-              telefono: phoneFound,
-              patrocinador: sponsorTarget !== 'auto' && sponsorTarget !== 'general' ? sponsorTarget : ''
-            };
-          }).filter(r => r.nombre || r.empresa || r.email || r.telefono);
-
-          if (fallbackParsed.length > 0) {
-            parsedRows = fallbackParsed;
-            break;
+          if (sheetParsed.length > 0) {
+            parsedRows.push(...sheetParsed);
+            // Si el usuario especificó cargar solo para un patrocinador y ya encontramos datos, podemos salir
+            if (forcedSponsor && !isMultiSheetWorkbook) {
+              break;
+            }
           }
         }
 
         if (parsedRows.length === 0) {
-          alert('No se detectaron contactos con datos válidos en el archivo. Verifica que contenga columnas de Nombre, Empresa, Correo o Teléfono.');
+          alert('No se detectaron contactos con datos válidos en ninguna de las pestañas del archivo. Verifica que contengan columnas de Nombre, Empresa, Correo o Teléfono.');
           return;
         }
 
         setBulkData(parsedRows);
-        setBulkTargetSponsor(sponsorTarget);
+        setBulkTargetSponsor(forcedSponsor || (isMultiSheetWorkbook ? 'auto' : sponsorTarget));
         setShowBulkModal(true);
       } catch (err) {
         console.error('Error al procesar archivo Excel:', err);
@@ -2999,28 +3064,54 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
             {/* Contenido / Tabla de Vista Previa */}
             <div className="p-6 space-y-4 overflow-y-auto flex-1">
               
-              <div className="bg-blue-50 border border-blue-200 text-blue-950 p-4 rounded-xl text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <Users size={18} className="text-blue-600 shrink-0" />
-                  <span>
-                    Se detectaron <strong>{bulkData.length} contactos válidos</strong> en el archivo.
-                  </span>
+              <div className="bg-blue-50 border border-blue-200 text-blue-950 p-4 rounded-xl text-xs space-y-3">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <Users size={18} className="text-blue-600 shrink-0" />
+                    <span>
+                      Se detectaron <strong>{bulkData.length} contactos válidos</strong> en el archivo.
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <label className="text-xs font-bold text-blue-950 shrink-0">Asignar a:</label>
+                    <select
+                      value={bulkTargetSponsor}
+                      onChange={(e) => setBulkTargetSponsor(e.target.value)}
+                      className="bg-white border border-blue-300 rounded-lg px-3 py-1.5 text-xs font-bold outline-none"
+                    >
+                      <option value="auto">⚡ Detectar automáticamente por Pestaña / Columna</option>
+                      <option value="general">⭐ Forzar Todos a Invitación General</option>
+                      {sponsorsList.map(sp => (
+                        <option key={sp} value={sp}>🏢 Forzar Todos a {sp}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <label className="text-xs font-bold text-blue-950 shrink-0">Asignar a:</label>
-                  <select
-                    value={bulkTargetSponsor}
-                    onChange={(e) => setBulkTargetSponsor(e.target.value)}
-                    className="bg-white border border-blue-300 rounded-lg px-3 py-1.5 text-xs font-bold outline-none"
-                  >
-                    <option value="auto">⚡ Detectar por columna 'Patrocinador'</option>
-                    <option value="general">⭐ Invitación General (ExpoFerre)</option>
-                    {sponsorsList.map(sp => (
-                      <option key={sp} value={sp}>🏢 Lista de {sp}</option>
-                    ))}
-                  </select>
-                </div>
+                {/* Desglose por Patrocinador / Pestañas */}
+                {bulkTargetSponsor === 'auto' && (() => {
+                  const sponsorCounts = {};
+                  bulkData.forEach(d => {
+                    const sp = d.patrocinador || 'General';
+                    sponsorCounts[sp] = (sponsorCounts[sp] || 0) + 1;
+                  });
+                  const entries = Object.entries(sponsorCounts);
+                  if (entries.length <= 1 && !bulkData[0]?.sheetName) return null;
+
+                  return (
+                    <div className="pt-2 border-t border-blue-200/60">
+                      <span className="text-[11px] font-bold text-blue-900 block mb-1.5">Distribución por Pestaña / Patrocinador detectado ({entries.length}):</span>
+                      <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                        {entries.map(([spName, count]) => (
+                          <span key={spName} className="inline-flex items-center gap-1 bg-white border border-blue-200 text-blue-900 px-2.5 py-1 rounded-md text-[11px] font-bold shadow-2xs">
+                            🏢 {spName}: <span className="text-blue-600 font-black">{count}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Tabla con scroll */}
