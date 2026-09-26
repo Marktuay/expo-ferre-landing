@@ -633,8 +633,24 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   6. **Ajuste de Reglas de Seguridad en Firestore:**
      - Se añadieron reglas explícitas para `speakers` (`allow get, create: if true; allow list, update, delete: if request.auth != null;`) y `juryEvaluations` asegurando que los formularios públicos operen sin requerir inicio de sesión previo.
 
-
-
-
-
-
+### ✉️ Módulo de Invitaciones Directas por Patrocinador y Envío Masivo de Correos (`25-26 de Septiembre de 2026`)
+- **Objetivo:** Gestionar listas independientes de invitados VIP/Especiales por empresa patrocinadora y comité organizador, con personalización visual (Artes Header y Footer con marcas representadas) y despacho masivo automatizado de correos electrónicos oficiales con enlace de registro de un solo uso.
+- **Componentes y Funcionalidades Desarrolladas:**
+  1. **Directorio de Patrocinadores (`AdminDirectInvites.jsx`):**
+     - Vista en tabla con el Comité Organizador y las 27 empresas patrocinadoras con sus respectivos stands asignados y conteos en tiempo real (Total, Registrados, Pendientes).
+     - Barra de acciones horizontales por fila:
+       - 📥 **`[Cargar Excel]`**: Selector de archivo Excel vinculado automáticamente a la marca seleccionada.
+       - ✉️ **`[Enviar Correos (X)]`**: Lanzador del despachador masivo de correos filtrado por patrocinador.
+       - 👥 **`[Ver (X)]`**: Navegación directa a la lista filtrada de invitados de esa empresa.
+       - 📥 **`[Plantilla]`**: Descarga de plantilla Excel prediseñada para la marca.
+       - 📊 **`[Exportar]`**: Exportación de invitados con enlaces únicos y discurso de cortesía.
+  2. **Motor de Envío Masivo de Correos Co-Brandeados:**
+     - Modal con previsualización del banner Header (`1200x450px`), cintillo Footer de marcas (`1200x250px`) y stand asignado.
+     - Criterios de filtrado: *Solo a nunca enviados* (evita duplicados) o *A todos los pendientes con correo*.
+     - Inyección directa en la colección `mail` de Firestore para envío a través de Firebase Trigger Email extension.
+     - Actualización de trazabilidad en `events/2026/directInvites/{token}`: `emailSent`, `emailSentAt`, `lastEmailTo` y `emailSendCount`.
+     - Barra de progreso interactiva en tiempo real y resumen de entrega final.
+  3. **Página de Registro Público Co-Brandeada (`DirectInviteRegistration.jsx`):**
+     - Renderiza cabecera con el arte co-brandeado del patrocinador, aviso destacado del stand asignado y pie con cintillo de marcas.
+     - Generación instantánea de Gafete Digital con código QR de acceso y registro automático de la empresa anfitriona.
+     - Invalidación inmediata del token al registrarse (`status: 'used'`).
