@@ -226,7 +226,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
 
 Un espacio exclusivo creado para ti, donde podrás encontrar capacitaciones y novedades que te ayudarán a fortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
 
-En nombre de Grupo SUR (Kermill) y el comité organizador de EXPO FERRE Nicaragua 2026, nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
+En nombre de Grupo SUR (Kermill) y el comité organizador, nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
 
 Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
 
@@ -257,7 +257,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
 Un espacio exclusivo creado para ti, donde podrás encontrar capacitaciones y novedades que te ayudarán a fortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
 
-En nombre de Grupo SUR (Kermill) y el comité organizador de EXPO FERRE Nicaragua 2026, nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
+En nombre de Grupo SUR (Kermill) y el comité organizador, nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
 
 Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
 
