@@ -7,6 +7,8 @@ import { getEventBasePath } from '../config/eventConfig';
 import { initialStandsList } from '../config/defaultStands';
 import CreateSpeakerModal from './CreateSpeakerModal';
 
+import { matchCompanyNames, normStr } from './AdminSponsors';
+
 export default function AdminSponsorDetails({ sponsor, onBack }) {
   const [currentSponsor, setCurrentSponsor] = useState(sponsor);
   const [guests, setGuests] = useState([]);
@@ -43,8 +45,9 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
 
     // Use sponsor.id (which is their uid) or their email as fallback for legacy records
     const sponsorId = currentSponsor.id;
+    const sponsorOfficialId = currentSponsor.officialId || `official-${normStr(currentSponsor.empresa || currentSponsor.company || currentSponsor.nombre)}`;
     const sponsorEmail = (currentSponsor.correo || currentSponsor.email || '').toLowerCase().trim();
-    const sponsorCompany = (currentSponsor.empresa || currentSponsor.company || currentSponsor.nombre || '').toLowerCase().trim();
+    const sponsorCompany = currentSponsor.empresa || currentSponsor.company || currentSponsor.nombre || '';
 
     // Escuchar invitados
     const qGuests = query(collection(db, `${getEventBasePath()}/guests`));
@@ -53,7 +56,7 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
         .map(doc => ({ id: doc.id, ...doc.data() }))
         .filter(g => {
           const gEmail = (g.sponsorEmail || g.email || '').toLowerCase().trim();
-          return g.sponsorId === sponsorId || (sponsorEmail && gEmail === sponsorEmail);
+          return g.sponsorId === sponsorId || g.sponsorId === sponsorOfficialId || (sponsorEmail && gEmail === sponsorEmail);
         });
       setGuests(list);
     });
@@ -65,7 +68,7 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
         .map(doc => ({ id: doc.id, ...doc.data() }))
         .filter(s => {
           const sEmail = (s.sponsorEmail || s.email || '').toLowerCase().trim();
-          return s.sponsorId === sponsorId || (sponsorEmail && sEmail === sponsorEmail);
+          return s.sponsorId === sponsorId || s.sponsorId === sponsorOfficialId || (sponsorEmail && sEmail === sponsorEmail);
         });
       setStaff(list);
     });
@@ -77,7 +80,7 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
         .map(doc => ({ id: doc.id, ...doc.data() }))
         .filter(sp => {
           const spEmail = (sp.sponsorEmail || sp.email || '').toLowerCase().trim();
-          return sp.sponsorId === sponsorId || (sponsorEmail && spEmail === sponsorEmail);
+          return sp.sponsorId === sponsorId || sp.sponsorId === sponsorOfficialId || (sponsorEmail && spEmail === sponsorEmail);
         });
       setSpeakers(list);
     });
@@ -102,17 +105,33 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
         if (!isReserved) return false;
 
         const stEmail = (st.reservationDetails?.correo || st.sponsorEmail || st.email || '').toLowerCase().trim();
-        const stComp = (st.reservationDetails?.empresa || st.company || st.empresa || '').toLowerCase().trim();
+        const stComp = st.reservationDetails?.empresa || st.company || st.empresa || '';
         const standName = st.name || (st.id ? `Stand ${st.id.replace('stand-', '')}` : 'Stand');
         
-        const idMatch = Boolean(sponsorId && st.sponsorId && (st.sponsorId === sponsorId || st.sponsorId === currentSponsor.id || currentSponsor.id?.includes(st.sponsorId)));
-        const emailMatch = Boolean(sponsorEmail && stEmail && (stEmail === sponsorEmail || stEmail.includes(sponsorEmail) || sponsorEmail.includes(stEmail)));
-        const compMatch = Boolean(
-          sponsorCompany.length > 0 && 
-          stComp.length > 0 && 
-          (stComp === sponsorCompany || stComp.includes(sponsorCompany) || sponsorCompany.includes(stComp))
+        const idMatch = Boolean(
+          st.sponsorId && (
+            st.sponsorId === sponsorId || 
+            st.sponsorId === currentSponsor.id || 
+            st.sponsorId === sponsorOfficialId ||
+            (currentSponsor.id && currentSponsor.id.includes(st.sponsorId))
+          )
         );
-        const nameMatch = Boolean(standName && currentSponsor.standList && Array.isArray(currentSponsor.standList) && currentSponsor.standList.includes(standName));
+
+        const emailMatch = Boolean(
+          sponsorEmail && stEmail && (
+            stEmail === sponsorEmail || 
+            (sponsorEmail !== 'patrocinador oficial' && (stEmail.includes(sponsorEmail) || sponsorEmail.includes(stEmail)))
+          )
+        );
+
+        const compMatch = matchCompanyNames(stComp, sponsorCompany);
+
+        const nameMatch = Boolean(
+          standName && 
+          currentSponsor.standList && 
+          Array.isArray(currentSponsor.standList) && 
+          currentSponsor.standList.includes(standName)
+        );
 
         return idMatch || emailMatch || compMatch || nameMatch;
       });

@@ -9,14 +9,14 @@ import { getEventBasePath } from '../config/eventConfig';
 const OFFICIAL_SPONSORS = [
   { company: 'Sur', category: 'Diamante', logo: '/diamante/sur.png' },
   { company: 'Kermil', category: 'Diamante', logo: '/diamante/logo-kermil.png' },
-  { company: 'Megalines', category: 'Diamante', logo: '/diamante/megalines1.png' },
+  { company: 'Megalineas', category: 'Diamante', logo: '/diamante/megalines1.png' },
   { company: 'Pensilvania', category: 'Diamante', logo: '/diamante/pensilvania.jpg' },
   { company: 'Flash Mark', category: 'Diamante', logo: '/diamante/megalines.png' },
   { company: 'Sinsa', category: 'Diamante', logo: '/diamante/sinsa.png' },
   { company: 'Comasa', category: 'Diamante', logo: '/diamante/comasa.png' },
   { company: 'Extel', category: 'Diamante', logo: '/diamante/extelpng.png' },
   { company: 'Nitrotel', category: 'Diamante', logo: '/diamante/nitrotel.png?v=1' },
-  { company: 'BAC', category: 'Diamante', logo: '/diamante/logo-bac.jpeg' },
+  { company: 'BAC Credomatic', category: 'Diamante', logo: '/diamante/logo-bac.jpeg' },
   { company: 'Importaciones Balladares', category: 'Diamante', logo: '/diamante/balladares.png' },
   { company: 'EMTOP', category: 'Diamante', logo: '/diamante/emtop.png' },
   { company: 'Sylvania', category: 'Diamante', logo: '/diamante/sylvania.jpg' },
@@ -33,6 +33,7 @@ const OFFICIAL_SPONSORS = [
   { company: 'Panelconsa', category: 'Diamante', logo: '/diamante/panelconsa.png' },
   { company: 'Steelmax', category: 'Diamante', logo: '/diamante/steelmax.png' },
   { company: 'Eaton', category: 'Diamante', logo: '/diamante/eaton.jpeg' },
+  { company: 'Sherwin Williams', category: 'Diamante', logo: '/diamante/sherwin.png' },
   { company: 'Plycem', category: 'Oro', logo: '/oro/plycem%20.png' },
   { company: 'Sicsa', category: 'Oro', logo: '/oro/sicsa.png' },
   { company: 'UP Digital', category: 'Oro', logo: '/oro/up.png' },
@@ -51,6 +52,42 @@ const OFFICIAL_SPONSORS = [
   { company: 'Monolit', category: 'Plata', logo: '/plata/monolit.png' },
   { company: 'Mobius', category: 'Plata', logo: '/plata/mobius.png' }
 ];
+
+export function normStr(str) {
+  if (!str) return '';
+  return String(str)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+
+export function getCompanyTokens(str) {
+  if (!str) return [];
+  const cleaned = String(str)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ');
+  const stopWords = new Set(['grupo', 'sa', 'safery', 'safety', 'de', 'el', 'la', 'los', 'las', 'del', 'comercial', 'eventos', 'nicaragua', 'banco', 'ferreteria']);
+  return cleaned.split(/\s+/).filter(t => t.length > 0 && !stopWords.has(t));
+}
+
+export function matchCompanyNames(c1, c2) {
+  const n1 = normStr(c1);
+  const n2 = normStr(c2);
+  if (!n1 || !n2) return false;
+  if (n1 === n2) return true;
+  if (n1.startsWith(n2) || n2.startsWith(n1)) return true;
+  if (n1.length >= 4 && n2.length >= 4 && (n1.includes(n2) || n2.includes(n1))) return true;
+
+  const tokens1 = getCompanyTokens(c1);
+  const tokens2 = getCompanyTokens(c2);
+  const common = tokens1.filter(t => tokens2.includes(t));
+  if (common.length > 0) return true;
+
+  return false;
+}
 
 export default function AdminSponsors({ onBack }) {
   const [sponsors, setSponsors] = useState([]);
@@ -71,9 +108,10 @@ export default function AdminSponsors({ onBack }) {
 
       // 1. Inicializar con Patrocinadores Oficiales confirmados
       OFFICIAL_SPONSORS.forEach(off => {
-        const offId = `official-${off.company.toLowerCase().replace(/\s+/g, '-')}`;
+        const offId = `official-${normStr(off.company)}`;
         combinedMap.set(offId, {
           id: offId,
+          officialId: offId,
           nombre: off.company,
           apellido: '',
           empresa: off.company,
@@ -89,53 +127,70 @@ export default function AdminSponsors({ onBack }) {
 
       // 2. Fusionar cuentas de usuarios registrados
       userResults.forEach(u => {
-        let matchKey = u.id;
-        const uComp = (u.empresa || u.company || u.nombre || '').toLowerCase().trim();
+        let matchKey = null;
+        const uComp = u.empresa || u.company || u.nombre || '';
         const uEmail = (u.correo || u.email || '').toLowerCase().trim();
         
         for (const [key, item] of combinedMap.entries()) {
-          const itemComp = (item.empresa || item.company || item.nombre || '').toLowerCase().trim();
+          const itemComp = item.empresa || item.company || item.nombre || '';
           const itemEmail = (item.correo || item.email || '').toLowerCase().trim();
 
-          const emailMatch = Boolean(uEmail && itemEmail && (uEmail === itemEmail));
-          const compMatch = Boolean(uComp.length > 0 && itemComp.length > 0 && (itemComp === uComp || itemComp.includes(uComp) || uComp.includes(itemComp)));
+          const emailMatch = Boolean(uEmail && itemEmail && (uEmail === itemEmail || (itemEmail !== 'patrocinador oficial' && itemEmail.includes(uEmail))));
+          const compMatch = matchCompanyNames(uComp, itemComp);
 
           if (emailMatch || compMatch) {
             matchKey = key;
             break;
           }
         }
+
+        if (!matchKey) matchKey = u.id;
+
         const existing = combinedMap.get(matchKey) || {};
         combinedMap.set(matchKey, {
           ...existing,
           ...u,
           id: u.id,
+          officialId: existing.isOfficial ? matchKey : (existing.officialId || null),
           standList: existing.standList || [],
-          isOfficial: false
+          isOfficial: existing.isOfficial || false
         });
       });
 
       // 3. Fusionar información de estands reservados
       standResults.forEach(st => {
-        // Verificar si el estand está reservado
         const isReserved = st.status !== 'available' && st.status !== 'free' && st.status !== 'libre' && (st.status === 'reserved' || st.status === 'reserved_official' || st.status === 'sold' || st.status === 'occupied' || st.reservationDetails || st.sponsorId || st.sponsorEmail);
         if (!isReserved) return;
 
         let match = null;
-        const stComp = (st.reservationDetails?.empresa || st.company || st.empresa || '').toLowerCase().trim();
+        const stComp = st.reservationDetails?.empresa || st.company || st.empresa || '';
         const stEmail = (st.reservationDetails?.correo || st.sponsorEmail || st.email || '').toLowerCase().trim();
+        const stSponsorId = st.sponsorId;
         const stContact = st.reservationDetails?.nombre ? `${st.reservationDetails.nombre} ${st.reservationDetails.apellido || ''}`.trim() : (st.contactName || st.contact || '');
         const stPhone = st.reservationDetails?.telefono || st.phone || '';
-        const companyName = st.reservationDetails?.empresa || st.company || st.empresa || '';
         const standName = st.name || (st.id ? `Stand ${st.id.replace('stand-', '')}` : 'Stand');
 
         for (const [key, item] of combinedMap.entries()) {
           const itemEmail = (item.correo || item.email || '').toLowerCase().trim();
-          const itemComp = (item.empresa || item.company || item.nombre || '').toLowerCase().trim();
+          const itemComp = item.empresa || item.company || item.nombre || '';
 
-          const idMatch = Boolean(st.sponsorId && (key === st.sponsorId || item.id === st.sponsorId));
-          const emailMatch = Boolean(stEmail && itemEmail && (itemEmail === stEmail || itemEmail.includes(stEmail) || stEmail.includes(itemEmail) || key === st.sponsorId));
-          const compMatch = Boolean(stComp.length > 0 && itemComp.length > 0 && (itemComp === stComp || itemComp.includes(stComp) || stComp.includes(itemComp)));
+          const idMatch = Boolean(
+            stSponsorId && (
+              key === stSponsorId || 
+              item.id === stSponsorId || 
+              item.officialId === stSponsorId ||
+              key === `official-${normStr(stSponsorId.replace('official-', ''))}`
+            )
+          );
+
+          const emailMatch = Boolean(
+            stEmail && itemEmail && (
+              itemEmail === stEmail || 
+              (itemEmail !== 'patrocinador oficial' && (itemEmail.includes(stEmail) || stEmail.includes(itemEmail)))
+            )
+          );
+
+          const compMatch = matchCompanyNames(stComp, itemComp);
 
           if (idMatch || emailMatch || compMatch) {
             match = item;
@@ -147,17 +202,17 @@ export default function AdminSponsors({ onBack }) {
           if (!match.standList) match.standList = [];
           if (standName && !match.standList.includes(standName)) match.standList.push(standName);
           if (st.logo) match.logo = st.logo;
-          if (companyName && companyName.trim()) match.empresa = companyName.trim();
+          if (stComp && stComp.trim()) match.empresa = stComp.trim();
           if (stEmail && (match.correo === 'Patrocinador Oficial' || !match.correo)) match.correo = stEmail;
           if (stContact && (!match.nombre || match.nombre === match.empresa)) match.nombre = stContact;
           if (stPhone && (match.telefono === 'N/A' || !match.telefono)) match.telefono = stPhone;
-        } else if (companyName && companyName.trim().length > 0) {
+        } else if (stComp && stComp.trim().length > 0) {
           const fakeId = `stand-sponsor-${st.id}`;
           combinedMap.set(fakeId, {
             id: fakeId,
-            nombre: stContact || companyName.trim(),
+            nombre: stContact || stComp.trim(),
             apellido: '',
-            empresa: companyName.trim(),
+            empresa: stComp.trim(),
             correo: stEmail || 'N/A',
             telefono: stPhone || 'N/A',
             status: 'approved',

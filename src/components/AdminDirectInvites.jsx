@@ -171,7 +171,8 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
         stands.push({ id: d.id, ...s });
         
         const comp = (s.company || s.reservationDetails?.empresa || '').trim();
-        if (comp && (s.status === 'reserved' || s.status === 'sold' || s.reservedBy)) {
+        const isReserved = s.status !== 'available' && s.status !== 'free' && s.status !== 'libre' && (s.status === 'reserved' || s.status === 'reserved_official' || s.status === 'sold' || s.status === 'occupied' || s.reservationDetails || s.sponsorId || s.sponsorEmail || s.reservedBy);
+        if (comp && isReserved) {
           if (!sMap[comp]) {
             sMap[comp] = {
               name: comp,
