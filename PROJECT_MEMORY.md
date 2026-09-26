@@ -69,6 +69,21 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
 **Última actualización: 26 de Septiembre de 2026**
 
+- **Lector de Excel Inteligente y Multi-Estrategia (`AdminDirectInvites.jsx`):**
+  - Búsqueda recursiva en todas las hojas del libro de Excel.
+  - Detección automática de encabezados en las primeras 15 filas (soporte para banners o títulos combinados en filas 1-3).
+  - Normalización de sinónimos (`Nombre`, `Cliente`, `Contacto`, `Destinatario`, `Representante`, `Telefono`, `Celular`, `WS`, `Correo`, `Email`).
+  - Respaldo heurístico automático si no existen nombres de columnas estándar.
+
+- **Blindaje y Seguridad Permanente de Stands (`InteractiveMap.jsx`, `AdminSponsorsHub.jsx`, `defaultStands.js`):**
+  - Eliminación total de llamadas automáticas de inicialización (`seedOfficialStands`) al cargar páginas.
+  - Protección de reservas en Firestore: la función de respaldo nunca sobrescribe ni libera stands con empresa o contacto asignado.
+  - Uso de escrituras atómicas no destructivas con `{ merge: true }`.
+
+- **Configuración de Speeches Oficiales y Co-Branding por Marca (`OFFICIAL_SPONSOR_CONFIGS`):**
+  - Speeches oficiales personalizados para **Grupo SUR**, **Fernández Sera** e **Importaciones Balladares**, con soporte para `{invitado}`, `[Nombre]`, `{enlace}`, fecha, lugar y enlace de un solo uso.
+
+
 - **Sistema de Envío Masivo de Invitaciones por Correo Electrónico (`AdminDirectInvites.jsx`):**
   - **Despacho Masivo Directo desde la Plataforma:** Se implementó el motor de envío masivo de correos oficiales para la Invitación General y para cada uno de los 27 patrocinadores.
   - **Modal de Configuración y Seguridad de Envío:**
