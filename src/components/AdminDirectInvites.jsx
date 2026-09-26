@@ -38,7 +38,12 @@ import {
   ChevronRight,
   SendHorizontal,
   MailCheck,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle,
+  StopCircle,
+  Zap,
+  ShieldAlert,
+  Timer
 } from 'lucide-react';
 
 export default function AdminDirectInvites({ onBack, adminUser }) {
@@ -107,11 +112,25 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     open: false,
     sponsorName: 'general',
     sponsorDisplayName: 'Invitación General',
-    filterType: 'never_sent' // 'never_sent' | 'all_pending'
+    filterType: 'never_sent', // 'never_sent' | 'all_pending'
+    batchLimit: 'all', // 'all' | '25' | '50' | '100'
+    paceSpeed: 'safe' // 'safe' (250ms) | 'normal' (120ms) | 'fast' (40ms)
   });
   const [isBulkSendingEmail, setIsBulkSendingEmail] = useState(false);
   const [bulkEmailProgress, setBulkEmailProgress] = useState({ current: 0, total: 0, failed: 0 });
   const [bulkEmailResult, setBulkEmailResult] = useState(null);
+  const cancelBulkEmailRef = useRef(false);
+
+  // Helper para validación estricta de formato de correo
+  const isValidEmailAddress = (email) => {
+    if (!email || typeof email !== 'string') return false;
+    const cleaned = email.trim();
+    const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+    return re.test(cleaned);
+  };
+
+  // Helper para pausas de ritmo controlado (Throttling / Antispam Pacing)
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   // Copiado feedback
   const [copiedToken, setCopiedToken] = useState(null);
@@ -752,19 +771,32 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
       open: true,
       sponsorName: isGen ? 'general' : sponsorName,
       sponsorDisplayName: isGen ? 'Invitación General (ExpoFerre)' : sponsorName,
-      filterType: 'never_sent'
+      filterType: 'never_sent',
+      batchLimit: 'all',
+      paceSpeed: 'safe'
     });
     setBulkEmailResult(null);
-    setBulkEmailProgress({ current: 0, total: 0, failed: 0 });
+    setBulkEmailProgress({ current: 0, total: 0, failed: 0, stopped: false });
+    cancelBulkEmailRef.current = false;
   };
 
-  // Ejecutar Envío Masivo de Correos por Patrocinador
+  // Detener Envío Masivo en Curso
+  const handleStopBulkEmail = () => {
+    cancelBulkEmailRef.current = true;
+  };
+
+  // Ejecutar Envío Masivo de Correos con Pacing Antispam y Lotes
   const handleExecuteBulkEmail = async () => {
     const targetSp = bulkEmailModal.sponsorName;
     const filterType = bulkEmailModal.filterType;
+    const batchLimit = bulkEmailModal.batchLimit;
+    const paceSpeed = bulkEmailModal.paceSpeed || 'safe';
     
-    // Filtrar destinatarios válidos
-    const targets = invites.filter(inv => {
+    // Pacing delay (ms)
+    const delayMs = paceSpeed === 'safe' ? 250 : paceSpeed === 'normal' ? 120 : 40;
+
+    // Filtrar destinatarios válidos y separar correos con sintaxis válida
+    let targets = invites.filter(inv => {
       // 1. Validar patrocinador
       if (targetSp === 'general') {
         if (inv.sponsorName && inv.sponsorId !== 'general') return false;
@@ -772,9 +804,9 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
         if ((inv.sponsorName || '').toLowerCase() !== targetSp.toLowerCase()) return false;
       }
       
-      // 2. Debe tener correo electrónico válido
+      // 2. Debe tener correo electrónico y sintaxis válida
       const email = (inv.email || '').trim();
-      if (!email || !email.includes('@')) return false;
+      if (!isValidEmailAddress(email)) return false;
 
       // 3. Debe estar en estado pendiente (no registrado)
       if (inv.status === 'used') return false;
@@ -788,19 +820,36 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     });
 
     if (targets.length === 0) {
-      alert('No se encontraron invitados pendientes con correo electrónico para procesar según el filtro seleccionado.');
+      alert('No se encontraron invitados pendientes con correo electrónico válido para procesar según el filtro seleccionado.');
       return;
     }
 
+    // Aplicar límite por lote si está seleccionado
+    if (batchLimit !== 'all') {
+      const limitNum = parseInt(batchLimit, 10);
+      if (!isNaN(limitNum) && limitNum > 0) {
+        targets = targets.slice(0, limitNum);
+      }
+    }
+
+    cancelBulkEmailRef.current = false;
     setIsBulkSendingEmail(true);
-    setBulkEmailProgress({ current: 0, total: targets.length, failed: 0 });
+    setBulkEmailProgress({ current: 0, total: targets.length, failed: 0, stopped: false });
     setBulkEmailResult(null);
 
     let sentCount = 0;
     let failCount = 0;
+    const failedList = [];
+    let wasStopped = false;
 
     try {
       for (let i = 0; i < targets.length; i++) {
+        // Verificar si el usuario solicitó detener
+        if (cancelBulkEmailRef.current) {
+          wasStopped = true;
+          break;
+        }
+
         const inv = targets[i];
         const targetEmail = inv.email.trim().toLowerCase();
 
@@ -828,16 +877,29 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
         } catch (err) {
           console.error(`Error enviando correo a ${targetEmail}:`, err);
           failCount++;
+          failedList.push({
+            name: inv.nombre || 'Sin nombre',
+            email: targetEmail,
+            company: inv.empresa || '',
+            error: err.message
+          });
         }
 
-        setBulkEmailProgress({ current: i + 1, total: targets.length, failed: failCount });
+        setBulkEmailProgress({ current: i + 1, total: targets.length, failed: failCount, stopped: wasStopped });
+
+        // Pausa de protección antispam entre despachos
+        if (i < targets.length - 1 && !cancelBulkEmailRef.current) {
+          await sleep(delayMs);
+        }
       }
 
       setBulkEmailResult({
         success: true,
         total: targets.length,
         sent: sentCount,
-        failed: failCount
+        failed: failCount,
+        failedList: failedList,
+        wasStopped
       });
     } catch (err) {
       console.error('Error durante el envío masivo de correos:', err);
@@ -2479,22 +2541,75 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
               
               {bulkEmailResult ? (
                 <div className="space-y-4">
-                  <div className="bg-green-50 border border-green-200 text-green-900 p-5 rounded-xl text-center space-y-2">
-                    <CheckCircle2 size={36} className="text-green-600 mx-auto" />
-                    <h4 className="font-bold text-lg text-green-950">¡Envío Masivo Completado!</h4>
-                    <p className="text-xs text-green-800">
-                      Se encolaron <strong>{bulkEmailResult.sent}</strong> correos exitosamente a los invitados correspondientes con sus respectivos artes co-brandeados.
+                  <div className={`p-5 rounded-xl text-center space-y-2 border ${
+                    bulkEmailResult.wasStopped 
+                      ? 'bg-amber-50 border-amber-200 text-amber-900' 
+                      : bulkEmailResult.failed > 0 
+                      ? 'bg-orange-50 border-orange-200 text-orange-900' 
+                      : 'bg-green-50 border-green-200 text-green-900'
+                  }`}>
+                    {bulkEmailResult.wasStopped ? (
+                      <AlertTriangle size={36} className="text-amber-600 mx-auto" />
+                    ) : bulkEmailResult.failed > 0 ? (
+                      <ShieldAlert size={36} className="text-orange-600 mx-auto" />
+                    ) : (
+                      <CheckCircle2 size={36} className="text-green-600 mx-auto" />
+                    )}
+
+                    <h4 className="font-bold text-lg">
+                      {bulkEmailResult.wasStopped 
+                        ? 'Envío Detenido por el Usuario' 
+                        : bulkEmailResult.failed > 0 
+                        ? 'Envío Finalizado con Observaciones' 
+                        : '¡Envío Masivo Completado con Éxito!'}
+                    </h4>
+
+                    <p className="text-xs">
+                      Se encolaron <strong>{bulkEmailResult.sent}</strong> de <strong>{bulkEmailResult.total}</strong> correos exitosamente.
                     </p>
-                    {bulkEmailResult.failed > 0 && (
-                      <p className="text-xs text-amber-700 font-bold">
-                        ⚠️ Hubo {bulkEmailResult.failed} fallos durante el envío.
+
+                    {bulkEmailResult.wasStopped && (
+                      <p className="text-xs text-amber-800 font-semibold">
+                        El proceso se interrumpió de forma segura. Los correos restantes se pueden enviar en el siguiente lote.
                       </p>
                     )}
                   </div>
+
+                  {/* Listado de Fallos si existen */}
+                  {bulkEmailResult.failedList && bulkEmailResult.failedList.length > 0 && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-red-900">
+                          <AlertCircle size={14} className="text-red-600" />
+                          <span>Contactos que no se pudieron procesar ({bulkEmailResult.failedList.length}):</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const text = bulkEmailResult.failedList.map(f => `${f.name} <${f.email}>: ${f.error}`).join('\n');
+                            navigator.clipboard.writeText(text);
+                            alert('Lista de correos fallidos copiada al portapapeles.');
+                          }}
+                          className="text-[11px] font-bold text-red-700 hover:text-red-900 underline cursor-pointer"
+                        >
+                          📋 Copiar Fallidos
+                        </button>
+                      </div>
+
+                      <div className="max-h-36 overflow-y-auto space-y-1.5 text-xs">
+                        {bulkEmailResult.failedList.map((f, idx) => (
+                          <div key={idx} className="bg-white p-2 rounded border border-red-100 flex items-center justify-between text-[11px]">
+                            <span className="font-semibold text-slate-800">{f.name} ({f.email})</span>
+                            <span className="text-red-600 text-[10px]">{f.error || 'Error SMTP'}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <>
-                  {/* Resumen de destinatarios */}
+                  {/* Resumen y Configuración de Destinatarios */}
                   {(() => {
                     const targetSp = bulkEmailModal.sponsorName;
                     const availableInvites = invites.filter(inv => {
@@ -2507,24 +2622,39 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                     });
 
                     const pendingTotal = availableInvites.filter(i => i.status === 'pending');
-                    const withEmail = pendingTotal.filter(i => i.email && i.email.includes('@'));
-                    const neverSent = withEmail.filter(i => !i.emailSentAt);
-                    const alreadySent = withEmail.filter(i => i.emailSentAt);
-                    const withoutEmail = pendingTotal.length - withEmail.length;
+                    
+                    // Separación por validez de correo
+                    const withValidEmail = pendingTotal.filter(i => isValidEmailAddress(i.email));
+                    const withInvalidEmail = pendingTotal.filter(i => i.email && !isValidEmailAddress(i.email));
+                    const withoutEmail = pendingTotal.filter(i => !i.email || !i.email.trim());
+
+                    const neverSent = withValidEmail.filter(i => !i.emailSentAt);
+                    const alreadySent = withValidEmail.filter(i => i.emailSentAt);
+
+                    const currentFilterTargets = bulkEmailModal.filterType === 'never_sent' ? neverSent : withValidEmail;
+                    
+                    // Cálculo de Lote Activo
+                    const batchSize = bulkEmailModal.batchLimit === 'all' 
+                      ? currentFilterTargets.length 
+                      : Math.min(parseInt(bulkEmailModal.batchLimit, 10) || currentFilterTargets.length, currentFilterTargets.length);
+
+                    // Estimación de tiempo
+                    const delayMs = bulkEmailModal.paceSpeed === 'safe' ? 250 : bulkEmailModal.paceSpeed === 'normal' ? 120 : 40;
+                    const estimatedSeconds = Math.ceil((batchSize * (delayMs + 60)) / 1000);
 
                     const spArt = getSponsorArt(targetSp);
 
                     return (
                       <div className="space-y-4">
                         
-                        {/* Tarjeta Informativa del Arte */}
-                        <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2">
+                        {/* Tarjeta Informativa del Arte Co-Brandeado */}
+                        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl space-y-2">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="font-bold text-slate-700">Artes que se adjuntarán:</span>
-                            <span className="text-[11px] text-slate-500">{spArt.stands ? `Stand: ${spArt.stands}` : 'Evento General'}</span>
+                            <span className="font-bold text-slate-700">Plantilla Oficial Co-Brandeada:</span>
+                            <span className="text-[11px] font-bold text-slate-500">{spArt.stands ? `Stand: ${spArt.stands}` : 'Comité Organizador'}</span>
                           </div>
                           
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2.5">
                             <div className="w-20 h-10 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0" title="Header Banner">
                               <img src={spArt.headerBannerUrl} alt="Header" className="w-full h-full object-cover" />
                             </div>
@@ -2532,79 +2662,175 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                               <img src={spArt.footerBannerUrl} alt="Footer" className="w-full h-full object-cover" />
                             </div>
                             <div className="text-[11px] text-slate-600 leading-tight">
-                              Header co-brandeado + Footer con cinta de marcas representadas y botón con token único.
+                              Header exclusivo + Stand oficial + Botón de acceso con token único + Cinta footer de marcas.
                             </div>
                           </div>
                         </div>
 
-                        {/* Desglose de Números */}
+                        {/* Desglose de Diagnóstico de Destinatarios */}
                         <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                          <div className="bg-blue-50 border border-blue-100 p-3 rounded-xl">
-                            <span className="text-secondary block text-[10px] uppercase font-bold">Listos p/ Enviar</span>
+                          <div className="bg-blue-50 border border-blue-100 p-2.5 rounded-xl">
+                            <span className="text-secondary block text-[10px] uppercase font-bold">Listos (Válidos)</span>
                             <span className="text-xl font-black text-blue-900">{neverSent.length}</span>
                           </div>
-                          <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-xl">
+                          <div className="bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl">
                             <span className="text-secondary block text-[10px] uppercase font-bold">Ya Enviados</span>
                             <span className="text-xl font-black text-emerald-900">{alreadySent.length}</span>
                           </div>
-                          <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl">
-                            <span className="text-secondary block text-[10px] uppercase font-bold">Sin Correo</span>
-                            <span className="text-xl font-black text-slate-600">{withoutEmail}</span>
+                          <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xl">
+                            <span className="text-secondary block text-[10px] uppercase font-bold">Sin / Mal Correo</span>
+                            <span className="text-xl font-black text-slate-600">{withoutEmail.length + withInvalidEmail.length}</span>
                           </div>
                         </div>
 
-                        {/* Selector de Criterio */}
-                        <div className="space-y-2">
-                          <label className="block text-xs font-bold text-on-surface uppercase tracking-wider">
-                            Seleccionar Criterio de Envío:
+                        {/* Advertencia si hay correos con sintaxis inválida */}
+                        {withInvalidEmail.length > 0 && (
+                          <div className="bg-amber-50 border border-amber-200 text-amber-900 px-3 py-2 rounded-lg text-xs flex items-center gap-2">
+                            <AlertTriangle size={14} className="text-amber-600 shrink-0" />
+                            <span>
+                              <strong>{withInvalidEmail.length}</strong> registro(s) tienen formato de correo inválido y serán omitidos automáticamente.
+                            </span>
+                          </div>
+                        )}
+
+                        {/* 1. Selector de Criterio */}
+                        <div className="space-y-1.5">
+                          <label className="block text-[11px] font-bold text-on-surface uppercase tracking-wider">
+                            1. Criterio de Selección:
                           </label>
 
-                          <label className="flex items-start gap-3 p-3 bg-surface border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-variant/30 transition-colors">
-                            <input
-                              type="radio"
-                              name="bulkFilterType"
-                              value="never_sent"
-                              checked={bulkEmailModal.filterType === 'never_sent'}
-                              onChange={() => setBulkEmailModal(prev => ({ ...prev, filterType: 'never_sent' }))}
-                              className="mt-0.5"
-                            />
-                            <div className="text-xs">
-                              <p className="font-bold text-on-surface">Solo a los que nunca se les ha enviado correo ({neverSent.length})</p>
-                              <p className="text-secondary text-[11px]">Recomendado para no duplicar correos a quienes ya recibieron su enlace.</p>
-                            </div>
-                          </label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <label className={`flex items-start gap-2.5 p-2.5 border rounded-xl cursor-pointer transition-all ${
+                              bulkEmailModal.filterType === 'never_sent' ? 'bg-amber-50/70 border-amber-400 text-amber-950 font-medium' : 'bg-surface border-outline-variant hover:bg-surface-variant/30 text-secondary'
+                            }`}>
+                              <input
+                                type="radio"
+                                name="bulkFilterType"
+                                value="never_sent"
+                                checked={bulkEmailModal.filterType === 'never_sent'}
+                                onChange={() => setBulkEmailModal(prev => ({ ...prev, filterType: 'never_sent' }))}
+                                className="mt-0.5"
+                              />
+                              <div className="text-xs">
+                                <p className="font-bold text-on-surface">Nunca enviados ({neverSent.length})</p>
+                                <p className="text-[10px] text-secondary">Evita duplicar correos.</p>
+                              </div>
+                            </label>
 
-                          <label className="flex items-start gap-3 p-3 bg-surface border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-variant/30 transition-colors">
-                            <input
-                              type="radio"
-                              name="bulkFilterType"
-                              value="all_pending"
-                              checked={bulkEmailModal.filterType === 'all_pending'}
-                              onChange={() => setBulkEmailModal(prev => ({ ...prev, filterType: 'all_pending' }))}
-                              className="mt-0.5"
-                            />
-                            <div className="text-xs">
-                              <p className="font-bold text-on-surface">A todos los pendientes con correo ({withEmail.length})</p>
-                              <p className="text-secondary text-[11px]">Incluye reenvíos a personas que aún no han completado su registro.</p>
-                            </div>
-                          </label>
+                            <label className={`flex items-start gap-2.5 p-2.5 border rounded-xl cursor-pointer transition-all ${
+                              bulkEmailModal.filterType === 'all_pending' ? 'bg-amber-50/70 border-amber-400 text-amber-950 font-medium' : 'bg-surface border-outline-variant hover:bg-surface-variant/30 text-secondary'
+                            }`}>
+                              <input
+                                type="radio"
+                                name="bulkFilterType"
+                                value="all_pending"
+                                checked={bulkEmailModal.filterType === 'all_pending'}
+                                onChange={() => setBulkEmailModal(prev => ({ ...prev, filterType: 'all_pending' }))}
+                                className="mt-0.5"
+                              />
+                              <div className="text-xs">
+                                <p className="font-bold text-on-surface">Todos pendientes ({withValidEmail.length})</p>
+                                <p className="text-[10px] text-secondary">Incluye reenvíos.</p>
+                              </div>
+                            </label>
+                          </div>
                         </div>
 
-                        {/* Barra de Progreso en Vivo */}
+                        {/* 2. Selector de Lote / Bloques (Batching) */}
+                        <div className="space-y-1.5">
+                          <label className="block text-[11px] font-bold text-on-surface uppercase tracking-wider">
+                            2. Tamaño del Lote a Despachar:
+                          </label>
+
+                          <div className="grid grid-cols-4 gap-2 text-xs">
+                            {[
+                              { id: 'all', label: `Todos (${currentFilterTargets.length})` },
+                              { id: '25', label: 'Lote de 25' },
+                              { id: '50', label: 'Lote de 50' },
+                              { id: '100', label: 'Lote de 100' }
+                            ].map(opt => (
+                              <button
+                                key={opt.id}
+                                type="button"
+                                onClick={() => setBulkEmailModal(prev => ({ ...prev, batchLimit: opt.id }))}
+                                className={`py-2 px-2 text-center rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                                  bulkEmailModal.batchLimit === opt.id
+                                    ? 'bg-amber-600 border-amber-600 text-white shadow-sm'
+                                    : 'bg-white border-outline-variant hover:bg-surface-variant/40 text-on-surface'
+                                }`}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 3. Control de Ritmo y Antispam Pacing */}
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[11px] font-bold text-on-surface uppercase tracking-wider flex items-center gap-1">
+                              <ShieldCheck size={13} className="text-emerald-600" />
+                              3. Protección Antispam y Velocidad:
+                            </label>
+                            <span className="text-[11px] font-bold text-secondary flex items-center gap-1">
+                              <Timer size={12} />
+                              ~{estimatedSeconds}s estimado ({batchSize} correos)
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-2 text-xs">
+                            {[
+                              { id: 'safe', label: '🛡️ Seguro (250ms)', desc: 'Máxima entregabilidad' },
+                              { id: 'normal', label: '⚡ Moderado (120ms)', desc: 'Equilibrado' },
+                              { id: 'fast', label: '🚀 Rápido (40ms)', desc: 'Envíos pequeños' }
+                            ].map(spd => (
+                              <button
+                                key={spd.id}
+                                type="button"
+                                onClick={() => setBulkEmailModal(prev => ({ ...prev, paceSpeed: spd.id }))}
+                                className={`p-2 rounded-xl border text-left transition-all cursor-pointer ${
+                                  bulkEmailModal.paceSpeed === spd.id
+                                    ? 'bg-amber-50 border-amber-500 text-amber-950 font-bold shadow-sm'
+                                    : 'bg-white border-outline-variant hover:bg-surface-variant/30 text-secondary'
+                                }`}
+                              >
+                                <span className="block text-[11px] font-bold text-on-surface">{spd.label}</span>
+                                <span className="block text-[9px] text-secondary">{spd.desc}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Barra de Progreso en Vivo con Botón de Detención */}
                         {isBulkSendingEmail && (
-                          <div className="space-y-2 pt-2">
+                          <div className="space-y-2 pt-2 bg-amber-50/60 p-3.5 rounded-xl border border-amber-200">
                             <div className="flex justify-between text-xs font-bold text-on-surface">
-                              <span className="flex items-center gap-1.5 text-amber-700">
-                                <RefreshCw size={12} className="animate-spin" />
-                                Despachando correos en vivo...
+                              <span className="flex items-center gap-1.5 text-amber-800">
+                                <RefreshCw size={13} className="animate-spin text-amber-600" />
+                                Despachando correos ({bulkEmailProgress.current} de {bulkEmailProgress.total})...
                               </span>
-                              <span>{bulkEmailProgress.current} / {bulkEmailProgress.total}</span>
+                              <span className="text-amber-900 font-black">
+                                {Math.round((bulkEmailProgress.current / (bulkEmailProgress.total || 1)) * 100)}%
+                              </span>
                             </div>
+
                             <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
                               <div
-                                className="bg-amber-600 h-full transition-all duration-200"
+                                className="bg-amber-600 h-full transition-all duration-150"
                                 style={{ width: `${(bulkEmailProgress.current / (bulkEmailProgress.total || 1)) * 100}%` }}
                               />
+                            </div>
+
+                            <div className="flex items-center justify-between text-[11px] text-amber-900 pt-1">
+                              <span>Fallidos: <strong>{bulkEmailProgress.failed}</strong></span>
+                              <button
+                                type="button"
+                                onClick={handleStopBulkEmail}
+                                className="py-1 px-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-[11px] flex items-center gap-1 cursor-pointer transition-colors shadow"
+                              >
+                                <StopCircle size={13} />
+                                Detener Envío
+                              </button>
                             </div>
                           </div>
                         )}
@@ -2623,7 +2849,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                 <button
                   type="button"
                   onClick={() => {
-                    setBulkEmailModal({ open: false, sponsorName: 'general', sponsorDisplayName: '', filterType: 'never_sent' });
+                    setBulkEmailModal({ open: false, sponsorName: 'general', sponsorDisplayName: '', filterType: 'never_sent', batchLimit: 'all', paceSpeed: 'safe' });
                     setBulkEmailResult(null);
                   }}
                   className="py-2.5 px-6 bg-slate-900 text-white font-bold rounded-xl text-xs hover:bg-black transition-all cursor-pointer"
@@ -2635,7 +2861,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                   <button
                     type="button"
                     disabled={isBulkSendingEmail}
-                    onClick={() => setBulkEmailModal({ open: false, sponsorName: 'general', sponsorDisplayName: '', filterType: 'never_sent' })}
+                    onClick={() => setBulkEmailModal({ open: false, sponsorName: 'general', sponsorDisplayName: '', filterType: 'never_sent', batchLimit: 'all', paceSpeed: 'safe' })}
                     className="py-2.5 px-4 bg-white border border-outline-variant hover:bg-surface text-on-surface font-bold rounded-xl text-xs transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     Cancelar

@@ -658,3 +658,9 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 ### 🏷️ Incorporación de Logo Mobius en Patrocinadores Plata (`26 de Septiembre de 2026`)
 - Se integró el archivo de logo [`public/plata/mobius.png`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/public/plata/mobius.png) en la categoría **Plata** en la última posición del carrusel/reel de la Landing Page ([`src/App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx)) y en el listado de patrocinadores oficiales ([`src/components/AdminSponsors.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsors.jsx)).
 
+### 🛡️ Optimización y Protección Antispam del Despacho Masivo de Correos (`26 de Septiembre de 2026`)
+- **Control de Ritmo y Pacing (Throttling):** Selector de velocidad de despacho (🛡️ Seguro a 250ms/correo, ⚡ Moderado a 120ms/correo, 🚀 Rápido a 40ms/correo) con cálculo de tiempo estimado en vivo para evitar caídas de reputación SMTP y suspensiones por ráfagas masivas.
+- **Despacho por Lotes (Batching):** Opciones para enviar por bloques (`Todos`, `25`, `50`, `100` correos) respetando límites de proveedores como Brevo, SendGrid, Gmail SMTP o servidores de hosting propios.
+- **Sanitización y Validación RFC:** Filtro estricto de sintaxis de correo que descarta registros mal formados antes del envío para reducir la tasa de rebotes.
+- **Control de Detención en Vivo:** Botón de parada de emergencia (`🛑 Detener Envío`) que suspende la cola de despacho de forma segura en cualquier momento sin perder los correos ya procesados.
+- **Auditoría de Errores Descargable:** Resumen interactivo post-envío con desglose de fallos y botón `[📋 Copiar Fallidos]` para corregir bases de datos.
