@@ -48,7 +48,8 @@ const OFFICIAL_SPONSORS = [
   { company: 'Madinisa', category: 'Plata', logo: '/plata/madinisa.png' },
   { company: 'Sonax', category: 'Plata', logo: '/plata/sonax.jpg' },
   { company: 'Dat Analytics', category: 'Plata', logo: '/plata/dataanalytics.jpg' },
-  { company: 'Monolit', category: 'Plata', logo: '/plata/monolit.png' }
+  { company: 'Monolit', category: 'Plata', logo: '/plata/monolit.png' },
+  { company: 'Mobius', category: 'Plata', logo: '/plata/mobius.png' }
 ];
 
 export default function AdminSponsors({ onBack }) {

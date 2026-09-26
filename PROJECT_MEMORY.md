@@ -654,3 +654,7 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
      - Renderiza cabecera con el arte co-brandeado del patrocinador, aviso destacado del stand asignado y pie con cintillo de marcas.
      - Generación instantánea de Gafete Digital con código QR de acceso y registro automático de la empresa anfitriona.
      - Invalidación inmediata del token al registrarse (`status: 'used'`).
+
+### 🏷️ Incorporación de Logo Mobius en Patrocinadores Plata (`26 de Septiembre de 2026`)
+- Se integró el archivo de logo [`public/plata/mobius.png`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/public/plata/mobius.png) en la categoría **Plata** en la última posición del carrusel/reel de la Landing Page ([`src/App.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx)) y en el listado de patrocinadores oficiales ([`src/components/AdminSponsors.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsors.jsx)).
+
