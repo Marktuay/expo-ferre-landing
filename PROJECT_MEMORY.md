@@ -67,7 +67,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📌 Tareas Pendientes para la Próxima Sesión
-- **Reincorporación de los 11 stands restantes según el plano oficial de MAXIMIZA (Completar los 35 stands):**
+- **1. Reincorporación de los 11 stands restantes según el plano oficial de MAXIMIZA (Completar los 35 stands):**
   1. Stand 7: RINSA (Plata)
   2. Stand 8: Monolit (Plata)
   3. Stand 14: Disensa / Total (Plata)
@@ -79,28 +79,63 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   9. Stand 33: Stand junto a INCASA (Plata)
   10. Stand 34: INCASA (Diamante)
   11. Stand 35: Eaton (Diamante)
-  *(Stands disponibles/libres: 9, 10, 36).*
-- Sincronizar estos 11 stands en `src/config/defaultStands.js` y en la base de datos Firestore (`events/2026/stands`).
+  *(Stands disponibles/libres según plano: 9, 10, 36).*
+  - Sincronizar estos 11 stands en `src/config/defaultStands.js` y en la base de datos Firestore (`events/2026/stands`).
+
+- **2. Revisión y Adjudicación de los 9 Contactos Duplicados Inter-Patrocinador:**
+  - Josué David (*Ferretería Gonzalez Sevilla*): Fernández Sera vs Importaciones Balladares.
+  - Delvis / Devil (*Ferretería Areas*): Fernández Sera vs Importaciones Balladares.
+  - Fidel Rodríguez (*Ferretería Rodríguez Reyes*): Importaciones Balladares vs Megalineas.
+  - Marco José (*Logística Constructiva la Fortaleza*): Importaciones Balladares vs Plycem.
+  - Denis Javier (*Ferretería Rey de Reyes Siuna*): Importaciones Balladares vs Ferretería Noelito.
+  - Ferretería Estrella Dorada (*Regina vs Cristina*): Megalineas vs MIDESA.
+  - Jesús Antonio (*Ferretería Jehová es mi Pastor / Jireth*): Plycem vs Ferretería Noelito.
+  - Ferretería Central (*Julio Cesar vs José Adán*): Importaciones Balladares vs Plycem.
+  - Rodrigo (*Negocios de Oriente vs Personal Midesa*): Fernández Sera vs MIDESA.
+
+- **3. Carga de Artes Gráficos (Header/Footer):**
+  - Subir los banners de Header (`1200x450px`) y Footer de Marcas (`1200x250px`) para los patrocinadores restantes.
 
 ---
 
-## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 26 de Septiembre de 2026**
+## 📅 Resumen de Cambios y Avances de la Sesión (26 de Septiembre de 2026)
 
-- **Lector de Excel Inteligente y Multi-Estrategia (`AdminDirectInvites.jsx`):**
-  - Búsqueda recursiva en todas las hojas del libro de Excel.
-  - Detección automática de encabezados en las primeras 15 filas (soporte para banners o títulos combinados en filas 1-3).
+- **Carga Masiva Exitosa de 151 Invitaciones Directas en Firestore:**
+  - Se generaron 151 registros con tokens únicos (`events/2026/directInvites`) distribuidos entre: Importaciones Balladares, Fernández Sera, Megalineas, Plycem, Ferretería Noelito, MIDESA, Monolit, Sicsa Nicaragua, Casco, Sonax y la Invitación General.
+  - Todos los contactos disponen de enlaces personalizados, speech oficial predeterminado y estado `pending`.
+
+- **Soporte para Libros Excel Multi-Pestaña en 1 Solo Archivo (`AdminDirectInvites.jsx`):**
+  - Función `handleFileUpload` mejorada para recorrer todas las pestañas de un archivo Excel.
+  - Detección inteligente de patrocinador por el nombre de la pestaña (ej. `SUR`, `Fernandez Sera`, `Balladares`, `Sicsa`, `Cemex`, etc.) o por columna interna `Patrocinador`.
+  - Desglose visual en el modal de confirmación con píldoras de conteo por pestaña.
+
+- **Lector de Excel Inteligente y Multi-Estrategia:**
+  - Detección de encabezados en las primeras 15 filas (soporta banners combinados y títulos en filas superiores).
   - Normalización de sinónimos (`Nombre`, `Cliente`, `Contacto`, `Destinatario`, `Representante`, `Telefono`, `Celular`, `WS`, `Correo`, `Email`).
-  - Respaldo heurístico automático si no existen nombres de columnas estándar.
+  - Respaldo heurístico de contenido si no hay nombres de columnas formales.
 
-- **Blindaje y Seguridad Permanente de Stands (`InteractiveMap.jsx`, `AdminSponsorsHub.jsx`, `defaultStands.js`):**
-  - Eliminación total de llamadas automáticas de inicialización (`seedOfficialStands`) al cargar páginas.
-  - Protección de reservas en Firestore: la función de respaldo nunca sobrescribe ni libera stands con empresa o contacto asignado.
-  - Uso de escrituras atómicas no destructivas con `{ merge: true }`.
+- **Blindaje y Seguridad Permanente de Stands contra Pérdida de Datos:**
+  - Eliminación de llamadas automáticas de inicialización (`seedOfficialStands`) en `InteractiveMap.jsx` y `AdminSponsorsHub.jsx`.
+  - Protección de reservas en `src/config/defaultStands.js`: ignora stands ya ocupados y usa `{ merge: true }`.
 
-- **Configuración Universal de Speeches Oficiales y Co-Branding por Marca (`OFFICIAL_SPONSOR_CONFIGS` & `getSponsorArt`):**
-  - Motor universal que pre-configura automáticamente el speech oficial estándar y el asunto de correo para **todos los 27 patrocinadores** (Sinsa, Armoconsa, Balladares, Extel, Sherwin-Williams, Fernández Sera, Sicsa, Megalineas, Grupo SUR, CEMEX, LAFISE, Indenicsa, Plycem, BAC Credomatic, Casco, Midesa, Noelito, etc.), inyectando en vivo su nombre, sus stands, fecha (17 de Octubre, 8:00am, Crowne Plaza) y enlace único de un solo uso.
-  - Permite a los administradores enfocarse únicamente en subir banners gráficos o listas Excel, ya que todo el contenido y personalización queda listo por defecto.
+- **Motor Universal de Speeches Oficiales y Co-Branding:**
+  - Auto-generación del speech oficial estándar y asunto de correo para los 27 patrocinadores inyectando variables dinámicas (`{invitado}`, `[Nombre]`, `{enlace}`, fecha y stands).
+  - Speeches específicos personalizados para **Grupo SUR**, **Fernández Sera**, **Importaciones Balladares** y **Sicsa Nicaragua**.
+
+- **Historial de Commits en Git (Rama `main`):**
+  - `6440c31`: *feat(invites): support multi-sheet multi-sponsor Excel workbook in a single upload*
+  - `ad91571`: *feat(invites): implement universal standard speech and email subject auto-generation for all sponsors*
+  - `73e8c2f`: *feat(invites): configure official custom speech for Sicsa Nicaragua*
+  - `8b742ea`: *feat(invites): configure official custom speech for Importaciones Balladares*
+  - `0865556`: *feat(invites): configure official custom speech for Fernandez Sera*
+  - `0f7d6b5`: *feat(invites): robust multi-strategy excel parser supporting all sponsor contact list formats*
+  - `933ff45`: *fix(map): completely eliminate auto-seed wipe risk on map load*
+  - `af9c04d`: *fix(stands): protect existing reservations and prevent auto-seeding resets*
+
+- **Comando de Despliegue en VM de Producción:**
+  ```bash
+  git pull origin main && npm run build && pm2 restart all
+  ```
 
 
 - **Sistema de Envío Masivo de Invitaciones por Correo Electrónico (`AdminDirectInvites.jsx`):**
