@@ -406,10 +406,17 @@ export const DEFAULT_OFFICIAL_STANDS = [
 ];
 
 export const seedOfficialStands = async (db) => {
+  const standsSnap = await getDocs(collection(db, `${getEventBasePath()}/stands`));
+  const existingMap = {};
+  standsSnap.forEach(d => {
+    existingMap[d.id] = d.data();
+  });
+
   for (let i = 1; i <= 38; i++) {
     const standId = `stand-${i}`;
     const official = DEFAULT_OFFICIAL_STANDS.find(s => s.id === standId);
     const meta = initialStandsList.find(s => s.id === standId);
+    const existing = existingMap[standId];
     const refActive = doc(db, `${getEventBasePath()}/stands`, standId);
     const refBackup = doc(db, `${getEventBasePath()}/stands_backup`, standId);
 
@@ -421,12 +428,17 @@ export const seedOfficialStands = async (db) => {
       updatedAt: new Date()
     };
 
+    // Si ya existe una reserva activa en Firestore, protegerla y nunca sobrescribir
+    if (existing && existing.status !== 'available' && existing.status !== 'free' && (existing.reservationDetails || existing.company || existing.sponsorEmail || existing.sponsorId)) {
+      continue;
+    }
+
     const dataToSave = official 
       ? { ...baseInfo, ...official } 
       : { ...baseInfo, status: 'available' };
 
-    await setDoc(refActive, dataToSave);
-    await setDoc(refBackup, dataToSave);
+    await setDoc(refActive, dataToSave, { merge: true });
+    await setDoc(refBackup, dataToSave, { merge: true });
   }
 };
 
