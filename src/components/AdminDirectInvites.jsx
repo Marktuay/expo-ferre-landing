@@ -32,7 +32,13 @@ import {
   Sparkles,
   Phone,
   Tag,
-  CheckSquare
+  CheckSquare,
+  LayoutGrid,
+  ListFilter,
+  ChevronRight,
+  SendHorizontal,
+  MailCheck,
+  RefreshCw
 } from 'lucide-react';
 
 export default function AdminDirectInvites({ onBack, adminUser }) {
@@ -42,7 +48,11 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [sponsorSettings, setSponsorSettings] = useState({});
   const [loading, setLoading] = useState(true);
   
+  // Modo de Vista: 'sponsors' (Directorio de Patrocinadores) | 'invites' (Detalle de Invitados)
+  const [viewMode, setViewMode] = useState('sponsors');
+  
   // Filtros
+  const [sponsorSearchTerm, setSponsorSearchTerm] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'used'
   const [selectedSponsorFilter, setSelectedSponsorFilter] = useState('all'); // 'all' | 'general' | sponsorName
@@ -84,11 +94,24 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [isBulkSaving, setIsBulkSaving] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const fileInputRef = useRef(null);
+  const singleSponsorFileInputRef = useRef(null);
+  const [targetedUploadSponsor, setTargetedUploadSponsor] = useState(null);
 
-  // Modal para Enviar Correo Directo
+  // Modal para Enviar Correo Directo Individual
   const [emailModal, setEmailModal] = useState({ open: false, invite: null });
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailSuccess, setEmailSuccess] = useState('');
+
+  // Modal para Envío Masivo de Correos por Patrocinador / General
+  const [bulkEmailModal, setBulkEmailModal] = useState({
+    open: false,
+    sponsorName: 'general',
+    sponsorDisplayName: 'Invitación General',
+    filterType: 'never_sent' // 'never_sent' | 'all_pending'
+  });
+  const [isBulkSendingEmail, setIsBulkSendingEmail] = useState(false);
+  const [bulkEmailProgress, setBulkEmailProgress] = useState({ current: 0, total: 0, failed: 0 });
+  const [bulkEmailResult, setBulkEmailResult] = useState(null);
 
   // Copiado feedback
   const [copiedToken, setCopiedToken] = useState(null);
@@ -176,6 +199,8 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     return {
       headerBannerUrl: setting.headerBannerUrl || 'https://expoferrenicaragua.com/email-header.png',
       footerBannerUrl: setting.footerBannerUrl || 'https://expoferrenicaragua.com/email-footer.png',
+      hasCustomHeader: !!setting.headerBannerUrl,
+      hasCustomFooter: !!setting.footerBannerUrl,
       customSpeech: setting.customSpeech || '',
       stands: setting.stands || (sponsorsMap[sponsorName]?.stands?.join(', ') || '')
     };
@@ -351,23 +376,23 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   };
 
   // Descargar Plantilla Oficial de Excel
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplateForSponsor = (sponsorName) => {
     import('xlsx').then((XLSX) => {
-      const targetSponsorName = selectedSponsorFilter !== 'all' && selectedSponsorFilter !== 'general' ? selectedSponsorFilter : 'SINSA';
+      const targetSponsor = sponsorName || (selectedSponsorFilter !== 'all' && selectedSponsorFilter !== 'general' ? selectedSponsorFilter : 'SINSA');
       const templateData = [
         {
           Nombre: "Carlos Mendoza",
           Empresa: "Ferretería El Roble",
           Correo: "carlos@ejemplo.com",
           Telefono: "88887777",
-          Patrocinador: targetSponsorName
+          Patrocinador: targetSponsor
         },
         {
           Nombre: "María Silva",
           Empresa: "Distribuidora Central",
           Correo: "maria@ejemplo.com",
           Telefono: "87654321",
-          Patrocinador: targetSponsorName
+          Patrocinador: targetSponsor
         }
       ];
 
@@ -382,14 +407,22 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
 
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Plantilla_Invitados");
-      XLSX.writeFile(workbook, `Plantilla_Carga_Masiva_${targetSponsorName.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
+      XLSX.writeFile(workbook, `Plantilla_Invitados_${targetSponsor.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
     });
   };
 
+  // Disparar carga de archivo para un patrocinador específico
+  const handleTriggerUploadForSponsor = (sponsorName) => {
+    setTargetedUploadSponsor(sponsorName);
+    singleSponsorFileInputRef.current?.click();
+  };
+
   // Procesar archivo Excel/CSV subido
-  const handleFileUpload = (e) => {
+  const handleFileUpload = (e, forcedSponsor = null) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const sponsorTarget = forcedSponsor || targetedUploadSponsor || (selectedSponsorFilter !== 'all' ? selectedSponsorFilter : 'auto');
 
     const reader = new FileReader();
     reader.onload = async (evt) => {
@@ -425,7 +458,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
             empresa,
             email: correo.toLowerCase(),
             telefono,
-            patrocinador: patrocinador || (selectedSponsorFilter !== 'all' && selectedSponsorFilter !== 'general' ? selectedSponsorFilter : '')
+            patrocinador: patrocinador || (sponsorTarget !== 'auto' && sponsorTarget !== 'general' ? sponsorTarget : '')
           };
         }).filter(r => r.nombre || r.empresa || r.email || r.telefono);
 
@@ -435,7 +468,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
         }
 
         setBulkData(parsedRows);
-        setBulkTargetSponsor(selectedSponsorFilter !== 'all' ? selectedSponsorFilter : 'auto');
+        setBulkTargetSponsor(sponsorTarget);
         setShowBulkModal(true);
       } catch (err) {
         console.error('Error al procesar archivo Excel:', err);
@@ -444,6 +477,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     };
     reader.readAsBinaryString(file);
     e.target.value = null;
+    setTargetedUploadSponsor(null);
   };
 
   // Guardar Lote de Invitaciones Directas en Firestore
@@ -469,7 +503,6 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
           if (bulkTargetSponsor && bulkTargetSponsor !== 'auto') {
             spName = bulkTargetSponsor === 'general' ? null : bulkTargetSponsor;
           } else if (item.patrocinador && item.patrocinador.toLowerCase() !== 'general') {
-            // Match with sponsorsMap
             const matchedKey = Object.keys(sponsorsMap).find(k => k.toLowerCase() === item.patrocinador.toLowerCase());
             spName = matchedKey || item.patrocinador;
           }
@@ -604,6 +637,73 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     setTimeout(() => setCopiedToken(null), 2500);
   };
 
+  // Función generadora del HTML del correo formal co-brandeado
+  const buildInviteEmail = (invite, customRecipientEmail = null) => {
+    const link = getInviteUrl(invite.id);
+    const guestLabel = invite.nombre?.trim() || 'Estimado(a) Invitado(a)';
+    const sponsorName = invite.sponsorName || '';
+    const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
+    const stands = invite.sponsorStands || art.stands || '';
+
+    const subject = art.customEmailSubject || (sponsorName 
+      ? `Invitación Exclusiva por cortesía de ${sponsorName} - EXPO FERRE 2026`
+      : 'Invitación Exclusiva: Acceso Oficial a EXPO FERRE Nicaragua 2026');
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
+        <img src="${art.headerBannerUrl}" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+        
+        <div style="padding: 32px 24px;">
+          <h2 style="color: #0d47a1; margin-top: 0; font-size: 22px;">¡Hola ${guestLabel}!</h2>
+          <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
+            ${sponsorName 
+              ? `Te saludamos cordialmente en nombre de <strong>${sponsorName}</strong> y el comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.`
+              : 'Te saluda <strong>Karen Torres</strong> en nombre del comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.'}
+          </p>
+          <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
+            ${sponsorName && stands 
+              ? `Tenemos el agrado de invitarte de forma exclusiva para que nos acompañes y conozcas nuestras últimas innovaciones en el <strong>Stand ${stands}</strong>.`
+              : 'Es un gusto saludarte y extenderte una invitación especial y personalizada para ser parte del encuentro más importante de la industria ferretera y de la construcción en el país.'}
+          </p>
+          <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
+            Hemos reservado para ti un <strong>pase preferencial de acceso</strong>. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro ingresando al botón que encontrarás abajo:
+          </p>
+
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${link}" style="background-color: #f39200; color: #ffffff; padding: 15px 36px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+              🎟️ Activar Mi Pase Exclusivo
+            </a>
+          </div>
+
+          <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 14px; border-radius: 4px; margin-bottom: 24px;">
+            <p style="margin: 0; font-size: 13px; color: #92400e;">
+              ⚠️ <strong>Nota:</strong> Este enlace es personal, intransferible y de <strong>un solo uso</strong>. Una vez completado tu registro, el enlace se desactivará automáticamente.
+            </p>
+          </div>
+
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 6px; text-align: left;">
+            <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 16 y 17 de Octubre, 2026</p>
+            <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza, Managua.</p>
+            ${sponsorName && stands ? `<p style="margin: 4px 0; font-size: 13px; color: #d97706;">🏢 <strong>Stand Anfitrión:</strong> Stand ${stands} (${sponsorName})</p>` : ''}
+          </div>
+
+          <p style="font-size: 15px; font-weight: bold; color: #0d47a1; margin-top: 28px;">
+            ¡Será un verdadero honor contar con tu presencia! 🚀
+          </p>
+
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 30px; word-break: break-all;">
+            Si el botón no abre, copia y pega este enlace en tu navegador:<br/>
+            <a href="${link}" style="color: #0d47a1;">${link}</a>
+          </p>
+        </div>
+        
+        <img src="${art.footerBannerUrl}" alt="Marcas ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+      </div>
+    `;
+
+    return { subject, html, recipientEmail: customRecipientEmail || invite.email };
+  };
+
   // Enviar correo individual
   const handleSendEmailDirect = async (e) => {
     e.preventDefault();
@@ -614,72 +714,22 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     setEmailSuccess('');
 
     try {
-      const link = getInviteUrl(invite.id);
-      const guestLabel = invite.nombre?.trim() || 'Estimado(a) Invitado(a)';
-      const sponsorName = invite.sponsorName || '';
-      const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
-      const stands = invite.sponsorStands || art.stands || '';
-
-      const subject = art.customEmailSubject || (sponsorName 
-        ? `Invitación Exclusiva por cortesía de ${sponsorName} - EXPO FERRE 2026`
-        : 'Invitación Exclusiva: Acceso Oficial a EXPO FERRE Nicaragua 2026');
+      const { subject, html } = buildInviteEmail(invite, invite.targetEmail.trim());
 
       await addDoc(collection(db, 'mail'), {
         to: invite.targetEmail.trim(),
         message: {
           subject: subject,
-          html: `
-            <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
-              <img src="${art.headerBannerUrl}" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
-              
-              <div style="padding: 32px 24px;">
-                <h2 style="color: #0d47a1; margin-top: 0; font-size: 22px;">¡Hola ${guestLabel}!</h2>
-                <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
-                  ${sponsorName 
-                    ? `Te saludamos cordialmente en nombre de <strong>${sponsorName}</strong> y el comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.`
-                    : 'Te saluda <strong>Karen Torres</strong> en nombre del comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.'}
-                </p>
-                <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
-                  ${sponsorName && stands 
-                    ? `Tenemos el agrado de invitarte de forma exclusiva para que nos acompañes y conozcas nuestras últimas innovaciones en el <strong>Stand ${stands}</strong>.`
-                    : 'Es un gusto saludarte y extenderte una invitación especial y personalizada para ser parte del encuentro más importante de la industria ferretera y de la construcción en el país.'}
-                </p>
-                <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
-                  Hemos reservado para ti un <strong>pase preferencial de acceso</strong>. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro ingresando al botón que encontrarás abajo:
-                </p>
-
-                <div style="text-align: center; margin: 32px 0;">
-                  <a href="${link}" style="background-color: #f39200; color: #ffffff; padding: 15px 36px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-                    🎟️ Activar Mi Pase Exclusivo
-                  </a>
-                </div>
-
-                <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 14px; border-radius: 4px; margin-bottom: 24px;">
-                  <p style="margin: 0; font-size: 13px; color: #92400e;">
-                    ⚠️ <strong>Nota:</strong> Este enlace es personal, intransferible y de <strong>un solo uso</strong>. Una vez completado tu registro, el enlace se desactivará automáticamente.
-                  </p>
-                </div>
-
-                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 6px; text-align: left;">
-                  <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 16 y 17 de Octubre, 2026</p>
-                  <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza, Managua.</p>
-                  ${sponsorName && stands ? `<p style="margin: 4px 0; font-size: 13px; color: #d97706;">🏢 <strong>Stand Anfitrión:</strong> Stand ${stands} (${sponsorName})</p>` : ''}
-                </div>
-
-                <p style="font-size: 15px; font-weight: bold; color: #0d47a1; margin-top: 28px;">
-                  ¡Será un verdadero honor contar con tu presencia! 🚀
-                </p>
-
-                <p style="font-size: 12px; color: #9ca3af; margin-top: 30px; word-break: break-all;">
-                  Si el botón no abre, copia y pega este enlace en tu navegador:<br/>
-                  <a href="${link}" style="color: #0d47a1;">${link}</a>
-                </p>
-              </div>
-              
-              <img src="${art.footerBannerUrl}" alt="Marcas ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
-            </div>
-          `
+          html: html
         }
+      });
+
+      // Actualizar documento de invitación
+      await updateDoc(doc(db, `${getEventBasePath()}/directInvites`, invite.id), {
+        emailSent: true,
+        emailSentAt: serverTimestamp(),
+        lastEmailTo: invite.targetEmail.trim(),
+        emailSendCount: (invite.emailSendCount || 0) + 1
       });
 
       setEmailSuccess(`¡Invitación enviada con éxito a ${invite.targetEmail}!`);
@@ -695,10 +745,120 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     }
   };
 
+  // Abrir Modal de Envío Masivo de Correos
+  const handleOpenBulkEmailModal = (sponsorName) => {
+    const isGen = !sponsorName || sponsorName === 'general';
+    setBulkEmailModal({
+      open: true,
+      sponsorName: isGen ? 'general' : sponsorName,
+      sponsorDisplayName: isGen ? 'Invitación General (ExpoFerre)' : sponsorName,
+      filterType: 'never_sent'
+    });
+    setBulkEmailResult(null);
+    setBulkEmailProgress({ current: 0, total: 0, failed: 0 });
+  };
+
+  // Ejecutar Envío Masivo de Correos por Patrocinador
+  const handleExecuteBulkEmail = async () => {
+    const targetSp = bulkEmailModal.sponsorName;
+    const filterType = bulkEmailModal.filterType;
+    
+    // Filtrar destinatarios válidos
+    const targets = invites.filter(inv => {
+      // 1. Validar patrocinador
+      if (targetSp === 'general') {
+        if (inv.sponsorName && inv.sponsorId !== 'general') return false;
+      } else if (targetSp !== 'all') {
+        if ((inv.sponsorName || '').toLowerCase() !== targetSp.toLowerCase()) return false;
+      }
+      
+      // 2. Debe tener correo electrónico válido
+      const email = (inv.email || '').trim();
+      if (!email || !email.includes('@')) return false;
+
+      // 3. Debe estar en estado pendiente (no registrado)
+      if (inv.status === 'used') return false;
+
+      // 4. Si el filtro es solo nunca enviados
+      if (filterType === 'never_sent' && inv.emailSentAt) {
+        return false;
+      }
+
+      return true;
+    });
+
+    if (targets.length === 0) {
+      alert('No se encontraron invitados pendientes con correo electrónico para procesar según el filtro seleccionado.');
+      return;
+    }
+
+    setIsBulkSendingEmail(true);
+    setBulkEmailProgress({ current: 0, total: targets.length, failed: 0 });
+    setBulkEmailResult(null);
+
+    let sentCount = 0;
+    let failCount = 0;
+
+    try {
+      for (let i = 0; i < targets.length; i++) {
+        const inv = targets[i];
+        const targetEmail = inv.email.trim().toLowerCase();
+
+        try {
+          const { subject, html } = buildInviteEmail(inv);
+
+          // 1. Encolar correo en la colección 'mail' de Firestore
+          await addDoc(collection(db, 'mail'), {
+            to: targetEmail,
+            message: {
+              subject,
+              html
+            }
+          });
+
+          // 2. Actualizar documento de invitación
+          await updateDoc(doc(db, `${getEventBasePath()}/directInvites`, inv.id), {
+            emailSent: true,
+            emailSentAt: serverTimestamp(),
+            lastEmailTo: targetEmail,
+            emailSendCount: (inv.emailSendCount || 0) + 1
+          });
+
+          sentCount++;
+        } catch (err) {
+          console.error(`Error enviando correo a ${targetEmail}:`, err);
+          failCount++;
+        }
+
+        setBulkEmailProgress({ current: i + 1, total: targets.length, failed: failCount });
+      }
+
+      setBulkEmailResult({
+        success: true,
+        total: targets.length,
+        sent: sentCount,
+        failed: failCount
+      });
+    } catch (err) {
+      console.error('Error durante el envío masivo de correos:', err);
+      alert('Ocurrió un error inesperado: ' + err.message);
+    } finally {
+      setIsBulkSendingEmail(false);
+    }
+  };
+
   // Exportar Excel (Respeta el filtro de lista de patrocinador)
-  const handleExportExcel = () => {
+  const handleExportExcel = (targetSponsor = null) => {
+    const spFilter = targetSponsor || selectedSponsorFilter;
+    
+    const dataToFilter = invites.filter(inv => {
+      if (spFilter === 'general') return !inv.sponsorName || inv.sponsorId === 'general';
+      if (spFilter !== 'all') return (inv.sponsorName || '').toLowerCase() === spFilter.toLowerCase();
+      return true;
+    });
+
     import('xlsx').then((XLSX) => {
-      const dataToExport = filteredInvites.map((inv) => ({
+      const dataToExport = dataToFilter.map((inv) => ({
         Fecha_Creacion: inv.createdAt?.toLocaleDateString ? inv.createdAt.toLocaleDateString() + ' ' + inv.createdAt.toLocaleTimeString() : 'N/A',
         Token_ID: inv.id,
         Invitado_Nombre: inv.nombre || 'N/A',
@@ -718,13 +878,13 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
       const worksheet = XLSX.utils.json_to_sheet(dataToExport);
       const workbook = XLSX.utils.book_new();
-      const sheetName = selectedSponsorFilter !== 'all' ? selectedSponsorFilter.substring(0, 30) : 'Invitaciones_Directas';
+      const sheetName = spFilter !== 'all' ? spFilter.substring(0, 30) : 'Invitaciones_Directas';
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
       XLSX.writeFile(workbook, `Invitaciones_${sheetName.replace(/[^a-zA-Z0-9]/g, '_')}_ExpoFerre_2026.xlsx`);
     });
   };
 
-  // Filtrar Invitaciones
+  // Filtrar Invitaciones para la vista detallada
   const filteredInvites = invites.filter(inv => {
     const term = searchTerm.toLowerCase().trim();
     const matchesStatus = statusFilter === 'all' || inv.status === statusFilter;
@@ -750,21 +910,43 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     return name.includes(term) || comp.includes(term) || mail.includes(term) || sp.includes(term) || regName.includes(term) || regComp.includes(term) || token.includes(term);
   });
 
-  // Métricas generales y filtradas
-  const totalCount = filteredInvites.length;
-  const pendingCount = filteredInvites.filter(i => i.status === 'pending').length;
-  const usedCount = filteredInvites.filter(i => i.status === 'used').length;
-
   const sponsorsList = Object.keys(sponsorsMap).sort();
 
-  // Datos del patrocinador actualmente seleccionado
-  const currentSponsorArt = selectedSponsorFilter !== 'all' ? getSponsorArt(selectedSponsorFilter) : null;
+  // Filtrar lista de patrocinadores para el directorio
+  const filteredSponsorsList = sponsorsList.filter(sp => {
+    const term = sponsorSearchTerm.toLowerCase().trim();
+    if (!term) return true;
+    const stands = (sponsorsMap[sp]?.stands || []).join(' ').toLowerCase();
+    return sp.toLowerCase().includes(term) || stands.includes(term);
+  });
+
+  // Métricas
+  const totalInvitesCount = invites.length;
+  const totalPendingCount = invites.filter(i => i.status === 'pending').length;
+  const totalUsedCount = invites.filter(i => i.status === 'used').length;
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
       <div className="max-w-7xl mx-auto space-y-6">
         
-        {/* Header Principal */}
+        {/* Hidden inputs para carga de archivos */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={(e) => handleFileUpload(e, selectedSponsorFilter)}
+          accept=".xlsx, .xls, .csv"
+          className="hidden"
+        />
+
+        <input
+          type="file"
+          ref={singleSponsorFileInputRef}
+          onChange={(e) => handleFileUpload(e, targetedUploadSponsor)}
+          accept=".xlsx, .xls, .csv"
+          className="hidden"
+        />
+
+        {/* Header Principal con Selector de Modo de Vista */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-outline-variant shadow-xs">
           <div>
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
@@ -772,57 +954,54 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
               Acceso Exclusivo de Un Solo Uso
             </div>
             <h1 className="text-2xl md:text-3xl font-black text-on-surface">
-              Invitaciones Directas & Listas por Patrocinador
+              Directorio de Patrocinadores & Invitaciones
             </h1>
             <p className="text-secondary text-sm">
-              Administra listas independientes para cada marca, configura sus artes de Header y Footer, y comparte enlaces de un solo uso.
+              Gestiona listas de invitados por marca, sube archivos Excel independientes y configura los artes co-brandeados.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              accept=".xlsx, .xls, .csv"
-              className="hidden"
-            />
+            
+            {/* Toggle de Vistas */}
+            <div className="bg-surface-variant/40 p-1 rounded-xl border border-outline-variant flex items-center gap-1">
+              <button
+                onClick={() => {
+                  setViewMode('sponsors');
+                  setSelectedSponsorFilter('all');
+                }}
+                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  viewMode === 'sponsors'
+                    ? 'bg-primary text-on-primary shadow-xs'
+                    : 'text-secondary hover:text-on-surface'
+                }`}
+              >
+                <Building2 size={15} />
+                Directorio Patrocinadores ({sponsorsList.length + 1})
+              </button>
+
+              <button
+                onClick={() => setViewMode('invites')}
+                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  viewMode === 'invites'
+                    ? 'bg-primary text-on-primary shadow-xs'
+                    : 'text-secondary hover:text-on-surface'
+                }`}
+              >
+                <Users size={15} />
+                Detalle Invitados ({totalInvitesCount})
+              </button>
+            </div>
 
             <button
               onClick={() => {
                 setGuestSponsor(selectedSponsorFilter !== 'all' ? selectedSponsorFilter : 'general');
                 setShowCreateModal(true);
               }}
-              className="px-4 py-2.5 bg-primary text-on-primary rounded-xl font-bold hover:brightness-110 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer"
+              className="px-4 py-2.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-black transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer"
             >
               <Plus size={16} />
               Nuevo Invitado
-            </button>
-
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer"
-            >
-              <FileUp size={16} />
-              Cargar Excel
-            </button>
-
-            <button
-              onClick={handleDownloadTemplate}
-              className="px-3 py-2.5 bg-white border border-outline-variant text-secondary rounded-xl font-bold hover:bg-surface-variant transition-all flex items-center gap-1.5 text-xs cursor-pointer shadow-2xs"
-              title="Descargar plantilla de Excel"
-            >
-              <Download size={15} />
-              Plantilla
-            </button>
-
-            <button
-              onClick={handleExportExcel}
-              disabled={filteredInvites.length === 0}
-              className="px-3.5 py-2.5 bg-[#217346] text-white rounded-xl font-bold hover:brightness-110 transition-all flex items-center gap-1.5 text-xs shadow-sm disabled:opacity-50 cursor-pointer"
-            >
-              <FileSpreadsheet size={15} />
-              Exportar Lista
             </button>
 
             <button
@@ -835,136 +1014,15 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
           </div>
         </div>
 
-        {/* SELECTOR DE LISTAS INDEPENDIENTES (TABS / PILLS) */}
-        <div className="bg-white p-4 rounded-2xl border border-outline-variant shadow-xs space-y-3">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-outline-variant/60 pb-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-on-surface uppercase tracking-wider">
-              <Layers size={16} className="text-primary" />
-              <span>Listas Independientes ({sponsorsList.length + 2}):</span>
-            </div>
-            <span className="text-xs text-secondary">
-              Selecciona una lista para ver sus invitados, métricas y artes asignados.
-            </span>
-          </div>
-
-          <div className="flex flex-wrap gap-2 pt-1 max-h-40 overflow-y-auto pr-1">
-            <button
-              onClick={() => setSelectedSponsorFilter('all')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                selectedSponsorFilter === 'all'
-                  ? 'bg-slate-900 text-white shadow-sm ring-2 ring-slate-900/20'
-                  : 'bg-surface hover:bg-surface-variant text-secondary'
-              }`}
-            >
-              <span>🌐 Todas las Listas</span>
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-white/20">{invites.length}</span>
-            </button>
-
-            <button
-              onClick={() => setSelectedSponsorFilter('general')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                selectedSponsorFilter === 'general'
-                  ? 'bg-primary text-on-primary shadow-sm ring-2 ring-primary/30'
-                  : 'bg-surface hover:bg-surface-variant text-secondary'
-              }`}
-            >
-              <span>⭐ Invitación General (ExpoFerre)</span>
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-white/20">
-                {invites.filter(i => !i.sponsorName || i.sponsorId === 'general').length}
-              </span>
-            </button>
-
-            {sponsorsList.map((sp) => {
-              const count = invites.filter(i => (i.sponsorName || '').toLowerCase() === sp.toLowerCase()).length;
-              const isSelected = selectedSponsorFilter.toLowerCase() === sp.toLowerCase();
-              return (
-                <button
-                  key={sp}
-                  onClick={() => setSelectedSponsorFilter(sp)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    isSelected
-                      ? 'bg-primary text-on-primary shadow-sm ring-2 ring-primary/30'
-                      : 'bg-surface hover:bg-surface-variant text-on-surface'
-                  }`}
-                >
-                  <span>🏢 {sp}</span>
-                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${isSelected ? 'bg-white/20' : 'bg-slate-200 text-slate-700'}`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* TARJETA DE GESTIÓN DE ARTES DEL PATROCINADOR SELECCIONADO */}
-        {selectedSponsorFilter !== 'all' && (
-          <div className="bg-gradient-to-r from-blue-900 to-indigo-950 p-6 rounded-2xl text-white shadow-md border border-blue-800/50 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold uppercase tracking-wider text-amber-300">
-                  {selectedSponsorFilter === 'general' ? 'Lista General' : `Patrocinador: ${selectedSponsorFilter}`}
-                </span>
-                {currentSponsorArt?.stands && (
-                  <span className="px-2.5 py-1 bg-white/10 rounded-full text-xs font-medium text-slate-200">
-                    📍 Stand(s): {currentSponsorArt.stands}
-                  </span>
-                )}
-              </div>
-              <h2 className="text-xl font-bold">
-                {selectedSponsorFilter === 'general' ? 'Artes Oficiales de Expo Ferre 2026' : `Artes y Co-Branding de ${selectedSponsorFilter}`}
-              </h2>
-              <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
-                Los correos y pantallas de registro de esta lista mostrarán el <strong>Header Banner</strong> superior y la <strong>Cinta de Marcas (Footer)</strong> inferior configurados.
-              </p>
-            </div>
-
-            {/* Vistas previas de artes */}
-            <div className="flex flex-wrap items-center gap-4 bg-black/30 p-3.5 rounded-xl border border-white/10">
-              <div className="text-center">
-                <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Header (1200x450)</p>
-                <div className="w-28 h-14 bg-slate-800 rounded-lg overflow-hidden border border-white/20 flex items-center justify-center">
-                  {currentSponsorArt?.headerBannerUrl ? (
-                    <img src={currentSponsorArt.headerBannerUrl} alt="Header" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-[10px] text-slate-400">Sin Arte</span>
-                  )}
-                </div>
-              </div>
-
-              <div className="text-center">
-                <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Footer Marcas (1200x250)</p>
-                <div className="w-28 h-14 bg-slate-800 rounded-lg overflow-hidden border border-white/20 flex items-center justify-center">
-                  {currentSponsorArt?.footerBannerUrl ? (
-                    <img src={currentSponsorArt.footerBannerUrl} alt="Footer" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-[10px] text-slate-400">Sin Arte</span>
-                  )}
-                </div>
-              </div>
-
-              <button
-                onClick={() => handleOpenArtModal(selectedSponsorFilter)}
-                className="px-4 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition-all shadow-md flex items-center gap-2 shrink-0 cursor-pointer"
-              >
-                <Palette size={16} />
-                Configurar Artes & Speech
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Tarjetas de Métricas de la Lista */}
+        {/* Tarjetas de Métricas Globales */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-white p-5 rounded-2xl border border-outline-variant shadow-2xs flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
               <Send size={24} />
             </div>
             <div>
-              <p className="text-xs font-bold text-secondary uppercase tracking-wider">
-                Total Enlaces {selectedSponsorFilter !== 'all' ? `(${selectedSponsorFilter})` : ''}
-              </p>
-              <p className="text-2xl font-black text-on-surface">{totalCount}</p>
+              <p className="text-xs font-bold text-secondary uppercase tracking-wider">Total Enlaces Generados</p>
+              <p className="text-2xl font-black text-on-surface">{totalInvitesCount}</p>
             </div>
           </div>
 
@@ -973,8 +1031,8 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
               <Clock size={24} />
             </div>
             <div>
-              <p className="text-xs font-bold text-secondary uppercase tracking-wider">Pendientes (Disponibles)</p>
-              <p className="text-2xl font-black text-amber-600">{pendingCount}</p>
+              <p className="text-xs font-bold text-secondary uppercase tracking-wider">Pendientes de Registro</p>
+              <p className="text-2xl font-black text-amber-600">{totalPendingCount}</p>
             </div>
           </div>
 
@@ -983,224 +1041,645 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
               <CheckCircle2 size={24} />
             </div>
             <div>
-              <p className="text-xs font-bold text-secondary uppercase tracking-wider">Registrados (Gafete Emitido)</p>
-              <p className="text-2xl font-black text-green-600">{usedCount}</p>
+              <p className="text-xs font-bold text-secondary uppercase tracking-wider">Registrados (Gafetes Emitidos)</p>
+              <p className="text-2xl font-black text-green-600">{totalUsedCount}</p>
             </div>
           </div>
         </div>
 
-        {/* Barra de Búsqueda y Filtros de Estado */}
-        <div className="bg-white p-4 rounded-2xl border border-outline-variant shadow-2xs flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="relative w-full sm:w-96">
-            <Search size={18} className="absolute left-3.5 top-3 text-secondary" />
-            <input
-              type="text"
-              placeholder="Buscar invitado, empresa o correo..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-surface border border-outline-variant rounded-xl text-sm outline-none focus:border-primary"
-            />
-          </div>
+        {/* VISTA 1: DIRECTORIO DE PATROCINADORES EN FORMATO LISTA / TABLA */}
+        {viewMode === 'sponsors' && (
+          <div className="space-y-4">
+            
+            {/* Barra de Búsqueda de Patrocinador */}
+            <div className="bg-white p-4 rounded-2xl border border-outline-variant shadow-2xs flex flex-col sm:flex-row gap-3 items-center justify-between">
+              <div className="relative w-full sm:w-96">
+                <Search size={18} className="absolute left-3.5 top-3 text-secondary" />
+                <input
+                  type="text"
+                  placeholder="Buscar patrocinador o stand..."
+                  value={sponsorSearchTerm}
+                  onChange={(e) => setSponsorSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-surface border border-outline-variant rounded-xl text-sm outline-none focus:border-primary"
+                />
+              </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <button
-              onClick={() => setStatusFilter('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                statusFilter === 'all' ? 'bg-primary text-on-primary' : 'bg-surface text-secondary hover:bg-surface-variant'
-              }`}
-            >
-              Todos ({totalCount})
-            </button>
-            <button
-              onClick={() => setStatusFilter('pending')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                statusFilter === 'pending' ? 'bg-amber-600 text-white' : 'bg-surface text-secondary hover:bg-surface-variant'
-              }`}
-            >
-              Pendientes ({pendingCount})
-            </button>
-            <button
-              onClick={() => setStatusFilter('used')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                statusFilter === 'used' ? 'bg-green-600 text-white' : 'bg-surface text-secondary hover:bg-surface-variant'
-              }`}
-            >
-              Registrados ({usedCount})
-            </button>
-          </div>
-        </div>
+              <div className="text-xs text-secondary font-medium">
+                Mostrando <strong>{filteredSponsorsList.length + 1}</strong> listas de patrocinador
+              </div>
+            </div>
 
-        {/* TABLA DE INVITACIONES */}
-        <div className="bg-white rounded-2xl border border-outline-variant shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="bg-surface-variant/40 border-b border-outline-variant text-xs uppercase tracking-wider text-secondary">
-                  <th className="p-4 font-bold">Invitado / Destinatario</th>
-                  <th className="p-4 font-bold">Lista / Patrocinador</th>
-                  <th className="p-4 font-bold">Estado del Enlace</th>
-                  <th className="p-4 font-bold">Resultado de Registro</th>
-                  <th className="p-4 font-bold text-center">Acciones & Envíos</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-outline-variant/60">
-                {loading ? (
-                  <tr>
-                    <td colSpan="5" className="p-8 text-center text-secondary">
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                        Cargando lista de invitados...
-                      </div>
-                    </td>
-                  </tr>
-                ) : filteredInvites.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="p-8 text-center text-secondary">
-                      {searchTerm ? 'No se encontraron contactos con ese término de búsqueda.' : 'No hay invitados en esta lista aún. Puedes presionar "Nuevo Invitado" o "Cargar Excel" para comenzar.'}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredInvites.map((inv) => {
-                    const isUsed = inv.status === 'used';
-                    const link = getInviteUrl(inv.id);
-                    const isWaCopied = copiedToken === `wa_${inv.id}`;
-                    const isLinkCopied = copiedToken === `link_${inv.id}`;
-
-                    return (
-                      <tr key={inv.id} className="hover:bg-surface-variant/20 transition-colors">
-                        
-                        {/* Invitado / Destinatario */}
+            {/* TABLA PRINCIPAL DE PATROCINADORES */}
+            <div className="bg-white rounded-2xl border border-outline-variant shadow-md overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-sm">
+                  <thead>
+                    <tr className="bg-surface-variant/40 border-b border-outline-variant text-xs uppercase tracking-wider text-secondary">
+                      <th className="p-4 font-bold">Patrocinador / Marca</th>
+                      <th className="p-4 font-bold">Stand(s)</th>
+                      <th className="p-4 font-bold">Artes de Correo (Header / Footer)</th>
+                      <th className="p-4 font-bold text-center">Invitados</th>
+                      <th className="p-4 font-bold text-center">Carga & Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant/60">
+                    
+                    {/* FILA ESPECIAL: INVITACIÓN GENERAL */}
+                    {(!sponsorSearchTerm || 'general expoferre'.includes(sponsorSearchTerm.toLowerCase())) && (
+                      <tr className="bg-amber-50/40 hover:bg-amber-50/70 transition-colors">
                         <td className="p-4">
-                          <div className="font-bold text-on-surface">
-                            {inv.nombre || <span className="text-secondary italic">Sin nombre previo</span>}
-                          </div>
-                          {inv.empresa && (
-                            <div className="text-xs text-secondary flex items-center gap-1 mt-0.5 font-medium">
-                              <Building2 size={12} /> {inv.empresa}
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
+                              ⭐
                             </div>
-                          )}
-                          <div className="text-xs text-slate-500 font-mono mt-0.5 flex flex-wrap gap-2">
-                            {inv.email && <span>✉️ {inv.email}</span>}
-                            {inv.telefono && <span>📞 {inv.telefono}</span>}
-                          </div>
-                        </td>
-
-                        {/* Lista / Patrocinador */}
-                        <td className="p-4">
-                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
-                            🏢 {inv.sponsorName || 'Invitación General'}
-                          </div>
-                          {inv.sponsorStands && (
-                            <div className="text-[11px] text-amber-700 font-medium mt-1">
-                              Stand: {inv.sponsorStands}
-                            </div>
-                          )}
-                        </td>
-
-                        {/* Estado */}
-                        <td className="p-4">
-                          {isUsed ? (
-                            <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 font-bold px-2.5 py-1 rounded-full text-xs border border-green-200">
-                              <CheckCircle2 size={12} /> USADO / REGISTRADO
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 font-bold px-2.5 py-1 rounded-full text-xs border border-amber-200">
-                              <Clock size={12} /> DISPONIBLE (UN SOLO USO)
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Resultado */}
-                        <td className="p-4">
-                          {isUsed ? (
-                            <div className="text-xs">
-                              <div className="font-bold text-green-800">{inv.registeredName}</div>
-                              <div className="text-secondary">{inv.registeredCompany}</div>
-                              <div className="text-[11px] text-slate-400 mt-0.5">
-                                {inv.usedAt?.toLocaleDateString ? inv.usedAt.toLocaleDateString() : 'Registrado'}
+                            <div>
+                              <div className="font-bold text-on-surface text-base flex items-center gap-1.5">
+                                <span>Invitación General</span>
+                                <span className="px-2 py-0.5 rounded-full text-[10px] bg-primary text-on-primary font-bold">Oficial</span>
                               </div>
+                              <p className="text-xs text-secondary">Comité Organizador EXPO FERRE 2026 (Karen Torres)</p>
                             </div>
-                          ) : (
-                            <span className="text-xs text-slate-400 italic">Esperando que el invitado llene el formulario</span>
-                          )}
+                          </div>
+                        </td>
+
+                        <td className="p-4">
+                          <span className="text-xs text-slate-500 font-medium">Evento General</span>
+                        </td>
+
+                        {/* Artes */}
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 h-8 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0" title="Header General">
+                              <img src="https://expoferrenicaragua.com/email-header.png" alt="Header" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="w-16 h-8 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0" title="Footer General">
+                              <img src="https://expoferrenicaragua.com/email-footer.png" alt="Footer" className="w-full h-full object-cover" />
+                            </div>
+                            <button
+                              onClick={() => handleOpenArtModal('general')}
+                              className="px-2.5 py-1 bg-white border border-outline-variant hover:bg-surface text-secondary text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                            >
+                              Editar
+                            </button>
+                          </div>
+                        </td>
+
+                        {/* Métricas */}
+                        <td className="p-4 text-center">
+                          {(() => {
+                            const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general');
+                            const genUsed = genInv.filter(i => i.status === 'used').length;
+                            return (
+                              <div>
+                                <span className="font-bold text-base text-on-surface">{genInv.length}</span>
+                                <div className="text-[11px] text-slate-500">
+                                  <span className="text-green-600 font-bold">{genUsed}</span> reg. / <span className="text-amber-600 font-bold">{genInv.length - genUsed}</span> pend.
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </td>
 
                         {/* Acciones */}
                         <td className="p-4 text-center">
-                          <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                            
-                            {/* Editar Invitado */}
+                          <div className="flex items-center justify-center gap-2 flex-wrap">
+                            {/* Botón Cargar Excel */}
                             <button
-                              onClick={() => handleOpenEditGuest(inv)}
-                              title="Editar datos del invitado o cambiar lista"
-                              className="p-2 bg-white border border-outline-variant hover:bg-surface text-secondary hover:text-primary rounded-lg transition-colors cursor-pointer"
+                              onClick={() => handleTriggerUploadForSponsor('general')}
+                              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                              title="Cargar archivo Excel para la lista General"
                             >
-                              <Edit2 size={14} />
+                              <FileUp size={14} />
+                              Cargar Excel
                             </button>
 
-                            {/* WhatsApp Directo */}
-                            <a
-                              href={getWhatsAppUrl(inv)}
-                              target="_blank"
-                              rel="noreferrer"
-                              title="Abrir chat de WhatsApp con el speech oficial y enlace único"
-                              className="p-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs"
-                            >
-                              <Phone size={14} />
-                              <span className="hidden xl:inline">WhatsApp</span>
-                            </a>
+                            {/* Botón Enviar Correos Masivos */}
+                            {(() => {
+                              const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general');
+                              const genPendingWithEmail = genInv.filter(i => i.status === 'pending' && i.email && i.email.includes('@'));
+                              const genUnsentEmail = genPendingWithEmail.filter(i => !i.emailSentAt);
+                              const countToSend = genUnsentEmail.length > 0 ? genUnsentEmail.length : genPendingWithEmail.length;
 
-                            {/* Copiar Speech WhatsApp */}
+                              return (
+                                <button
+                                  onClick={() => handleOpenBulkEmailModal('general')}
+                                  disabled={genPendingWithEmail.length === 0}
+                                  className={`px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
+                                    genUnsentEmail.length > 0
+                                      ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                                      : genPendingWithEmail.length > 0
+                                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                      : 'bg-slate-200 text-slate-500'
+                                  }`}
+                                  title={
+                                    genPendingWithEmail.length === 0
+                                      ? 'No hay correos pendientes en la lista general'
+                                      : `Enviar invitaciones por correo (${countToSend} destinatarios disponibles)`
+                                  }
+                                >
+                                  <MailCheck size={14} />
+                                  <span>Enviar Correos</span>
+                                  {genPendingWithEmail.length > 0 && (
+                                    <span className="ml-0.5 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
+                                      {countToSend}
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })()}
+
+                            {/* Botón Ver Invitados */}
                             <button
-                              onClick={() => handleCopyWhatsApp(inv)}
-                              title="Copiar texto de WhatsApp al portapapeles"
-                              className={`p-2 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                                isWaCopied ? 'bg-green-600 text-white' : 'bg-surface hover:bg-surface-variant text-on-surface border border-outline-variant'
-                              }`}
+                              onClick={() => {
+                                setSelectedSponsorFilter('general');
+                                setViewMode('invites');
+                              }}
+                              className="px-3 py-2 bg-white border border-outline-variant hover:bg-surface text-on-surface rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
                             >
-                              {isWaCopied ? <Check size={14} /> : <Copy size={14} />}
+                              <Users size={14} />
+                              Ver Invitados
                             </button>
-
-                            {/* Enviar Correo */}
-                            <button
-                              onClick={() => setEmailModal({ open: true, invite: { ...inv, targetEmail: inv.email || '' } })}
-                              title="Enviar correo de invitación con banner y enlace"
-                              className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg transition-colors cursor-pointer"
-                            >
-                              <Mail size={14} />
-                            </button>
-
-                            {/* Copiar Link */}
-                            <button
-                              onClick={() => handleCopyLinkOnly(inv)}
-                              title="Copiar enlace único de un solo uso"
-                              className={`p-2 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                                isLinkCopied ? 'bg-green-600 text-white' : 'bg-surface hover:bg-surface-variant text-on-surface border border-outline-variant'
-                              }`}
-                            >
-                              <ExternalLink size={14} />
-                            </button>
-
-                            {/* Eliminar */}
-                            <button
-                              onClick={() => handleDeleteInvite(inv)}
-                              title="Eliminar invitación"
-                              className="p-2 bg-white border border-red-200 hover:bg-red-50 text-red-600 rounded-lg transition-colors cursor-pointer"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-
                           </div>
                         </td>
-
                       </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                    )}
+
+                    {/* FILAS DE LOS 27 PATROCINADORES */}
+                    {filteredSponsorsList.map((sp) => {
+                      const spInvites = invites.filter(i => (i.sponsorName || '').toLowerCase() === sp.toLowerCase());
+                      const spUsed = spInvites.filter(i => i.status === 'used').length;
+                      const spPending = spInvites.length - spUsed;
+                      const spPendingWithEmail = spInvites.filter(i => i.status === 'pending' && i.email && i.email.includes('@'));
+                      const spUnsentEmail = spPendingWithEmail.filter(i => !i.emailSentAt);
+                      const countToSend = spUnsentEmail.length > 0 ? spUnsentEmail.length : spPendingWithEmail.length;
+
+                      const art = getSponsorArt(sp);
+                      const standsText = sponsorsMap[sp]?.stands?.join(', ') || art.stands || 'N/A';
+
+                      return (
+                        <tr key={sp} className="hover:bg-surface-variant/20 transition-colors">
+                          
+                          {/* Patrocinador */}
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center font-bold shrink-0">
+                                🏢
+                              </div>
+                              <div>
+                                <div className="font-bold text-on-surface text-base">
+                                  {sp}
+                                </div>
+                                <p className="text-xs text-secondary">
+                                  {sponsorsMap[sp]?.contactName ? `Contacto: ${sponsorsMap[sp].contactName}` : 'Patrocinador Oficial'}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Stands */}
+                          <td className="p-4">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-900 font-bold text-xs rounded-full border border-amber-200">
+                              📍 Stand {standsText}
+                            </span>
+                          </td>
+
+                          {/* Artes de Correo (Header & Footer) */}
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              {/* Miniatura Header */}
+                              <div className="w-16 h-8 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Header Banner">
+                                <img src={art.headerBannerUrl} alt="Header" className="w-full h-full object-cover" />
+                                {art.hasCustomHeader && (
+                                  <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-500 rounded-full"></span>
+                                )}
+                              </div>
+
+                              {/* Miniatura Footer */}
+                              <div className="w-16 h-8 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Footer Banner de Marcas">
+                                <img src={art.footerBannerUrl} alt="Footer" className="w-full h-full object-cover" />
+                                {art.hasCustomFooter && (
+                                  <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-500 rounded-full"></span>
+                                )}
+                              </div>
+
+                              <button
+                                onClick={() => handleOpenArtModal(sp)}
+                                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
+                                  art.hasCustomHeader || art.hasCustomFooter
+                                    ? 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
+                                    : 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100'
+                                }`}
+                                title="Subir o cambiar artes de Header y Footer"
+                              >
+                                <Palette size={12} />
+                                {art.hasCustomHeader || art.hasCustomFooter ? 'Artes Listos' : 'Subir Artes'}
+                              </button>
+                            </div>
+                          </td>
+
+                          {/* Métricas de Invitados */}
+                          <td className="p-4 text-center">
+                            <div>
+                              <span className="font-bold text-base text-on-surface">{spInvites.length}</span>
+                              <div className="text-[11px] text-slate-500">
+                                <span className="text-green-600 font-bold">{spUsed}</span> reg. / <span className="text-amber-600 font-bold">{spPending}</span> pend.
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Acciones de Carga y Gestión */}
+                          <td className="p-4 text-center">
+                            <div className="flex items-center justify-center gap-2 flex-wrap">
+                              
+                              {/* Botón Cargar Excel */}
+                              <button
+                                onClick={() => handleTriggerUploadForSponsor(sp)}
+                                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                title={`Cargar archivo Excel de invitados para ${sp}`}
+                              >
+                                <FileUp size={14} />
+                                Cargar Excel
+                              </button>
+
+                              {/* Botón Enviar Correos Masivos */}
+                              <button
+                                onClick={() => handleOpenBulkEmailModal(sp)}
+                                disabled={spPendingWithEmail.length === 0}
+                                className={`px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
+                                  spUnsentEmail.length > 0
+                                    ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                                    : spPendingWithEmail.length > 0
+                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                    : 'bg-slate-200 text-slate-500'
+                                }`}
+                                title={
+                                  spPendingWithEmail.length === 0
+                                    ? `No hay correos pendientes registrados para ${sp}`
+                                    : `Enviar invitaciones por correo para ${sp} (${countToSend} destinatarios disponibles)`
+                                }
+                              >
+                                <MailCheck size={14} />
+                                <span>Enviar Correos</span>
+                                {spPendingWithEmail.length > 0 && (
+                                  <span className="ml-0.5 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
+                                    {countToSend}
+                                  </span>
+                                )}
+                              </button>
+
+                              {/* Botón Ver Lista de Invitados */}
+                              <button
+                                onClick={() => {
+                                  setSelectedSponsorFilter(sp);
+                                  setViewMode('invites');
+                                }}
+                                className="px-3 py-2 bg-white border border-outline-variant hover:bg-surface text-on-surface rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+                                title={`Ver los ${spInvites.length} invitados de ${sp}`}
+                              >
+                                <Users size={14} />
+                                Ver ({spInvites.length})
+                              </button>
+
+                              {/* Plantilla */}
+                              <button
+                                onClick={() => handleDownloadTemplateForSponsor(sp)}
+                                className="p-2 bg-white border border-outline-variant hover:bg-surface text-secondary rounded-xl text-xs transition-colors cursor-pointer"
+                                title={`Descargar plantilla Excel para ${sp}`}
+                              >
+                                <Download size={14} />
+                              </button>
+
+                              {/* Exportar */}
+                              <button
+                                onClick={() => handleExportExcel(sp)}
+                                disabled={spInvites.length === 0}
+                                className="p-2 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-xl text-xs transition-colors disabled:opacity-40 cursor-pointer shadow-2xs"
+                                title={`Exportar a Excel los invitados de ${sp}`}
+                              >
+                                <FileSpreadsheet size={14} />
+                              </button>
+                            </div>
+                          </td>
+
+                        </tr>
+                      );
+                    })}
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
           </div>
-        </div>
+        )}
+
+        {/* VISTA 2: TABLA DETALLADA DE INVITADOS CON ENVÍOS */}
+        {viewMode === 'invites' && (
+          <div className="space-y-4">
+            
+            {/* Barra superior de la lista con botón para volver */}
+            <div className="bg-white p-4 rounded-2xl border border-outline-variant shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setViewMode('sponsors');
+                    setSelectedSponsorFilter('all');
+                  }}
+                  className="px-3 py-2 bg-surface hover:bg-surface-variant text-on-surface rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border border-outline-variant"
+                >
+                  <ArrowLeft size={14} />
+                  Volver a Directorio
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-secondary font-bold uppercase">Viendo Lista:</span>
+                  <span className="px-3 py-1 bg-primary text-on-primary font-bold text-xs rounded-full shadow-xs">
+                    {selectedSponsorFilter === 'all' ? '🌐 Todas las Listas' : (selectedSponsorFilter === 'general' ? '⭐ Invitación General' : `🏢 ${selectedSponsorFilter}`)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Botón Enviar Correos Masivos */}
+                {(() => {
+                  const pendingWithEmail = filteredInvites.filter(i => i.status === 'pending' && i.email && i.email.includes('@'));
+                  const unsentEmail = pendingWithEmail.filter(i => !i.emailSentAt);
+                  const count = unsentEmail.length > 0 ? unsentEmail.length : pendingWithEmail.length;
+
+                  return (
+                    <button
+                      onClick={() => handleOpenBulkEmailModal(selectedSponsorFilter === 'all' ? 'all' : selectedSponsorFilter)}
+                      disabled={pendingWithEmail.length === 0}
+                      className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                      title={
+                        pendingWithEmail.length === 0
+                          ? 'No hay correos pendientes en la vista actual'
+                          : `Enviar correos a los invitados de esta vista (${count} disponibles)`
+                      }
+                    >
+                      <MailCheck size={14} />
+                      Enviar Correos Masivos ({count})
+                    </button>
+                  );
+                })()}
+
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <FileUp size={14} />
+                  Cargar Excel a esta lista
+                </button>
+
+                <button
+                  onClick={() => handleExportExcel(selectedSponsorFilter)}
+                  disabled={filteredInvites.length === 0}
+                  className="px-3.5 py-2 bg-[#217346] text-white rounded-xl text-xs font-bold hover:brightness-110 transition-all flex items-center gap-1.5 shadow-xs disabled:opacity-50 cursor-pointer"
+                >
+                  <FileSpreadsheet size={14} />
+                  Exportar Excel
+                </button>
+              </div>
+
+            </div>
+
+            {/* Barra de Búsqueda y Filtros de Estado */}
+            <div className="bg-white p-4 rounded-2xl border border-outline-variant shadow-2xs flex flex-col sm:flex-row gap-3 items-center justify-between">
+              <div className="relative w-full sm:w-96">
+                <Search size={18} className="absolute left-3.5 top-3 text-secondary" />
+                <input
+                  type="text"
+                  placeholder="Buscar invitado, empresa o correo..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-surface border border-outline-variant rounded-xl text-sm outline-none focus:border-primary"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => setStatusFilter('all')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                    statusFilter === 'all' ? 'bg-primary text-on-primary' : 'bg-surface text-secondary hover:bg-surface-variant'
+                  }`}
+                >
+                  Todos ({filteredInvites.length})
+                </button>
+                <button
+                  onClick={() => setStatusFilter('pending')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                    statusFilter === 'pending' ? 'bg-amber-600 text-white' : 'bg-surface text-secondary hover:bg-surface-variant'
+                  }`}
+                >
+                  Pendientes ({filteredInvites.filter(i => i.status === 'pending').length})
+                </button>
+                <button
+                  onClick={() => setStatusFilter('used')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                    statusFilter === 'used' ? 'bg-green-600 text-white' : 'bg-surface text-secondary hover:bg-surface-variant'
+                  }`}
+                >
+                  Registrados ({filteredInvites.filter(i => i.status === 'used').length})
+                </button>
+              </div>
+            </div>
+
+            {/* TABLA DE INVITACIONES */}
+            <div className="bg-white rounded-2xl border border-outline-variant shadow-md overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-sm">
+                  <thead>
+                    <tr className="bg-surface-variant/40 border-b border-outline-variant text-xs uppercase tracking-wider text-secondary">
+                      <th className="p-4 font-bold">Invitado / Destinatario</th>
+                      <th className="p-4 font-bold">Patrocinador / Stand</th>
+                      <th className="p-4 font-bold">Estado Enlace & Correo</th>
+                      <th className="p-4 font-bold">Resultado de Registro</th>
+                      <th className="p-4 font-bold text-center">Acciones & Envíos</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant/60">
+                    {loading ? (
+                      <tr>
+                        <td colSpan="5" className="p-8 text-center text-secondary">
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            Cargando lista de invitados...
+                          </div>
+                        </td>
+                      </tr>
+                    ) : filteredInvites.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="p-8 text-center text-secondary">
+                          {searchTerm ? 'No se encontraron contactos con ese término de búsqueda.' : 'No hay invitados en esta lista aún. Puedes presionar "Cargar Excel" para importar los contactos.'}
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredInvites.map((inv) => {
+                        const isUsed = inv.status === 'used';
+                        const isWaCopied = copiedToken === `wa_${inv.id}`;
+                        const isLinkCopied = copiedToken === `link_${inv.id}`;
+
+                        return (
+                          <tr key={inv.id} className="hover:bg-surface-variant/20 transition-colors">
+                            
+                            {/* Invitado / Destinatario */}
+                            <td className="p-4">
+                              <div className="font-bold text-on-surface">
+                                {inv.nombre || <span className="text-secondary italic">Sin nombre previo</span>}
+                              </div>
+                              {inv.empresa && (
+                                <div className="text-xs text-secondary flex items-center gap-1 mt-0.5 font-medium">
+                                  <Building2 size={12} /> {inv.empresa}
+                                </div>
+                              )}
+                              <div className="text-xs text-slate-500 font-mono mt-0.5 flex flex-wrap gap-2">
+                                {inv.email && <span>✉️ {inv.email}</span>}
+                                {inv.telefono && <span>📞 {inv.telefono}</span>}
+                              </div>
+                            </td>
+
+                            {/* Lista / Patrocinador */}
+                            <td className="p-4">
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                                🏢 {inv.sponsorName || 'Invitación General'}
+                              </div>
+                              {inv.sponsorStands && (
+                                <div className="text-[11px] text-amber-700 font-medium mt-1">
+                                  Stand: {inv.sponsorStands}
+                                </div>
+                              )}
+                            </td>
+
+                            {/* Estado del Enlace & Correo */}
+                            <td className="p-4 space-y-1">
+                              <div>
+                                {isUsed ? (
+                                  <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 font-bold px-2.5 py-0.5 rounded-full text-[11px] border border-green-200">
+                                    <CheckCircle2 size={11} /> USADO / REGISTRADO
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 font-bold px-2.5 py-0.5 rounded-full text-[11px] border border-amber-200">
+                                    <Clock size={11} /> PENDIENTE REGISTRO
+                                  </span>
+                                )}
+                              </div>
+
+                              <div>
+                                {inv.emailSentAt ? (
+                                  <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 font-medium px-2.5 py-0.5 rounded-full text-[10px] border border-blue-200" title={`Enviado a ${inv.lastEmailTo || inv.email}`}>
+                                    <MailCheck size={10} /> Correo Enviado ({inv.emailSendCount || 1})
+                                  </span>
+                                ) : inv.email ? (
+                                  <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-600 font-medium px-2.5 py-0.5 rounded-full text-[10px] border border-slate-200">
+                                    <Clock size={10} /> Correo No Enviado
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 bg-red-50 text-red-600 font-medium px-2.5 py-0.5 rounded-full text-[10px] border border-red-200">
+                                    <AlertCircle size={10} /> Sin Correo
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* Resultado */}
+                            <td className="p-4">
+                              {isUsed ? (
+                                <div className="text-xs">
+                                  <div className="font-bold text-green-800">{inv.registeredName}</div>
+                                  <div className="text-secondary">{inv.registeredCompany}</div>
+                                  <div className="text-[11px] text-slate-400 mt-0.5">
+                                    {inv.usedAt?.toLocaleDateString ? inv.usedAt.toLocaleDateString() : 'Registrado'}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-slate-400 italic">Esperando que el invitado llene el formulario</span>
+                              )}
+                            </td>
+
+                            {/* Acciones */}
+                            <td className="p-4 text-center">
+                              <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                                
+                                {/* Editar Invitado */}
+                                <button
+                                  onClick={() => handleOpenEditGuest(inv)}
+                                  title="Editar datos del invitado o cambiar lista"
+                                  className="p-2 bg-white border border-outline-variant hover:bg-surface text-secondary hover:text-primary rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Edit2 size={14} />
+                                </button>
+
+                                {/* WhatsApp Directo */}
+                                <a
+                                  href={getWhatsAppUrl(inv)}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  title="Abrir chat de WhatsApp con el speech oficial y enlace único"
+                                  className="p-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs"
+                                >
+                                  <Phone size={14} />
+                                  <span className="hidden xl:inline">WhatsApp</span>
+                                </a>
+
+                                {/* Copiar Speech WhatsApp */}
+                                <button
+                                  onClick={() => handleCopyWhatsApp(inv)}
+                                  title="Copiar texto de WhatsApp al portapapeles"
+                                  className={`p-2 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                                    isWaCopied ? 'bg-green-600 text-white' : 'bg-surface hover:bg-surface-variant text-on-surface border border-outline-variant'
+                                  }`}
+                                >
+                                  {isWaCopied ? <Check size={14} /> : <Copy size={14} />}
+                                </button>
+
+                                {/* Enviar Correo */}
+                                <button
+                                  onClick={() => setEmailModal({ open: true, invite: { ...inv, targetEmail: inv.email || '' } })}
+                                  title={inv.emailSentAt ? `Reenviar correo oficial (ya enviado ${inv.emailSendCount || 1} vez)` : "Enviar correo de invitación con banner y enlace"}
+                                  className={`p-2 rounded-lg transition-colors cursor-pointer border ${
+                                    inv.emailSentAt 
+                                      ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-300' 
+                                      : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
+                                  }`}
+                                >
+                                  <Mail size={14} />
+                                </button>
+
+                                {/* Copiar Link */}
+                                <button
+                                  onClick={() => handleCopyLinkOnly(inv)}
+                                  title="Copiar enlace único de un solo uso"
+                                  className={`p-2 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                                    isLinkCopied ? 'bg-green-600 text-white' : 'bg-surface hover:bg-surface-variant text-on-surface border border-outline-variant'
+                                  }`}
+                                >
+                                  <ExternalLink size={14} />
+                                </button>
+
+                                {/* Eliminar */}
+                                <button
+                                  onClick={() => handleDeleteInvite(inv)}
+                                  title="Eliminar invitación"
+                                  className="p-2 bg-white border border-red-200 hover:bg-red-50 text-red-600 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+
+                              </div>
+                            </td>
+
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        )}
 
       </div>
 
@@ -1504,7 +1983,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                         <button
                           type="button"
                           onClick={() => setArtHeaderUrl('')}
-                          className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-lg text-xs font-bold shadow-md hover:bg-red-700"
+                          className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-lg text-xs font-bold shadow-md hover:bg-red-700 cursor-pointer"
                         >
                           Quitar
                         </button>
@@ -1557,7 +2036,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                         <button
                           type="button"
                           onClick={() => setArtFooterUrl('')}
-                          className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-lg text-xs font-bold shadow-md hover:bg-red-700"
+                          className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-lg text-xs font-bold shadow-md hover:bg-red-700 cursor-pointer"
                         >
                           Quitar
                         </button>
@@ -1656,7 +2135,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                           key={tag}
                           type="button"
                           onClick={() => setArtCustomSpeech(prev => prev + ' ' + tag)}
-                          className="px-2 py-1 bg-surface-variant hover:bg-primary/20 text-on-surface rounded-md text-[11px] font-mono font-bold"
+                          className="px-2 py-1 bg-surface-variant hover:bg-primary/20 text-on-surface rounded-md text-[11px] font-mono font-bold cursor-pointer"
                         >
                           {tag}
                         </button>
@@ -1937,6 +2416,225 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                 </>
               )}
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Envío Masivo de Correos por Patrocinador */}
+      {bulkEmailModal.open && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-outline-variant overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]">
+            
+            {/* Header */}
+            <div className="bg-amber-600 p-5 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5">
+                <MailCheck size={22} />
+                <div>
+                  <h3 className="font-bold text-base">Envío Masivo de Invitaciones por Correo</h3>
+                  <p className="text-white/80 text-xs">
+                    {bulkEmailModal.sponsorName === 'all' 
+                      ? 'Todas las listas activas' 
+                      : bulkEmailModal.sponsorName === 'general' 
+                      ? 'Lista General (ExpoFerre)' 
+                      : `Lista Oficial de ${bulkEmailModal.sponsorName}`}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (!isBulkSendingEmail) {
+                    setBulkEmailModal({ open: false, sponsorName: 'general', sponsorDisplayName: '', filterType: 'never_sent' });
+                    setBulkEmailResult(null);
+                  }
+                }}
+                disabled={isBulkSendingEmail}
+                className="p-1 hover:bg-white/20 rounded-full text-white disabled:opacity-50 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Contenido */}
+            <div className="p-6 space-y-5 overflow-y-auto flex-1">
+              
+              {bulkEmailResult ? (
+                <div className="space-y-4">
+                  <div className="bg-green-50 border border-green-200 text-green-900 p-5 rounded-xl text-center space-y-2">
+                    <CheckCircle2 size={36} className="text-green-600 mx-auto" />
+                    <h4 className="font-bold text-lg text-green-950">¡Envío Masivo Completado!</h4>
+                    <p className="text-xs text-green-800">
+                      Se encolaron <strong>{bulkEmailResult.sent}</strong> correos exitosamente a los invitados correspondientes con sus respectivos artes co-brandeados.
+                    </p>
+                    {bulkEmailResult.failed > 0 && (
+                      <p className="text-xs text-amber-700 font-bold">
+                        ⚠️ Hubo {bulkEmailResult.failed} fallos durante el envío.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Resumen de destinatarios */}
+                  {(() => {
+                    const targetSp = bulkEmailModal.sponsorName;
+                    const availableInvites = invites.filter(inv => {
+                      if (targetSp === 'general') {
+                        if (inv.sponsorName && inv.sponsorId !== 'general') return false;
+                      } else if (targetSp !== 'all') {
+                        if ((inv.sponsorName || '').toLowerCase() !== targetSp.toLowerCase()) return false;
+                      }
+                      return true;
+                    });
+
+                    const pendingTotal = availableInvites.filter(i => i.status === 'pending');
+                    const withEmail = pendingTotal.filter(i => i.email && i.email.includes('@'));
+                    const neverSent = withEmail.filter(i => !i.emailSentAt);
+                    const alreadySent = withEmail.filter(i => i.emailSentAt);
+                    const withoutEmail = pendingTotal.length - withEmail.length;
+
+                    const spArt = getSponsorArt(targetSp);
+
+                    return (
+                      <div className="space-y-4">
+                        
+                        {/* Tarjeta Informativa del Arte */}
+                        <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-slate-700">Artes que se adjuntarán:</span>
+                            <span className="text-[11px] text-slate-500">{spArt.stands ? `Stand: ${spArt.stands}` : 'Evento General'}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <div className="w-20 h-10 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0" title="Header Banner">
+                              <img src={spArt.headerBannerUrl} alt="Header" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="w-20 h-10 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0" title="Footer Banner">
+                              <img src={spArt.footerBannerUrl} alt="Footer" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="text-[11px] text-slate-600 leading-tight">
+                              Header co-brandeado + Footer con cinta de marcas representadas y botón con token único.
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Desglose de Números */}
+                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                          <div className="bg-blue-50 border border-blue-100 p-3 rounded-xl">
+                            <span className="text-secondary block text-[10px] uppercase font-bold">Listos p/ Enviar</span>
+                            <span className="text-xl font-black text-blue-900">{neverSent.length}</span>
+                          </div>
+                          <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-xl">
+                            <span className="text-secondary block text-[10px] uppercase font-bold">Ya Enviados</span>
+                            <span className="text-xl font-black text-emerald-900">{alreadySent.length}</span>
+                          </div>
+                          <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                            <span className="text-secondary block text-[10px] uppercase font-bold">Sin Correo</span>
+                            <span className="text-xl font-black text-slate-600">{withoutEmail}</span>
+                          </div>
+                        </div>
+
+                        {/* Selector de Criterio */}
+                        <div className="space-y-2">
+                          <label className="block text-xs font-bold text-on-surface uppercase tracking-wider">
+                            Seleccionar Criterio de Envío:
+                          </label>
+
+                          <label className="flex items-start gap-3 p-3 bg-surface border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-variant/30 transition-colors">
+                            <input
+                              type="radio"
+                              name="bulkFilterType"
+                              value="never_sent"
+                              checked={bulkEmailModal.filterType === 'never_sent'}
+                              onChange={() => setBulkEmailModal(prev => ({ ...prev, filterType: 'never_sent' }))}
+                              className="mt-0.5"
+                            />
+                            <div className="text-xs">
+                              <p className="font-bold text-on-surface">Solo a los que nunca se les ha enviado correo ({neverSent.length})</p>
+                              <p className="text-secondary text-[11px]">Recomendado para no duplicar correos a quienes ya recibieron su enlace.</p>
+                            </div>
+                          </label>
+
+                          <label className="flex items-start gap-3 p-3 bg-surface border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-variant/30 transition-colors">
+                            <input
+                              type="radio"
+                              name="bulkFilterType"
+                              value="all_pending"
+                              checked={bulkEmailModal.filterType === 'all_pending'}
+                              onChange={() => setBulkEmailModal(prev => ({ ...prev, filterType: 'all_pending' }))}
+                              className="mt-0.5"
+                            />
+                            <div className="text-xs">
+                              <p className="font-bold text-on-surface">A todos los pendientes con correo ({withEmail.length})</p>
+                              <p className="text-secondary text-[11px]">Incluye reenvíos a personas que aún no han completado su registro.</p>
+                            </div>
+                          </label>
+                        </div>
+
+                        {/* Barra de Progreso en Vivo */}
+                        {isBulkSendingEmail && (
+                          <div className="space-y-2 pt-2">
+                            <div className="flex justify-between text-xs font-bold text-on-surface">
+                              <span className="flex items-center gap-1.5 text-amber-700">
+                                <RefreshCw size={12} className="animate-spin" />
+                                Despachando correos en vivo...
+                              </span>
+                              <span>{bulkEmailProgress.current} / {bulkEmailProgress.total}</span>
+                            </div>
+                            <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
+                              <div
+                                className="bg-amber-600 h-full transition-all duration-200"
+                                style={{ width: `${(bulkEmailProgress.current / (bulkEmailProgress.total || 1)) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                      </div>
+                    );
+                  })()}
+                </>
+              )}
+
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-surface-variant/30 border-t border-outline-variant flex items-center justify-end gap-3 shrink-0">
+              {bulkEmailResult ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBulkEmailModal({ open: false, sponsorName: 'general', sponsorDisplayName: '', filterType: 'never_sent' });
+                    setBulkEmailResult(null);
+                  }}
+                  className="py-2.5 px-6 bg-slate-900 text-white font-bold rounded-xl text-xs hover:bg-black transition-all cursor-pointer"
+                >
+                  Cerrar
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    disabled={isBulkSendingEmail}
+                    onClick={() => setBulkEmailModal({ open: false, sponsorName: 'general', sponsorDisplayName: '', filterType: 'never_sent' })}
+                    className="py-2.5 px-4 bg-white border border-outline-variant hover:bg-surface text-on-surface font-bold rounded-xl text-xs transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isBulkSendingEmail}
+                    onClick={handleExecuteBulkEmail}
+                    className="py-2.5 px-5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition-all shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                  >
+                    <SendHorizontal size={16} />
+                    {isBulkSendingEmail
+                      ? `Enviando (${bulkEmailProgress.current}/${bulkEmailProgress.total})...`
+                      : 'Iniciar Envío Masivo'}
+                  </button>
+                </>
+              )}
+            </div>
+
           </div>
         </div>
       )}
