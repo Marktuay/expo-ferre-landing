@@ -213,11 +213,72 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     const clean = name.toLowerCase().trim();
     if (clean.includes('sur')) return 'grupo_sur';
     if (clean.includes('fernandez') || clean.includes('fernández') || clean.includes('sera')) return 'fernandez_sera';
+    if (clean.includes('balladares')) return 'importaciones_balladares';
     return clean.replace(/[^a-z0-9]/g, '_');
   };
 
   // Configuraciones y speeches oficiales predeterminados por marca
   const OFFICIAL_SPONSOR_CONFIGS = {
+    importaciones_balladares: {
+      sponsorName: 'Importaciones Balladares',
+      stands: 'Stand 6, 16',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Importaciones Balladares!',
+      customSpeech: `Sé parte de EXPO FERRE Nicaragua 2026! 
+
+Un espacio exclusivo creado para tí, donde podrás encontrar capacitaciones y novedades que te ayudarán afortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
+
+Hola {invitado},
+
+Nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
+
+Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
+
+Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones.
+
+¡Será un verdadero gusto tenerte con nosotros!
+
+📅 Fecha: 17 de Octubre
+📍 Lugar: Centro de Convenciones Crowne Plaza Managua
+⏰ Hora: 8:00am
+
+Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
+
+🔗 {enlace}
+
+⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
+
+¡Contamos con tu valiosa presencia!`
+    },
+    balladares: {
+      sponsorName: 'Importaciones Balladares',
+      stands: 'Stand 6, 16',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Importaciones Balladares!',
+      customSpeech: `Sé parte de EXPO FERRE Nicaragua 2026! 
+
+Un espacio exclusivo creado para tí, donde podrás encontrar capacitaciones y novedades que te ayudarán afortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
+
+Hola {invitado},
+
+Nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
+
+Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
+
+Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones.
+
+¡Será un verdadero gusto tenerte con nosotros!
+
+📅 Fecha: 17 de Octubre
+📍 Lugar: Centro de Convenciones Crowne Plaza Managua
+⏰ Hora: 8:00am
+
+Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
+
+🔗 {enlace}
+
+⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
+
+¡Contamos con tu valiosa presencia!`
+    },
     fernandez_sera: {
       sponsorName: 'Fernández Sera',
       stands: 'Stand 13',
