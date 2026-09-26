@@ -19,7 +19,8 @@ export default function AdminSponsorsHub({ onBack, onNavigate, adminUser }) {
       
       snapshot.forEach(doc => {
         const data = doc.data();
-        if (data.status === 'reserved' || data.status === 'sold') {
+        const isReserved = data.status !== 'available' && data.status !== 'free' && data.status !== 'libre' && (data.status === 'reserved' || data.status === 'reserved_official' || data.status === 'sold' || data.status === 'occupied' || data.reservationDetails || data.sponsorId || data.sponsorEmail || data.reservedBy);
+        if (isReserved) {
           reserved++;
           const standConfig = initialStandsList.find(s => s.id === doc.id || s.id === data.id);
           const priceToUse = data.price || standConfig?.price || '0';

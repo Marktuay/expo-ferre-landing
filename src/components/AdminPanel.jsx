@@ -36,20 +36,22 @@ export default function AdminPanel({ onBack, adminUser }) {
   }, []);
 
   useEffect(() => {
-    const q = query(collection(db, `${getEventBasePath()}/stands`), where('status', '==', 'reserved'));
+    const q = query(collection(db, `${getEventBasePath()}/stands`));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const standsData = snapshot.docs.map(doc => {
-        const data = doc.data();
-        const standId = doc.id || data.id;
-        const meta = initialStandsList.find(s => s.id === standId);
-        const standNum = standId ? standId.replace('stand-', '') : '';
-        return {
-          id: standId,
-          name: data.name || meta?.name || (standNum ? `Stand ${standNum}` : 'Stand'),
-          size: data.size || meta?.size || data.reservationDetails?.categoria || '',
-          ...data
-        };
-      });
+      const standsData = snapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          const standId = doc.id || data.id;
+          const meta = initialStandsList.find(s => s.id === standId);
+          const standNum = standId ? standId.replace('stand-', '') : '';
+          return {
+            id: standId,
+            name: data.name || meta?.name || (standNum ? `Stand ${standNum}` : 'Stand'),
+            size: data.size || meta?.size || data.reservationDetails?.categoria || '',
+            ...data
+          };
+        })
+        .filter(st => st.status !== 'available' && st.status !== 'free' && st.status !== 'libre' && (st.status === 'reserved' || st.status === 'reserved_official' || st.status === 'sold' || st.status === 'occupied' || st.reservationDetails || st.sponsorId || st.sponsorEmail || st.reservedBy));
       // Ordenar por número de stand
       standsData.sort((a, b) => {
         const numA = parseInt((a.id || '').replace('stand-', '')) || 0;
