@@ -220,13 +220,12 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
       sponsorName: 'Grupo SUR',
       stands: 'Stand 21',
       customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Grupo SUR y Kermill!',
-      customSpeech: `¡Hola {invitado}! 👋
+      customSpeech: `Sé parte de EXPO FERRE Nicaragua 2026! 
+Un espacio exclusivo creado para tí, donde podrás encontrar capacitaciones y novedades que te ayudarán afortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
 
-¡Sé parte de EXPO FERRE Nicaragua 2026!
+Hola {invitado},
 
-Un espacio exclusivo creado para ti, donde podrás encontrar capacitaciones y novedades que te ayudarán a fortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
-
-En nombre de Grupo SUR (Kermill) y el comité organizador de EXPO FERRE Nicaragua 2026, nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
+Nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
 
 Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
 
@@ -234,10 +233,9 @@ Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nic
 
 ¡Será un verdadero gusto tenerte con nosotros!
 
-📅 Fecha: 17 de Octubre de 2026
+📅 Fecha: 17 de Octubre
 📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora de Registro: 7:30 AM | Inicio: 8:00 AM
-🏢 Stand: Stand 21 (Grupo SUR)
+⏰ Hora: 8:00am
 
 Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
 
@@ -251,13 +249,12 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
       sponsorName: 'Grupo SUR',
       stands: 'Stand 21',
       customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Grupo SUR y Kermill!',
-      customSpeech: `¡Hola {invitado}! 👋
+      customSpeech: `Sé parte de EXPO FERRE Nicaragua 2026! 
+Un espacio exclusivo creado para tí, donde podrás encontrar capacitaciones y novedades que te ayudarán afortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
 
-¡Sé parte de EXPO FERRE Nicaragua 2026!
+Hola {invitado},
 
-Un espacio exclusivo creado para ti, donde podrás encontrar capacitaciones y novedades que te ayudarán a fortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
-
-En nombre de Grupo SUR (Kermill) y el comité organizador de EXPO FERRE Nicaragua 2026, nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
+Nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
 
 Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
 
@@ -265,10 +262,9 @@ Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nic
 
 ¡Será un verdadero gusto tenerte con nosotros!
 
-📅 Fecha: 17 de Octubre de 2026
+📅 Fecha: 17 de Octubre
 📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora de Registro: 7:30 AM | Inicio: 8:00 AM
-🏢 Stand: Stand 21 (Grupo SUR)
+⏰ Hora: 8:00am
 
 Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
 
@@ -705,12 +701,19 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     const stands = invite.sponsorStands || art.stands || '';
 
     if (art.customSpeech && art.customSpeech.trim()) {
-      return art.customSpeech
+      let speech = art.customSpeech
         .replace(/{invitado}/g, guestLabel)
+        .replace(/\[Nombre\]/g, guestLabel)
         .replace(/{empresa_invitada}/g, invite.empresa || '')
         .replace(/{patrocinador}/g, sponsorName)
-        .replace(/{stands}/g, stands ? `Stand ${stands}` : 'nuestro stand')
-        .replace(/{enlace}/g, link);
+        .replace(/{stands}/g, stands ? `Stand ${stands}` : 'nuestro stand');
+
+      if (speech.includes('{enlace}')) {
+        speech = speech.replace(/{enlace}/g, link);
+      } else {
+        speech += `\n\n🔗 ${link}\n\n⚠️ Nota: Este enlace es personal, intransferible y de un solo uso.`;
+      }
+      return speech;
     }
 
     if (sponsorName) {
