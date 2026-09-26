@@ -47,9 +47,30 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
           const data = inviteSnap.data();
           if (data.status === 'used') {
             setTokenStatus('used');
+            setInviteData(data);
           } else {
             setTokenStatus('valid');
-            setInviteData(data);
+            
+            let mergedData = { ...data };
+            if (data.sponsorId) {
+              try {
+                const spRef = doc(db, `${getEventBasePath()}/sponsorSettings`, data.sponsorId);
+                const spSnap = await getDoc(spRef);
+                if (spSnap.exists()) {
+                  const spData = spSnap.data();
+                  mergedData = {
+                    ...mergedData,
+                    headerBannerUrl: spData.headerBannerUrl || mergedData.headerBannerUrl,
+                    footerBannerUrl: spData.footerBannerUrl || mergedData.footerBannerUrl,
+                    sponsorStands: spData.stands || mergedData.sponsorStands
+                  };
+                }
+              } catch (spErr) {
+                console.warn("No se pudo cargar sponsorSettings dinámico:", spErr);
+              }
+            }
+
+            setInviteData(mergedData);
             // Pre-llenar si el admin ingresó datos previos
             if (data.nombre) setNombre(data.nombre);
             if (data.apellido) setApellido(data.apellido);
@@ -293,6 +314,12 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
               INVITADO ESPECIAL
             </div>
 
+            {inviteData?.sponsorName && (
+              <div className="inline-flex items-center gap-1.5 bg-amber-500/15 text-amber-900 font-bold text-xs px-3.5 py-1 rounded-full mb-3 border border-amber-500/30">
+                🤝 Invitado por: {inviteData.sponsorName} {inviteData.sponsorStands ? `(Stand ${inviteData.sponsorStands})` : ''}
+              </div>
+            )}
+
             {/* Nombre del Asistente */}
             <h3 className="font-black text-2xl text-primary mb-1 uppercase tracking-wide">
               {registeredData.nombre}
@@ -345,19 +372,44 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
     <div className="min-h-screen bg-[#F5F5F7] py-12 px-4 flex items-center justify-center">
       <div className="max-w-xl w-full bg-white rounded-2xl shadow-xl border border-outline-variant overflow-hidden">
         
-        {/* Header con estilo ExpoFerre */}
-        <div className="bg-gradient-to-r from-primary to-primary-container p-6 md:p-8 text-on-primary text-center">
-          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-xs px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
-            <span className="material-symbols-outlined text-sm">stars</span>
-            Invitación Exclusiva
+        {/* Header con estilo ExpoFerre o Banner del Patrocinador */}
+        {inviteData?.headerBannerUrl ? (
+          <div className="relative w-full bg-slate-950 overflow-hidden border-b border-outline-variant">
+            <img 
+              src={inviteData.headerBannerUrl} 
+              alt={inviteData.sponsorName || "ExpoFerre 2026"} 
+              className="w-full h-auto max-h-56 object-cover object-center"
+            />
+            <div className="bg-gradient-to-t from-black/85 via-black/40 to-transparent p-4 text-white text-center">
+              <div className="inline-flex items-center gap-1.5 bg-primary text-on-primary px-3 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider mx-auto mb-1">
+                <span>⭐</span> Invitación Exclusiva {inviteData.sponsorName ? `• ${inviteData.sponsorName}` : ''}
+              </div>
+              <h1 className="text-lg md:text-xl font-black uppercase tracking-tight text-white drop-shadow-sm">
+                {inviteData.sponsorName ? `Pase Oficial cortesía de ${inviteData.sponsorName}` : 'EXPO FERRE 2026'}
+              </h1>
+              {inviteData.sponsorStands && (
+                <p className="text-amber-300 text-xs font-semibold mt-0.5">
+                  📍 Stand Asignado: {inviteData.sponsorStands}
+                </p>
+              )}
+            </div>
           </div>
-          <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight">
-            EXPO FERRE 2026
-          </h1>
-          <p className="text-white/90 text-sm mt-1 max-w-md mx-auto">
-            Completa tus datos para activar tu Pase Oficial con Código QR de Acceso Directo.
-          </p>
-        </div>
+        ) : (
+          <div className="bg-gradient-to-r from-primary to-primary-container p-6 md:p-8 text-on-primary text-center">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-xs px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+              <span className="material-symbols-outlined text-sm">stars</span>
+              Invitación Exclusiva {inviteData?.sponsorName ? `• ${inviteData.sponsorName}` : ''}
+            </div>
+            <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight">
+              EXPO FERRE 2026
+            </h1>
+            <p className="text-white/90 text-sm mt-1 max-w-md mx-auto">
+              {inviteData?.sponsorName 
+                ? `${inviteData.sponsorName} te invita cordialmente a registrarte para tu Pase Oficial con Código QR.`
+                : 'Completa tus datos para activar tu Pase Oficial con Código QR de Acceso Directo.'}
+            </p>
+          </div>
+        )}
 
         {/* Formulario */}
         <div className="p-6 md:p-8">
@@ -532,6 +584,20 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
             </div>
           </form>
         </div>
+
+        {/* Footer Banner de Marcas Representadas */}
+        {inviteData?.footerBannerUrl && (
+          <div className="border-t border-outline-variant bg-slate-50 p-4 text-center">
+            <p className="text-[10px] font-bold text-secondary uppercase tracking-wider mb-2">
+              Marcas Oficiales en Exhibición {inviteData.sponsorStands ? `• Stand ${inviteData.sponsorStands}` : ''}
+            </p>
+            <img 
+              src={inviteData.footerBannerUrl} 
+              alt="Marcas en Exhibición" 
+              className="w-full h-auto max-h-24 object-contain mx-auto rounded-lg"
+            />
+          </div>
+        )}
       </div>
     </div>
   );
