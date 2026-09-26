@@ -80,8 +80,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   - Protección de reservas en Firestore: la función de respaldo nunca sobrescribe ni libera stands con empresa o contacto asignado.
   - Uso de escrituras atómicas no destructivas con `{ merge: true }`.
 
-- **Configuración de Speeches Oficiales y Co-Branding por Marca (`OFFICIAL_SPONSOR_CONFIGS`):**
-  - Speeches oficiales personalizados para **Grupo SUR**, **Fernández Sera** e **Importaciones Balladares**, con soporte para `{invitado}`, `[Nombre]`, `{enlace}`, fecha, lugar y enlace de un solo uso.
+- **Configuración Universal de Speeches Oficiales y Co-Branding por Marca (`OFFICIAL_SPONSOR_CONFIGS` & `getSponsorArt`):**
+  - Motor universal que pre-configura automáticamente el speech oficial estándar y el asunto de correo para **todos los 27 patrocinadores** (Sinsa, Armoconsa, Balladares, Extel, Sherwin-Williams, Fernández Sera, Sicsa, Megalineas, Grupo SUR, CEMEX, LAFISE, Indenicsa, Plycem, BAC Credomatic, Casco, Midesa, Noelito, etc.), inyectando en vivo su nombre, sus stands, fecha (17 de Octubre, 8:00am, Crowne Plaza) y enlace único de un solo uso.
+  - Permite a los administradores enfocarse únicamente en subir banners gráficos o listas Excel, ya que todo el contenido y personalización queda listo por defecto.
 
 
 - **Sistema de Envío Masivo de Invitaciones por Correo Electrónico (`AdminDirectInvites.jsx`):**
