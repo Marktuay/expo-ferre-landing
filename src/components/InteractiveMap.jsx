@@ -4,7 +4,7 @@ import { collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firesto
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, auth } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
-import { seedOfficialStands, initialStandsList } from '../config/defaultStands';
+import { initialStandsList } from '../config/defaultStands';
 
 export { initialStandsList };
 
@@ -41,11 +41,8 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
         });
         setStands(mergedStands);
       } else {
-        // Inicializar stands en Firestore si está vacío y auto-cargar oficiales
-        initialStandsList.forEach(async (stand) => {
-          await setDoc(doc(db, `${getEventBasePath()}/stands`, stand.id), stand);
-        });
-        seedOfficialStands(db).catch(err => console.error("Error auto-seeding in InteractiveMap:", err));
+        // Si no hay datos en Firestore, usar lista base en memoria local sin alterar la base de datos
+        setStands(initialStandsList);
       }
     }, (error) => {
       console.warn("InteractiveMap onSnapshot permission or network warning:", error);
