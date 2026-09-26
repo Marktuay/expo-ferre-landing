@@ -1142,29 +1142,29 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
                         {/* Acciones */}
                         <td className="p-4 text-center">
-                          <div className="flex items-center justify-center gap-2 flex-wrap">
-                            {/* Botón Cargar Excel */}
-                            <button
-                              onClick={() => handleTriggerUploadForSponsor('general')}
-                              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
-                              title="Cargar archivo Excel para la lista General"
-                            >
-                              <FileUp size={14} />
-                              Cargar Excel
-                            </button>
+                          {(() => {
+                            const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general');
+                            const genPendingWithEmail = genInv.filter(i => i.status === 'pending' && i.email && i.email.includes('@'));
+                            const genUnsentEmail = genPendingWithEmail.filter(i => !i.emailSentAt);
+                            const countToSend = genUnsentEmail.length > 0 ? genUnsentEmail.length : genPendingWithEmail.length;
 
-                            {/* Botón Enviar Correos Masivos */}
-                            {(() => {
-                              const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general');
-                              const genPendingWithEmail = genInv.filter(i => i.status === 'pending' && i.email && i.email.includes('@'));
-                              const genUnsentEmail = genPendingWithEmail.filter(i => !i.emailSentAt);
-                              const countToSend = genUnsentEmail.length > 0 ? genUnsentEmail.length : genPendingWithEmail.length;
+                            return (
+                              <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap bg-surface-variant/30 p-1.5 rounded-xl border border-outline-variant/60">
+                                {/* Botón Cargar Excel */}
+                                <button
+                                  onClick={() => handleTriggerUploadForSponsor('general')}
+                                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                  title="Cargar archivo Excel para la lista General"
+                                >
+                                  <FileUp size={13} />
+                                  <span>Cargar Excel</span>
+                                </button>
 
-                              return (
+                                {/* Botón Enviar Correos Masivos */}
                                 <button
                                   onClick={() => handleOpenBulkEmailModal('general')}
                                   disabled={genPendingWithEmail.length === 0}
-                                  className={`px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
                                     genUnsentEmail.length > 0
                                       ? 'bg-amber-600 hover:bg-amber-700 text-white'
                                       : genPendingWithEmail.length > 0
@@ -1177,7 +1177,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                                       : `Enviar invitaciones por correo (${countToSend} destinatarios disponibles)`
                                   }
                                 >
-                                  <MailCheck size={14} />
+                                  <MailCheck size={13} />
                                   <span>Enviar Correos</span>
                                   {genPendingWithEmail.length > 0 && (
                                     <span className="ml-0.5 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
@@ -1185,21 +1185,41 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                                     </span>
                                   )}
                                 </button>
-                              );
-                            })()}
 
-                            {/* Botón Ver Invitados */}
-                            <button
-                              onClick={() => {
-                                setSelectedSponsorFilter('general');
-                                setViewMode('invites');
-                              }}
-                              className="px-3 py-2 bg-white border border-outline-variant hover:bg-surface text-on-surface rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <Users size={14} />
-                              Ver Invitados
-                            </button>
-                          </div>
+                                {/* Botón Ver Invitados */}
+                                <button
+                                  onClick={() => {
+                                    setSelectedSponsorFilter('general');
+                                    setViewMode('invites');
+                                  }}
+                                  className="px-2.5 py-1.5 bg-white border border-outline-variant hover:bg-surface text-on-surface rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+                                  title={`Ver los ${genInv.length} invitados de la lista General`}
+                                >
+                                  <Users size={13} />
+                                  <span>Ver ({genInv.length})</span>
+                                </button>
+
+                                {/* Plantilla */}
+                                <button
+                                  onClick={() => handleDownloadTemplateForSponsor('general')}
+                                  className="p-1.5 bg-white border border-outline-variant hover:bg-surface text-secondary rounded-lg text-xs transition-colors cursor-pointer shadow-2xs"
+                                  title="Descargar plantilla Excel para la lista General"
+                                >
+                                  <Download size={13} />
+                                </button>
+
+                                {/* Exportar */}
+                                <button
+                                  onClick={() => handleExportExcel('general')}
+                                  disabled={genInv.length === 0}
+                                  className="p-1.5 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-lg text-xs transition-colors disabled:opacity-40 cursor-pointer shadow-2xs"
+                                  title="Exportar a Excel los invitados de la lista General"
+                                >
+                                  <FileSpreadsheet size={13} />
+                                </button>
+                              </div>
+                            );
+                          })()}
                         </td>
                       </tr>
                     )}
@@ -1289,23 +1309,23 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
                           {/* Acciones de Carga y Gestión */}
                           <td className="p-4 text-center">
-                            <div className="flex items-center justify-center gap-2 flex-wrap">
+                            <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap bg-surface-variant/30 p-1.5 rounded-xl border border-outline-variant/60">
                               
                               {/* Botón Cargar Excel */}
                               <button
                                 onClick={() => handleTriggerUploadForSponsor(sp)}
-                                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                                 title={`Cargar archivo Excel de invitados para ${sp}`}
                               >
-                                <FileUp size={14} />
-                                Cargar Excel
+                                <FileUp size={13} />
+                                <span>Cargar Excel</span>
                               </button>
 
                               {/* Botón Enviar Correos Masivos */}
                               <button
                                 onClick={() => handleOpenBulkEmailModal(sp)}
                                 disabled={spPendingWithEmail.length === 0}
-                                className={`px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
                                   spUnsentEmail.length > 0
                                     ? 'bg-amber-600 hover:bg-amber-700 text-white'
                                     : spPendingWithEmail.length > 0
@@ -1318,7 +1338,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                                     : `Enviar invitaciones por correo para ${sp} (${countToSend} destinatarios disponibles)`
                                 }
                               >
-                                <MailCheck size={14} />
+                                <MailCheck size={13} />
                                 <span>Enviar Correos</span>
                                 {spPendingWithEmail.length > 0 && (
                                   <span className="ml-0.5 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
@@ -1333,30 +1353,30 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                                   setSelectedSponsorFilter(sp);
                                   setViewMode('invites');
                                 }}
-                                className="px-3 py-2 bg-white border border-outline-variant hover:bg-surface text-on-surface rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+                                className="px-2.5 py-1.5 bg-white border border-outline-variant hover:bg-surface text-on-surface rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
                                 title={`Ver los ${spInvites.length} invitados de ${sp}`}
                               >
-                                <Users size={14} />
-                                Ver ({spInvites.length})
+                                <Users size={13} />
+                                <span>Ver ({spInvites.length})</span>
                               </button>
 
                               {/* Plantilla */}
                               <button
                                 onClick={() => handleDownloadTemplateForSponsor(sp)}
-                                className="p-2 bg-white border border-outline-variant hover:bg-surface text-secondary rounded-xl text-xs transition-colors cursor-pointer"
+                                className="p-1.5 bg-white border border-outline-variant hover:bg-surface text-secondary rounded-lg text-xs transition-colors cursor-pointer shadow-2xs"
                                 title={`Descargar plantilla Excel para ${sp}`}
                               >
-                                <Download size={14} />
+                                <Download size={13} />
                               </button>
 
                               {/* Exportar */}
                               <button
                                 onClick={() => handleExportExcel(sp)}
                                 disabled={spInvites.length === 0}
-                                className="p-2 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-xl text-xs transition-colors disabled:opacity-40 cursor-pointer shadow-2xs"
+                                className="p-1.5 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-lg text-xs transition-colors disabled:opacity-40 cursor-pointer shadow-2xs"
                                 title={`Exportar a Excel los invitados de ${sp}`}
                               >
-                                <FileSpreadsheet size={14} />
+                                <FileSpreadsheet size={13} />
                               </button>
                             </div>
                           </td>
