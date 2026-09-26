@@ -779,54 +779,95 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     const guestLabel = invite.nombre?.trim() || 'Estimado(a) Invitado(a)';
     const sponsorName = invite.sponsorName || '';
     const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
-    const stands = invite.sponsorStands || art.stands || '';
+    const rawStands = invite.sponsorStands || art.stands || '';
+    const standsClean = rawStands ? (rawStands.toLowerCase().startsWith('stand') ? rawStands : `Stand ${rawStands}`) : '';
 
     const subject = art.customEmailSubject || (sponsorName 
       ? `Invitación Exclusiva por cortesía de ${sponsorName} - EXPO FERRE 2026`
       : 'Invitación Exclusiva: Acceso Oficial a EXPO FERRE Nicaragua 2026');
+
+    const buttonHtml = `
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${link}" style="background-color: #f39200; color: #ffffff; padding: 15px 36px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+          🎟️ Activar Mi Pase Exclusivo
+        </a>
+      </div>
+    `;
+
+    const noteHtml = `
+      <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 14px; border-radius: 4px; margin-bottom: 24px;">
+        <p style="margin: 0; font-size: 13px; color: #92400e;">
+          ⚠️ <strong>Nota:</strong> Este enlace es personal, intransferible y de <strong>un solo uso</strong>. Una vez completado tu registro, el enlace se desactivará automáticamente.
+        </p>
+      </div>
+    `;
+
+    let bodyContentHtml = '';
+
+    if (art.customSpeech && art.customSpeech.trim()) {
+      let speechFormatted = art.customSpeech
+        .replace(/{invitado}/g, guestLabel)
+        .replace(/\[Nombre\]/g, guestLabel)
+        .replace(/{empresa_invitada}/g, invite.empresa || '')
+        .replace(/{patrocinador}/g, sponsorName)
+        .replace(/{stands}/g, standsClean || 'nuestro stand');
+
+      if (speechFormatted.includes('{enlace}')) {
+        speechFormatted = speechFormatted.replace(/{enlace}/g, buttonHtml);
+      } else {
+        speechFormatted += `\n\n${buttonHtml}\n\n${noteHtml}`;
+      }
+
+      const paragraphs = speechFormatted.split('\n\n');
+      bodyContentHtml = paragraphs.map(p => {
+        if (p.includes(buttonHtml) || p.includes(noteHtml)) {
+          return p;
+        }
+        if (p.includes('📅') || p.includes('📍') || p.includes('⏰') || p.includes('🏢')) {
+          const lines = p.split('\n').map(l => `<p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">${l}</p>`).join('');
+          return `<div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 6px; text-align: left; margin: 18px 0;">${lines}</div>`;
+        }
+        return `<p style="font-size: 15px; line-height: 1.6; color: #4b5563; margin-bottom: 14px;">${p.replace(/\n/g, '<br/>')}</p>`;
+      }).join('');
+    } else {
+      bodyContentHtml = `
+        <h2 style="color: #0d47a1; margin-top: 0; font-size: 22px;">¡Hola ${guestLabel}!</h2>
+        <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
+          ${sponsorName 
+            ? `Te saludamos cordialmente en nombre de <strong>${sponsorName}</strong> y el comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.`
+            : 'Te saluda <strong>Karen Torres</strong> en nombre del comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.'}
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
+          ${sponsorName && standsClean 
+            ? `Tenemos el agrado de invitarte de forma exclusiva para que nos acompañes y conozcas nuestras últimas innovaciones en el <strong>${standsClean}</strong>.`
+            : 'Es un gusto saludarte y extenderte una invitación especial y personalizada para ser parte del encuentro más importante de la industria ferretera y de la construcción en el país.'}
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
+          Hemos reservado para ti un <strong>pase preferencial de acceso</strong>. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro ingresando al botón que encontrarás abajo:
+        </p>
+
+        ${buttonHtml}
+        ${noteHtml}
+
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 6px; text-align: left;">
+          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 16 y 17 de Octubre, 2026</p>
+          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza, Managua.</p>
+          ${sponsorName && standsClean ? `<p style="margin: 4px 0; font-size: 13px; color: #d97706;">🏢 <strong>Stand Anfitrión:</strong> ${standsClean} (${sponsorName})</p>` : ''}
+        </div>
+
+        <p style="font-size: 15px; font-weight: bold; color: #0d47a1; margin-top: 28px;">
+          ¡Será un verdadero honor contar con tu presencia! 🚀
+        </p>
+      `;
+    }
 
     const html = `
       <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
         <img src="${art.headerBannerUrl}" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
         
         <div style="padding: 32px 24px;">
-          <h2 style="color: #0d47a1; margin-top: 0; font-size: 22px;">¡Hola ${guestLabel}!</h2>
-          <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
-            ${sponsorName 
-              ? `Te saludamos cordialmente en nombre de <strong>${sponsorName}</strong> y el comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.`
-              : 'Te saluda <strong>Karen Torres</strong> en nombre del comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.'}
-          </p>
-          <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
-            ${sponsorName && stands 
-              ? `Tenemos el agrado de invitarte de forma exclusiva para que nos acompañes y conozcas nuestras últimas innovaciones en el <strong>Stand ${stands}</strong>.`
-              : 'Es un gusto saludarte y extenderte una invitación especial y personalizada para ser parte del encuentro más importante de la industria ferretera y de la construcción en el país.'}
-          </p>
-          <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
-            Hemos reservado para ti un <strong>pase preferencial de acceso</strong>. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro ingresando al botón que encontrarás abajo:
-          </p>
-
-          <div style="text-align: center; margin: 32px 0;">
-            <a href="${link}" style="background-color: #f39200; color: #ffffff; padding: 15px 36px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-              🎟️ Activar Mi Pase Exclusivo
-            </a>
-          </div>
-
-          <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 14px; border-radius: 4px; margin-bottom: 24px;">
-            <p style="margin: 0; font-size: 13px; color: #92400e;">
-              ⚠️ <strong>Nota:</strong> Este enlace es personal, intransferible y de <strong>un solo uso</strong>. Una vez completado tu registro, el enlace se desactivará automáticamente.
-            </p>
-          </div>
-
-          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 6px; text-align: left;">
-            <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 16 y 17 de Octubre, 2026</p>
-            <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza, Managua.</p>
-            ${sponsorName && stands ? `<p style="margin: 4px 0; font-size: 13px; color: #d97706;">🏢 <strong>Stand Anfitrión:</strong> Stand ${stands} (${sponsorName})</p>` : ''}
-          </div>
-
-          <p style="font-size: 15px; font-weight: bold; color: #0d47a1; margin-top: 28px;">
-            ¡Será un verdadero honor contar con tu presencia! 🚀
-          </p>
-
+          ${bodyContentHtml}
+          
           <p style="font-size: 12px; color: #9ca3af; margin-top: 30px; word-break: break-all;">
             Si el botón no abre, copia y pega este enlace en tu navegador:<br/>
             <a href="${link}" style="color: #0d47a1;">${link}</a>
@@ -2558,26 +2599,85 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                       className="w-full h-auto object-cover"
                     />
                     
-                    <div className="p-5 space-y-3 text-xs">
-                      <h3 className="font-bold text-base text-[#0d47a1]">¡Hola Carlos Mendoza!</h3>
-                      <p className="text-slate-600 leading-relaxed">
-                        Te saludamos cordialmente en nombre de <strong>{artModal.sponsorName}</strong> y el comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.
-                      </p>
-                      <p className="text-slate-600 leading-relaxed">
-                        Tenemos el agrado de invitarte de forma exclusiva para que nos acompañes y conozcas nuestras últimas innovaciones en el <strong>Stand {artStands || 'Oficial'}</strong>.
-                      </p>
-                      
-                      <div className="text-center py-4">
-                        <span className="inline-block bg-[#f39200] text-white px-6 py-2.5 rounded-lg font-bold shadow-xs">
-                          🎟️ Activar Mi Pase Exclusivo
-                        </span>
-                      </div>
+                    <div className="p-6 space-y-4 text-xs text-slate-700 leading-relaxed">
+                      {artCustomSpeech && artCustomSpeech.trim() ? (
+                        <div className="space-y-3">
+                          {artCustomSpeech
+                            .replace(/{invitado}/g, 'Carlos Mendoza')
+                            .replace(/\[Nombre\]/g, 'Carlos Mendoza')
+                            .replace(/{empresa_invitada}/g, 'Ferretería El Progreso')
+                            .replace(/{patrocinador}/g, artModal.sponsorName)
+                            .replace(/{stands}/g, artStands ? (artStands.toLowerCase().startsWith('stand') ? artStands : `Stand ${artStands}`) : 'nuestro stand')
+                            .split('\n\n')
+                            .map((paragraph, pIdx) => {
+                              if (paragraph.includes('{enlace}')) {
+                                return (
+                                  <div key={pIdx} className="space-y-3 my-2">
+                                    <div className="text-center py-2">
+                                      <span className="inline-block bg-[#f39200] text-white px-6 py-2.5 rounded-lg font-bold shadow-xs text-xs">
+                                        🎟️ Activar Mi Pase Exclusivo
+                                      </span>
+                                    </div>
+                                    <div className="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-lg text-[11px] text-amber-900 font-medium">
+                                      ⚠️ <strong>Nota:</strong> Este enlace es personal, intransferible y de un solo uso.
+                                    </div>
+                                  </div>
+                                );
+                              }
 
-                      <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg text-[11px]">
-                        <p>📅 <strong>Fecha:</strong> 16 y 17 de Octubre, 2026</p>
-                        <p>📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza, Managua</p>
-                        <p>🏢 <strong>Stand:</strong> Stand {artStands || 'Oficial'} ({artModal.sponsorName})</p>
-                      </div>
+                              if (paragraph.includes('📅') || paragraph.includes('📍') || paragraph.includes('⏰') || paragraph.includes('🏢')) {
+                                return (
+                                  <div key={pIdx} className="bg-slate-50 border border-slate-200 p-3 rounded-lg text-[11px] space-y-1 font-medium text-slate-800 my-2">
+                                    {paragraph.split('\n').map((line, lIdx) => (
+                                      <p key={lIdx}>{line}</p>
+                                    ))}
+                                  </div>
+                                );
+                              }
+
+                              return (
+                                <p key={pIdx} className="whitespace-pre-line text-slate-600 leading-relaxed">
+                                  {paragraph}
+                                </p>
+                              );
+                            })}
+
+                          {!artCustomSpeech.includes('{enlace}') && (
+                            <div className="space-y-3 pt-2">
+                              <div className="text-center py-2">
+                                <span className="inline-block bg-[#f39200] text-white px-6 py-2.5 rounded-lg font-bold shadow-xs text-xs">
+                                  🎟️ Activar Mi Pase Exclusivo
+                                </span>
+                              </div>
+                              <div className="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-lg text-[11px] text-amber-900 font-medium">
+                                ⚠️ <strong>Nota:</strong> Este enlace es personal, intransferible y de un solo uso.
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          <h3 className="font-bold text-base text-[#0d47a1]">¡Hola Carlos Mendoza!</h3>
+                          <p className="text-slate-600 leading-relaxed">
+                            Te saludamos cordialmente en nombre de <strong>{artModal.sponsorName}</strong> y el comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.
+                          </p>
+                          <p className="text-slate-600 leading-relaxed">
+                            Tenemos el agrado de invitarte de forma exclusiva para que nos acompañes y conozcas nuestras últimas innovaciones en el <strong>{artStands ? (artStands.toLowerCase().startsWith('stand') ? artStands : `Stand ${artStands}`) : 'Stand Oficial'}</strong>.
+                          </p>
+                          
+                          <div className="text-center py-4">
+                            <span className="inline-block bg-[#f39200] text-white px-6 py-2.5 rounded-lg font-bold shadow-xs">
+                              🎟️ Activar Mi Pase Exclusivo
+                            </span>
+                          </div>
+
+                          <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg text-[11px]">
+                            <p>📅 <strong>Fecha:</strong> 17 de Octubre de 2026</p>
+                            <p>📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza, Managua</p>
+                            <p>🏢 <strong>Stand:</strong> {artStands ? (artStands.toLowerCase().startsWith('stand') ? artStands : `Stand ${artStands}`) : 'Stand Oficial'} ({artModal.sponsorName})</p>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     {/* Footer Image */}
