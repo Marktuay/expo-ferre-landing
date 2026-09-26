@@ -560,40 +560,111 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
         const XLSX = await import('xlsx');
         const bstr = evt.target.result;
         const wb = XLSX.read(bstr, { type: 'binary' });
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const rawData = XLSX.utils.sheet_to_json(ws, { defval: '' });
 
-        if (!rawData || rawData.length === 0) {
-          alert('El archivo Excel está vacío o no tiene un formato válido.');
-          return;
+        let parsedRows = [];
+
+        // Estrategia: Recorrer todas las hojas hasta encontrar contactos válidos
+        for (const wsname of wb.SheetNames) {
+          const ws = wb.Sheets[wsname];
+          if (!ws) continue;
+
+          // 1. Obtener matriz de filas crudas (array de arrays)
+          const rawRows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          if (!rawRows || rawRows.length === 0) continue;
+
+          // 2. Buscar fila de cabecera inteligente (primeras 15 filas)
+          let headerRowIndex = -1;
+          const candidateKeywords = ['nombre', 'name', 'invitado', 'contacto', 'persona', 'cliente', 'destinatario', 'representante', 'empresa', 'company', 'negocio', 'correo', 'email', 'telefono', 'teléfono', 'celular', 'phone'];
+
+          for (let r = 0; r < Math.min(rawRows.length, 15); r++) {
+            const rowText = rawRows[r].map(c => String(c).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()).join(' ');
+            const matches = candidateKeywords.filter(kw => rowText.includes(kw));
+            if (matches.length >= 1) {
+              headerRowIndex = r;
+              break;
+            }
+          }
+
+          if (headerRowIndex !== -1) {
+            // Parsear con la cabecera detectada
+            const headers = rawRows[headerRowIndex].map(h => String(h).trim());
+            const dataRows = rawRows.slice(headerRowIndex + 1);
+
+            const findColIdx = (candidates) => {
+              return headers.findIndex(h => {
+                const clean = h.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+                return candidates.some(c => clean.includes(c));
+              });
+            };
+
+            const idxNombre = findColIdx(['nombre', 'name', 'invitado', 'contacto', 'persona', 'cliente', 'destinatario', 'representante', 'titular', 'asistente', 'propietario', 'dueno', 'atencion']);
+            const idxEmpresa = findColIdx(['empresa', 'company', 'negocio', 'ferreteria', 'comercial', 'razon social', 'distribuidora', 'establecimiento', 'taller', 'organizacion']);
+            const idxCorreo = findColIdx(['correo', 'email', 'mail', 'e-mail', 'electronico', 'direccion']);
+            const idxTelefono = findColIdx(['telefono', 'celular', 'phone', 'movil', 'tel', 'ws', 'whatsapp', 'cel', 'numero', 'contacto']);
+            const idxPatrocinador = findColIdx(['patrocinador', 'sponsor', 'anfitrion', 'marca', 'proveedor']);
+
+            const sheetParsed = dataRows.map((row, index) => {
+              const nombre = idxNombre !== -1 ? String(row[idxNombre] || '').trim() : '';
+              const empresa = idxEmpresa !== -1 ? String(row[idxEmpresa] || '').trim() : '';
+              const correo = idxCorreo !== -1 ? String(row[idxCorreo] || '').trim().toLowerCase() : '';
+              const telefono = idxTelefono !== -1 ? String(row[idxTelefono] || '').trim() : '';
+              const patrocinador = idxPatrocinador !== -1 ? String(row[idxPatrocinador] || '').trim() : '';
+
+              return {
+                rowNum: headerRowIndex + index + 2,
+                nombre,
+                empresa,
+                email: correo,
+                telefono,
+                patrocinador: patrocinador || (sponsorTarget !== 'auto' && sponsorTarget !== 'general' ? sponsorTarget : '')
+              };
+            }).filter(r => r.nombre || r.empresa || r.email || r.telefono);
+
+            if (sheetParsed.length > 0) {
+              parsedRows = sheetParsed;
+              break;
+            }
+          }
+
+          // 3. Fallback: Parseo por heurística de contenido de celda
+          const fallbackParsed = rawRows.slice(1).map((row, index) => {
+            let emailFound = '';
+            let phoneFound = '';
+            let textCols = [];
+
+            row.forEach(cell => {
+              const str = String(cell).trim();
+              if (!str) return;
+              if (str.includes('@') && str.includes('.')) {
+                emailFound = str.toLowerCase();
+              } else if (/^[+]?[\d\s-]{7,15}$/.test(str.replace(/\s+/g, ''))) {
+                phoneFound = str;
+              } else if (str.length > 1) {
+                textCols.push(str);
+              }
+            });
+
+            const nombre = textCols[0] || '';
+            const empresa = textCols[1] || '';
+
+            return {
+              rowNum: index + 2,
+              nombre,
+              empresa,
+              email: emailFound,
+              telefono: phoneFound,
+              patrocinador: sponsorTarget !== 'auto' && sponsorTarget !== 'general' ? sponsorTarget : ''
+            };
+          }).filter(r => r.nombre || r.empresa || r.email || r.telefono);
+
+          if (fallbackParsed.length > 0) {
+            parsedRows = fallbackParsed;
+            break;
+          }
         }
 
-        const parsedRows = rawData.map((row, index) => {
-          const keys = Object.keys(row);
-          const findVal = (candidates) => {
-            const match = keys.find(k => candidates.some(c => k.toLowerCase().trim().includes(c)));
-            return match ? String(row[match]).trim() : '';
-          };
-
-          const nombre = findVal(['nombre', 'name', 'invitado', 'contacto', 'persona']);
-          const empresa = findVal(['empresa', 'company', 'negocio', 'ferreteria']);
-          const correo = findVal(['correo', 'email', 'mail', 'e-mail']);
-          const telefono = findVal(['telefono', 'teléfono', 'celular', 'phone', 'movil', 'móvil', 'tel']);
-          const patrocinador = findVal(['patrocinador', 'sponsor', 'anfitrion', 'marca']);
-
-          return {
-            rowNum: index + 2,
-            nombre,
-            empresa,
-            email: correo.toLowerCase(),
-            telefono,
-            patrocinador: patrocinador || (sponsorTarget !== 'auto' && sponsorTarget !== 'general' ? sponsorTarget : '')
-          };
-        }).filter(r => r.nombre || r.empresa || r.email || r.telefono);
-
         if (parsedRows.length === 0) {
-          alert('No se detectaron contactos con datos válidos en el archivo.');
+          alert('No se detectaron contactos con datos válidos en el archivo. Verifica que contenga columnas de Nombre, Empresa, Correo o Teléfono.');
           return;
         }
 
