@@ -3,9 +3,9 @@
 Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual de la plataforma, la arquitectura utilizada y el roadmap (lo que falta por hacer) para que cualquier inteligencia artificial pueda retomar el trabajo exactamente donde se quedó.
 
 ## 🛠 Arquitectura y Stack Tecnológico
-- **Frontend:** React + Vite, TailwindCSS (configurado para diseño responsivo). Desplegado y alojado en una Máquina Virtual (VM) de Google Cloud.
+- **Frontend:** React + Vite, TailwindCSS (configurado para diseño responsivo). Desplegado y alojado en una Máquina Virtual (VM) de Google Cloud gestionado con **PM2**.
 - **Backend / Base de Datos:** Firebase (Firestore y Auth) utilizado **únicamente** para autenticación y para guardar los datos recogidos en los formularios.
-- **Control de Versiones:** Git (GitHub).
+- **Control de Versiones & Despliegue:** Git (GitHub). Flujo de despliegue en VM: `git pull origin main && npm run build && pm2 restart all` (o `pm2 reload all`).
 
 ## ✅ Estado Actual (Implementado)
 
