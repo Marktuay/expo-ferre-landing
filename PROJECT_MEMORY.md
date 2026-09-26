@@ -67,7 +67,34 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 ---
 
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
-**Última actualización: 24 de Septiembre de 2026**
+**Última actualización: 26 de Septiembre de 2026**
+
+- **Sistema de Envío Masivo de Invitaciones por Correo Electrónico (`AdminDirectInvites.jsx`):**
+  - **Despacho Masivo Directo desde la Plataforma:** Se implementó el motor de envío masivo de correos oficiales para la Invitación General y para cada uno de los 27 patrocinadores.
+  - **Modal de Configuración y Seguridad de Envío:**
+    - Muestra la vista previa del Header Banner, Footer de Marcas y números de stand.
+    - Selector de criterio:
+      - 🔘 *Solo a los que nunca se les ha enviado correo* (Recomendado para prevenir envíos duplicados).
+      - 🔘 *A todos los pendientes con correo registrado* (Para reenvíos y recordatorios).
+    - Barra de progreso en tiempo real con contador en vivo (`Enviando X / Y...`) y reporte final con desglose de éxitos y fallos.
+  - **Generador de Plantilla HTML Co-Brandeada (`buildInviteEmail`):**
+    - Header Banner (`1200x450px`) responsive con logo del patrocinador y ExpoFerre.
+    - Saludo formal personalizado con el nombre del invitado.
+    - Llamado a la acción con botón principal `🎟️ Activar Mi Pase Exclusivo` enlazado a su token único de un solo uso.
+    - Caja de aviso de seguridad sobre el enlace de un solo uso.
+    - Caja informativa del evento (16 y 17 de Octubre de 2026, Crowne Plaza Managua, Stand Anfitrión).
+    - Footer Banner (`1200x250px`) con la cinta de marcas oficiales representadas.
+  - **Trazabilidad y Auditoría en Firestore:**
+    - Cada documento en `events/2026/directInvites` se actualiza automáticamente con `emailSent: true`, `emailSentAt: serverTimestamp()`, `lastEmailTo` y `emailSendCount`.
+    - En la vista de detalle de invitados, se muestra el badge de estado (`✉️ Correo Enviado (1)`, `⏳ Correo No Enviado`, `⚠️ Sin Correo`).
+
+- **Rediseño y Alineación de la Botonera de Acciones (`Toolbar` horizontal unificado):**
+  - Se estructuraron los botones de la columna **"CARGA & ACCIONES"** en una sola barra horizontal elegante, eliminando saltos de línea irregulares:
+    - **`[Cargar Excel]`** (Azul con icono `FileUp`).
+    - **`[Enviar Correos (X)]`** (Ámbar/Verde con icono `MailCheck` y badge con contador dinámico de correos listos).
+    - **`[Ver (X)]`** (Blanco con borde e icono `Users`).
+    - **`[📥 Plantilla]`** (Icono de descarga de plantilla Excel para ese patrocinador).
+    - **`[📊 Exportar]`** (Icono verde Excel para descargar la base con enlaces únicos y speech listos).
 
 - **Unificación de Fechas Oficiales del Evento:**
   - Se corrigieron y unificaron todas las fechas a **16 y 17 de Octubre de 2026** en:
