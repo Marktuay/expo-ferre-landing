@@ -209,19 +209,90 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     if (!name || name === 'general' || name.toLowerCase().includes('general') || name.toLowerCase().includes('expoferre')) {
       return 'general';
     }
-    return name.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+    const clean = name.toLowerCase().trim();
+    if (clean.includes('sur')) return 'grupo_sur';
+    return clean.replace(/[^a-z0-9]/g, '_');
+  };
+
+  // Configuraciones y speeches oficiales predeterminados por marca
+  const OFFICIAL_SPONSOR_CONFIGS = {
+    grupo_sur: {
+      sponsorName: 'Grupo SUR',
+      stands: 'Stand 21',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Grupo SUR y Kermill!',
+      customSpeech: `¡Hola {invitado}! 👋
+
+¡Sé parte de EXPO FERRE Nicaragua 2026!
+
+Un espacio exclusivo creado para ti, donde podrás encontrar capacitaciones y novedades que te ayudarán a fortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
+
+En nombre de Grupo SUR (Kermill) y el comité organizador de EXPO FERRE Nicaragua 2026, nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
+
+Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
+
+Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones.
+
+¡Será un verdadero gusto tenerte con nosotros!
+
+📅 Fecha: 17 de Octubre de 2026
+📍 Lugar: Centro de Convenciones Crowne Plaza Managua
+⏰ Hora de Registro: 7:30 AM | Inicio: 8:00 AM
+🏢 Stand: Stand 21 (Grupo SUR)
+
+Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
+
+🔗 {enlace}
+
+⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
+
+¡Contamos con tu valiosa presencia!`
+    },
+    sur: {
+      sponsorName: 'Grupo SUR',
+      stands: 'Stand 21',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Grupo SUR y Kermill!',
+      customSpeech: `¡Hola {invitado}! 👋
+
+¡Sé parte de EXPO FERRE Nicaragua 2026!
+
+Un espacio exclusivo creado para ti, donde podrás encontrar capacitaciones y novedades que te ayudarán a fortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
+
+En nombre de Grupo SUR (Kermill) y el comité organizador de EXPO FERRE Nicaragua 2026, nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
+
+Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
+
+Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones.
+
+¡Será un verdadero gusto tenerte con nosotros!
+
+📅 Fecha: 17 de Octubre de 2026
+📍 Lugar: Centro de Convenciones Crowne Plaza Managua
+⏰ Hora de Registro: 7:30 AM | Inicio: 8:00 AM
+🏢 Stand: Stand 21 (Grupo SUR)
+
+Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
+
+🔗 {enlace}
+
+⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
+
+¡Contamos con tu valiosa presencia!`
+    }
   };
 
   const getSponsorArt = (sponsorName) => {
     const key = getSponsorKey(sponsorName);
     const setting = sponsorSettings[key] || {};
+    const official = OFFICIAL_SPONSOR_CONFIGS[key] || {};
+
     return {
-      headerBannerUrl: setting.headerBannerUrl || 'https://expoferrenicaragua.com/email-header.png',
-      footerBannerUrl: setting.footerBannerUrl || 'https://expoferrenicaragua.com/email-footer.png',
-      hasCustomHeader: !!setting.headerBannerUrl,
-      hasCustomFooter: !!setting.footerBannerUrl,
-      customSpeech: setting.customSpeech || '',
-      stands: setting.stands || (sponsorsMap[sponsorName]?.stands?.join(', ') || '')
+      headerBannerUrl: setting.headerBannerUrl || official.headerBannerUrl || 'https://expoferrenicaragua.com/email-header.png',
+      footerBannerUrl: setting.footerBannerUrl || official.footerBannerUrl || 'https://expoferrenicaragua.com/email-footer.png',
+      hasCustomHeader: !!setting.headerBannerUrl || !!official.headerBannerUrl,
+      hasCustomFooter: !!setting.footerBannerUrl || !!official.footerBannerUrl,
+      customSpeech: setting.customSpeech || official.customSpeech || '',
+      customEmailSubject: setting.customEmailSubject || official.customEmailSubject || '',
+      stands: setting.stands || official.stands || (sponsorsMap[sponsorName]?.stands?.join(', ') || '')
     };
   };
 
@@ -319,28 +390,61 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     }
   };
 
+  // Helper para comprimir imágenes de banners antes de almacenar / previsualizar
+  const compressBannerImage = (file, maxWidth = 1200, quality = 0.85) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   // Abrir Modal de Configuración de Artes por Patrocinador
   const handleOpenArtModal = (sponsorName) => {
     const key = getSponsorKey(sponsorName);
     const existing = sponsorSettings[key] || {};
-    const defaultStands = sponsorsMap[sponsorName]?.stands?.join(', ') || '';
+    const official = OFFICIAL_SPONSOR_CONFIGS[key] || {};
+    const defaultStands = existing.stands || official.stands || sponsorsMap[sponsorName]?.stands?.join(', ') || '';
 
     setArtModal({
       open: true,
       sponsorKey: key,
-      sponsorName: sponsorName === 'general' ? 'Invitación General (ExpoFerre)' : sponsorName,
+      sponsorName: sponsorName === 'general' ? 'Invitación General (ExpoFerre)' : (official.sponsorName || sponsorName),
       stands: defaultStands
     });
 
-    setArtHeaderUrl(existing.headerBannerUrl || (sponsorName === 'general' ? 'https://expoferrenicaragua.com/email-header.png' : ''));
-    setArtFooterUrl(existing.footerBannerUrl || (sponsorName === 'general' ? 'https://expoferrenicaragua.com/email-footer.png' : ''));
-    setArtStands(existing.stands || defaultStands);
-    setArtCustomSpeech(existing.customSpeech || '');
-    setArtCustomSubject(existing.customEmailSubject || '');
+    setArtHeaderUrl(existing.headerBannerUrl || official.headerBannerUrl || (sponsorName === 'general' ? 'https://expoferrenicaragua.com/email-header.png' : ''));
+    setArtFooterUrl(existing.footerBannerUrl || official.footerBannerUrl || (sponsorName === 'general' ? 'https://expoferrenicaragua.com/email-footer.png' : ''));
+    setArtStands(defaultStands);
+    setArtCustomSpeech(existing.customSpeech || official.customSpeech || '');
+    setArtCustomSubject(existing.customEmailSubject || official.customEmailSubject || '');
     setArtTab('banners');
   };
 
-  // Subir imagen de banner a Firebase Storage
+  // Subir imagen de banner a Firebase Storage con fallback a Base64 comprimido
   const handleUploadBannerImage = async (e, type) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -349,18 +453,28 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     if (type === 'footer') setIsUploadingFooter(true);
 
     try {
-      const fileExt = file.name.split('.').pop() || 'jpg';
-      const fileName = `events/2026/sponsorBanners/${artModal.sponsorKey}_${type}_${Date.now()}.${fileExt}`;
-      const imgRef = storageRef(storage, fileName);
+      // 1. Optimizar imagen localmente y colocar en vista previa de inmediato
+      const compressedDataUrl = await compressBannerImage(file);
+      if (type === 'header') setArtHeaderUrl(compressedDataUrl);
+      if (type === 'footer') setArtFooterUrl(compressedDataUrl);
 
-      await uploadBytes(imgRef, file);
-      const downloadUrl = await getDownloadURL(imgRef);
+      // 2. Intentar subir a Firebase Storage si está disponible
+      try {
+        const fileExt = file.name.split('.').pop() || 'jpg';
+        const fileName = `events/2026/sponsorBanners/${artModal.sponsorKey}_${type}_${Date.now()}.${fileExt}`;
+        const imgRef = storageRef(storage, fileName);
 
-      if (type === 'header') setArtHeaderUrl(downloadUrl);
-      if (type === 'footer') setArtFooterUrl(downloadUrl);
+        await uploadBytes(imgRef, file);
+        const downloadUrl = await getDownloadURL(imgRef);
+
+        if (type === 'header') setArtHeaderUrl(downloadUrl);
+        if (type === 'footer') setArtFooterUrl(downloadUrl);
+      } catch (storageErr) {
+        console.warn('Almacenamiento en la nube omitido o falló, se mantendrá versión optimizada:', storageErr);
+      }
     } catch (err) {
-      console.error('Error al subir imagen de banner:', err);
-      alert('Error al subir imagen: ' + err.message);
+      console.error('Error al procesar imagen de banner:', err);
+      alert('Error al procesar imagen: ' + err.message);
     } finally {
       if (type === 'header') setIsUploadingHeader(false);
       if (type === 'footer') setIsUploadingFooter(false);
