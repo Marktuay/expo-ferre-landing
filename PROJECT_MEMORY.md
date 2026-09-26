@@ -66,6 +66,24 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ---
 
+## 📌 Tareas Pendientes para la Próxima Sesión
+- **Reincorporación de los 11 stands restantes según el plano oficial de MAXIMIZA (Completar los 35 stands):**
+  1. Stand 7: RINSA (Plata)
+  2. Stand 8: Monolit (Plata)
+  3. Stand 14: Disensa / Total (Plata)
+  4. Stand 17: Disensa (Plata)
+  5. Stand 18: Disensa (Plata)
+  6. Stand 24: Amanco Wavin (Plata)
+  7. Stand 25: Madinisa (Plata)
+  8. Stand 29: Baratogo / Tu Casa (Oro)
+  9. Stand 33: Stand junto a INCASA (Plata)
+  10. Stand 34: INCASA (Diamante)
+  11. Stand 35: Eaton (Diamante)
+  *(Stands disponibles/libres: 9, 10, 36).*
+- Sincronizar estos 11 stands en `src/config/defaultStands.js` y en la base de datos Firestore (`events/2026/stands`).
+
+---
+
 ## 📅 Resumen de Cambios Recientes (Para contexto futuro)
 **Última actualización: 26 de Septiembre de 2026**
 
