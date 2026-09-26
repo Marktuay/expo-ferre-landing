@@ -2612,14 +2612,11 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                             .map((paragraph, pIdx) => {
                               if (paragraph.includes('{enlace}')) {
                                 return (
-                                  <div key={pIdx} className="space-y-3 my-2">
+                                  <div key={pIdx} className="my-3">
                                     <div className="text-center py-2">
                                       <span className="inline-block bg-[#f39200] text-white px-6 py-2.5 rounded-lg font-bold shadow-xs text-xs">
                                         🎟️ Activar Mi Pase Exclusivo
                                       </span>
-                                    </div>
-                                    <div className="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-lg text-[11px] text-amber-900 font-medium">
-                                      ⚠️ <strong>Nota:</strong> Este enlace es personal, intransferible y de un solo uso.
                                     </div>
                                   </div>
                                 );
@@ -2643,14 +2640,11 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                             })}
 
                           {!artCustomSpeech.includes('{enlace}') && (
-                            <div className="space-y-3 pt-2">
+                            <div className="pt-2">
                               <div className="text-center py-2">
                                 <span className="inline-block bg-[#f39200] text-white px-6 py-2.5 rounded-lg font-bold shadow-xs text-xs">
                                   🎟️ Activar Mi Pase Exclusivo
                                 </span>
-                              </div>
-                              <div className="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-lg text-[11px] text-amber-900 font-medium">
-                                ⚠️ <strong>Nota:</strong> Este enlace es personal, intransferible y de un solo uso.
                               </div>
                             </div>
                           )}
