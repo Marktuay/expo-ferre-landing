@@ -98,27 +98,31 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
 
       // 1. Filtrar únicamente stands que estén reservados por este patrocinador
       const reservedList = fullStands.filter(st => {
-        const isReserved = st.status === 'reserved' || st.status === 'reserved_official' || st.status === 'sold';
+        const isReserved = st.status !== 'available' && st.status !== 'free' && st.status !== 'libre' && (st.status === 'reserved' || st.status === 'reserved_official' || st.status === 'sold' || st.status === 'occupied' || st.reservationDetails || st.sponsorId || st.sponsorEmail);
         if (!isReserved) return false;
 
         const stEmail = (st.reservationDetails?.correo || st.sponsorEmail || st.email || '').toLowerCase().trim();
         const stComp = (st.reservationDetails?.empresa || st.company || st.empresa || '').toLowerCase().trim();
+        const standName = st.name || (st.id ? `Stand ${st.id.replace('stand-', '')}` : 'Stand');
         
-        const idMatch = Boolean(sponsorId && st.sponsorId && st.sponsorId === sponsorId);
-        const emailMatch = Boolean(sponsorEmail && stEmail && stEmail === sponsorEmail);
+        const idMatch = Boolean(sponsorId && st.sponsorId && (st.sponsorId === sponsorId || st.sponsorId === currentSponsor.id || currentSponsor.id?.includes(st.sponsorId)));
+        const emailMatch = Boolean(sponsorEmail && stEmail && (stEmail === sponsorEmail || stEmail.includes(sponsorEmail) || sponsorEmail.includes(stEmail)));
         const compMatch = Boolean(
           sponsorCompany.length > 0 && 
           stComp.length > 0 && 
           (stComp === sponsorCompany || stComp.includes(sponsorCompany) || sponsorCompany.includes(stComp))
         );
-        const nameMatch = Boolean(st.name && currentSponsor.standList && Array.isArray(currentSponsor.standList) && currentSponsor.standList.includes(st.name));
+        const nameMatch = Boolean(standName && currentSponsor.standList && Array.isArray(currentSponsor.standList) && currentSponsor.standList.includes(standName));
 
         return idMatch || emailMatch || compMatch || nameMatch;
       });
       setStands(reservedList);
 
       // 2. Filtrar estands libres (disponibles para asignación)
-      const freeList = fullStands.filter(st => st.status !== 'reserved' && st.status !== 'reserved_official' && st.status !== 'sold');
+      const freeList = fullStands.filter(st => {
+        const isReserved = st.status !== 'available' && st.status !== 'free' && st.status !== 'libre' && (st.status === 'reserved' || st.status === 'reserved_official' || st.status === 'sold' || st.status === 'occupied' || st.reservationDetails || st.sponsorId || st.sponsorEmail);
+        return !isReserved;
+      });
       setAvailableStands(freeList);
     });
 

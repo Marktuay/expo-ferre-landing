@@ -61,7 +61,7 @@ export default function AdminSponsors({ onBack }) {
 
   useEffect(() => {
     const qUsers = query(collection(db, 'users'), where('role', '==', 'sponsor'));
-    const qStands = query(collection(db, `${getEventBasePath()}/stands`), where('status', 'in', ['reserved', 'sold']));
+    const qStands = query(collection(db, `${getEventBasePath()}/stands`));
     
     let userResults = [];
     let standResults = [];
@@ -117,6 +117,10 @@ export default function AdminSponsors({ onBack }) {
 
       // 3. Fusionar información de estands reservados
       standResults.forEach(st => {
+        // Verificar si el estand está reservado
+        const isReserved = st.status !== 'available' && st.status !== 'free' && st.status !== 'libre' && (st.status === 'reserved' || st.status === 'reserved_official' || st.status === 'sold' || st.status === 'occupied' || st.reservationDetails || st.sponsorId || st.sponsorEmail);
+        if (!isReserved) return;
+
         let match = null;
         const stComp = (st.reservationDetails?.empresa || st.company || st.empresa || '').toLowerCase().trim();
         const stEmail = (st.reservationDetails?.correo || st.sponsorEmail || st.email || '').toLowerCase().trim();
@@ -130,7 +134,7 @@ export default function AdminSponsors({ onBack }) {
           const itemComp = (item.empresa || item.company || item.nombre || '').toLowerCase().trim();
 
           const idMatch = Boolean(st.sponsorId && (key === st.sponsorId || item.id === st.sponsorId));
-          const emailMatch = Boolean(stEmail && itemEmail && (itemEmail === stEmail || key === st.sponsorId));
+          const emailMatch = Boolean(stEmail && itemEmail && (itemEmail === stEmail || itemEmail.includes(stEmail) || stEmail.includes(itemEmail) || key === st.sponsorId));
           const compMatch = Boolean(stComp.length > 0 && itemComp.length > 0 && (itemComp === stComp || itemComp.includes(stComp) || stComp.includes(itemComp)));
 
           if (idMatch || emailMatch || compMatch) {
