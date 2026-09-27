@@ -215,7 +215,42 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     if (clean.includes('fernandez') || clean.includes('fernández') || clean.includes('sera')) return 'fernandez_sera';
     if (clean.includes('balladares')) return 'importaciones_balladares';
     if (clean.includes('sicsa') || clean.includes('siccsa')) return 'sicsa';
+    if (clean.includes('sinsa')) return 'sinsa';
+    if (clean.includes('cemex')) return 'cemex';
+    if (clean.includes('lafise')) return 'lafise';
+    if (clean.includes('bac')) return 'bac';
+    if (clean.includes('indenicsa')) return 'indenicsa';
+    if (clean.includes('plycem')) return 'plycem';
+    if (clean.includes('casco')) return 'casco';
+    if (clean.includes('midesa')) return 'midesa';
+    if (clean.includes('noelito')) return 'noelito';
+    if (clean.includes('sherwin')) return 'sherwin_williams';
+    if (clean.includes('armoconsa')) return 'armoconsa';
+    if (clean.includes('extel')) return 'extel';
+    if (clean.includes('megalina') || clean.includes('megalinea')) return 'megalineas';
+    if (clean.includes('amanco') || clean.includes('wavin')) return 'amanco_wavin';
+    if (clean.includes('holcim') || clean.includes('disensa')) return 'holcim_disensa';
+    if (clean.includes('monolit') || clean.includes('precom')) return 'precom_monolit';
+    if (clean.includes('futec') || clean.includes('rinsa')) return 'futec';
+    if (clean.includes('madinisa') || clean.includes('sonax')) return 'madinisa';
+    if (clean.includes('incasa') || clean.includes('ipsm')) return 'incasa';
+    if (clean.includes('eaton')) return 'eaton';
+    if (clean.includes('tigo')) return 'tigo';
+    if (clean.includes('parque') || clean.includes('zaratoga') || clean.includes('baratogo') || clean.includes('tucasa')) return 'parques_industriales';
+    if (clean.includes('romax') || clean.includes('maximiza')) return 'romax';
+    if (clean.includes('jp') || clean.includes('studio') || clean.includes('technology')) return 'jp_technology_studio';
     return clean.replace(/[^a-z0-9]/g, '_');
+  };
+
+  const isMatchingSponsor = (sp1, sp2) => {
+    if (!sp1 || !sp2) return false;
+    const clean1 = (sp1 || '').trim().toLowerCase();
+    const clean2 = (sp2 || '').trim().toLowerCase();
+    if (clean1 === clean2) return true;
+    const k1 = getSponsorKey(sp1);
+    const k2 = getSponsorKey(sp2);
+    if (k1 && k2 && k1 !== 'general' && k1 === k2) return true;
+    return clean1.includes(clean2) || clean2.includes(clean1);
   };
 
   // Configuraciones y speeches oficiales predeterminados por marca
@@ -1298,9 +1333,9 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     let targets = invites.filter(inv => {
       // 1. Validar patrocinador
       if (targetSp === 'general') {
-        if (inv.sponsorName && inv.sponsorId !== 'general') return false;
+        if (inv.sponsorName && inv.sponsorId !== 'general' && getSponsorKey(inv.sponsorName) !== 'general') return false;
       } else if (targetSp !== 'all') {
-        if ((inv.sponsorName || '').toLowerCase() !== targetSp.toLowerCase()) return false;
+        if (!isMatchingSponsor(inv.sponsorName, targetSp) && inv.sponsorId !== getSponsorKey(targetSp)) return false;
       }
       
       // 2. Debe tener correo electrónico y sintaxis válida
@@ -1413,8 +1448,8 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     const spFilter = targetSponsor || selectedSponsorFilter;
     
     const dataToFilter = invites.filter(inv => {
-      if (spFilter === 'general') return !inv.sponsorName || inv.sponsorId === 'general';
-      if (spFilter !== 'all') return (inv.sponsorName || '').toLowerCase() === spFilter.toLowerCase();
+      if (spFilter === 'general') return !inv.sponsorName || inv.sponsorId === 'general' || getSponsorKey(inv.sponsorName) === 'general';
+      if (spFilter !== 'all') return isMatchingSponsor(inv.sponsorName, spFilter) || (inv.sponsorId && inv.sponsorId === getSponsorKey(spFilter));
       return true;
     });
 
@@ -1452,9 +1487,9 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     
     let matchesSponsor = true;
     if (selectedSponsorFilter === 'general') {
-      matchesSponsor = !inv.sponsorName || inv.sponsorId === 'general';
+      matchesSponsor = !inv.sponsorName || inv.sponsorId === 'general' || getSponsorKey(inv.sponsorName) === 'general';
     } else if (selectedSponsorFilter !== 'all') {
-      matchesSponsor = (inv.sponsorName || '').toLowerCase() === selectedSponsorFilter.toLowerCase();
+      matchesSponsor = isMatchingSponsor(inv.sponsorName, selectedSponsorFilter) || (inv.sponsorId && inv.sponsorId === getSponsorKey(selectedSponsorFilter));
     }
 
     if (!matchesStatus || !matchesSponsor) return false;
@@ -1956,7 +1991,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
                     {/* FILAS DE LOS 27 PATROCINADORES */}
                     {filteredSponsorsList.map((sp) => {
-                      const spInvites = invites.filter(i => (i.sponsorName || '').toLowerCase() === sp.toLowerCase());
+                      const spInvites = invites.filter(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp)));
                       const spUsed = spInvites.filter(i => i.status === 'used').length;
                       const spPending = spInvites.length - spUsed;
                       const spPendingWithEmail = spInvites.filter(i => i.status === 'pending' && i.email && i.email.includes('@'));
