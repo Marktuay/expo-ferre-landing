@@ -66,23 +66,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ---
 
-## 📌 Tareas Pendientes para la Próxima Sesión
-- **1. Reincorporación de los 11 stands restantes según el plano oficial de MAXIMIZA (Completar los 35 stands):**
-  1. Stand 7: RINSA (Plata)
-  2. Stand 8: Monolit (Plata)
-  3. Stand 14: Disensa / Total (Plata)
-  4. Stand 17: Disensa (Plata)
-  5. Stand 18: Disensa (Plata)
-  6. Stand 24: Amanco Wavin (Plata)
-  7. Stand 25: Madinisa (Plata)
-  8. Stand 29: Baratogo / Tu Casa (Oro)
-  9. Stand 33: Stand junto a INCASA (Plata)
-  10. Stand 34: INCASA (Diamante)
-  11. Stand 35: Eaton (Diamante)
-  *(Stands disponibles/libres según plano: 9, 10, 36).*
-  - Sincronizar estos 11 stands en `src/config/defaultStands.js` y en la base de datos Firestore (`events/2026/stands`).
+## 📌 Tareas Pendientes
 
-- **2. Revisión y Adjudicación de los 9 Contactos Duplicados Inter-Patrocinador:**
+- **1. Revisión y Adjudicación de los 9 Contactos Duplicados Inter-Patrocinador:**
   - Josué David (*Ferretería Gonzalez Sevilla*): Fernández Sera vs Importaciones Balladares.
   - Delvis / Devil (*Ferretería Areas*): Fernández Sera vs Importaciones Balladares.
   - Fidel Rodríguez (*Ferretería Rodríguez Reyes*): Importaciones Balladares vs Megalineas.
@@ -93,10 +79,43 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   - Ferretería Central (*Julio Cesar vs José Adán*): Importaciones Balladares vs Plycem.
   - Rodrigo (*Negocios de Oriente vs Personal Midesa*): Fernández Sera vs MIDESA.
 
-- **3. Carga de Artes Gráficos (Header/Footer):**
-  - Subir los banners de Header (`1200x450px`) y Footer de Marcas (`1200x250px`) para los patrocinadores restantes.
+- **2. Carga de Artes Gráficos (Header/Footer) y Speeches Personalizados:**
+  - Subir los banners de Header (`1200x450px`) y Footer de Marcas Representadas (`1200x250px`) para los patrocinadores restantes a través de la interfaz.
 
 ---
+
+## 📅 Resumen de Cambios y Avances de la Sesión (27 de Septiembre de 2026)
+
+- **Sincronización Total de 35 Stands Reservados en Firestore (`events/2026/stands`):**
+  - Se cargaron e integraron los 35 stands oficiales de acuerdo a la tabla maestra autorizada y al plano de MAXIMIZA:
+    - **Stands 1, 2, 3, 4:** Sinsa (Diamante)
+    - **Stand 5:** ARMOCONSA (Oro)
+    - **Stands 6, 16:** Importaciones Balladares Nicaragua (Diamante)
+    - **Stand 7:** FUTEC (Plata)
+    - **Stands 8, 14:** Precom - Monolit (Plata)
+    - **Stands 9, 10, 36:** Disponibles / Libres
+    - **Stand 11:** Extel (Diamante)
+    - **Stand 12:** SherwinWilliams (Plata)
+    - **Stand 13:** Fernandez Sera (Plata)
+    - **Stand 15:** Sicsa Nicaragua (Oro)
+    - **Stands 17, 18:** Holcim - Disensa (Oro)
+    - **Stands 19, 20:** Megalineas (Diamante)
+    - **Stand 21:** Grupo Sur (Diamante)
+    - **Stands 22, 23:** CEMEX (Diamante)
+    - **Stand 24:** AMANCO - WAVIN (Plata)
+    - **Stand 25:** Madinisa (Plata)
+    - **Stand 26:** LAFISE (Diamante)
+    - **Stands 27, 28:** Indenicsa (Diamante)
+    - **Stand 29:** Parques Industriales en Carretera Nueva a León (Oro)
+    - **Stand 30:** Plycem (Oro)
+    - **Stand 31:** BAC (Diamante)
+    - **Stand 32:** Casco (Plata)
+    - **Stand 33:** TIGO (Oro)
+    - **Stand 34:** INCASA - GRUPO IPSM (Diamante)
+    - **Stand 35:** EATON (Diamante)
+    - **Stand 37:** MIDESA (Plata)
+    - **Stand 38:** Ferreteria Noelito (Diamante)
+  - `defaultStands.js` y `AdminDirectInvites.jsx` actualizados con correspondencia de nombres, logos, categorías y reconocimiento automático de pestañas de Excel.
 
 ## 📅 Resumen de Cambios y Avances de la Sesión (26 de Septiembre de 2026)
 
