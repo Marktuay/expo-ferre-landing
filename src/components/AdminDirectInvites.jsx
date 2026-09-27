@@ -606,6 +606,10 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
   // Abrir Modal de Configuración de Artes por Patrocinador
   const handleOpenArtModal = (sponsorName) => {
+    setIsUploadingHeader(false);
+    setIsUploadingFooter(false);
+    setIsSavingArt(false);
+
     const key = getSponsorKey(sponsorName);
     const existing = sponsorSettings[key] || {};
     const official = OFFICIAL_SPONSOR_CONFIGS[key] || {};
@@ -626,6 +630,14 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     setArtTab('banners');
   };
 
+  // Cerrar Modal de Artes con reseteo completo de estados
+  const handleCloseArtModal = () => {
+    setIsUploadingHeader(false);
+    setIsUploadingFooter(false);
+    setIsSavingArt(false);
+    setArtModal({ open: false, sponsorKey: '', sponsorName: '', stands: '' });
+  };
+
   // Subir imagen de banner a Firebase Storage con fallback a Base64 comprimido
   const handleUploadBannerImage = async (e, type) => {
     const file = e.target.files?.[0];
@@ -640,17 +652,20 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
       if (type === 'header') setArtHeaderUrl(compressedDataUrl);
       if (type === 'footer') setArtFooterUrl(compressedDataUrl);
 
-      // 2. Intentar subir a Firebase Storage si está disponible
+      // 2. Intentar subir a Firebase Storage si está disponible con tiempo límite
       try {
         const fileExt = file.name.split('.').pop() || 'jpg';
         const fileName = `events/2026/sponsorBanners/${artModal.sponsorKey}_${type}_${Date.now()}.${fileExt}`;
         const imgRef = storageRef(storage, fileName);
 
-        await uploadBytes(imgRef, file);
-        const downloadUrl = await getDownloadURL(imgRef);
+        const uploadPromise = uploadBytes(imgRef, file).then(() => getDownloadURL(imgRef));
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Storage timeout')), 10000));
+        const downloadUrl = await Promise.race([uploadPromise, timeoutPromise]);
 
-        if (type === 'header') setArtHeaderUrl(downloadUrl);
-        if (type === 'footer') setArtFooterUrl(downloadUrl);
+        if (downloadUrl) {
+          if (type === 'header') setArtHeaderUrl(downloadUrl);
+          if (type === 'footer') setArtFooterUrl(downloadUrl);
+        }
       } catch (storageErr) {
         console.warn('Almacenamiento en la nube omitido o falló, se mantendrá versión optimizada:', storageErr);
       }
@@ -660,6 +675,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     } finally {
       if (type === 'header') setIsUploadingHeader(false);
       if (type === 'footer') setIsUploadingFooter(false);
+      if (e.target) e.target.value = '';
     }
   };
 
@@ -680,7 +696,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
         updatedBy: adminUser?.email || auth.currentUser?.email || 'admin'
       }, { merge: true });
 
-      setArtModal({ open: false, sponsorKey: '', sponsorName: '', stands: '' });
+      handleCloseArtModal();
       alert(`¡Artes y configuración de "${artModal.sponsorName}" guardados exitosamente!`);
     } catch (err) {
       console.error('Error al guardar artes de patrocinador:', err);
@@ -2670,7 +2686,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                   <p className="text-white/80 text-xs">Configuración de Artes (Header/Footer), Stands y Speech</p>
                 </div>
               </div>
-              <button onClick={() => setArtModal({ open: false, sponsorKey: '', sponsorName: '', stands: '' })} className="p-1 hover:bg-white/20 rounded-full text-white cursor-pointer">
+              <button onClick={handleCloseArtModal} className="p-1 hover:bg-white/20 rounded-full text-white cursor-pointer">
                 <X size={18} />
               </button>
             </div>
@@ -3016,7 +3032,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
               <button
                 type="button"
                 disabled={isSavingArt}
-                onClick={() => setArtModal({ open: false, sponsorKey: '', sponsorName: '', stands: '' })}
+                onClick={handleCloseArtModal}
                 className="py-2.5 px-4 bg-white border border-outline-variant hover:bg-surface text-on-surface font-bold rounded-xl text-xs transition-colors cursor-pointer"
               >
                 Cancelar
