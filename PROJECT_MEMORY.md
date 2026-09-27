@@ -116,6 +116,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     - **Stand 37:** MIDESA (Plata)
     - **Stand 38:** Ferreteria Noelito (Diamante)
   - `defaultStands.js` y `AdminDirectInvites.jsx` actualizados con correspondencia de nombres, logos, categorías y reconocimiento automático de pestañas de Excel.
+  - **Corrección de Bug en Modal de Artes (`AdminDirectInvites.jsx`):** Se corrigió el bloqueo del botón "Subiendo..." al cambiar de patrocinador. Ahora se resetean automáticamente los estados de subida (`isUploadingHeader`, `isUploadingFooter`, `isSavingArt`) tanto al abrir como al cerrar el modal, se agregó tiempo límite de seguridad (timeout) en la subida a Firebase Storage y se limpia el valor del input file (`e.target.value = ''`).
 
 ## 📅 Resumen de Cambios y Avances de la Sesión (26 de Septiembre de 2026)
 
