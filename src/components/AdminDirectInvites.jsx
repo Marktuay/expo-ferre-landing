@@ -231,7 +231,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     if (clean.includes('amanco') || clean.includes('wavin')) return 'amanco_wavin';
     if (clean.includes('holcim') || clean.includes('disensa')) return 'holcim_disensa';
     if (clean.includes('monolit') || clean.includes('precom')) return 'precom_monolit';
-    if (clean.includes('futec') || clean.includes('rinsa')) return 'futec';
+    if (clean.includes('futec')) return 'futec';
     if (clean.includes('madinisa') || clean.includes('sonax')) return 'madinisa';
     if (clean.includes('incasa') || clean.includes('ipsm')) return 'incasa';
     if (clean.includes('eaton')) return 'eaton';
@@ -718,18 +718,41 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
   const handleSaveSponsorArt = async () => {
     setIsSavingArt(true);
     try {
-      const settingRef = doc(db, `${getEventBasePath()}/sponsorSettings`, artModal.sponsorKey);
+      const key = artModal.sponsorKey || getSponsorKey(artModal.sponsorName);
+      const cleanHeader = artHeaderUrl.trim() || null;
+      const cleanFooter = artFooterUrl.trim() || null;
+      const cleanStands = artStands.trim() || null;
+      const cleanSpeech = artCustomSpeech.trim() || null;
+      const cleanSubject = artCustomSubject.trim() || null;
+
+      const settingRef = doc(db, `${getEventBasePath()}/sponsorSettings`, key);
       await setDoc(settingRef, {
-        sponsorId: artModal.sponsorKey,
+        sponsorId: key,
         sponsorName: artModal.sponsorName,
-        headerBannerUrl: artHeaderUrl.trim() || null,
-        footerBannerUrl: artFooterUrl.trim() || null,
-        stands: artStands.trim() || null,
-        customSpeech: artCustomSpeech.trim() || null,
-        customEmailSubject: artCustomSubject.trim() || null,
+        headerBannerUrl: cleanHeader,
+        footerBannerUrl: cleanFooter,
+        stands: cleanStands,
+        customSpeech: cleanSpeech,
+        customEmailSubject: cleanSubject,
         updatedAt: serverTimestamp(),
         updatedBy: adminUser?.email || auth.currentUser?.email || 'admin'
       }, { merge: true });
+
+      // Inmediata actualización reactiva local
+      setSponsorSettings(prev => ({
+        ...prev,
+        [key]: {
+          ...(prev[key] || {}),
+          id: key,
+          sponsorId: key,
+          sponsorName: artModal.sponsorName,
+          headerBannerUrl: cleanHeader,
+          footerBannerUrl: cleanFooter,
+          stands: cleanStands,
+          customSpeech: cleanSpeech,
+          customEmailSubject: cleanSubject
+        }
+      }));
 
       handleCloseArtModal();
       alert(`¡Artes y configuración de "${artModal.sponsorName}" guardados exitosamente!`);
@@ -823,7 +846,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     if (clean.includes('amanco') || clean.includes('wavin')) return 'AMANCO - WAVIN';
     if (clean.includes('holcim') || clean.includes('disensa')) return 'Holcim (Disensa)';
     if (clean.includes('monolit') || clean.includes('precom')) return 'Precom (Monolit)';
-    if (clean.includes('futec') || clean.includes('rinsa')) return 'FUTEC';
+    if (clean.includes('futec')) return 'FUTEC';
     if (clean.includes('madinisa')) return 'Madinisa';
     if (clean.includes('incasa') || clean.includes('ipsm')) return 'INCASA (GRUPO IPSM)';
     if (clean.includes('eaton')) return 'EATON';
@@ -1846,20 +1869,37 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
                         {/* Artes */}
                         <td className="p-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-16 h-8 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0" title="Header General">
-                              <img src="https://expoferrenicaragua.com/email-header.png" alt="Header" className="w-full h-full object-cover" />
-                            </div>
-                            <div className="w-16 h-8 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0" title="Footer General">
-                              <img src="https://expoferrenicaragua.com/email-footer.png" alt="Footer" className="w-full h-full object-cover" />
-                            </div>
-                            <button
-                              onClick={() => handleOpenArtModal('general')}
-                              className="px-2.5 py-1 bg-white border border-outline-variant hover:bg-surface text-secondary text-xs font-bold rounded-lg transition-colors cursor-pointer"
-                            >
-                              Editar
-                            </button>
-                          </div>
+                          {(() => {
+                            const genArt = getSponsorArt('general');
+                            return (
+                              <div className="flex items-center gap-2">
+                                <div className="w-16 h-8 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Header General">
+                                  <img src={genArt.headerBannerUrl} alt="Header" className="w-full h-full object-cover" />
+                                  {genArt.hasCustomHeader && (
+                                    <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-500 rounded-full"></span>
+                                  )}
+                                </div>
+                                <div className="w-16 h-8 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Footer General">
+                                  <img src={genArt.footerBannerUrl} alt="Footer" className="w-full h-full object-cover" />
+                                  {genArt.hasCustomFooter && (
+                                    <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-500 rounded-full"></span>
+                                  )}
+                                </div>
+                                <button
+                                  onClick={() => handleOpenArtModal('general')}
+                                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
+                                    genArt.hasCustomHeader || genArt.hasCustomFooter
+                                      ? 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
+                                      : 'bg-white border border-outline-variant hover:bg-surface text-secondary'
+                                  }`}
+                                  title="Subir o cambiar artes de Header y Footer"
+                                >
+                                  <Palette size={12} />
+                                  {genArt.hasCustomHeader || genArt.hasCustomFooter ? 'Artes Listos' : 'Subir Artes'}
+                                </button>
+                              </div>
+                            );
+                          })()}
                         </td>
 
                         {/* Métricas e Indicador de Correo */}
