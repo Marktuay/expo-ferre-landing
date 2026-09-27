@@ -1,5 +1,5 @@
 import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
-import { getEventBasePath } from './eventConfig';
+import { getEventBasePath } from './eventConfig.js';
 
 export const initialStandsList = [
   { id: 'stand-1', x: '67.71%', y: '56.10%', name: 'Stand 1', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
@@ -125,12 +125,42 @@ export const DEFAULT_OFFICIAL_STANDS = [
     sponsorId: 'official-importaciones-balladares',
     sponsorEmail: 'mercadeoib@importacionesballadares.com',
     reservationDetails: {
-      empresa: 'Importaciones Balladares',
+      empresa: 'Importaciones Balladares Nicaragua',
       nombre: 'José',
       apellido: 'Hernández',
       correo: 'mercadeoib@importacionesballadares.com',
       telefono: '+505 76695734',
       categoria: 'Diamante'
+    }
+  },
+  {
+    id: 'stand-7',
+    status: 'reserved',
+    logo: '/logorinsa-v2.jpeg',
+    sponsorId: 'official-futec',
+    sponsorEmail: 'contacto@futec.com.ni',
+    reservationDetails: {
+      empresa: 'FUTEC',
+      nombre: 'Atención',
+      apellido: 'FUTEC',
+      correo: 'contacto@futec.com.ni',
+      telefono: '+505 22000007',
+      categoria: 'Plata'
+    }
+  },
+  {
+    id: 'stand-8',
+    status: 'reserved',
+    logo: '/plata/monolit.png',
+    sponsorId: 'official-precom-monolit',
+    sponsorEmail: 'ventas@monolit.com.ni',
+    reservationDetails: {
+      empresa: 'Precom (Monolit)',
+      nombre: 'Atención',
+      apellido: 'Monolit',
+      correo: 'ventas@monolit.com.ni',
+      telefono: '+505 22000008',
+      categoria: 'Plata'
     }
   },
   {
@@ -155,7 +185,7 @@ export const DEFAULT_OFFICIAL_STANDS = [
     sponsorId: 'official-sherwin-williams',
     sponsorEmail: 'kahernandez@swdeca.com',
     reservationDetails: {
-      empresa: 'Sherwin-Williams',
+      empresa: 'SherwinWilliams',
       nombre: 'Karla',
       apellido: 'Hernández',
       correo: 'kahernandez@swdeca.com',
@@ -170,11 +200,26 @@ export const DEFAULT_OFFICIAL_STANDS = [
     sponsorId: 'official-fernández-sera',
     sponsorEmail: 'cmercadeo@fernandezsera.com',
     reservationDetails: {
-      empresa: 'Fernández Sera',
+      empresa: 'Fernandez Sera',
       nombre: 'César',
       apellido: 'Rivera',
       correo: 'cmercadeo@fernandezsera.com',
       telefono: '+505 88352323',
+      categoria: 'Plata'
+    }
+  },
+  {
+    id: 'stand-14',
+    status: 'reserved',
+    logo: '/plata/monolit.png',
+    sponsorId: 'official-precom-monolit',
+    sponsorEmail: 'ventas@monolit.com.ni',
+    reservationDetails: {
+      empresa: 'Precom (Monolit)',
+      nombre: 'Atención',
+      apellido: 'Monolit',
+      correo: 'ventas@monolit.com.ni',
+      telefono: '+505 22000008',
       categoria: 'Plata'
     }
   },
@@ -200,12 +245,42 @@ export const DEFAULT_OFFICIAL_STANDS = [
     sponsorId: 'official-importaciones-balladares',
     sponsorEmail: 'mercadeoib@importacionesballadares.com',
     reservationDetails: {
-      empresa: 'Importaciones Balladares',
+      empresa: 'Importaciones Balladares Nicaragua',
       nombre: 'José',
       apellido: 'Hernández',
       correo: 'mercadeoib@importacionesballadares.com',
       telefono: '+505 76695734',
       categoria: 'Diamante'
+    }
+  },
+  {
+    id: 'stand-17',
+    status: 'reserved',
+    logo: '/oro/disensa.jpeg',
+    sponsorId: 'official-holcim-disensa',
+    sponsorEmail: 'contacto@holcim.com.ni',
+    reservationDetails: {
+      empresa: 'Holcim (Disensa)',
+      nombre: 'Atención',
+      apellido: 'Holcim',
+      correo: 'contacto@holcim.com.ni',
+      telefono: '+505 22000017',
+      categoria: 'Oro'
+    }
+  },
+  {
+    id: 'stand-18',
+    status: 'reserved',
+    logo: '/oro/disensa.jpeg',
+    sponsorId: 'official-holcim-disensa',
+    sponsorEmail: 'contacto@holcim.com.ni',
+    reservationDetails: {
+      empresa: 'Holcim (Disensa)',
+      nombre: 'Atención',
+      apellido: 'Holcim',
+      correo: 'contacto@holcim.com.ni',
+      telefono: '+505 22000018',
+      categoria: 'Oro'
     }
   },
   {
@@ -245,7 +320,7 @@ export const DEFAULT_OFFICIAL_STANDS = [
     sponsorId: 'official-sur',
     sponsorEmail: 'aaguilarp@gruposur.com',
     reservationDetails: {
-      empresa: 'Grupo SUR',
+      empresa: 'Grupo Sur',
       nombre: 'Mario',
       apellido: 'Jarquín',
       correo: 'aaguilarp@gruposur.com',
@@ -284,6 +359,36 @@ export const DEFAULT_OFFICIAL_STANDS = [
     }
   },
   {
+    id: 'stand-24',
+    status: 'reserved',
+    logo: '/plata/mobius.png',
+    sponsorId: 'official-amanco-wavin',
+    sponsorEmail: 'contacto@amanco.com',
+    reservationDetails: {
+      empresa: 'AMANCO - WAVIN',
+      nombre: 'Atención',
+      apellido: 'Amanco',
+      correo: 'contacto@amanco.com',
+      telefono: '+505 22000024',
+      categoria: 'Plata'
+    }
+  },
+  {
+    id: 'stand-25',
+    status: 'reserved',
+    logo: '/plata/madinisa.png',
+    sponsorId: 'official-madinisa',
+    sponsorEmail: 'contacto@madinisa.com.ni',
+    reservationDetails: {
+      empresa: 'Madinisa',
+      nombre: 'Atención',
+      apellido: 'Madinisa',
+      correo: 'contacto@madinisa.com.ni',
+      telefono: '+505 22000025',
+      categoria: 'Plata'
+    }
+  },
+  {
     id: 'stand-26',
     status: 'reserved',
     logo: '/diamante/lafise.jpg',
@@ -310,7 +415,7 @@ export const DEFAULT_OFFICIAL_STANDS = [
       apellido: 'Indenicsa',
       correo: 'contacto@indenicsa.com',
       telefono: '+505 22000003',
-      categoria: 'Oro'
+      categoria: 'Diamante'
     }
   },
   {
@@ -325,6 +430,21 @@ export const DEFAULT_OFFICIAL_STANDS = [
       apellido: 'Indenicsa',
       correo: 'contacto@indenicsa.com',
       telefono: '+505 22000003',
+      categoria: 'Diamante'
+    }
+  },
+  {
+    id: 'stand-29',
+    status: 'reserved',
+    logo: '/oro/zaratoga.jpeg',
+    sponsorId: 'official-parques-industriales',
+    sponsorEmail: 'contacto@zaratoga.com.ni',
+    reservationDetails: {
+      empresa: 'Parques Industriales en Carretera Nueva a León',
+      nombre: 'Atención',
+      apellido: 'Parques Industriales',
+      correo: 'contacto@zaratoga.com.ni',
+      telefono: '+505 22000029',
       categoria: 'Oro'
     }
   },
@@ -350,7 +470,7 @@ export const DEFAULT_OFFICIAL_STANDS = [
     sponsorId: 'official-bac-credomatic',
     sponsorEmail: 'gerardo.zelaya@baccredomatic.ni',
     reservationDetails: {
-      empresa: 'BAC Credomatic',
+      empresa: 'BAC',
       nombre: 'Gerardo',
       apellido: 'Zelaya',
       correo: 'gerardo.zelaya@baccredomatic.ni',
@@ -371,6 +491,51 @@ export const DEFAULT_OFFICIAL_STANDS = [
       correo: 'cmunoz@cascosafety.com',
       telefono: '+505 82400677',
       categoria: 'Plata'
+    }
+  },
+  {
+    id: 'stand-33',
+    status: 'reserved',
+    logo: '/oro/tigo.png',
+    sponsorId: 'official-tigo',
+    sponsorEmail: 'contacto@tigo.com.ni',
+    reservationDetails: {
+      empresa: 'TIGO',
+      nombre: 'Atención',
+      apellido: 'TIGO',
+      correo: 'contacto@tigo.com.ni',
+      telefono: '+505 22000033',
+      categoria: 'Oro'
+    }
+  },
+  {
+    id: 'stand-34',
+    status: 'reserved',
+    logo: '/diamante/incasa.png',
+    sponsorId: 'official-incasa',
+    sponsorEmail: 'contacto@incasa.com.ni',
+    reservationDetails: {
+      empresa: 'INCASA (GRUPO IPSM)',
+      nombre: 'Atención',
+      apellido: 'INCASA',
+      correo: 'contacto@incasa.com.ni',
+      telefono: '+505 22000034',
+      categoria: 'Diamante'
+    }
+  },
+  {
+    id: 'stand-35',
+    status: 'reserved',
+    logo: '/diamante/eaton.jpeg',
+    sponsorId: 'official-eaton',
+    sponsorEmail: 'contacto@eaton.com',
+    reservationDetails: {
+      empresa: 'EATON',
+      nombre: 'Atención',
+      apellido: 'EATON',
+      correo: 'contacto@eaton.com',
+      telefono: '+505 22000035',
+      categoria: 'Diamante'
     }
   },
   {
@@ -395,7 +560,7 @@ export const DEFAULT_OFFICIAL_STANDS = [
     sponsorId: 'official-noelito',
     sponsorEmail: 'mercadeo@ferreterianoelito.com',
     reservationDetails: {
-      empresa: 'Ferretería Noelito',
+      empresa: 'Ferreteria Noelito',
       nombre: 'Linda',
       apellido: 'Gutiérrez',
       correo: 'mercadeo@ferreterianoelito.com',

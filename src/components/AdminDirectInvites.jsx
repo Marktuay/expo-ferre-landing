@@ -752,31 +752,34 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     }
 
     // 2. Coincidencias por palabras clave frecuentes
-    if (clean.includes('sur')) return 'Grupo SUR';
-    if (clean.includes('fernandez') || clean.includes('sera')) return 'Fernández Sera';
-    if (clean.includes('balladares')) return 'Importaciones Balladares';
+    if (clean.includes('sur')) return 'Grupo Sur';
+    if (clean.includes('fernandez') || clean.includes('sera')) return 'Fernandez Sera';
+    if (clean.includes('balladares')) return 'Importaciones Balladares Nicaragua';
     if (clean.includes('sicsa') || clean.includes('siccsa')) return 'Sicsa Nicaragua';
     if (clean.includes('sinsa')) return 'Sinsa';
     if (clean.includes('cemex')) return 'CEMEX';
     if (clean.includes('lafise')) return 'LAFISE';
-    if (clean.includes('bac')) return 'BAC Credomatic';
+    if (clean.includes('bac')) return 'BAC';
     if (clean.includes('indenicsa')) return 'Indenicsa';
     if (clean.includes('plycem')) return 'Plycem';
     if (clean.includes('casco')) return 'Casco';
     if (clean.includes('midesa')) return 'MIDESA';
-    if (clean.includes('noelito')) return 'Ferretería Noelito';
-    if (clean.includes('sherwin')) return 'Sherwin-Williams';
+    if (clean.includes('noelito')) return 'Ferreteria Noelito';
+    if (clean.includes('sherwin')) return 'SherwinWilliams';
     if (clean.includes('armoconsa')) return 'ARMOCONSA';
     if (clean.includes('extel')) return 'Extel';
     if (clean.includes('megalina') || clean.includes('megalinea')) return 'Megalineas';
-    if (clean.includes('amanco') || clean.includes('wavin')) return 'Amanco Wavin';
-    if (clean.includes('disensa')) return 'Disensa';
-    if (clean.includes('monolit')) return 'Monolit';
-    if (clean.includes('rinsa')) return 'RINSA';
+    if (clean.includes('amanco') || clean.includes('wavin')) return 'AMANCO - WAVIN';
+    if (clean.includes('holcim') || clean.includes('disensa')) return 'Holcim (Disensa)';
+    if (clean.includes('monolit') || clean.includes('precom')) return 'Precom (Monolit)';
+    if (clean.includes('futec') || clean.includes('rinsa')) return 'FUTEC';
     if (clean.includes('madinisa')) return 'Madinisa';
-    if (clean.includes('incasa')) return 'INCASA';
-    if (clean.includes('eaton')) return 'Eaton';
-    if (clean.includes('baratogo') || clean.includes('tucasa')) return 'Baratogo';
+    if (clean.includes('incasa') || clean.includes('ipsm')) return 'INCASA (GRUPO IPSM)';
+    if (clean.includes('eaton')) return 'EATON';
+    if (clean.includes('tigo')) return 'TIGO';
+    if (clean.includes('parque') || clean.includes('zaratoga') || clean.includes('baratogo') || clean.includes('tucasa')) return 'Parques Industriales en Carretera Nueva a León';
+    if (clean.includes('romax') || clean.includes('maximiza')) return 'ROMAX';
+    if (clean.includes('jp') || clean.includes('studio') || clean.includes('technology')) return 'JP Technology Studio';
 
     // 3. Fallback: Usar el nombre de la pestaña limpio
     return sheetName.trim();
