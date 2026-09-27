@@ -68,7 +68,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ## 📌 Tareas Pendientes
 
-- **1. Revisión y Adjudicación de los 9 Contactos Duplicados Inter-Patrocinador:**
+- **1. Revisión y Adjudicación de los 9 Contactos Duplicados Inter-Patrocinador (En espera de decisión del organizador):**
   - Josué David (*Ferretería Gonzalez Sevilla*): Fernández Sera vs Importaciones Balladares.
   - Delvis / Devil (*Ferretería Areas*): Fernández Sera vs Importaciones Balladares.
   - Fidel Rodríguez (*Ferretería Rodríguez Reyes*): Importaciones Balladares vs Megalineas.
