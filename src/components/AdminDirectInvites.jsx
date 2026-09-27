@@ -253,219 +253,10 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     return clean1.includes(clean2) || clean2.includes(clean1);
   };
 
-  // Configuraciones y speeches oficiales predeterminados por marca
-  const OFFICIAL_SPONSOR_CONFIGS = {
-    sicsa: {
-      sponsorName: 'Sicsa Nicaragua',
-      stands: 'Stand 15',
-      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Sicsa Nicaragua!',
-      customSpeech: `Sé parte de EXPO FERRE Nicaragua 2026! 
-Un espacio exclusivo creado para tí, donde podrás encontrar capacitaciones y novedades que te ayudarán afortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
-
-Hola {invitado},
-
-Nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
-
-Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
-
-Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones.
-
-¡Será un verdadero gusto tenerte con nosotros!
-
-📅 Fecha: 17 de Octubre
-📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00am
-
-Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
-
-🔗 {enlace}
-
-⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
-
-¡Contamos con tu valiosa presencia!`
-    },
-    sicsa_nicaragua: {
-      sponsorName: 'Sicsa Nicaragua',
-      stands: 'Stand 15',
-      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Sicsa Nicaragua!',
-      customSpeech: `Sé parte de EXPO FERRE Nicaragua 2026! 
-Un espacio exclusivo creado para tí, donde podrás encontrar capacitaciones y novedades que te ayudarán afortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
-
-Hola {invitado},
-
-Nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
-
-Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
-
-Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones.
-
-¡Será un verdadero gusto tenerte con nosotros!
-
-📅 Fecha: 17 de Octubre
-📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00am
-
-Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
-
-🔗 {enlace}
-
-⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
-
-¡Contamos con tu valiosa presencia!`
-    },
-    importaciones_balladares: {
-      sponsorName: 'Importaciones Balladares',
-      stands: 'Stand 6, 16',
-      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Importaciones Balladares!',
-      customSpeech: `Sé parte de EXPO FERRE Nicaragua 2026! 
-
-Un espacio exclusivo creado para tí, donde podrás encontrar capacitaciones y novedades que te ayudarán afortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
-
-Hola {invitado},
-
-Nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
-
-Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
-
-Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones.
-
-¡Será un verdadero gusto tenerte con nosotros!
-
-📅 Fecha: 17 de Octubre
-📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00am
-
-Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
-
-🔗 {enlace}
-
-⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
-
-¡Contamos con tu valiosa presencia!`
-    },
-    balladares: {
-      sponsorName: 'Importaciones Balladares',
-      stands: 'Stand 6, 16',
-      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Importaciones Balladares!',
-      customSpeech: `Sé parte de EXPO FERRE Nicaragua 2026! 
-
-Un espacio exclusivo creado para tí, donde podrás encontrar capacitaciones y novedades que te ayudarán afortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
-
-Hola {invitado},
-
-Nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
-
-Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
-
-Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones.
-
-¡Será un verdadero gusto tenerte con nosotros!
-
-📅 Fecha: 17 de Octubre
-📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00am
-
-Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
-
-🔗 {enlace}
-
-⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
-
-¡Contamos con tu valiosa presencia!`
-    },
-    fernandez_sera: {
-      sponsorName: 'Fernández Sera',
-      stands: 'Stand 13',
-      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Fernández Sera!',
-      customSpeech: `Sé parte de EXPO FERRE Nicaragua 2026! 
-
-Un espacio exclusivo creado para tí, donde podrás encontrar capacitaciones y novedades que te ayudarán afortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
-
-Hola {invitado},
-
-Nos complace invitarte a ser parte de la primera edición de EXPO FERRÉ Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
-
-Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
-
-Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRÉ Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones.
-
-¡Será un verdadero gusto tenerte con nosotros!
-
-📅 Fecha: 17 de Octubre
-📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00am
-
-Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
-
-🔗 {enlace}
-
-⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
-
-¡Contamos con tu valiosa presencia!`
-    },
-    grupo_sur: {
-      sponsorName: 'Grupo SUR',
-      stands: 'Stand 21',
-      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Grupo SUR y Kermill!',
-      customSpeech: `Sé parte de EXPO FERRE Nicaragua 2026! 
-Un espacio exclusivo creado para tí, donde podrás encontrar capacitaciones y novedades que te ayudarán afortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
-
-Hola {invitado},
-
-Nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
-
-Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
-
-Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones.
-
-¡Será un verdadero gusto tenerte con nosotros!
-
-📅 Fecha: 17 de Octubre
-📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00am
-
-Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
-
-🔗 {enlace}
-
-⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
-
-¡Contamos con tu valiosa presencia!`
-    },
-    sur: {
-      sponsorName: 'Grupo SUR',
-      stands: 'Stand 21',
-      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Grupo SUR y Kermill!',
-      customSpeech: `Sé parte de EXPO FERRE Nicaragua 2026! 
-Un espacio exclusivo creado para tí, donde podrás encontrar capacitaciones y novedades que te ayudarán afortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
-
-Hola {invitado},
-
-Nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar, conectar y fortalecer la industria ferretera en Nicaragua.
-
-Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
-
-Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones.
-
-¡Será un verdadero gusto tenerte con nosotros!
-
-📅 Fecha: 17 de Octubre
-📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00am
-
-Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
-
-🔗 {enlace}
-
-⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
-
-¡Contamos con tu valiosa presencia!`
-    }
-  };
-
-  const generateDefaultSponsorSpeech = (sponsorName, stands) => {
+  const buildCorporateSpeech = (sponsorName, stands) => {
+    const standsLine = stands ? (stands.toLowerCase().startsWith('stand') ? stands : `Stand ${stands}`) : 'nuestro stand oficial';
     return `Sé parte de EXPO FERRE Nicaragua 2026! 
-Un espacio exclusivo creado para tí, donde podrás encontrar capacitaciones y novedades que te ayudarán afortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
+Un espacio exclusivo creado para ti, donde podrás encontrar capacitaciones y novedades que te ayudarán a fortalecer relaciones comerciales y generar nuevas oportunidades de negocio.
 
 Hola {invitado},
 
@@ -473,13 +264,14 @@ Nos complace invitarte a ser parte de la primera edición de EXPO FERRE Nicaragu
 
 Será una jornada para generar nuevas conexiones, compartir conocimientos, conocer soluciones innovadoras y descubrir oportunidades de negocio que contribuyan al crecimiento del sector.
 
-Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones.
+Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nicaragua 2026 y esperamos compartir contigo una experiencia llena de oportunidades, novedades y grandes conexiones en nuestro ${standsLine}.
 
 ¡Será un verdadero gusto tenerte con nosotros!
 
-📅 Fecha: 17 de Octubre
+📅 Fecha: 16 y 17 de Octubre de 2026
 📍 Lugar: Centro de Convenciones Crowne Plaza Managua
 ⏰ Hora: 8:00am
+🏢 Stand: ${standsLine}
 
 Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
 
@@ -488,6 +280,218 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 ⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
 
 ¡Contamos con tu valiosa presencia!`;
+  };
+
+  // Configuraciones y speeches oficiales predeterminados por marca
+  const OFFICIAL_SPONSOR_CONFIGS = {
+    sinsa: {
+      sponsorName: 'SINSA',
+      stands: 'Stands 1, 2, 3, 4',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con SINSA!',
+      customSpeech: buildCorporateSpeech('SINSA', 'Stands 1, 2, 3, 4')
+    },
+    armoconsa: {
+      sponsorName: 'ARMOCONSA',
+      stands: 'Stand 5',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con ARMOCONSA!',
+      customSpeech: buildCorporateSpeech('ARMOCONSA', 'Stand 5')
+    },
+    importaciones_balladares: {
+      sponsorName: 'Importaciones Balladares',
+      stands: 'Stands 6, 16',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Importaciones Balladares!',
+      customSpeech: buildCorporateSpeech('Importaciones Balladares', 'Stands 6, 16')
+    },
+    balladares: {
+      sponsorName: 'Importaciones Balladares',
+      stands: 'Stands 6, 16',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Importaciones Balladares!',
+      customSpeech: buildCorporateSpeech('Importaciones Balladares', 'Stands 6, 16')
+    },
+    futec: {
+      sponsorName: 'FUTEC',
+      stands: 'Stand 7',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con FUTEC!',
+      customSpeech: buildCorporateSpeech('FUTEC', 'Stand 7')
+    },
+    precom_monolit: {
+      sponsorName: 'Precom (Monolit)',
+      stands: 'Stands 8, 14',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Precom y Monolit!',
+      customSpeech: buildCorporateSpeech('Precom (Monolit)', 'Stands 8, 14')
+    },
+    monolit: {
+      sponsorName: 'Precom (Monolit)',
+      stands: 'Stands 8, 14',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Precom y Monolit!',
+      customSpeech: buildCorporateSpeech('Precom (Monolit)', 'Stands 8, 14')
+    },
+    extel: {
+      sponsorName: 'Extel',
+      stands: 'Stand 11',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Extel!',
+      customSpeech: buildCorporateSpeech('Extel', 'Stand 11')
+    },
+    sherwin_williams: {
+      sponsorName: 'SherwinWilliams',
+      stands: 'Stand 12',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con SherwinWilliams!',
+      customSpeech: buildCorporateSpeech('SherwinWilliams', 'Stand 12')
+    },
+    fernandez_sera: {
+      sponsorName: 'Fernández Sera',
+      stands: 'Stand 13',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Fernández Sera!',
+      customSpeech: buildCorporateSpeech('Fernández Sera', 'Stand 13')
+    },
+    sicsa: {
+      sponsorName: 'Sicsa Nicaragua',
+      stands: 'Stand 15',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Sicsa Nicaragua!',
+      customSpeech: buildCorporateSpeech('Sicsa Nicaragua', 'Stand 15')
+    },
+    sicsa_nicaragua: {
+      sponsorName: 'Sicsa Nicaragua',
+      stands: 'Stand 15',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Sicsa Nicaragua!',
+      customSpeech: buildCorporateSpeech('Sicsa Nicaragua', 'Stand 15')
+    },
+    holcim_disensa: {
+      sponsorName: 'Holcim (Disensa)',
+      stands: 'Stands 17, 18',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Holcim y Disensa!',
+      customSpeech: buildCorporateSpeech('Holcim (Disensa)', 'Stands 17, 18')
+    },
+    holcim: {
+      sponsorName: 'Holcim (Disensa)',
+      stands: 'Stands 17, 18',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Holcim y Disensa!',
+      customSpeech: buildCorporateSpeech('Holcim (Disensa)', 'Stands 17, 18')
+    },
+    megalineas: {
+      sponsorName: 'Megalineas',
+      stands: 'Stands 19, 20',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Megalineas!',
+      customSpeech: buildCorporateSpeech('Megalineas', 'Stands 19, 20')
+    },
+    grupo_sur: {
+      sponsorName: 'Grupo SUR',
+      stands: 'Stand 21',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Grupo SUR y Kermill!',
+      customSpeech: buildCorporateSpeech('Grupo SUR', 'Stand 21')
+    },
+    sur: {
+      sponsorName: 'Grupo SUR',
+      stands: 'Stand 21',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Grupo SUR y Kermill!',
+      customSpeech: buildCorporateSpeech('Grupo SUR', 'Stand 21')
+    },
+    cemex: {
+      sponsorName: 'CEMEX',
+      stands: 'Stands 22, 23',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con CEMEX!',
+      customSpeech: buildCorporateSpeech('CEMEX', 'Stands 22, 23')
+    },
+    amanco_wavin: {
+      sponsorName: 'AMANCO - WAVIN',
+      stands: 'Stand 24',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con AMANCO WAVIN!',
+      customSpeech: buildCorporateSpeech('AMANCO - WAVIN', 'Stand 24')
+    },
+    madinisa: {
+      sponsorName: 'Madinisa (Sonax)',
+      stands: 'Stand 25',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Madinisa y Sonax!',
+      customSpeech: buildCorporateSpeech('Madinisa (Sonax)', 'Stand 25')
+    },
+    sonax: {
+      sponsorName: 'Madinisa (Sonax)',
+      stands: 'Stand 25',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Madinisa y Sonax!',
+      customSpeech: buildCorporateSpeech('Madinisa (Sonax)', 'Stand 25')
+    },
+    lafise: {
+      sponsorName: 'LAFISE',
+      stands: 'Stand 26',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Banco LAFISE!',
+      customSpeech: buildCorporateSpeech('LAFISE', 'Stand 26')
+    },
+    indenicsa: {
+      sponsorName: 'Indenicsa',
+      stands: 'Stands 27, 28',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Indenicsa!',
+      customSpeech: buildCorporateSpeech('Indenicsa', 'Stands 27, 28')
+    },
+    parques_industriales: {
+      sponsorName: 'Parques Industriales',
+      stands: 'Stand 29',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Parques Industriales!',
+      customSpeech: buildCorporateSpeech('Parques Industriales en Carretera Nueva a León', 'Stand 29')
+    },
+    plycem: {
+      sponsorName: 'Plycem',
+      stands: 'Stand 30',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Plycem!',
+      customSpeech: buildCorporateSpeech('Plycem', 'Stand 30')
+    },
+    bac: {
+      sponsorName: 'BAC',
+      stands: 'Stand 31',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con BAC Credomatic!',
+      customSpeech: buildCorporateSpeech('BAC', 'Stand 31')
+    },
+    casco: {
+      sponsorName: 'Casco de Nicaragua',
+      stands: 'Stand 32',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Casco de Nicaragua!',
+      customSpeech: buildCorporateSpeech('Casco de Nicaragua', 'Stand 32')
+    },
+    tigo: {
+      sponsorName: 'TIGO',
+      stands: 'Stand 33',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con TIGO Business!',
+      customSpeech: buildCorporateSpeech('TIGO', 'Stand 33')
+    },
+    incasa: {
+      sponsorName: 'INCASA (GRUPO IPSM)',
+      stands: 'Stand 34',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con INCASA!',
+      customSpeech: buildCorporateSpeech('INCASA (GRUPO IPSM)', 'Stand 34')
+    },
+    eaton: {
+      sponsorName: 'EATON',
+      stands: 'Stand 35',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con EATON!',
+      customSpeech: buildCorporateSpeech('EATON', 'Stand 35')
+    },
+    midesa: {
+      sponsorName: 'MIDESA',
+      stands: 'Stand 37',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con MIDESA!',
+      customSpeech: buildCorporateSpeech('MIDESA', 'Stand 37')
+    },
+    noelito: {
+      sponsorName: 'Ferretería Noelito',
+      stands: 'Stand 38',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Ferretería Noelito!',
+      customSpeech: buildCorporateSpeech('Ferretería Noelito', 'Stand 38')
+    },
+    romax: {
+      sponsorName: 'ROMAX',
+      stands: 'Organizador',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con ROMAX!',
+      customSpeech: buildCorporateSpeech('ROMAX', '')
+    },
+    jp_technology_studio: {
+      sponsorName: 'JP Technology Studio',
+      stands: 'Organizador',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con JP Technology Studio!',
+      customSpeech: buildCorporateSpeech('JP Technology Studio', '')
+    }
+  };
+
+  const generateDefaultSponsorSpeech = (sponsorName, stands) => {
+    return buildCorporateSpeech(sponsorName, stands);
   };
 
   const getSponsorArt = (sponsorName) => {
@@ -3468,9 +3472,9 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                     const targetSp = bulkEmailModal.sponsorName;
                     const availableInvites = invites.filter(inv => {
                       if (targetSp === 'general') {
-                        if (inv.sponsorName && inv.sponsorId !== 'general') return false;
+                        if (inv.sponsorName && inv.sponsorId !== 'general' && getSponsorKey(inv.sponsorName) !== 'general') return false;
                       } else if (targetSp !== 'all') {
-                        if ((inv.sponsorName || '').toLowerCase() !== targetSp.toLowerCase()) return false;
+                        if (!isMatchingSponsor(inv.sponsorName, targetSp) && inv.sponsorId !== getSponsorKey(targetSp)) return false;
                       }
                       return true;
                     });
