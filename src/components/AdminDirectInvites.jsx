@@ -1994,12 +1994,14 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                       const spInvites = invites.filter(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp)));
                       const spUsed = spInvites.filter(i => i.status === 'used').length;
                       const spPending = spInvites.length - spUsed;
-                      const spPendingWithEmail = spInvites.filter(i => i.status === 'pending' && i.email && i.email.includes('@'));
+                      const spPendingWithEmail = spInvites.filter(i => i.status === 'pending' && isValidEmailAddress(i.email));
                       const spUnsentEmail = spPendingWithEmail.filter(i => !i.emailSentAt);
                       const countToSend = spUnsentEmail.length > 0 ? spUnsentEmail.length : spPendingWithEmail.length;
 
                       const art = getSponsorArt(sp);
-                      const standsText = sponsorsMap[sp]?.stands?.join(', ') || art.stands || 'N/A';
+                      const rawStands = sponsorsMap[sp]?.stands?.join(', ') || art.stands || 'N/A';
+                      const cleanStands = rawStands.replace(/stand\s*/gi, '').trim();
+                      const standsText = cleanStands.includes(',') || cleanStands.includes('-') ? `Stands ${cleanStands}` : `Stand ${cleanStands}`;
 
                       return (
                         <tr key={sp} className="hover:bg-surface-variant/20 transition-colors">
@@ -2024,7 +2026,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                           {/* Stands */}
                           <td className="p-4">
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-900 font-bold text-xs rounded-full border border-amber-200">
-                              📍 Stand {standsText}
+                              📍 {standsText}
                             </span>
                           </td>
 
