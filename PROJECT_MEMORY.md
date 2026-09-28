@@ -86,6 +86,19 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ## 📅 Resumen de Cambios y Avances de la Sesión (28 de Septiembre de 2026)
 
+### ✉️ Motor de Recordatorios Masivos por Correo Electrónico (`AdminDirectInvites.jsx`)
+- **Botón `🔔 Recordatorio Masivo ({totalUnregisteredWithEmail})`:**
+  - Ubicado en el header del Medidor de Despacho, permite lanzar el flujo de recordatorios masivos por correo para todos los contactos con email válido que aún tienen estado `PENDIENTE REGISTRO`.
+- **Plantilla Oficial de Correo de Recordatorio:**
+  - Asunto oficial: `🔔 Recordatorio: Tu Pase para EXPO FERRE 2026 con [Patrocinador]` (o pase exclusivo general).
+  - Cuerpo HTML institucional con header banner, saludo personalizado (`[Nombre]`), botón de acción `🎟️ Completar Mi Registro y Activar Pase`, recordatorio de datos clave (`17 de Octubre`, `Crowne Plaza Managua`, `8:00am`), aviso de uso único y cinta footer de marcas.
+- **Selector Inteligente de Criterios en el Modal Masivo:**
+  - *Opción 1 (Primer Envío):* Solo a quienes nunca han recibido correo.
+  - *Opción 2 (Recordatorio a Todos):* A todos los pendientes de registrarse con correo válido.
+  - *Opción 3 (Solo Reenvío):* Exclusivamente a quienes ya recibieron un primer correo pero aún no se han registrado.
+- **Límite de Cupo Diario Protegido:**
+  - 2,000 correos/día con pausas antispam reguladas y selector de lotes (25, 50, 100 o Todos).
+
 ### 🔔 Notificaciones de Recordatorio por WhatsApp para Invitados Pendientes (`AdminDirectInvites.jsx`)
 - **Speech Oficial de Recordatorio Homologado:**
   - Se creó el generador corporativo `buildCorporateReminderSpeech` que personaliza automáticamente el mensaje según sea invitación general o por patrocinador (mencionando el stand oficial si aplica).
