@@ -84,7 +84,45 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ---
 
-## 📅 Resumen de Cambios y Avances de la Sesión (27 de Septiembre de 2026)
+## 📅 Resumen de Cambios y Avances de la Sesión (27 de Septiembre de 2026 - Tarde)
+
+### 🏆 Premios a la Excelencia Ferretera (Actualización Completa del Sistema de Nominación & Jurados)
+- **Nomenclatura y Pestañas Actualizadas:**
+  - Se eliminó la palabra `PASO` del formulario del jurado (`JudgeEvaluationForm.jsx`), reemplazándola por las pestañas oficiales:
+    - **Pestaña 1:** `Categoría 1 FAMILIA`
+    - **Pestaña 2:** `Categoría 2 ORO`
+    - **Pestaña 3:** `Categoría 3 Promesa`
+- **Bloque Explicativo del Sistema de Nominación y Ranking:**
+  - Se incorporó la guía oficial para los jurados:
+    - Cada jurado deberá nominar 5 ferreterías por categoría y asignarles un ranking del 1 al 5 (**1 = Mayor valoración**, **5 = Menor valoración**).
+    - El 1.º lugar será la ferretería con mayor valoración según los criterios establecidos.
+- **Criterios de Evaluación Oficiales por Categoría:**
+  - **01. Ferretería Familiar:** Trayectoria familiar / generacional (permanencia y continuidad), Reputación (confianza y reconocimiento) y Adaptación (evolución sin perder esencia).
+  - **02. Ferretería Oro:** Antigüedad (más de 25 años de trayectoria), Reputación y Reconocimiento sectorial, y Evolución.
+  - **03. Ferretería Promesa:** Antigüedad (menos de 5 años en el mercado nicaragüense), Crecimiento y reputación, Posicionamiento y Diferenciación.
+- **Etiquetado de Slots de Nominación:**
+  - Slot 1: `1.º Lugar (Mayor valoración)`
+  - Slot 2: `2.º Lugar`
+  - Slot 3: `3.º Lugar`
+  - Slot 4: `4.º Lugar`
+  - Slot 5: `5.º Lugar (Menor valoración)`
+- **Puntuación Ponderada y Tabla de Ranking en Vivo (`AdminJury.jsx`):**
+  - Se implementó el cálculo ponderado donde 1.º lugar = 5 pts, 2.º = 4 pts, ..., 5.º = 1 pto.
+  - La tabla de resultados y la exportación a Excel ahora muestran tanto el **Puntaje Ponderado Total (⭐ pts)** como el **Total de Nominaciones (votos)** y el desglose individual por jurado.
+
+### ✉️ Motor de Invitaciones Directas & Artes Co-Brandeados (`AdminDirectInvites.jsx`)
+- **Reactividad Inmediata de Miniaturas de Arte:**
+  - Se corrigió la fila de "Invitación General" en la tabla del directorio para que consuma dinámicamente `getSponsorArt('general')` en lugar de URLs estáticas. Al subir y guardar un banner, la miniatura se actualiza en tiempo real con su indicador verde de arte listo.
+- **Homologación del Speech Oficial Exacto:**
+  - Se configuró el texto corporativo exacto solicitado en todas las listas de patrocinadores:
+    - Saludo: `Hola [Nombre],` (soporta `[Nombre]` y `{invitado}`).
+    - Evento: `17 de Octubre`, `Centro de Convenciones Crowne Plaza Managua`, `8:00am`.
+    - Enlace único dinámico con disclaimer de uso único y autodestrucción.
+- **Reconocimiento y Mapeo de Marcas:**
+  - Madinisa / Sonax (Stand 25, Plata) configurado con correspondencia bidireccional.
+  - Limpieza de palabras clave en `getSponsorKey` y modal masivo para cálculo de destinatarios 100% exacto.
+
+## 📅 Resumen de Cambios y Avances de la Sesión (27 de Septiembre de 2026 - Mañana)
 
 - **Sincronización Total de 35 Stands Reservados en Firestore (`events/2026/stands`):**
   - Se cargaron e integraron los 35 stands oficiales de acuerdo a la tabla maestra autorizada y al plano de MAXIMIZA:
