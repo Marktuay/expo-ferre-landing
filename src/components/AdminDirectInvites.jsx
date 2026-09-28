@@ -43,7 +43,8 @@ import {
   StopCircle,
   Zap,
   ShieldAlert,
-  Timer
+  Timer,
+  Bell
 } from 'lucide-react';
 
 export default function AdminDirectInvites({ onBack, adminUser }) {
@@ -278,6 +279,32 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 ⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
 
 ¡Contamos con tu valiosa presencia!`;
+  };
+
+  const buildCorporateReminderSpeech = (sponsorName, stands) => {
+    const standsClean = stands ? (stands.toLowerCase().startsWith('stand') ? stands : `Stand ${stands}`) : '';
+    const sponsorHeader = sponsorName && sponsorName !== 'general' && sponsorName.toLowerCase() !== 'invitación general'
+      ? `por cortesía de *${sponsorName}*${standsClean ? ` (${standsClean})` : ''}`
+      : 'de la organización oficial';
+
+    return `¡Recordatorio de Invitación a EXPO FERRE Nicaragua 2026! 🔔
+
+Hola [Nombre],
+
+Esperamos que te encuentres muy bien. Te escribimos para recordarte que tienes reservado tu pase exclusivo ${sponsorHeader} para la primera edición de *EXPO FERRE Nicaragua 2026*.
+
+Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con Código QR* para ingresar de manera preferencial y sin filas.
+
+📅 Fecha: 17 de Octubre
+📍 Lugar: Centro de Convenciones Crowne Plaza Managua
+⏰ Hora: 8:00am
+
+👉 Por favor activa tu pase completando tu registro en este enlace único:
+🔗 {enlace}
+
+⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
+
+¡Contamos con tu valiosa presencia! 🚀`;
   };
 
   // Configuraciones y speeches oficiales predeterminados por marca
@@ -1122,8 +1149,9 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
 Tenemos el agrado de extenderte una invitación especial y exclusiva para que nos acompañes y nos visites en nuestro ${stands ? `Stand ${stands}` : 'stand oficial'}.
 
-📅 Fecha: 16 y 17 de Octubre de 2026
-📍 Lugar: Centro de Convenciones Crowne Plaza, Managua
+📅 Fecha: 17 de Octubre
+📍 Lugar: Centro de Convenciones Crowne Plaza Managua
+⏰ Hora: 8:00am
 
 Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
 
@@ -1134,13 +1162,14 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
 ¡Será un verdadero honor recibirte en nuestro stand! 🚀`;
     }
 
-    // General Speech (Karen Torres)
-    return `¡Hola ${guestLabel}! Te saluda Karen Torres en nombre del comité organizador de EXPO FERRE Nicaragua 2026.
+    // General Speech
+    return `¡Hola ${guestLabel}! Te saludamos en nombre del comité organizador de EXPO FERRE Nicaragua 2026.
 
 Es un gusto saludarte y extenderte una invitación especial y personalizada para ser parte del encuentro más importante de la industria ferretera y de la construcción en el país.
 
-📅 Fecha: 16 y 17 de Octubre de 2026
-📍 Lugar: Centro de Convenciones Crowne Plaza, Managua
+📅 Fecha: 17 de Octubre
+📍 Lugar: Centro de Convenciones Crowne Plaza Managua
+⏰ Hora: 8:00am
 
 Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
 
@@ -1149,6 +1178,36 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 ⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
 
 ¡Será un verdadero honor contar con tu presencia! 🚀`;
+  };
+
+  // Obtener speech de recordatorio para WhatsApp
+  const getWhatsAppReminderSpeech = (invite) => {
+    const link = getInviteUrl(invite.id);
+    const guestLabel = invite.nombre?.trim() || 'Estimado(a) Colega';
+    const sponsorName = invite.sponsorName || '';
+    const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
+    const stands = invite.sponsorStands || art.stands || '';
+
+    if (art.customReminderSpeech && art.customReminderSpeech.trim()) {
+      let speech = art.customReminderSpeech
+        .replace(/{invitado}/g, guestLabel)
+        .replace(/\[Nombre\]/g, guestLabel)
+        .replace(/{empresa_invitada}/g, invite.empresa || '')
+        .replace(/{patrocinador}/g, sponsorName)
+        .replace(/{stands}/g, stands ? `Stand ${stands}` : 'nuestro stand');
+
+      if (speech.includes('{enlace}')) {
+        speech = speech.replace(/{enlace}/g, link);
+      } else {
+        speech += `\n\n🔗 ${link}\n\n⚠️ Nota: Este enlace es personal, intransferible y de un solo uso.`;
+      }
+      return speech;
+    }
+
+    return buildCorporateReminderSpeech(sponsorName, stands)
+      .replace(/{invitado}/g, guestLabel)
+      .replace(/\[Nombre\]/g, guestLabel)
+      .replace(/{enlace}/g, link);
   };
 
   const getWhatsAppUrl = (invite) => {
@@ -1160,10 +1219,26 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     return phoneClean ? `https://wa.me/${phoneClean}?text=${text}` : `https://wa.me/?text=${text}`;
   };
 
+  const getWhatsAppReminderUrl = (invite) => {
+    const text = encodeURIComponent(getWhatsAppReminderSpeech(invite));
+    let phoneClean = (invite.telefono || '').replace(/[^0-9]/g, '');
+    if (phoneClean && phoneClean.length === 8) {
+      phoneClean = '505' + phoneClean;
+    }
+    return phoneClean ? `https://wa.me/${phoneClean}?text=${text}` : `https://wa.me/?text=${text}`;
+  };
+
   const handleCopyWhatsApp = (invite) => {
     const text = getWhatsAppSpeech(invite);
     navigator.clipboard.writeText(text);
     setCopiedToken(`wa_${invite.id}`);
+    setTimeout(() => setCopiedToken(null), 2500);
+  };
+
+  const handleCopyWhatsAppReminder = (invite) => {
+    const text = getWhatsAppReminderSpeech(invite);
+    navigator.clipboard.writeText(text);
+    setCopiedToken(`wa_rem_${invite.id}`);
     setTimeout(() => setCopiedToken(null), 2500);
   };
 
@@ -2377,6 +2452,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                       filteredInvites.map((inv) => {
                         const isUsed = inv.status === 'used';
                         const isWaCopied = copiedToken === `wa_${inv.id}`;
+                        const isWaRemCopied = copiedToken === `wa_rem_${inv.id}`;
                         const isLinkCopied = copiedToken === `link_${inv.id}`;
 
                         return (
@@ -2469,27 +2545,41 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                                   <Edit2 size={14} />
                                 </button>
 
-                                {/* WhatsApp Directo */}
+                                {/* WhatsApp Directo (Invitación Oficial) */}
                                 <a
                                   href={getWhatsAppUrl(inv)}
                                   target="_blank"
                                   rel="noreferrer"
-                                  title="Abrir chat de WhatsApp con el speech oficial y enlace único"
+                                  title="Abrir chat de WhatsApp con Invitación Oficial y enlace único"
                                   className="p-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs"
                                 >
                                   <Phone size={14} />
                                   <span className="hidden xl:inline">WhatsApp</span>
                                 </a>
 
+                                {/* Recordatorio WhatsApp (Para Pendientes de Registro) */}
+                                {inv.status === 'pending' && (
+                                  <a
+                                    href={getWhatsAppReminderUrl(inv)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    title="Enviar RECORDATORIO por WhatsApp (para activar pase y registrarse)"
+                                    className="p-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs"
+                                  >
+                                    <Bell size={14} />
+                                    <span className="hidden xl:inline">Recordar</span>
+                                  </a>
+                                )}
+
                                 {/* Copiar Speech WhatsApp */}
                                 <button
-                                  onClick={() => handleCopyWhatsApp(inv)}
-                                  title="Copiar texto de WhatsApp al portapapeles"
+                                  onClick={() => inv.status === 'pending' && inv.emailSentAt ? handleCopyWhatsAppReminder(inv) : handleCopyWhatsApp(inv)}
+                                  title={inv.status === 'pending' && inv.emailSentAt ? "Copiar texto de Recordatorio de WhatsApp" : "Copiar texto de WhatsApp al portapapeles"}
                                   className={`p-2 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                                    isWaCopied ? 'bg-green-600 text-white' : 'bg-surface hover:bg-surface-variant text-on-surface border border-outline-variant'
+                                    isWaCopied || isWaRemCopied ? 'bg-green-600 text-white' : 'bg-surface hover:bg-surface-variant text-on-surface border border-outline-variant'
                                   }`}
                                 >
-                                  {isWaCopied ? <Check size={14} /> : <Copy size={14} />}
+                                  {isWaCopied || isWaRemCopied ? <Check size={14} /> : <Copy size={14} />}
                                 </button>
 
                                 {/* Enviar Correo */}
