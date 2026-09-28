@@ -1250,7 +1250,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
   };
 
   // Función generadora del HTML del correo formal co-brandeado
-  const buildInviteEmail = (invite, customRecipientEmail = null) => {
+  const buildInviteEmail = (invite, customRecipientEmail = null, isReminder = false) => {
     const link = getInviteUrl(invite.id);
     const guestLabel = invite.nombre?.trim() || 'Estimado(a) Invitado(a)';
     const sponsorName = invite.sponsorName || '';
@@ -1258,14 +1258,20 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     const rawStands = invite.sponsorStands || art.stands || '';
     const standsClean = rawStands ? (rawStands.toLowerCase().startsWith('stand') ? rawStands : `Stand ${rawStands}`) : '';
 
-    const subject = art.customEmailSubject || (sponsorName 
-      ? `Invitación Exclusiva por cortesía de ${sponsorName} - EXPO FERRE 2026`
-      : 'Invitación Exclusiva: Acceso Oficial a EXPO FERRE Nicaragua 2026');
+    const defaultSubject = isReminder
+      ? (sponsorName 
+          ? `🔔 Recordatorio: Tu Pase para EXPO FERRE 2026 con ${sponsorName}`
+          : '🔔 Recordatorio: Tu Pase Exclusivo para EXPO FERRE Nicaragua 2026')
+      : (art.customEmailSubject || (sponsorName 
+          ? `¡Sé parte de EXPO FERRE Nicaragua 2026 con ${sponsorName}!`
+          : 'Invitación Exclusiva: Acceso Oficial a EXPO FERRE Nicaragua 2026'));
+
+    const subject = isReminder ? (art.customReminderSubject || defaultSubject) : defaultSubject;
 
     const buttonHtml = `
       <div style="text-align: center; margin: 32px 0;">
         <a href="${link}" style="background-color: #f39200; color: #ffffff; padding: 15px 36px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-          🎟️ Activar Mi Pase Exclusivo
+          🎟️ ${isReminder ? 'Completar Mi Registro y Activar Pase' : 'Activar Mi Pase Exclusivo'}
         </a>
       </div>
     `;
@@ -1280,7 +1286,31 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
     let bodyContentHtml = '';
 
-    if (art.customSpeech && art.customSpeech.trim()) {
+    if (isReminder) {
+      bodyContentHtml = `
+        <h2 style="color: #0d47a1; margin-top: 0; font-size: 22px;">¡Recordatorio de Invitación, ${guestLabel}! 🔔</h2>
+        <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
+          Te escribimos para recordarte que tienes reservado tu <strong>pase exclusivo</strong> ${sponsorName ? `por cortesía de <strong>${sponsorName}</strong>` : 'de la organización oficial'} para la primera edición de <strong>EXPO FERRE Nicaragua 2026</strong>.
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
+          Aún estás a tiempo de confirmar tu asistencia y recibir tu <strong>Gafete Oficial con Código QR</strong> para ingresar de manera preferencial y sin filas.
+        </p>
+
+        ${buttonHtml}
+        ${noteHtml}
+
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 6px; text-align: left;">
+          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 17 de Octubre, 2026</p>
+          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza Managua.</p>
+          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">⏰ <strong>Hora:</strong> 8:00am</p>
+          ${sponsorName && standsClean ? `<p style="margin: 4px 0; font-size: 13px; color: #d97706;">🏢 <strong>Stand Anfitrión:</strong> ${standsClean} (${sponsorName})</p>` : ''}
+        </div>
+
+        <p style="font-size: 15px; font-weight: bold; color: #0d47a1; margin-top: 28px;">
+          ¡Contamos con tu valiosa presencia! 🚀
+        </p>
+      `;
+    } else if (art.customSpeech && art.customSpeech.trim()) {
       let speechFormatted = art.customSpeech
         .replace(/{invitado}/g, guestLabel)
         .replace(/\[Nombre\]/g, guestLabel)
@@ -1311,7 +1341,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
         <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
           ${sponsorName 
             ? `Te saludamos cordialmente en nombre de <strong>${sponsorName}</strong> y el comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.`
-            : 'Te saluda <strong>Karen Torres</strong> en nombre del comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.'}
+            : 'Te saludamos en nombre del comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.'}
         </p>
         <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
           ${sponsorName && standsClean 
@@ -1326,8 +1356,9 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
         ${noteHtml}
 
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 6px; text-align: left;">
-          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 16 y 17 de Octubre, 2026</p>
-          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza, Managua.</p>
+          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 17 de Octubre, 2026</p>
+          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza Managua.</p>
+          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">⏰ <strong>Hora:</strong> 8:00am</p>
           ${sponsorName && standsClean ? `<p style="margin: 4px 0; font-size: 13px; color: #d97706;">🏢 <strong>Stand Anfitrión:</strong> ${standsClean} (${sponsorName})</p>` : ''}
         </div>
 
@@ -1399,13 +1430,13 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
   };
 
   // Abrir Modal de Envío Masivo de Correos
-  const handleOpenBulkEmailModal = (sponsorName) => {
+  const handleOpenBulkEmailModal = (sponsorName, defaultFilterType = 'never_sent') => {
     const isGen = !sponsorName || sponsorName === 'general';
     setBulkEmailModal({
       open: true,
       sponsorName: isGen ? 'general' : sponsorName,
       sponsorDisplayName: isGen ? 'Invitación General (ExpoFerre)' : sponsorName,
-      filterType: 'never_sent',
+      filterType: defaultFilterType,
       batchLimit: 'all',
       paceSpeed: 'safe'
     });
@@ -1429,6 +1460,8 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     // Pacing delay (ms)
     const delayMs = paceSpeed === 'safe' ? 250 : paceSpeed === 'normal' ? 120 : 40;
 
+    const isReminderMode = filterType === 'unregistered_reminder' || filterType === 'only_already_sent_reminders';
+
     // Filtrar destinatarios válidos y separar correos con sintaxis válida
     let targets = invites.filter(inv => {
       // 1. Validar patrocinador
@@ -1447,6 +1480,11 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
       // 4. Si el filtro es solo nunca enviados
       if (filterType === 'never_sent' && inv.emailSentAt) {
+        return false;
+      }
+
+      // 5. Si el filtro es solo los que ya recibieron correo previo
+      if (filterType === 'only_already_sent_reminders' && !inv.emailSentAt) {
         return false;
       }
 
@@ -1488,7 +1526,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
         const targetEmail = inv.email.trim().toLowerCase();
 
         try {
-          const { subject, html } = buildInviteEmail(inv);
+          const { subject, html } = buildInviteEmail(inv, null, isReminderMode);
 
           // 1. Encolar correo en la colección 'mail' de Firestore
           await addDoc(collection(db, 'mail'), {
@@ -1625,6 +1663,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
   const totalWithValidEmail = invites.filter(i => isValidEmailAddress(i.email)).length;
   const totalEmailsSent = invites.filter(i => i.emailSent || i.emailSentAt).length;
   const totalEmailsPending = invites.filter(i => isValidEmailAddress(i.email) && !i.emailSentAt && i.status === 'pending').length;
+  const totalUnregisteredWithEmail = invites.filter(i => isValidEmailAddress(i.email) && i.status === 'pending').length;
   const totalRegisteredFromEmail = invites.filter(i => (i.emailSent || i.emailSentAt) && i.status === 'used').length;
   const totalWithoutValidEmail = totalInvitesCount - totalWithValidEmail;
   
@@ -1748,15 +1787,26 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
               </div>
             </div>
 
-            {/* Botón de Despacho Global */}
-            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            {/* Botones de Despacho Global & Recordatorio */}
+            <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
               <button
-                onClick={() => handleOpenBulkEmailModal('all')}
+                onClick={() => handleOpenBulkEmailModal('all', 'never_sent')}
                 disabled={totalEmailsPending === 0}
-                className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transform active:scale-95"
+                className="flex-1 sm:flex-initial px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transform active:scale-95"
+                title={totalEmailsPending === 0 ? "No hay invitaciones iniciales pendientes por enviar" : "Enviar invitación inicial a los que nunca han recibido correo"}
               >
                 <SendHorizontal size={15} className="text-slate-950" />
-                <span>Despachar Masivo a Pendientes ({totalEmailsPending})</span>
+                <span>Despachar Nuevos ({totalEmailsPending})</span>
+              </button>
+
+              <button
+                onClick={() => handleOpenBulkEmailModal('all', 'unregistered_reminder')}
+                disabled={totalUnregisteredWithEmail === 0}
+                className="flex-1 sm:flex-initial px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black rounded-xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transform active:scale-95 border border-white/10"
+                title="Enviar correo de recordatorio a todos los contactos que aún no han completado su pase"
+              >
+                <Bell size={15} className="text-amber-300" />
+                <span>🔔 Recordatorio Masivo ({totalUnregisteredWithEmail})</span>
               </button>
             </div>
           </div>
@@ -3577,7 +3627,11 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                     const neverSent = withValidEmail.filter(i => !i.emailSentAt);
                     const alreadySent = withValidEmail.filter(i => i.emailSentAt);
 
-                    const currentFilterTargets = bulkEmailModal.filterType === 'never_sent' ? neverSent : withValidEmail;
+                    const currentFilterTargets = bulkEmailModal.filterType === 'never_sent' 
+                      ? neverSent 
+                      : bulkEmailModal.filterType === 'only_already_sent_reminders'
+                      ? alreadySent
+                      : withValidEmail;
                     
                     // Cálculo de Lote Activo
                     const batchSize = bulkEmailModal.batchLimit === 'all' 
@@ -3616,11 +3670,11 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                         {/* Desglose de Diagnóstico de Destinatarios */}
                         <div className="grid grid-cols-3 gap-2 text-center text-xs">
                           <div className="bg-blue-50 border border-blue-100 p-2.5 rounded-xl">
-                            <span className="text-secondary block text-[10px] uppercase font-bold">Listos (Válidos)</span>
+                            <span className="text-secondary block text-[10px] uppercase font-bold">Listos (Primer Envío)</span>
                             <span className="text-xl font-black text-blue-900">{neverSent.length}</span>
                           </div>
                           <div className="bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl">
-                            <span className="text-secondary block text-[10px] uppercase font-bold">Ya Enviados</span>
+                            <span className="text-secondary block text-[10px] uppercase font-bold">Ya Contactados</span>
                             <span className="text-xl font-black text-emerald-900">{alreadySent.length}</span>
                           </div>
                           <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xl">
@@ -3645,7 +3699,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                             1. Criterio de Selección:
                           </label>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                             <label className={`flex items-start gap-2.5 p-2.5 border rounded-xl cursor-pointer transition-all ${
                               bulkEmailModal.filterType === 'never_sent' ? 'bg-amber-50/70 border-amber-400 text-amber-950 font-medium' : 'bg-surface border-outline-variant hover:bg-surface-variant/30 text-secondary'
                             }`}>
@@ -3658,25 +3712,42 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                                 className="mt-0.5"
                               />
                               <div className="text-xs">
-                                <p className="font-bold text-on-surface">Nunca enviados ({neverSent.length})</p>
-                                <p className="text-[10px] text-secondary">Evita duplicar correos.</p>
+                                <p className="font-bold text-on-surface">Primer Envío ({neverSent.length})</p>
+                                <p className="text-[10px] text-secondary">Solo nunca enviados.</p>
                               </div>
                             </label>
 
                             <label className={`flex items-start gap-2.5 p-2.5 border rounded-xl cursor-pointer transition-all ${
-                              bulkEmailModal.filterType === 'all_pending' ? 'bg-amber-50/70 border-amber-400 text-amber-950 font-medium' : 'bg-surface border-outline-variant hover:bg-surface-variant/30 text-secondary'
+                              bulkEmailModal.filterType === 'unregistered_reminder' || bulkEmailModal.filterType === 'all_pending' ? 'bg-blue-50/70 border-blue-400 text-blue-950 font-medium' : 'bg-surface border-outline-variant hover:bg-surface-variant/30 text-secondary'
                             }`}>
                               <input
                                 type="radio"
                                 name="bulkFilterType"
-                                value="all_pending"
-                                checked={bulkEmailModal.filterType === 'all_pending'}
-                                onChange={() => setBulkEmailModal(prev => ({ ...prev, filterType: 'all_pending' }))}
+                                value="unregistered_reminder"
+                                checked={bulkEmailModal.filterType === 'unregistered_reminder' || bulkEmailModal.filterType === 'all_pending'}
+                                onChange={() => setBulkEmailModal(prev => ({ ...prev, filterType: 'unregistered_reminder' }))}
                                 className="mt-0.5"
                               />
                               <div className="text-xs">
-                                <p className="font-bold text-on-surface">Todos pendientes ({withValidEmail.length})</p>
-                                <p className="text-[10px] text-secondary">Incluye reenvíos.</p>
+                                <p className="font-bold text-on-surface">🔔 Recordatorio Todos ({withValidEmail.length})</p>
+                                <p className="text-[10px] text-secondary">A todos los pendientes.</p>
+                              </div>
+                            </label>
+
+                            <label className={`flex items-start gap-2.5 p-2.5 border rounded-xl cursor-pointer transition-all ${
+                              bulkEmailModal.filterType === 'only_already_sent_reminders' ? 'bg-indigo-50/70 border-indigo-400 text-indigo-950 font-medium' : 'bg-surface border-outline-variant hover:bg-surface-variant/30 text-secondary'
+                            }`}>
+                              <input
+                                type="radio"
+                                name="bulkFilterType"
+                                value="only_already_sent_reminders"
+                                checked={bulkEmailModal.filterType === 'only_already_sent_reminders'}
+                                onChange={() => setBulkEmailModal(prev => ({ ...prev, filterType: 'only_already_sent_reminders' }))}
+                                className="mt-0.5"
+                              />
+                              <div className="text-xs">
+                                <p className="font-bold text-on-surface">🔔 Solo Reenvío ({alreadySent.length})</p>
+                                <p className="text-[10px] text-secondary">Ya contactados antes.</p>
                               </div>
                             </label>
                           </div>
