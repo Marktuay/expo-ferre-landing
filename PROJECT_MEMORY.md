@@ -84,6 +84,20 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ---
 
+## 📅 Resumen de Cambios y Avances de la Sesión (28 de Septiembre de 2026)
+
+### 🔔 Notificaciones de Recordatorio por WhatsApp para Invitados Pendientes (`AdminDirectInvites.jsx`)
+- **Speech Oficial de Recordatorio Homologado:**
+  - Se creó el generador corporativo `buildCorporateReminderSpeech` que personaliza automáticamente el mensaje según sea invitación general o por patrocinador (mencionando el stand oficial si aplica).
+  - Incluye: saludo con nombre dinámico (`[Nombre]` / `{invitado}`), fecha oficial (`17 de Octubre`), lugar (`Centro de Convenciones Crowne Plaza Managua`), hora (`8:00am`), llamado a la acción para generar su Gafete con Código QR y enlace único criptográfico personal e intransferible.
+- **Botón Dedicado "Recordar" (🔔) en la Tabla de Invitaciones:**
+  - Los contactos con estado `PENDIENTE REGISTRO` cuentan ahora con un botón de acción en color ámbar/dorado (`Recordar`) que abre instantáneamente WhatsApp con el número pre-marcado (`+505...`) y el mensaje de recordatorio listo para enviar con 1 solo clic.
+  - Se agregó soporte para copiar el Speech de Recordatorio directamente al portapapeles con confirmación visual de copiado.
+- **Diagnóstico de Conexión y Dominios Autorizados de Firebase:**
+  - Se verificó y resolvió el bloqueo de red por extensiones en el navegador (`auth/network-request-failed`) asegurando el acceso tanto en local como en producción mediante dominios autorizados y modo incógnito.
+
+---
+
 ## 📅 Resumen de Cambios y Avances de la Sesión (27 de Septiembre de 2026 - Tarde)
 
 ### 🏆 Premios a la Excelencia Ferretera (Actualización Completa del Sistema de Nominación & Jurados)
