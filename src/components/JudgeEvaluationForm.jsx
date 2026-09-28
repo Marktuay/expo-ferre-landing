@@ -8,26 +8,42 @@ const CATEGORIES = [
   {
     id: 'familiar',
     number: '01',
-    title: 'Ferretería Familiar',
+    tabLabel: 'Categoría 1 FAMILIA',
+    title: '01. FERRETERÍA FAMILIAR',
     badgeText: '01. FAMILIAR',
-    tagline: 'Una historia que se construye de generación en generación.',
-    description: 'Reconoce a ferreterías donde la familia es parte fundamental de la identidad, historia y continuidad del negocio.'
+    description: 'Reconoce a ferreterías donde la familia es parte fundamental de la identidad, historia y continuidad del negocio.',
+    criteria: [
+      { label: 'Trayectoria familiar / generacional', desc: 'Permanencia y continuidad de la familia al frente del negocio (hijos, padres, hermanos u otras generaciones de la familia).' },
+      { label: 'Reputación', desc: 'Reconocimiento y confianza que la ferretería ha construido en su mercado.' },
+      { label: 'Adaptación', desc: 'Capacidad de evolucionar con las necesidades del mercado sin perder su esencia.' }
+    ]
   },
   {
     id: 'oro',
     number: '02',
-    title: 'Ferretería Oro',
+    tabLabel: 'Categoría 2 ORO',
+    title: '02. FERRETERÍA ORO',
     badgeText: '02. ORO (25+ AÑOS)',
-    tagline: '25+ años construyendo historia y trayectoria en el mercado.',
-    description: 'Reconoce a ferreterías con más de 25 años de trayectoria sólida, solvencia y reconocimiento en el sector.'
+    description: 'Reconoce a ferreterías con más de 25 años de trayectoria sólida, solvencia y reconocimiento en el sector.',
+    criteria: [
+      { label: 'Antigüedad', desc: 'Más de 25 años de trayectoria en el mercado.' },
+      { label: 'Reputación y Reconocimiento sectorial', desc: 'Confianza y reconocimiento construido durante su trayectoria.' },
+      { label: 'Evolución', desc: 'Capacidad de adaptarse y crecer junto con el mercado.' }
+    ]
   },
   {
     id: 'promesa',
     number: '03',
-    title: 'Ferretería Promesa',
+    tabLabel: 'Categoría 3 Promesa',
+    title: '03. FERRETERÍA PROMESA',
     badgeText: '03. PROMESA (<5 AÑOS)',
-    tagline: 'Jóvenes emprendimientos con crecimiento extraordinario.',
-    description: 'Reconoce a ferreterías jóvenes con menos de 5 años de presencia en Nicaragua con alto potencial y dinamismo.'
+    description: 'Reconoce a ferreterías jóvenes con menos de 5 años de presencia en Nicaragua con alto potencial y dinamismo.',
+    criteria: [
+      { label: 'Antigüedad', desc: 'Menos de 5 años en el mercado nicaragüense.' },
+      { label: 'Crecimiento y reputación', desc: 'Evolución y crecimiento visible año tras año.' },
+      { label: 'Posicionamiento', desc: 'Presencia y reconocimiento alcanzado dentro del mercado.' },
+      { label: 'Diferenciación', desc: 'Elementos que la distinguen de otras ferreterías.' }
+    ]
   }
 ];
 
@@ -209,7 +225,7 @@ export default function JudgeEvaluationForm({ onClose }) {
           </div>
         </div>
 
-        {/* SELECTOR DE 3 PASOS / CATEGORÍAS */}
+        {/* SELECTOR DE 3 CATEGORÍAS */}
         <div className="grid grid-cols-3 gap-2 mb-4">
           {CATEGORIES.map((cat, idx) => {
             const isActive = activeCategoryIndex === idx;
@@ -220,29 +236,50 @@ export default function JudgeEvaluationForm({ onClose }) {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategoryIndex(idx)}
-                className={`py-2.5 px-3 rounded-xl text-center border transition-all ${
+                className={`py-2.5 px-2 sm:px-3 rounded-xl text-center border transition-all cursor-pointer ${
                   isActive 
                     ? 'bg-white border-[#f39200] shadow-sm ring-2 ring-[#f39200]/20' 
                     : 'bg-white/80 border-slate-200 text-slate-500 hover:bg-white'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5 mb-0.5">
-                  <span className={`text-[10px] font-black uppercase ${isActive ? 'text-[#f39200]' : 'text-slate-400'}`}>
-                    Paso {idx + 1}
+                  <span className={`text-[10px] sm:text-[11px] font-black uppercase ${isActive ? 'text-[#f39200]' : 'text-slate-500'}`}>
+                    {cat.tabLabel}
                   </span>
                   {isCompleted && (
                     <Check size={12} className="text-emerald-600 font-bold" />
                   )}
                 </div>
-                <div className="text-xs font-bold text-slate-800 truncate">
-                  {cat.title.replace('Ferretería ', '')}
-                </div>
                 <div className="text-[10px] text-slate-400 font-semibold mt-0.5">
-                  {filledCount}/5 listas
+                  {filledCount}/5 nominadas
                 </div>
               </button>
             );
           })}
+        </div>
+
+        {/* SISTEMA DE NOMINACIÓN Y RANKING */}
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 mb-4 text-xs space-y-2.5">
+          <div className="flex items-center gap-2 text-amber-950 font-black text-xs uppercase tracking-wide">
+            <Award size={16} className="text-[#f39200] shrink-0" />
+            <span>Sistema de nominación y ranking:</span>
+          </div>
+          <p className="text-slate-700 leading-relaxed text-[11px] sm:text-xs">
+            Cada jurado deberá nominar <strong>5 ferreterías por categoría</strong> y asignarles un ranking del <strong>1 al 5</strong>:
+          </p>
+          <div className="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-amber-200/80 font-bold text-slate-800 text-[11px]">
+            <div className="flex items-center gap-1.5 text-amber-900">
+              <span className="w-5 h-5 rounded-md bg-amber-500 text-white flex items-center justify-center text-[10px] font-black">1</span>
+              <span>= Mayor valoración</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-slate-700">
+              <span className="w-5 h-5 rounded-md bg-slate-600 text-white flex items-center justify-center text-[10px] font-black">5</span>
+              <span>= Menor valoración</span>
+            </div>
+          </div>
+          <p className="text-[11px] text-slate-600 italic">
+            El 1.º lugar será la ferretería con mayor valoración según los criterios establecidos.
+          </p>
         </div>
 
         {/* TARJETA PRINCIPAL DE NOMINACIÓN */}
@@ -264,16 +301,38 @@ export default function JudgeEvaluationForm({ onClose }) {
             </div>
           </div>
 
-          <div className="mb-4">
-            <p className="text-xs text-slate-600 font-semibold">
-              Por favor, ingresa hasta <strong>5 ferreterías</strong> que consideres merecedoras de este premio:
+          {/* CRITERIOS DE EVALUACIÓN OFICIALES */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-5 space-y-2">
+            <h4 className="font-black text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+              <span>📋 Criterios de evaluación:</span>
+            </h4>
+            <ul className="space-y-1.5 text-xs text-slate-700">
+              {currentCategory.criteria.map((cr, cIdx) => (
+                <li key={cIdx} className="flex items-start gap-2 leading-relaxed">
+                  <span className="text-[#f39200] font-black mt-0.5">•</span>
+                  <span>
+                    <strong className="text-slate-900">{cr.label}:</strong> {cr.desc}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mb-3">
+            <p className="text-xs text-slate-600 font-bold uppercase tracking-wide">
+              Ingresa tus 5 ferreterías nominadas ordenadas por valoración (1 al 5):
             </p>
           </div>
 
-          {/* 5 SLOTS DIRECTOS (NOMBRE + CIUDAD) */}
+          {/* 5 SLOTS DIRECTOS (NOMBRE + CIUDAD + RANKING) */}
           <div className="space-y-3">
             {currentSlots.map((slot, slotIdx) => {
               const hasName = slot.nombreFerreteria.trim() !== '';
+              const rankLabel = slotIdx === 0 
+                ? '1.º Lugar (Mayor valoración)' 
+                : slotIdx === 4 
+                ? '5.º Lugar (Menor valoración)' 
+                : `${slotIdx + 1}.º Lugar`;
 
               return (
                 <div 
@@ -284,14 +343,20 @@ export default function JudgeEvaluationForm({ onClose }) {
                       : 'border-slate-200 bg-slate-50/60 focus-within:bg-white focus-within:border-[#f39200] focus-within:ring-1 focus-within:ring-[#f39200]/20'
                   }`}
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 ${
-                      hasName ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'
-                    }`}>
-                      {hasName ? <Check size={13} /> : slot.slot}
-                    </span>
-                    <span className="font-bold text-xs text-slate-800">
-                      Ferretería #{slot.slot}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 ${
+                        hasName ? 'bg-emerald-600 text-white' : slotIdx === 0 ? 'bg-amber-500 text-white' : 'bg-slate-700 text-white'
+                      }`}>
+                        {hasName ? <Check size={13} /> : slot.slot}
+                      </span>
+                      <span className="font-black text-xs text-slate-900">
+                        {rankLabel}
+                      </span>
+                    </div>
+
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Ranking #{slot.slot}
                     </span>
                   </div>
 
@@ -301,7 +366,7 @@ export default function JudgeEvaluationForm({ onClose }) {
                         type="text" 
                         value={slot.nombreFerreteria}
                         onChange={(e) => handleInfoChange(slotIdx, 'nombreFerreteria', e.target.value)}
-                        placeholder={`Nombre comercial de la ferretería #${slot.slot}`}
+                        placeholder={`Nombre comercial de la ferretería (${slot.slot}º lugar)`}
                         className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#f39200]"
                       />
                     </div>

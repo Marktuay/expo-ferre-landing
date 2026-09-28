@@ -40,35 +40,40 @@ export default function AdminJury({ onBack }) {
     };
   }, []);
 
-  // Calcular Rankings Consolidados por Categoría (Por cantidad de nominaciones)
+  // Calcular Rankings Consolidados por Categoría (Por valoración ponderada y cantidad de nominaciones)
   const calculateRanking = (catId) => {
-    const storesMap = {}; // { 'Nombre': { name, city, nominationsCount, judges: [] } }
+    const storesMap = {}; // { 'Nombre': { name, city, nominationsCount, totalScore, judges: [] } }
 
     evaluations.forEach(ev => {
       const catSlots = ev.evaluations?.[catId] || [];
-      catSlots.forEach(slot => {
+      catSlots.forEach((slot, slotIdx) => {
         const name = (slot.nombreFerreteria || '').trim();
         if (!name) return;
 
         const normKey = name.toLowerCase();
+        const rankPos = slot.slot || (slotIdx + 1);
+        // Puntos según ranking del 1 al 5: 1º lugar = 5 pts, 2º = 4 pts, 3º = 3 pts, 4º = 2 pts, 5º = 1 pto
+        const points = Math.max(1, 6 - rankPos);
 
         if (!storesMap[normKey]) {
           storesMap[normKey] = {
             name: name,
             city: slot.ciudad || 'N/D',
             nominationsCount: 0,
+            totalScore: 0,
             judges: []
           };
         }
 
         storesMap[normKey].nominationsCount += 1;
-        storesMap[normKey].judges.push(ev.judgeName);
+        storesMap[normKey].totalScore += points;
+        storesMap[normKey].judges.push(`${ev.judgeName} (${rankPos}º lugar · ${points} pts)`);
       });
     });
 
     const list = Object.values(storesMap);
-    // Ordenar de mayor a menor número de nominaciones
-    list.sort((a, b) => b.nominationsCount - a.nominationsCount);
+    // Ordenar de mayor a menor puntuación ponderada y luego por cantidad de nominaciones
+    list.sort((a, b) => b.totalScore - a.totalScore || b.nominationsCount - a.nominationsCount);
     return list;
   };
 
@@ -93,14 +98,18 @@ export default function AdminJury({ onBack }) {
       evaluations.forEach(ev => {
         ['familiar', 'oro', 'promesa'].forEach(cat => {
           const slots = ev.evaluations?.[cat] || [];
-          slots.forEach(slot => {
+          slots.forEach((slot, slotIdx) => {
             if (slot.nombreFerreteria?.trim()) {
+              const rankPos = slot.slot || (slotIdx + 1);
+              const points = Math.max(1, 6 - rankPos);
               evalsData.push({
                 'Jurado': ev.judgeName,
                 'Empresa / Institución': ev.judgeCompany || 'N/D',
                 'Categoría': cat === 'familiar' ? '01. Ferretería Familiar' : cat === 'oro' ? '02. Ferretería Oro' : '03. Ferretería Promesa',
                 'Ferretería Nominada': slot.nombreFerreteria,
                 'Ciudad / Departamento': slot.ciudad || 'N/D',
+                'Posición Ranking (1-5)': `${rankPos}º Lugar`,
+                'Puntaje Asignado': points,
                 'Fecha Registro': ev.submittedAtStr || 'N/D'
               });
             }
@@ -115,8 +124,9 @@ export default function AdminJury({ onBack }) {
         'Posición': idx + 1,
         'Ferretería': item.name,
         'Ciudad': item.city,
+        'Puntaje Total Ponderado': item.totalScore,
         'Total Nominaciones': item.nominationsCount,
-        'Jurados que la nominaron': item.judges.join(', ')
+        'Desglose Jurados': item.judges.join(' | ')
       })));
       XLSX.utils.book_append_sheet(wb, wsFam, "Ranking Familiar");
 
@@ -125,8 +135,9 @@ export default function AdminJury({ onBack }) {
         'Posición': idx + 1,
         'Ferretería': item.name,
         'Ciudad': item.city,
+        'Puntaje Total Ponderado': item.totalScore,
         'Total Nominaciones': item.nominationsCount,
-        'Jurados que la nominaron': item.judges.join(', ')
+        'Desglose Jurados': item.judges.join(' | ')
       })));
       XLSX.utils.book_append_sheet(wb, wsOro, "Ranking Oro");
 
@@ -135,8 +146,9 @@ export default function AdminJury({ onBack }) {
         'Posición': idx + 1,
         'Ferretería': item.name,
         'Ciudad': item.city,
+        'Puntaje Total Ponderado': item.totalScore,
         'Total Nominaciones': item.nominationsCount,
-        'Jurados que la nominaron': item.judges.join(', ')
+        'Desglose Jurados': item.judges.join(' | ')
       })));
       XLSX.utils.book_append_sheet(wb, wsProm, "Ranking Promesa");
 
@@ -303,8 +315,9 @@ export default function AdminJury({ onBack }) {
                         <th className="py-3 px-4 w-16 text-center">Pos.</th>
                         <th className="py-3 px-4">Ferretería</th>
                         <th className="py-3 px-4">Ciudad</th>
-                        <th className="py-3 px-4 text-center">Nominaciones (Votos)</th>
-                        <th className="py-3 px-4 text-right">Jurados</th>
+                        <th className="py-3 px-4 text-center">Puntaje Ponderado</th>
+                        <th className="py-3 px-4 text-center">Nominaciones</th>
+                        <th className="py-3 px-4 text-right">Jurados y Valoración</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -321,10 +334,15 @@ export default function AdminJury({ onBack }) {
                           </td>
                           <td className="py-3 px-4 text-center">
                             <span className="bg-amber-100 text-amber-900 px-3 py-1 rounded-full text-xs font-black">
+                              ⭐ {store.totalScore} pts
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <span className="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full text-xs font-bold">
                               {store.nominationsCount} {store.nominationsCount === 1 ? 'voto' : 'votos'}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-right text-xs text-gray-500 max-w-xs truncate">
+                          <td className="py-3 px-4 text-right text-xs text-gray-600 max-w-xs truncate" title={store.judges.join(' | ')}>
                             {store.judges.join(', ')}
                           </td>
                         </tr>
