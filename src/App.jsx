@@ -410,10 +410,10 @@ export default function App() {
               href="/mediakit.pdf" 
               target="_blank" 
               rel="noopener noreferrer" 
-              download="MediaKit-ExpoFerre2026.pdf"
+              download="Informacion-Taller-ExpoFerre2026.pdf"
               className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[22px]">download</span> Media Kit
+              <span className="material-symbols-outlined text-[22px]">download</span> Información del Taller
             </a>
             <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'awards', 100); }} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
               <span className="material-symbols-outlined text-[22px]">emoji_events</span> Premios
@@ -521,11 +521,11 @@ export default function App() {
               href="/mediakit.pdf" 
               target="_blank" 
               rel="noopener noreferrer" 
-              download="MediaKit-ExpoFerre2026.pdf"
+              download="Informacion-Taller-ExpoFerre2026.pdf"
               onClick={() => setIsMobileMenuOpen(false)} 
               className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[24px]">download</span> Media Kit
+              <span className="material-symbols-outlined text-[24px]">download</span> Información del Taller
             </a>
             <button onClick={() => { setCurrentView('sponsorDashboard'); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
               <span className="material-symbols-outlined text-[24px]">military_tech</span> Patrocinadores
