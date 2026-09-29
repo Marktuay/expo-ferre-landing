@@ -545,7 +545,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
     const header = setting.headerBannerUrl || official.headerBannerUrl || defaultHeader;
     const footer = setting.footerBannerUrl || official.footerBannerUrl || defaultFooter;
-    const whatsapp = setting.whatsappBannerUrl || official.whatsappBannerUrl || header;
+    const whatsapp = setting.whatsappBannerUrl || official.whatsappBannerUrl || '';
     const whatsappReminder = setting.whatsappReminderBannerUrl || official.whatsappReminderBannerUrl || whatsapp;
 
     return {
@@ -731,8 +731,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
     setArtHeaderUrl(existing.headerBannerUrl || official.headerBannerUrl || (sponsorName === 'general' ? 'https://expoferrenicaragua.com/email-header.png' : ''));
     setArtFooterUrl(existing.footerBannerUrl || official.footerBannerUrl || (sponsorName === 'general' ? 'https://expoferrenicaragua.com/email-footer.png' : ''));
-    setArtWhatsappBannerUrl(existing.whatsappBannerUrl || official.whatsappBannerUrl || existing.headerBannerUrl || official.headerBannerUrl || (sponsorName === 'general' ? 'https://expoferrenicaragua.com/email-header.png' : ''));
-    setArtWhatsappReminderBannerUrl(existing.whatsappReminderBannerUrl || official.whatsappReminderBannerUrl || existing.whatsappBannerUrl || official.whatsappBannerUrl || existing.headerBannerUrl || official.headerBannerUrl || (sponsorName === 'general' ? 'https://expoferrenicaragua.com/email-header.png' : ''));
+    setArtWhatsappBannerUrl(existing.whatsappBannerUrl || official.whatsappBannerUrl || '');
+    setArtWhatsappReminderBannerUrl(existing.whatsappReminderBannerUrl || official.whatsappReminderBannerUrl || '');
     setArtStands(defaultStands);
     setArtCustomSpeech(existing.customSpeech || official.customSpeech || '');
     setArtCustomSubject(existing.customEmailSubject || official.customEmailSubject || '');
@@ -2442,20 +2442,23 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                                     <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full" title="Header personalizado"></span>
                                   )}
                                 </div>
-                                <div className="w-7 h-6 bg-emerald-950 rounded border border-emerald-300 overflow-hidden shrink-0 relative flex items-center justify-center" title="Flyer WhatsApp General">
-                                  <img 
-                                    src={genArt.whatsappBannerUrl || '/email-header.png'} 
-                                    alt="WhatsApp" 
-                                    className="w-full h-full object-cover" 
-                                    onError={(e) => {
-                                      e.currentTarget.onerror = null;
-                                      e.currentTarget.src = '/email-header.png';
-                                    }}
-                                  />
-                                  {genArt.hasCustomWhatsapp && (
-                                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-400 rounded-full" title="Flyer personalizado"></span>
-                                  )}
-                                </div>
+                                {genArt.whatsappBannerUrl ? (
+                                  <div className="w-5 h-7 bg-emerald-950 rounded border border-emerald-400 overflow-hidden shrink-0 relative flex items-center justify-center shadow-xs" title="Flyer Vertical WhatsApp (Asignado)">
+                                    <img 
+                                      src={genArt.whatsappBannerUrl} 
+                                      alt="WhatsApp" 
+                                      className="w-full h-full object-cover" 
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                                  </div>
+                                ) : (
+                                  <div className="w-5 h-7 bg-slate-100 rounded border border-dashed border-slate-300 shrink-0 flex items-center justify-center text-slate-400" title="Sin flyer vertical de WhatsApp">
+                                    <Phone size={10} />
+                                  </div>
+                                )}
                                 <button
                                   onClick={() => handleOpenArtModal('general')}
                                   className={`p-1.5 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
@@ -2678,21 +2681,24 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                                 )}
                               </div>
 
-                              {/* Miniatura WhatsApp */}
-                              <div className="w-7 h-6 bg-emerald-950 rounded border border-emerald-300 overflow-hidden shrink-0 relative flex items-center justify-center" title="Flyer WhatsApp">
-                                <img 
-                                  src={art.whatsappBannerUrl || '/email-header.png'} 
-                                  alt="WhatsApp" 
-                                  className="w-full h-full object-cover" 
-                                  onError={(e) => {
-                                    e.currentTarget.onerror = null;
-                                    e.currentTarget.src = '/email-header.png';
-                                  }}
-                                />
-                                {art.hasCustomWhatsapp && (
-                                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-400 rounded-full" title="Flyer personalizado"></span>
-                                )}
-                              </div>
+                              {/* Miniatura WhatsApp Vertical */}
+                              {art.whatsappBannerUrl ? (
+                                <div className="w-5 h-7 bg-emerald-950 rounded border border-emerald-400 overflow-hidden shrink-0 relative flex items-center justify-center shadow-xs" title="Flyer Vertical WhatsApp (Asignado)">
+                                  <img 
+                                    src={art.whatsappBannerUrl} 
+                                    alt="WhatsApp" 
+                                    className="w-full h-full object-cover" 
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                                </div>
+                              ) : (
+                                <div className="w-5 h-7 bg-slate-100 rounded border border-dashed border-slate-300 shrink-0 flex items-center justify-center text-slate-400" title="Sin flyer vertical de WhatsApp">
+                                  <Phone size={10} />
+                                </div>
+                              )}
 
                               <button
                                 onClick={() => handleOpenArtModal(sp)}
@@ -3522,58 +3528,75 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
               {artTab === 'whatsapp' && (
                 <div className="space-y-6">
-                  <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-3.5 rounded-xl text-xs flex items-start gap-2.5">
-                    <Phone size={18} className="text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold">Artes Gráficos Personalizados para WhatsApp:</span>
-                      <p className="text-emerald-800 text-[11px] mt-0.5">
-                        Configura los artes visuales dedicados (cuadrados 1080x1080 o verticales 1080x1350 px) que acompañarán los envíos por WhatsApp de invitación y recordatorio.
+                  <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-4 rounded-xl text-xs flex items-start gap-3 shadow-xs">
+                    <Phone size={20} className="text-emerald-600 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <span className="font-bold text-sm text-emerald-950">Artes y Flyers Verticales para WhatsApp (Móvil):</span>
+                      <p className="text-emerald-800 text-xs leading-relaxed">
+                        WhatsApp es un canal móvil; los artes deben tener proporción vertical.
+                        Dimensiones recomendadas: <strong className="text-emerald-950">1080 × 1920 px (Vertical 9:16 / Estado / Historia)</strong> o <strong className="text-emerald-950">1080 × 1350 px (Vertical 4:5)</strong> / 1080 × 1080 px (Cuadrado 1:1). Evita formatos horizontales de correo para WhatsApp.
                       </p>
                     </div>
                   </div>
 
                   {/* FLYER PRINCIPAL DE INVITACIÓN WHATSAPP */}
-                  <div className="bg-surface-variant/20 p-4 rounded-xl border border-outline-variant space-y-3">
-                    <div className="flex items-center justify-between">
+                  <div className="bg-surface-variant/20 p-5 rounded-2xl border border-outline-variant space-y-4">
+                    <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
                       <div>
-                        <h4 className="font-bold text-sm text-on-surface flex items-center gap-1.5">
-                          <ImageIcon size={16} className="text-emerald-600" />
-                          1. Arte / Flyer de Invitación para WhatsApp (1080 x 1080 o 1080 x 1350 px)
+                        <h4 className="font-bold text-sm text-on-surface flex items-center gap-2">
+                          <ImageIcon size={18} className="text-emerald-600" />
+                          1. Flyer Vertical de Invitación para WhatsApp
                         </h4>
-                        <p className="text-xs text-secondary">Flyer principal que se envía en el primer contacto con el enlace exclusivo.</p>
+                        <p className="text-xs text-secondary mt-0.5">
+                          Formato Vertical Móvil: <strong>1080 × 1920 px</strong> (9:16) o <strong>1080 × 1350 px</strong> (4:5)
+                        </p>
                       </div>
+                      {artWhatsappBannerUrl && (
+                        <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 font-bold rounded-lg text-[11px] border border-emerald-200">
+                          ✓ Asignado
+                        </span>
+                      )}
                     </div>
 
                     {artWhatsappBannerUrl ? (
-                      <div className="relative rounded-xl overflow-hidden border border-outline-variant max-h-56 bg-slate-900 flex items-center justify-center">
-                        <img src={artWhatsappBannerUrl} alt="WhatsApp Invitation Flyer" className="max-h-56 w-auto object-contain" />
-                        <div className="absolute top-2 right-2 flex gap-1.5">
+                      <div className="relative rounded-2xl overflow-hidden border-2 border-slate-700 bg-slate-950 flex items-center justify-center min-h-[280px] max-h-[400px] max-w-xs mx-auto p-2 shadow-xl group">
+                        <img 
+                          src={artWhatsappBannerUrl} 
+                          alt="Flyer WhatsApp Invitación" 
+                          className="max-h-[380px] w-auto max-w-full object-contain rounded-xl shadow-md" 
+                        />
+                        <div className="absolute top-3 right-3 flex gap-2">
                           <button
                             type="button"
                             onClick={() => handleDownloadImage(artWhatsappBannerUrl, `Arte_WhatsApp_Invitacion_${artModal.sponsorKey}.png`)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white p-1.5 rounded-lg text-xs font-bold shadow-md cursor-pointer flex items-center gap-1"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-xl text-xs font-bold shadow-lg cursor-pointer flex items-center gap-1 transition-transform hover:scale-105"
                             title="Descargar imagen"
                           >
-                            <Download size={13} />
+                            <Download size={14} />
                           </button>
                           <button
                             type="button"
                             onClick={() => setArtWhatsappBannerUrl('')}
-                            className="bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-lg text-xs font-bold shadow-md cursor-pointer"
-                            title="Quitar imagen"
+                            className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-xl text-xs font-bold shadow-lg cursor-pointer transition-transform hover:scale-105"
+                            title="Quitar flyer"
                           >
-                            Quitar
+                            <X size={14} />
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <div className="border-2 border-dashed border-outline-variant p-6 rounded-xl text-center bg-white space-y-2">
-                        <ImageIcon size={32} className="mx-auto text-slate-400" />
-                        <p className="text-xs text-secondary font-medium">Sube el flyer de invitación para WhatsApp o escribe el enlace directo</p>
-                        <div className="flex justify-center gap-3 pt-2">
-                          <label className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5">
-                            <FileUp size={14} />
-                            {isUploadingWhatsapp ? 'Subiendo...' : 'Subir Flyer WhatsApp'}
+                      <div className="border-2 border-dashed border-outline-variant p-6 rounded-2xl text-center bg-white space-y-3 max-w-md mx-auto">
+                        <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                          <Phone size={24} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-on-surface">Subir Flyer Vertical de Invitación</p>
+                          <p className="text-[11px] text-secondary mt-0.5">Recomendado: 1080 × 1920 px (9:16) o 1080 × 1350 px (4:5)</p>
+                        </div>
+                        <div className="flex justify-center pt-1">
+                          <label className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-2 shadow-sm">
+                            <FileUp size={15} />
+                            {isUploadingWhatsapp ? 'Subiendo Flyer...' : 'Subir Flyer Vertical'}
                             <input
                               type="file"
                               accept="image/*"
@@ -3587,59 +3610,75 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                     )}
 
                     <div className="pt-1">
-                      <label className="block text-[11px] font-bold text-secondary uppercase mb-1">O escribe/pega la URL del Flyer de WhatsApp:</label>
+                      <label className="block text-[11px] font-bold text-secondary uppercase mb-1">O escribe/pega la URL del Flyer Vertical de WhatsApp:</label>
                       <input
                         type="url"
                         placeholder="https://..."
                         value={artWhatsappBannerUrl}
                         onChange={(e) => setArtWhatsappBannerUrl(e.target.value)}
-                        className="w-full px-3 py-2 bg-surface border border-outline-variant rounded-lg text-xs outline-none focus:border-primary"
+                        className="w-full px-3.5 py-2.5 bg-surface border border-outline-variant rounded-xl text-xs outline-none focus:border-primary"
                       />
                     </div>
                   </div>
 
                   {/* FLYER DE RECORDATORIO DE REGISTRO WHATSAPP */}
-                  <div className="bg-surface-variant/20 p-4 rounded-xl border border-outline-variant space-y-3">
-                    <div className="flex items-center justify-between">
+                  <div className="bg-surface-variant/20 p-5 rounded-2xl border border-outline-variant space-y-4">
+                    <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
                       <div>
-                        <h4 className="font-bold text-sm text-on-surface flex items-center gap-1.5">
-                          <Bell size={16} className="text-amber-600" />
-                          2. Arte / Flyer de Recordatorio para WhatsApp (1080 x 1080 o 1080 x 1350 px)
+                        <h4 className="font-bold text-sm text-on-surface flex items-center gap-2">
+                          <Bell size={18} className="text-amber-600" />
+                          2. Flyer Vertical de Recordatorio para WhatsApp
                         </h4>
-                        <p className="text-xs text-secondary">Flyer de recordatorio y urgencia para invitados que aún no han llenado el registro.</p>
+                        <p className="text-xs text-secondary mt-0.5">
+                          Formato Vertical Móvil: <strong>1080 × 1920 px</strong> (9:16) o <strong>1080 × 1350 px</strong> (4:5)
+                        </p>
                       </div>
+                      {artWhatsappReminderBannerUrl && (
+                        <span className="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold rounded-lg text-[11px] border border-amber-200">
+                          ✓ Asignado
+                        </span>
+                      )}
                     </div>
 
                     {artWhatsappReminderBannerUrl ? (
-                      <div className="relative rounded-xl overflow-hidden border border-outline-variant max-h-56 bg-slate-900 flex items-center justify-center">
-                        <img src={artWhatsappReminderBannerUrl} alt="WhatsApp Reminder Flyer" className="max-h-56 w-auto object-contain" />
-                        <div className="absolute top-2 right-2 flex gap-1.5">
+                      <div className="relative rounded-2xl overflow-hidden border-2 border-slate-700 bg-slate-950 flex items-center justify-center min-h-[280px] max-h-[400px] max-w-xs mx-auto p-2 shadow-xl group">
+                        <img 
+                          src={artWhatsappReminderBannerUrl} 
+                          alt="Flyer WhatsApp Recordatorio" 
+                          className="max-h-[380px] w-auto max-w-full object-contain rounded-xl shadow-md" 
+                        />
+                        <div className="absolute top-3 right-3 flex gap-2">
                           <button
                             type="button"
                             onClick={() => handleDownloadImage(artWhatsappReminderBannerUrl, `Arte_WhatsApp_Recordatorio_${artModal.sponsorKey}.png`)}
-                            className="bg-amber-600 hover:bg-amber-700 text-white p-1.5 rounded-lg text-xs font-bold shadow-md cursor-pointer flex items-center gap-1"
+                            className="bg-amber-600 hover:bg-amber-700 text-white p-2 rounded-xl text-xs font-bold shadow-lg cursor-pointer flex items-center gap-1 transition-transform hover:scale-105"
                             title="Descargar imagen"
                           >
-                            <Download size={13} />
+                            <Download size={14} />
                           </button>
                           <button
                             type="button"
                             onClick={() => setArtWhatsappReminderBannerUrl('')}
-                            className="bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-lg text-xs font-bold shadow-md cursor-pointer"
-                            title="Quitar imagen"
+                            className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-xl text-xs font-bold shadow-lg cursor-pointer transition-transform hover:scale-105"
+                            title="Quitar flyer"
                           >
-                            Quitar
+                            <X size={14} />
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <div className="border-2 border-dashed border-outline-variant p-6 rounded-xl text-center bg-white space-y-2">
-                        <ImageIcon size={32} className="mx-auto text-slate-400" />
-                        <p className="text-xs text-secondary font-medium">Sube el flyer de recordatorio para WhatsApp o escribe el enlace directo</p>
-                        <div className="flex justify-center gap-3 pt-2">
-                          <label className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5">
-                            <FileUp size={14} />
-                            {isUploadingWhatsappReminder ? 'Subiendo...' : 'Subir Flyer Recordatorio'}
+                      <div className="border-2 border-dashed border-outline-variant p-6 rounded-2xl text-center bg-white space-y-3 max-w-md mx-auto">
+                        <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+                          <Bell size={24} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-on-surface">Subir Flyer Vertical de Recordatorio</p>
+                          <p className="text-[11px] text-secondary mt-0.5">Recomendado: 1080 × 1920 px (9:16) o 1080 × 1350 px (4:5)</p>
+                        </div>
+                        <div className="flex justify-center pt-1">
+                          <label className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-2 shadow-sm">
+                            <FileUp size={15} />
+                            {isUploadingWhatsappReminder ? 'Subiendo Recordatorio...' : 'Subir Flyer Vertical'}
                             <input
                               type="file"
                               accept="image/*"
@@ -3659,7 +3698,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                         placeholder="https://..."
                         value={artWhatsappReminderBannerUrl}
                         onChange={(e) => setArtWhatsappReminderBannerUrl(e.target.value)}
-                        className="w-full px-3 py-2 bg-surface border border-outline-variant rounded-lg text-xs outline-none focus:border-primary"
+                        className="w-full px-3.5 py-2.5 bg-surface border border-outline-variant rounded-xl text-xs outline-none focus:border-primary"
                       />
                     </div>
                   </div>
@@ -3942,18 +3981,19 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                         )}
                       </div>
 
-                      {/* Vista Previa de Imagen */}
-                      <div className="bg-slate-900 rounded-xl overflow-hidden border border-outline-variant flex items-center justify-center min-h-[220px] max-h-[280px] p-2 relative group shadow-inner">
+                      {/* Vista Previa de Flyer Vertical */}
+                      <div className="bg-slate-950 rounded-2xl overflow-hidden border-2 border-slate-800 flex items-center justify-center min-h-[280px] max-h-[360px] p-2.5 relative group shadow-inner">
                         {currentFlyerUrl ? (
                           <img 
                             src={currentFlyerUrl} 
                             alt="Flyer WhatsApp" 
-                            className="max-h-[260px] w-auto object-contain rounded-lg shadow-md"
+                            className="max-h-[340px] w-auto max-w-full object-contain rounded-xl shadow-md"
                           />
                         ) : (
                           <div className="text-center p-6 text-slate-400 space-y-2">
-                            <ImageIcon size={36} className="mx-auto text-slate-500" />
-                            <p className="text-xs">No hay arte asignado aún.</p>
+                            <Phone size={36} className="mx-auto text-emerald-500/70" />
+                            <p className="text-xs font-medium">Sin flyer vertical configurado</p>
+                            <p className="text-[10px] text-slate-400">Puedes configurarlo en la sección de Artes (1080x1920 px).</p>
                           </div>
                         )}
                       </div>
