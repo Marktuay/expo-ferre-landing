@@ -44,7 +44,8 @@ import {
   Zap,
   ShieldAlert,
   Timer,
-  Bell
+  Bell,
+  MessageSquare
 } from 'lucide-react';
 
 export default function AdminDirectInvites({ onBack, adminUser }) {
@@ -86,13 +87,20 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [artModal, setArtModal] = useState({ open: false, sponsorKey: '', sponsorName: '', stands: '' });
   const [artHeaderUrl, setArtHeaderUrl] = useState('');
   const [artFooterUrl, setArtFooterUrl] = useState('');
+  const [artWhatsappBannerUrl, setArtWhatsappBannerUrl] = useState('');
+  const [artWhatsappReminderBannerUrl, setArtWhatsappReminderBannerUrl] = useState('');
   const [artStands, setArtStands] = useState('');
   const [artCustomSpeech, setArtCustomSpeech] = useState('');
   const [artCustomSubject, setArtCustomSubject] = useState('');
   const [isUploadingHeader, setIsUploadingHeader] = useState(false);
   const [isUploadingFooter, setIsUploadingFooter] = useState(false);
+  const [isUploadingWhatsapp, setIsUploadingWhatsapp] = useState(false);
+  const [isUploadingWhatsappReminder, setIsUploadingWhatsappReminder] = useState(false);
   const [isSavingArt, setIsSavingArt] = useState(false);
-  const [artTab, setArtTab] = useState('banners'); // 'banners' | 'speech' | 'preview'
+  const [artTab, setArtTab] = useState('banners'); // 'banners' | 'whatsapp' | 'speech' | 'preview'
+
+  // Modal para Envío y Recordatorio por WhatsApp con Arte de Patrocinador
+  const [whatsAppModal, setWhatsAppModal] = useState({ open: false, invite: null, isReminder: false });
 
   // Modal para Carga Masiva (Excel)
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -532,11 +540,18 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       ? 'Invitación Exclusiva: Acceso Oficial a EXPO FERRE Nicaragua 2026'
       : `¡Sé parte de EXPO FERRE Nicaragua 2026 con ${sponsorName}!`;
 
+    const defaultHeader = isGen ? 'https://expoferrenicaragua.com/email-header.png' : '';
+    const defaultFooter = isGen ? 'https://expoferrenicaragua.com/email-footer.png' : '';
+
     return {
-      headerBannerUrl: setting.headerBannerUrl || official.headerBannerUrl || 'https://expoferrenicaragua.com/email-header.png',
-      footerBannerUrl: setting.footerBannerUrl || official.footerBannerUrl || 'https://expoferrenicaragua.com/email-footer.png',
+      headerBannerUrl: setting.headerBannerUrl || official.headerBannerUrl || defaultHeader,
+      footerBannerUrl: setting.footerBannerUrl || official.footerBannerUrl || defaultFooter,
+      whatsappBannerUrl: setting.whatsappBannerUrl || official.whatsappBannerUrl || setting.headerBannerUrl || official.headerBannerUrl || defaultHeader,
+      whatsappReminderBannerUrl: setting.whatsappReminderBannerUrl || official.whatsappReminderBannerUrl || setting.whatsappBannerUrl || official.whatsappBannerUrl || setting.headerBannerUrl || official.headerBannerUrl || defaultHeader,
       hasCustomHeader: !!setting.headerBannerUrl || !!official.headerBannerUrl,
       hasCustomFooter: !!setting.footerBannerUrl || !!official.footerBannerUrl,
+      hasCustomWhatsapp: !!setting.whatsappBannerUrl || !!official.whatsappBannerUrl,
+      hasCustomWhatsappReminder: !!setting.whatsappReminderBannerUrl || !!official.whatsappReminderBannerUrl,
       customSpeech: setting.customSpeech || official.customSpeech || defaultSpeech,
       customEmailSubject: setting.customEmailSubject || official.customEmailSubject || defaultSubject,
       stands: calculatedStands
@@ -669,10 +684,32 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     });
   };
 
+  // Helper para descargar imagen de arte localmente
+  const handleDownloadImage = async (imageUrl, filename = 'Arte_WhatsApp.png') => {
+    if (!imageUrl) return;
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+      console.warn('Fallback direct open for image download:', e);
+      window.open(imageUrl, '_blank');
+    }
+  };
+
   // Abrir Modal de Configuración de Artes por Patrocinador
   const handleOpenArtModal = (sponsorName) => {
     setIsUploadingHeader(false);
     setIsUploadingFooter(false);
+    setIsUploadingWhatsapp(false);
+    setIsUploadingWhatsappReminder(false);
     setIsSavingArt(false);
 
     const key = getSponsorKey(sponsorName);
@@ -689,6 +726,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
     setArtHeaderUrl(existing.headerBannerUrl || official.headerBannerUrl || (sponsorName === 'general' ? 'https://expoferrenicaragua.com/email-header.png' : ''));
     setArtFooterUrl(existing.footerBannerUrl || official.footerBannerUrl || (sponsorName === 'general' ? 'https://expoferrenicaragua.com/email-footer.png' : ''));
+    setArtWhatsappBannerUrl(existing.whatsappBannerUrl || official.whatsappBannerUrl || existing.headerBannerUrl || official.headerBannerUrl || (sponsorName === 'general' ? 'https://expoferrenicaragua.com/email-header.png' : ''));
+    setArtWhatsappReminderBannerUrl(existing.whatsappReminderBannerUrl || official.whatsappReminderBannerUrl || existing.whatsappBannerUrl || official.whatsappBannerUrl || existing.headerBannerUrl || official.headerBannerUrl || (sponsorName === 'general' ? 'https://expoferrenicaragua.com/email-header.png' : ''));
     setArtStands(defaultStands);
     setArtCustomSpeech(existing.customSpeech || official.customSpeech || '');
     setArtCustomSubject(existing.customEmailSubject || official.customEmailSubject || '');
@@ -699,6 +738,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   const handleCloseArtModal = () => {
     setIsUploadingHeader(false);
     setIsUploadingFooter(false);
+    setIsUploadingWhatsapp(false);
+    setIsUploadingWhatsappReminder(false);
     setIsSavingArt(false);
     setArtModal({ open: false, sponsorKey: '', sponsorName: '', stands: '' });
   };
@@ -710,12 +751,16 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
     if (type === 'header') setIsUploadingHeader(true);
     if (type === 'footer') setIsUploadingFooter(true);
+    if (type === 'whatsapp') setIsUploadingWhatsapp(true);
+    if (type === 'whatsapp_reminder') setIsUploadingWhatsappReminder(true);
 
     try {
       // 1. Optimizar imagen localmente y colocar en vista previa de inmediato
-      const compressedDataUrl = await compressBannerImage(file);
+      const compressedDataUrl = await compressBannerImage(file, type.startsWith('whatsapp') ? 1080 : 1200, 0.88);
       if (type === 'header') setArtHeaderUrl(compressedDataUrl);
       if (type === 'footer') setArtFooterUrl(compressedDataUrl);
+      if (type === 'whatsapp') setArtWhatsappBannerUrl(compressedDataUrl);
+      if (type === 'whatsapp_reminder') setArtWhatsappReminderBannerUrl(compressedDataUrl);
 
       // 2. Intentar subir a Firebase Storage si está disponible con tiempo límite
       try {
@@ -730,16 +775,20 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         if (downloadUrl) {
           if (type === 'header') setArtHeaderUrl(downloadUrl);
           if (type === 'footer') setArtFooterUrl(downloadUrl);
+          if (type === 'whatsapp') setArtWhatsappBannerUrl(downloadUrl);
+          if (type === 'whatsapp_reminder') setArtWhatsappReminderBannerUrl(downloadUrl);
         }
       } catch (storageErr) {
         console.warn('Almacenamiento en la nube omitido o falló, se mantendrá versión optimizada:', storageErr);
       }
     } catch (err) {
-      console.error('Error al procesar imagen de banner:', err);
+      console.error('Error al procesar imagen:', err);
       alert('Error al procesar imagen: ' + err.message);
     } finally {
       if (type === 'header') setIsUploadingHeader(false);
       if (type === 'footer') setIsUploadingFooter(false);
+      if (type === 'whatsapp') setIsUploadingWhatsapp(false);
+      if (type === 'whatsapp_reminder') setIsUploadingWhatsappReminder(false);
       if (e.target) e.target.value = '';
     }
   };
@@ -751,6 +800,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       const key = artModal.sponsorKey || getSponsorKey(artModal.sponsorName);
       const cleanHeader = artHeaderUrl.trim() || null;
       const cleanFooter = artFooterUrl.trim() || null;
+      const cleanWhatsapp = artWhatsappBannerUrl.trim() || null;
+      const cleanWhatsappReminder = artWhatsappReminderBannerUrl.trim() || null;
       const cleanStands = artStands.trim() || null;
       const cleanSpeech = artCustomSpeech.trim() || null;
       const cleanSubject = artCustomSubject.trim() || null;
@@ -761,6 +812,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         sponsorName: artModal.sponsorName,
         headerBannerUrl: cleanHeader,
         footerBannerUrl: cleanFooter,
+        whatsappBannerUrl: cleanWhatsapp,
+        whatsappReminderBannerUrl: cleanWhatsappReminder,
         stands: cleanStands,
         customSpeech: cleanSpeech,
         customEmailSubject: cleanSubject,
@@ -778,6 +831,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
           sponsorName: artModal.sponsorName,
           headerBannerUrl: cleanHeader,
           footerBannerUrl: cleanFooter,
+          whatsappBannerUrl: cleanWhatsapp,
+          whatsappReminderBannerUrl: cleanWhatsappReminder,
           stands: cleanStands,
           customSpeech: cleanSpeech,
           customEmailSubject: cleanSubject
@@ -785,7 +840,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       }));
 
       handleCloseArtModal();
-      alert(`¡Artes y configuración de "${artModal.sponsorName}" guardados exitosamente!`);
+      alert(`¡Artes de correo, WhatsApp y configuración de "${artModal.sponsorName}" guardados exitosamente!`);
     } catch (err) {
       console.error('Error al guardar artes de patrocinador:', err);
       alert('Error al guardar: ' + err.message);
@@ -2362,32 +2417,32 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                           })()}
                         </td>
 
-                        {/* Artes */}
+                        {/* Artes (Correo & WhatsApp) */}
                         <td className="p-4 text-center">
                           {(() => {
                             const genArt = getSponsorArt('general');
                             return (
-                              <div className="flex items-center justify-center gap-2">
-                                <div className="w-12 h-6 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Header General">
+                              <div className="flex items-center justify-center gap-1.5 flex-wrap max-w-[150px] mx-auto">
+                                <div className="w-9 h-5 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Banner Correo General (Header)">
                                   <img src={genArt.headerBannerUrl} alt="Header" className="w-full h-full object-cover" />
                                   {genArt.hasCustomHeader && (
                                     <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                                   )}
                                 </div>
-                                <div className="w-12 h-6 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Footer General">
-                                  <img src={genArt.footerBannerUrl} alt="Footer" className="w-full h-full object-cover" />
-                                  {genArt.hasCustomFooter && (
-                                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                <div className="w-6 h-5 bg-emerald-950 rounded border border-emerald-300 overflow-hidden shrink-0 relative" title="Flyer WhatsApp General">
+                                  <img src={genArt.whatsappBannerUrl} alt="WhatsApp" className="w-full h-full object-cover" />
+                                  {genArt.hasCustomWhatsapp && (
+                                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
                                   )}
                                 </div>
                                 <button
                                   onClick={() => handleOpenArtModal('general')}
-                                  className={`p-1 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
-                                    genArt.hasCustomHeader || genArt.hasCustomFooter
+                                  className={`p-1.5 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
+                                    genArt.hasCustomHeader || genArt.hasCustomWhatsapp
                                       ? 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
                                       : 'bg-white border border-outline-variant hover:bg-surface text-secondary'
                                   }`}
-                                  title="Subir o cambiar artes de Header y Footer"
+                                  title="Configurar artes de Correo y WhatsApp General"
                                 >
                                   <Palette size={13} />
                                 </button>
@@ -2583,33 +2638,33 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                             </div>
                           </td>
 
-                          {/* Artes de Correo (Header & Footer) */}
+                          {/* Artes (Correo & WhatsApp) */}
                           <td className="p-4 text-center">
-                            <div className="flex items-center justify-center gap-2">
-                              {/* Miniatura Header */}
-                              <div className="w-12 h-6 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Header Banner">
+                            <div className="flex items-center justify-center gap-1.5 flex-wrap max-w-[150px] mx-auto">
+                              {/* Miniatura Header Correo */}
+                              <div className="w-9 h-5 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Banner Correo (Header)">
                                 <img src={art.headerBannerUrl} alt="Header" className="w-full h-full object-cover" />
                                 {art.hasCustomHeader && (
                                   <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                                 )}
                               </div>
 
-                              {/* Miniatura Footer */}
-                              <div className="w-12 h-6 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Footer Banner de Marcas">
-                                <img src={art.footerBannerUrl} alt="Footer" className="w-full h-full object-cover" />
-                                {art.hasCustomFooter && (
-                                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                              {/* Miniatura WhatsApp */}
+                              <div className="w-6 h-5 bg-emerald-950 rounded border border-emerald-300 overflow-hidden shrink-0 relative" title="Flyer WhatsApp">
+                                <img src={art.whatsappBannerUrl} alt="WhatsApp" className="w-full h-full object-cover" />
+                                {art.hasCustomWhatsapp && (
+                                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
                                 )}
                               </div>
 
                               <button
                                 onClick={() => handleOpenArtModal(sp)}
-                                className={`p-1 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
-                                  art.hasCustomHeader || art.hasCustomFooter
+                                className={`p-1.5 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
+                                  art.hasCustomHeader || art.hasCustomWhatsapp
                                     ? 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
                                     : 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100'
                                 }`}
-                                title="Subir o cambiar artes de Header y Footer"
+                                title="Configurar artes de Correo y WhatsApp para este patrocinador"
                               >
                                 <Palette size={13} />
                               </button>
@@ -2940,30 +2995,28 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                                   <Edit2 size={14} />
                                 </button>
 
-                                {/* WhatsApp Directo (Invitación Oficial) */}
-                                <a
-                                  href={getWhatsAppUrl(inv)}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  title="Abrir chat de WhatsApp con Invitación Oficial y enlace único"
-                                  className="p-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs"
+                                {/* WhatsApp Directo (Invitación Oficial con Arte de Patrocinador) */}
+                                <button
+                                  type="button"
+                                  onClick={() => setWhatsAppModal({ open: true, invite: inv, isReminder: false })}
+                                  title="Ver arte personalizado y abrir WhatsApp con Invitación Oficial"
+                                  className="p-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer"
                                 >
                                   <Phone size={14} />
                                   <span className="hidden xl:inline">WhatsApp</span>
-                                </a>
+                                </button>
 
                                 {/* Recordatorio WhatsApp (Para Pendientes de Registro) */}
                                 {inv.status === 'pending' && (
-                                  <a
-                                    href={getWhatsAppReminderUrl(inv)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    title="Enviar RECORDATORIO por WhatsApp (para activar pase y registrarse)"
-                                    className="p-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs"
+                                  <button
+                                    type="button"
+                                    onClick={() => setWhatsAppModal({ open: true, invite: inv, isReminder: true })}
+                                    title="Ver arte de recordatorio y enviar mensaje por WhatsApp"
+                                    className="p-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer"
                                   >
                                     <Bell size={14} />
                                     <span className="hidden xl:inline">Recordar</span>
-                                  </a>
+                                  </button>
                                 )}
 
                                 {/* Copiar Speech WhatsApp */}
@@ -3264,7 +3317,17 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                 }`}
               >
                 <ImageIcon size={15} />
-                Banners (Header & Footer)
+                Banners Correo
+              </button>
+
+              <button
+                onClick={() => setArtTab('whatsapp')}
+                className={`py-2.5 px-4 font-bold text-xs border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+                  artTab === 'whatsapp' ? 'border-primary text-primary' : 'border-transparent text-secondary hover:text-on-surface'
+                }`}
+              >
+                <Phone size={15} />
+                Artes WhatsApp (Flyers)
               </button>
 
               <button
@@ -3315,7 +3378,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                       <div>
                         <h4 className="font-bold text-sm text-on-surface flex items-center gap-1.5">
                           <ImageIcon size={16} className="text-primary" />
-                          1. Header Banner Superior (1200 x 450 px)
+                          1. Header Banner Superior para Correo (1200 x 450 px)
                         </h4>
                         <p className="text-xs text-secondary">Arte principal con logo ExpoFerre + Patrocinador + Stand</p>
                       </div>
@@ -3369,7 +3432,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                     <div>
                       <h4 className="font-bold text-sm text-on-surface flex items-center gap-1.5">
                         <ImageIcon size={16} className="text-primary" />
-                        2. Footer Banner de Marcas Representadas (1200 x 250 px)
+                        2. Footer Banner de Marcas Representadas para Correo (1200 x 250 px)
                       </h4>
                       <p className="text-xs text-secondary">Cinta inferior con la parrilla de marcas que exhibirán en el stand</p>
                     </div>
@@ -3412,6 +3475,153 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                         placeholder="https://..."
                         value={artFooterUrl}
                         onChange={(e) => setArtFooterUrl(e.target.value)}
+                        className="w-full px-3 py-2 bg-surface border border-outline-variant rounded-lg text-xs outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {artTab === 'whatsapp' && (
+                <div className="space-y-6">
+                  <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-3.5 rounded-xl text-xs flex items-start gap-2.5">
+                    <Phone size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold">Artes Gráficos Personalizados para WhatsApp:</span>
+                      <p className="text-emerald-800 text-[11px] mt-0.5">
+                        Configura los artes visuales dedicados (cuadrados 1080x1080 o verticales 1080x1350 px) que acompañarán los envíos por WhatsApp de invitación y recordatorio.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* FLYER PRINCIPAL DE INVITACIÓN WHATSAPP */}
+                  <div className="bg-surface-variant/20 p-4 rounded-xl border border-outline-variant space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-bold text-sm text-on-surface flex items-center gap-1.5">
+                          <ImageIcon size={16} className="text-emerald-600" />
+                          1. Arte / Flyer de Invitación para WhatsApp (1080 x 1080 o 1080 x 1350 px)
+                        </h4>
+                        <p className="text-xs text-secondary">Flyer principal que se envía en el primer contacto con el enlace exclusivo.</p>
+                      </div>
+                    </div>
+
+                    {artWhatsappBannerUrl ? (
+                      <div className="relative rounded-xl overflow-hidden border border-outline-variant max-h-56 bg-slate-900 flex items-center justify-center">
+                        <img src={artWhatsappBannerUrl} alt="WhatsApp Invitation Flyer" className="max-h-56 w-auto object-contain" />
+                        <div className="absolute top-2 right-2 flex gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadImage(artWhatsappBannerUrl, `Arte_WhatsApp_Invitacion_${artModal.sponsorKey}.png`)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white p-1.5 rounded-lg text-xs font-bold shadow-md cursor-pointer flex items-center gap-1"
+                            title="Descargar imagen"
+                          >
+                            <Download size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setArtWhatsappBannerUrl('')}
+                            className="bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-lg text-xs font-bold shadow-md cursor-pointer"
+                            title="Quitar imagen"
+                          >
+                            Quitar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-outline-variant p-6 rounded-xl text-center bg-white space-y-2">
+                        <ImageIcon size={32} className="mx-auto text-slate-400" />
+                        <p className="text-xs text-secondary font-medium">Sube el flyer de invitación para WhatsApp o escribe el enlace directo</p>
+                        <div className="flex justify-center gap-3 pt-2">
+                          <label className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5">
+                            <FileUp size={14} />
+                            {isUploadingWhatsapp ? 'Subiendo...' : 'Subir Flyer WhatsApp'}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleUploadBannerImage(e, 'whatsapp')}
+                              className="hidden"
+                              disabled={isUploadingWhatsapp}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="pt-1">
+                      <label className="block text-[11px] font-bold text-secondary uppercase mb-1">O escribe/pega la URL del Flyer de WhatsApp:</label>
+                      <input
+                        type="url"
+                        placeholder="https://..."
+                        value={artWhatsappBannerUrl}
+                        onChange={(e) => setArtWhatsappBannerUrl(e.target.value)}
+                        className="w-full px-3 py-2 bg-surface border border-outline-variant rounded-lg text-xs outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+
+                  {/* FLYER DE RECORDATORIO DE REGISTRO WHATSAPP */}
+                  <div className="bg-surface-variant/20 p-4 rounded-xl border border-outline-variant space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-bold text-sm text-on-surface flex items-center gap-1.5">
+                          <Bell size={16} className="text-amber-600" />
+                          2. Arte / Flyer de Recordatorio para WhatsApp (1080 x 1080 o 1080 x 1350 px)
+                        </h4>
+                        <p className="text-xs text-secondary">Flyer de recordatorio y urgencia para invitados que aún no han llenado el registro.</p>
+                      </div>
+                    </div>
+
+                    {artWhatsappReminderBannerUrl ? (
+                      <div className="relative rounded-xl overflow-hidden border border-outline-variant max-h-56 bg-slate-900 flex items-center justify-center">
+                        <img src={artWhatsappReminderBannerUrl} alt="WhatsApp Reminder Flyer" className="max-h-56 w-auto object-contain" />
+                        <div className="absolute top-2 right-2 flex gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadImage(artWhatsappReminderBannerUrl, `Arte_WhatsApp_Recordatorio_${artModal.sponsorKey}.png`)}
+                            className="bg-amber-600 hover:bg-amber-700 text-white p-1.5 rounded-lg text-xs font-bold shadow-md cursor-pointer flex items-center gap-1"
+                            title="Descargar imagen"
+                          >
+                            <Download size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setArtWhatsappReminderBannerUrl('')}
+                            className="bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-lg text-xs font-bold shadow-md cursor-pointer"
+                            title="Quitar imagen"
+                          >
+                            Quitar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-outline-variant p-6 rounded-xl text-center bg-white space-y-2">
+                        <ImageIcon size={32} className="mx-auto text-slate-400" />
+                        <p className="text-xs text-secondary font-medium">Sube el flyer de recordatorio para WhatsApp o escribe el enlace directo</p>
+                        <div className="flex justify-center gap-3 pt-2">
+                          <label className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5">
+                            <FileUp size={14} />
+                            {isUploadingWhatsappReminder ? 'Subiendo...' : 'Subir Flyer Recordatorio'}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleUploadBannerImage(e, 'whatsapp_reminder')}
+                              className="hidden"
+                              disabled={isUploadingWhatsappReminder}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="pt-1">
+                      <label className="block text-[11px] font-bold text-secondary uppercase mb-1">O escribe/pega la URL del Flyer de Recordatorio:</label>
+                      <input
+                        type="url"
+                        placeholder="https://..."
+                        value={artWhatsappReminderBannerUrl}
+                        onChange={(e) => setArtWhatsappReminderBannerUrl(e.target.value)}
                         className="w-full px-3 py-2 bg-surface border border-outline-variant rounded-lg text-xs outline-none focus:border-primary"
                       />
                     </div>
@@ -3609,6 +3819,207 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
               >
                 <Check size={16} />
                 {isSavingArt ? 'Guardando...' : 'Guardar Configuración de Artes'}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Enviar Invitación / Recordatorio por WhatsApp con Arte de Patrocinador */}
+      {whatsAppModal.open && whatsAppModal.invite && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-outline-variant overflow-hidden animate-in fade-in zoom-in duration-200 max-h-[92vh] flex flex-col">
+            
+            {/* Header */}
+            <div className="bg-[#075E54] p-5 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#25D366] text-white flex items-center justify-center font-bold shadow-md">
+                  <Phone size={22} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base flex items-center gap-2">
+                    {whatsAppModal.isReminder ? '🔔 Recordatorio de Registro por WhatsApp' : '📲 Invitación Oficial por WhatsApp'}
+                  </h3>
+                  <p className="text-white/80 text-xs">
+                    Destinatario: <span className="font-bold text-white">{whatsAppModal.invite.nombre || 'Invitado sin nombre'}</span> {whatsAppModal.invite.empresa ? `(${whatsAppModal.invite.empresa})` : ''} • Patrocinador: <span className="font-bold text-amber-300">{whatsAppModal.invite.sponsorName || 'General'}</span>
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setWhatsAppModal({ open: false, invite: null, isReminder: false })} 
+                className="p-1 hover:bg-white/20 rounded-full text-white cursor-pointer transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Selector de Modo: Invitación Inicial vs Recordatorio */}
+            <div className="flex border-b border-outline-variant bg-surface px-6 pt-3 shrink-0 gap-2">
+              <button
+                onClick={() => setWhatsAppModal(prev => ({ ...prev, isReminder: false }))}
+                className={`py-2 px-4 font-bold text-xs rounded-t-lg transition-all cursor-pointer flex items-center gap-2 border-b-2 ${
+                  !whatsAppModal.isReminder ? 'border-[#25D366] text-[#075E54] bg-emerald-50/60' : 'border-transparent text-secondary hover:text-on-surface'
+                }`}
+              >
+                <MessageSquare size={14} />
+                Invitación Inicial
+              </button>
+              <button
+                onClick={() => setWhatsAppModal(prev => ({ ...prev, isReminder: true }))}
+                className={`py-2 px-4 font-bold text-xs rounded-t-lg transition-all cursor-pointer flex items-center gap-2 border-b-2 ${
+                  whatsAppModal.isReminder ? 'border-amber-500 text-amber-700 bg-amber-50/60' : 'border-transparent text-secondary hover:text-on-surface'
+                }`}
+              >
+                <Bell size={14} />
+                Recordatorio de Activación
+              </button>
+            </div>
+
+            {/* Contenido Modal */}
+            <div className="p-6 space-y-5 overflow-y-auto flex-1">
+              {(() => {
+                const inv = whatsAppModal.invite;
+                const isRem = whatsAppModal.isReminder;
+                const spName = inv.sponsorName || 'general';
+                const art = getSponsorArt(spName);
+                const currentFlyerUrl = isRem ? (art.whatsappReminderBannerUrl || art.whatsappBannerUrl) : art.whatsappBannerUrl;
+                const speechText = isRem ? getWhatsAppReminderSpeech(inv) : getWhatsAppSpeech(inv);
+                const waUrl = isRem ? getWhatsAppReminderUrl(inv) : getWhatsAppUrl(inv);
+                const isCopied = copiedToken === (isRem ? `wa_rem_${inv.id}` : `wa_${inv.id}`);
+
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                    
+                    {/* Columna Izquierda: Flyer de WhatsApp */}
+                    <div className="md:col-span-5 space-y-3 flex flex-col">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                          <ImageIcon size={15} className="text-[#25D366]" />
+                          Arte Oficial {isRem ? 'Recordatorio' : 'Invitación'}
+                        </span>
+                        {spName && spName !== 'general' && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                            {spName}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Vista Previa de Imagen */}
+                      <div className="bg-slate-900 rounded-xl overflow-hidden border border-outline-variant flex items-center justify-center min-h-[220px] max-h-[280px] p-2 relative group shadow-inner">
+                        {currentFlyerUrl ? (
+                          <img 
+                            src={currentFlyerUrl} 
+                            alt="Flyer WhatsApp" 
+                            className="max-h-[260px] w-auto object-contain rounded-lg shadow-md"
+                          />
+                        ) : (
+                          <div className="text-center p-6 text-slate-400 space-y-2">
+                            <ImageIcon size={36} className="mx-auto text-slate-500" />
+                            <p className="text-xs">No hay arte asignado aún.</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Botón Descargar Arte */}
+                      <div className="space-y-2 pt-1">
+                        <button
+                          type="button"
+                          disabled={!currentFlyerUrl}
+                          onClick={() => handleDownloadImage(currentFlyerUrl, `Arte_WhatsApp_${isRem ? 'Recordatorio' : 'Invitacion'}_${getSponsorKey(spName)}.png`)}
+                          className="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
+                        >
+                          <Download size={15} />
+                          <span>1. Descargar Arte Gráfico</span>
+                        </button>
+                        
+                        {currentFlyerUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(currentFlyerUrl);
+                              setCopiedToken(`flyer_${inv.id}`);
+                              setTimeout(() => setCopiedToken(null), 2000);
+                            }}
+                            className="w-full py-1.5 px-3 bg-surface hover:bg-surface-variant text-secondary hover:text-on-surface rounded-lg text-[11px] font-medium transition-colors flex items-center justify-center gap-1.5 border border-outline-variant cursor-pointer"
+                          >
+                            {copiedToken === `flyer_${inv.id}` ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+                            <span>{copiedToken === `flyer_${inv.id}` ? '¡Enlace del Arte Copiado!' : 'Copiar URL de la imagen'}</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Columna Derecha: Speech Personalizado y Acciones */}
+                    <div className="md:col-span-7 space-y-3 flex flex-col">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                          <MessageSquare size={15} className="text-[#25D366]" />
+                          Mensaje Personalizado con Enlace Único
+                        </span>
+                        {inv.telefono && (
+                          <span className="text-xs text-slate-600 font-mono font-bold bg-slate-100 px-2 py-0.5 rounded-md">
+                            📱 {inv.telefono}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Cuadro de Texto de WhatsApp */}
+                      <textarea
+                        readOnly
+                        rows={10}
+                        value={speechText}
+                        className="w-full p-3.5 bg-slate-50 border border-outline-variant rounded-xl text-xs font-mono text-slate-800 outline-none resize-none leading-relaxed flex-1 shadow-inner select-all"
+                      />
+
+                      {/* Guía rápida de flujo */}
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-[11px] text-amber-900 flex items-start gap-2">
+                        <Sparkles size={15} className="text-amber-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong>Flujo 1-Click:</strong> 1. Descarga el arte gráfico. 2. Presiona <strong>Abrir WhatsApp</strong>. 3. Pega el texto y adjunta la imagen descargada en el chat.
+                        </div>
+                      </div>
+
+                      {/* Botones de Acción */}
+                      <div className="grid grid-cols-2 gap-3 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => isRem ? handleCopyWhatsAppReminder(inv) : handleCopyWhatsApp(inv)}
+                          className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer border ${
+                            isCopied
+                              ? 'bg-green-600 text-white border-green-600'
+                              : 'bg-white hover:bg-surface text-slate-800 border-outline-variant'
+                          }`}
+                        >
+                          {isCopied ? <Check size={16} /> : <Copy size={16} />}
+                          <span>{isCopied ? '¡Texto Copiado!' : '2. Copiar Texto'}</span>
+                        </button>
+
+                        <a
+                          href={waUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="py-2.5 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                          <Send size={16} />
+                          <span>3. Abrir WhatsApp</span>
+                        </a>
+                      </div>
+                    </div>
+
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-surface-variant/30 border-t border-outline-variant flex items-center justify-end gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setWhatsAppModal({ open: false, invite: null, isReminder: false })}
+                className="py-2 px-5 bg-white border border-outline-variant hover:bg-surface text-on-surface font-bold rounded-xl text-xs transition-colors cursor-pointer"
+              >
+                Cerrar
               </button>
             </div>
 
