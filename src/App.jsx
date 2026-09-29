@@ -410,10 +410,10 @@ export default function App() {
               href="/mediakit.pdf" 
               target="_blank" 
               rel="noopener noreferrer" 
-              download="MediaKit-Master-Ferretero-ExpoFerre2026.pdf"
+              download="MediaKit-ExpoFerre2026.pdf"
               className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[22px]">construction</span> Taller Master Ferretero
+              <span className="material-symbols-outlined text-[22px]">download</span> Media Kit
             </a>
             <button onClick={() => { setCurrentView('landing'); setTimeout(() => window.location.hash = 'awards', 100); }} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-4 rounded-md transition-all shadow-sm flex items-center gap-2 text-lg">
               <span className="material-symbols-outlined text-[22px]">emoji_events</span> Premios
@@ -521,11 +521,11 @@ export default function App() {
               href="/mediakit.pdf" 
               target="_blank" 
               rel="noopener noreferrer" 
-              download="MediaKit-Master-Ferretero-ExpoFerre2026.pdf"
+              download="MediaKit-ExpoFerre2026.pdf"
               onClick={() => setIsMobileMenuOpen(false)} 
               className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[24px]">construction</span> Taller Master Ferretero
+              <span className="material-symbols-outlined text-[24px]">download</span> Media Kit
             </a>
             <button onClick={() => { setCurrentView('sponsorDashboard'); setIsMobileMenuOpen(false); }} className="bg-white/5 hover:bg-white/10 text-white font-bold text-lg text-left flex items-center gap-3 py-3 px-4 rounded-md transition-colors">
               <span className="material-symbols-outlined text-[24px]">military_tech</span> Patrocinadores
@@ -742,68 +742,75 @@ export default function App() {
               </div>
             </div>
           )}
-          <div id="taller-master-ferretero" className="relative z-10 container mx-auto grid grid-cols-1 lg:grid-cols-12 gap-stack-lg items-center mt-10 scroll-mt-32">
+          <div className="relative z-10 container mx-auto grid grid-cols-1 lg:grid-cols-12 gap-stack-lg items-center mt-10">
             <div className="lg:col-span-7 text-white space-y-stack-sm">
               <FadeIn>
-                <div className="bg-[#f39200] text-black font-bold inline-flex items-center gap-1.5 px-3.5 py-1 rounded-md text-xs uppercase tracking-widest clip-industrial mb-3 shadow-md">
-                  <span className="material-symbols-outlined text-sm">construction</span>
-                  MASTER FERRETERO
+                <div className="bg-[#f39200] text-black font-black inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs uppercase tracking-widest clip-industrial mb-3 shadow-md">
+                  <span className="material-symbols-outlined text-sm">stars</span>
+                  1RA EDICIÓN · NICARAGUA 2026
                 </div>
-                <h1 className="font-headline-xl text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-white drop-shadow-lg tracking-tight">
-                  EL MODELO DE LAS 7P APLICADO A LA FERRETERÍA
+                <h1 className="font-headline-xl text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-white drop-shadow-lg tracking-tight uppercase">
+                  EL GRAN ENCUENTRO DE LA INDUSTRIA FERRETERA
                 </h1>
                 <p className="font-body-lg text-base sm:text-lg max-w-xl opacity-90 mt-3 text-slate-200 drop-shadow-md leading-relaxed">
-                  Taller intensivo diseñado para transformar la gestión comercial de las ferreterías, pasando de decisiones empíricas a un modelo estructurado y basado en datos.
+                  La primera plataforma comercial que reúne a las marcas líderes, distribuidores, fabricantes y propietarios de ferreterías de toda Nicaragua en un solo lugar.
                 </p>
               </FadeIn>
 
-              {/* Badges de Información del Taller */}
+              {/* Badges de Información del Evento */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-3 text-sm">
                 <div className="flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/10 shadow-sm">
                   <span className="material-symbols-outlined text-[#f39200] text-xl shrink-0">calendar_month</span>
                   <div>
-                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Fecha</span>
-                    <span className="font-semibold text-white">16 de Octubre de 2026</span>
+                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Fecha del Evento</span>
+                    <span className="font-semibold text-white">17 de Octubre de 2026</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/10 shadow-sm">
+                  <span className="material-symbols-outlined text-[#f39200] text-xl shrink-0">location_on</span>
+                  <div>
+                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Sede Oficial</span>
+                    <span className="font-semibold text-white">Centro de Convenciones Crowne Plaza</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/10 shadow-sm">
                   <span className="material-symbols-outlined text-[#f39200] text-xl shrink-0">schedule</span>
                   <div>
-                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Horario & Duración</span>
-                    <span className="font-semibold text-white">8:00 AM a 5:00 PM (8 Horas)</span>
+                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Horario</span>
+                    <span className="font-semibold text-white">8:00 AM a 6:00 PM</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/10 shadow-sm">
-                  <span className="material-symbols-outlined text-[#f39200] text-xl shrink-0">groups</span>
+                  <span className="material-symbols-outlined text-[#f39200] text-xl shrink-0">handshake</span>
                   <div>
-                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Modalidad & Cupo</span>
-                    <span className="font-semibold text-white">Presencial · Máx. 40 Personas</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/10 shadow-sm">
-                  <span className="material-symbols-outlined text-[#f39200] text-xl shrink-0">workspace_premium</span>
-                  <div>
-                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Beneficios</span>
-                    <span className="font-semibold text-white">Certificación Certifier + Material</span>
+                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Acceso & Networking</span>
+                    <span className="font-semibold text-white">Exhibición Comercial & Conferencias</span>
                   </div>
                 </div>
               </div>
 
-              {/* Botón Descargar Media Kit */}
-              <div className="pt-2">
-                <a 
-                  href="/mediakit.pdf" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  download="MediaKit-Master-Ferretero-ExpoFerre2026.pdf"
-                  className="inline-flex items-center gap-2 bg-[#f39200] hover:bg-[#d98200] text-black font-black px-5 py-2.5 rounded-xl transition-all shadow-lg hover:scale-105 active:scale-95 text-sm uppercase tracking-wider"
+              {/* Botones de Acción */}
+              <div className="pt-3 flex flex-wrap gap-3 items-center">
+                <button 
+                  onClick={() => {
+                    document.getElementById('preregistro-form')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="inline-flex items-center gap-2 bg-[#f39200] hover:bg-[#d98200] text-black font-black px-6 py-3 rounded-xl transition-all shadow-lg hover:scale-105 active:scale-95 text-sm uppercase tracking-wider cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-lg">download</span>
-                  Descargar Media Kit (PDF)
-                </a>
+                  <span className="material-symbols-outlined text-lg">confirmation_number</span>
+                  Quiero Asistir (Prerregistro)
+                </button>
+
+                <button 
+                  onClick={() => setCurrentView('sponsorDashboard')}
+                  className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-bold px-5 py-3 rounded-xl transition-all border border-white/20 backdrop-blur-sm text-sm uppercase tracking-wider cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-lg">storefront</span>
+                  Quiero Ser Patrocinador
+                </button>
               </div>
             </div>
             <div className="lg:col-span-5 flex justify-center items-center">
