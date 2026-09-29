@@ -59,6 +59,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   
   // Filtros
   const [sponsorSearchTerm, setSponsorSearchTerm] = useState('');
+  const [sponsorFilterStatus, setSponsorFilterStatus] = useState('all'); // 'all' | 'has_registered' | 'has_pending' | 'has_unsent_emails' | 'has_invites'
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'used'
   const [selectedSponsorFilter, setSelectedSponsorFilter] = useState('all'); // 'all' | 'general' | sponsorName
@@ -1581,7 +1582,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
     }
   };
 
-  // Exportar Excel (Respeta el filtro de lista de patrocinador)
+  // Exportar Excel de lista actual (Respeta el filtro de patrocinador seleccionado)
   const handleExportExcel = (targetSponsor = null) => {
     const spFilter = targetSponsor || selectedSponsorFilter;
     
@@ -1606,7 +1607,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
         Registrado_Empresa: inv.registeredCompany || '',
         Registrado_Email: inv.registeredEmail || '',
         Registrado_Telefono: inv.registeredPhone || '',
-        Fecha_Uso: inv.usedAt ? inv.usedAt.toLocaleDateString() + ' ' + inv.usedAt.toLocaleTimeString() : '',
+        Fecha_Uso: inv.usedAt ? (typeof inv.usedAt.toLocaleDateString === 'function' ? inv.usedAt.toLocaleDateString() + ' ' + inv.usedAt.toLocaleTimeString() : new Date(inv.usedAt).toLocaleString()) : '',
         Enlace_Unico: getInviteUrl(inv.id)
       }));
 
@@ -1615,6 +1616,143 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
       const sheetName = spFilter !== 'all' ? spFilter.substring(0, 30) : 'Invitaciones_Directas';
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
       XLSX.writeFile(workbook, `Invitaciones_${sheetName.replace(/[^a-zA-Z0-9]/g, '_')}_ExpoFerre_2026.xlsx`);
+    });
+  };
+
+  // Exportar Informe Ejecutivo Completo Multi-Hoja en Excel
+  const handleExportExecutiveReport = () => {
+    import('xlsx').then((XLSX) => {
+      // 1. Hoja 1: Resumen por Patrocinador y Totales Globales
+      const summaryRows = [];
+
+      // Fila: General
+      const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
+      const genUsed = genInv.filter(i => i.status === 'used').length;
+      const genPending = genInv.length - genUsed;
+      const genWithEmail = genInv.filter(i => isValidEmailAddress(i.email)).length;
+      const genSent = genInv.filter(i => i.emailSent || i.emailSentAt).length;
+      const genUnsent = genInv.filter(i => isValidEmailAddress(i.email) && !i.emailSentAt && i.status === 'pending').length;
+      const genNoEmail = genInv.length - genWithEmail;
+      const genCoveragePct = genWithEmail > 0 ? Math.round((genSent / genWithEmail) * 100) : 0;
+      const genConversionPct = genInv.length > 0 ? Math.round((genUsed / genInv.length) * 100) : 0;
+      const genArt = getSponsorArt('general');
+
+      summaryRows.push({
+        Patrocinador: 'Invitación General (Comité EXPO FERRE 2026)',
+        Stands: 'Evento General',
+        Total_Invitados: genInv.length,
+        Correos_Enviados: genSent,
+        Correos_Pendientes_Envio: genUnsent,
+        Sin_Correo_Valido_WhatsApp_Only: genNoEmail,
+        Cobertura_Envios_Pct: `${genCoveragePct}%`,
+        Registrados_Gafetes_Emitidos: genUsed,
+        Pendientes_Completar_Registro: genPending,
+        Tasa_Efectividad_Registro_Pct: `${genConversionPct}%`,
+        Header_Personalizado: genArt.hasCustomHeader ? 'SÍ' : 'NO (Default)',
+        Footer_Personalizado: genArt.hasCustomFooter ? 'SÍ' : 'NO (Default)',
+        Speech_Personalizado: (sponsorSettings['general']?.customSpeech || '').trim() ? 'SÍ' : 'NO (Default)'
+      });
+
+      // Filas de cada Patrocinador
+      sponsorsList.forEach((sp) => {
+        const spInvites = invites.filter(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp)));
+        const spUsed = spInvites.filter(i => i.status === 'used').length;
+        const spPending = spInvites.length - spUsed;
+        const spWithEmail = spInvites.filter(i => isValidEmailAddress(i.email)).length;
+        const spSent = spInvites.filter(i => i.emailSent || i.emailSentAt).length;
+        const spUnsent = spInvites.filter(i => isValidEmailAddress(i.email) && !i.emailSentAt && i.status === 'pending').length;
+        const spNoEmail = spInvites.length - spWithEmail;
+        const spCoveragePct = spWithEmail > 0 ? Math.round((spSent / spWithEmail) * 100) : 0;
+        const spConversionPct = spInvites.length > 0 ? Math.round((spUsed / spInvites.length) * 100) : 0;
+        const art = getSponsorArt(sp);
+        const rawStands = sponsorsMap[sp]?.stands?.join(', ') || art.stands || 'N/A';
+        const cleanStands = rawStands.replace(/stand\s*/gi, '').trim();
+
+        summaryRows.push({
+          Patrocinador: sp,
+          Stands: cleanStands ? `Stand ${cleanStands}` : 'N/A',
+          Total_Invitados: spInvites.length,
+          Correos_Enviados: spSent,
+          Correos_Pendientes_Envio: spUnsent,
+          Sin_Correo_Valido_WhatsApp_Only: spNoEmail,
+          Cobertura_Envios_Pct: `${spCoveragePct}%`,
+          Registrados_Gafetes_Emitidos: spUsed,
+          Pendientes_Completar_Registro: spPending,
+          Tasa_Efectividad_Registro_Pct: `${spConversionPct}%`,
+          Header_Personalizado: art.hasCustomHeader ? 'SÍ' : 'NO (Default)',
+          Footer_Personalizado: art.hasCustomFooter ? 'SÍ' : 'NO (Default)',
+          Speech_Personalizado: (sponsorSettings[getSponsorKey(sp)]?.customSpeech || '').trim() ? 'SÍ' : 'NO (Default)'
+        });
+      });
+
+      // Fila Final de Totales Globales
+      const globalEffectiveRate = totalInvitesCount > 0 ? Math.round((totalUsedCount / totalInvitesCount) * 100) : 0;
+      summaryRows.push({
+        Patrocinador: '=== TOTALES GLOBALES ===',
+        Stands: '35 Stands Reservados',
+        Total_Invitados: totalInvitesCount,
+        Correos_Enviados: totalEmailsSent,
+        Correos_Pendientes_Envio: totalEmailsPending,
+        Sin_Correo_Valido_WhatsApp_Only: totalWithoutValidEmail,
+        Cobertura_Envios_Pct: `${emailCoveragePercent}%`,
+        Registrados_Gafetes_Emitidos: totalUsedCount,
+        Pendientes_Completar_Registro: totalPendingCount,
+        Tasa_Efectividad_Registro_Pct: `${globalEffectiveRate}%`,
+        Header_Personalizado: '-',
+        Footer_Personalizado: '-',
+        Speech_Personalizado: '-'
+      });
+
+      // 2. Hoja 2: Detalle Individual Completo de todos los Invitados
+      const detailRows = invites.map((inv, idx) => {
+        const hasSent = inv.emailSent || inv.emailSentAt;
+        const isUsed = inv.status === 'used';
+        return {
+          No: idx + 1,
+          Token_ID: inv.id,
+          Patrocinador_Asignado: inv.sponsorName || 'Invitación General',
+          Stands_Patrocinador: inv.sponsorStands || 'N/A',
+          Nombre_Destinatario: inv.nombre || 'N/A',
+          Empresa_Destinataria: inv.empresa || 'N/A',
+          Correo_Electronico: inv.email || 'N/A',
+          Telefono_WhatsApp: inv.telefono || 'N/A',
+          Estado_Invitacion: isUsed ? 'REGISTRADO (GAFETE EMITIDO)' : 'PENDIENTE DE REGISTRO',
+          Correo_Despachado: hasSent ? 'ENVIADO' : (isValidEmailAddress(inv.email) ? 'PENDIENTE DE ENVIO' : 'SIN CORREO VALIDO'),
+          Cantidad_Envios_Correo: inv.emailSentCount || (hasSent ? 1 : 0),
+          Fecha_Ultimo_Envio: inv.emailSentAt ? (typeof inv.emailSentAt.toDate === 'function' ? inv.emailSentAt.toDate().toLocaleString('es-NI') : new Date(inv.emailSentAt).toLocaleString('es-NI')) : 'No enviado',
+          Nombre_Registrado_Gafete: inv.registeredName || '',
+          Empresa_Registrada_Gafete: inv.registeredCompany || '',
+          Email_Registrado_Gafete: inv.registeredEmail || '',
+          Telefono_Registrado_Gafete: inv.registeredPhone || '',
+          Fecha_Registro_Gafete: inv.usedAt ? (typeof inv.usedAt.toLocaleDateString === 'function' ? inv.usedAt.toLocaleDateString('es-NI') + ' ' + inv.usedAt.toLocaleTimeString('es-NI') : new Date(inv.usedAt).toLocaleString('es-NI')) : '',
+          Enlace_Unico_QR: getInviteUrl(inv.id)
+        };
+      });
+
+      const wb = XLSX.utils.book_new();
+      
+      const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
+      const wsDetail = XLSX.utils.json_to_sheet(detailRows);
+
+      // Auto-ajustar anchos aproximados de columnas
+      wsSummary['!cols'] = [
+        { wch: 35 }, { wch: 20 }, { wch: 16 }, { wch: 18 }, { wch: 24 },
+        { wch: 30 }, { wch: 22 }, { wch: 28 }, { wch: 28 }, { wch: 28 },
+        { wch: 22 }, { wch: 22 }, { wch: 22 }
+      ];
+
+      wsDetail['!cols'] = [
+        { wch: 6 }, { wch: 24 }, { wch: 30 }, { wch: 20 }, { wch: 28 },
+        { wch: 28 }, { wch: 30 }, { wch: 18 }, { wch: 28 }, { wch: 22 },
+        { wch: 22 }, { wch: 24 }, { wch: 28 }, { wch: 28 }, { wch: 30 },
+        { wch: 20 }, { wch: 24 }, { wch: 45 }
+      ];
+
+      XLSX.utils.book_append_sheet(wb, wsSummary, "Resumen_Por_Patrocinador");
+      XLSX.utils.book_append_sheet(wb, wsDetail, "Detalle_General_Invitados");
+
+      const nowStr = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `Informe_Ejecutivo_Invitaciones_ExpoFerre_${nowStr}.xlsx`);
     });
   };
 
@@ -1646,13 +1784,53 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
   const sponsorsList = Object.keys(sponsorsMap).sort();
 
-  // Filtrar lista de patrocinadores para el directorio
+  // Conteo de patrocinadores según criterios para los chips de filtro
+  const countSponsorsWithInvites = sponsorsList.filter(sp => {
+    return invites.some(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp)));
+  }).length + (invites.some(i => !i.sponsorName || i.sponsorId === 'general') ? 1 : 0);
+
+  const countSponsorsWithRegistered = sponsorsList.filter(sp => {
+    return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && i.status === 'used');
+  }).length + (invites.some(i => (!i.sponsorName || i.sponsorId === 'general') && i.status === 'used') ? 1 : 0);
+
+  const countSponsorsWithPending = sponsorsList.filter(sp => {
+    return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && i.status === 'pending');
+  }).length + (invites.some(i => (!i.sponsorName || i.sponsorId === 'general') && i.status === 'pending') ? 1 : 0);
+
+  const countSponsorsWithUnsentEmails = sponsorsList.filter(sp => {
+    return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && i.status === 'pending' && isValidEmailAddress(i.email) && !i.emailSentAt);
+  }).length + (invites.some(i => (!i.sponsorName || i.sponsorId === 'general') && i.status === 'pending' && isValidEmailAddress(i.email) && !i.emailSentAt) ? 1 : 0);
+
+  // Filtrar lista de patrocinadores para el directorio (Búsqueda + Filtro de Estado)
   const filteredSponsorsList = sponsorsList.filter(sp => {
     const term = sponsorSearchTerm.toLowerCase().trim();
-    if (!term) return true;
     const stands = (sponsorsMap[sp]?.stands || []).join(' ').toLowerCase();
-    return sp.toLowerCase().includes(term) || stands.includes(term);
+    const matchesSearch = !term || sp.toLowerCase().includes(term) || stands.includes(term);
+    if (!matchesSearch) return false;
+
+    const spInvites = invites.filter(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp)));
+    if (sponsorFilterStatus === 'has_invites') return spInvites.length > 0;
+    if (sponsorFilterStatus === 'has_registered') return spInvites.some(i => i.status === 'used');
+    if (sponsorFilterStatus === 'has_pending') return spInvites.some(i => i.status === 'pending');
+    if (sponsorFilterStatus === 'has_unsent_emails') return spInvites.some(i => i.status === 'pending' && isValidEmailAddress(i.email) && !i.emailSentAt);
+
+    return true;
   });
+
+  // Visibilidad de la fila Especial General según filtros
+  const showGeneralRow = (() => {
+    const term = sponsorSearchTerm.toLowerCase().trim();
+    const matchesSearch = !term || 'invitacion general expoferre karen torres'.includes(term);
+    if (!matchesSearch) return false;
+
+    const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
+    if (sponsorFilterStatus === 'has_invites') return genInv.length > 0;
+    if (sponsorFilterStatus === 'has_registered') return genInv.some(i => i.status === 'used');
+    if (sponsorFilterStatus === 'has_pending') return genInv.some(i => i.status === 'pending');
+    if (sponsorFilterStatus === 'has_unsent_emails') return genInv.some(i => i.status === 'pending' && isValidEmailAddress(i.email) && !i.emailSentAt);
+
+    return true;
+  })();
 
   // Métricas Globales
   const totalInvitesCount = invites.length;
@@ -1691,7 +1869,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
           className="hidden"
         />
 
-        {/* Header Principal con Selector de Modo de Vista */}
+        {/* Header Principal con Selector de Modo de Vista & Exportar Informe */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-outline-variant shadow-xs">
           <div>
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
@@ -1708,6 +1886,17 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
 
           <div className="flex flex-wrap items-center gap-2.5">
             
+            {/* Botón Descargar Informe Ejecutivo Excel */}
+            <button
+              onClick={handleExportExecutiveReport}
+              disabled={invites.length === 0}
+              className="px-4 py-2.5 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-xl font-bold transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer disabled:opacity-40"
+              title="Descargar reporte ejecutivo consolidado en Excel con resumen por patrocinador y detalle completo"
+            >
+              <FileSpreadsheet size={16} />
+              <span>Informe Ejecutivo (Excel)</span>
+            </button>
+
             {/* Toggle de Vistas */}
             <div className="bg-surface-variant/40 p-1 rounded-xl border border-outline-variant flex items-center gap-1">
               <button
@@ -1939,22 +2128,123 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
         {viewMode === 'sponsors' && (
           <div className="space-y-4">
             
-            {/* Barra de Búsqueda de Patrocinador */}
-            <div className="bg-white p-4 rounded-2xl border border-outline-variant shadow-2xs flex flex-col sm:flex-row gap-3 items-center justify-between">
-              <div className="relative w-full sm:w-96">
-                <Search size={18} className="absolute left-3.5 top-3 text-secondary" />
-                <input
-                  type="text"
-                  placeholder="Buscar patrocinador o stand..."
-                  value={sponsorSearchTerm}
-                  onChange={(e) => setSponsorSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-surface border border-outline-variant rounded-xl text-sm outline-none focus:border-primary"
-                />
+            {/* Barra de Filtros y Búsqueda de Patrocinador */}
+            <div className="bg-white p-5 rounded-2xl border border-outline-variant shadow-2xs space-y-4">
+              
+              {/* Fila Superior: Búsqueda + Botón de Informe Ejecutivo */}
+              <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+                <div className="relative w-full md:w-96">
+                  <Search size={18} className="absolute left-3.5 top-3 text-secondary" />
+                  <input
+                    type="text"
+                    placeholder="Buscar patrocinador o stand..."
+                    value={sponsorSearchTerm}
+                    onChange={(e) => setSponsorSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-surface border border-outline-variant rounded-xl text-sm outline-none focus:border-primary"
+                  />
+                  {sponsorSearchTerm && (
+                    <button 
+                      onClick={() => setSponsorSearchTerm('')}
+                      className="absolute right-3 top-2.5 text-secondary hover:text-on-surface text-xs font-bold"
+                    >
+                      Limpiar
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
+                  <button
+                    onClick={handleExportExecutiveReport}
+                    disabled={invites.length === 0}
+                    className="px-4 py-2 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer disabled:opacity-40"
+                    title="Descargar reporte ejecutivo en Excel con desglose por patrocinador y lista global"
+                  >
+                    <FileSpreadsheet size={15} />
+                    <span>Descargar Informe Ejecutivo (Excel)</span>
+                  </button>
+
+                  <div className="text-xs text-secondary font-medium pl-2 border-l border-outline-variant hidden sm:block">
+                    Mostrando <strong>{filteredSponsorsList.length + (showGeneralRow ? 1 : 0)}</strong> de {sponsorsList.length + 1}
+                  </div>
+                </div>
               </div>
 
-              <div className="text-xs text-secondary font-medium">
-                Mostrando <strong>{filteredSponsorsList.length + 1}</strong> listas de patrocinador
+              {/* Fila Inferior: Chips de Filtro Rápido */}
+              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-outline-variant/60 text-xs">
+                <span className="text-secondary font-bold text-[11px] uppercase tracking-wider mr-1 flex items-center gap-1">
+                  <ListFilter size={13} />
+                  Filtrar por:
+                </span>
+
+                <button
+                  onClick={() => setSponsorFilterStatus('all')}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                    sponsorFilterStatus === 'all'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'bg-surface-variant/40 hover:bg-surface-variant text-secondary border border-outline-variant/60'
+                  }`}
+                >
+                  Todos ({sponsorsList.length + 1})
+                </button>
+
+                <button
+                  onClick={() => setSponsorFilterStatus('has_registered')}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    sponsorFilterStatus === 'has_registered'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200'
+                  }`}
+                >
+                  <CheckCircle2 size={13} />
+                  Con Registrados ({countSponsorsWithRegistered})
+                </button>
+
+                <button
+                  onClick={() => setSponsorFilterStatus('has_pending')}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    sponsorFilterStatus === 'has_pending'
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'
+                  }`}
+                >
+                  <Clock size={13} />
+                  Con Pendientes ({countSponsorsWithPending})
+                </button>
+
+                <button
+                  onClick={() => setSponsorFilterStatus('has_unsent_emails')}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    sponsorFilterStatus === 'has_unsent_emails'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200'
+                  }`}
+                >
+                  <Mail size={13} />
+                  Con Envíos Pendientes ({countSponsorsWithUnsentEmails})
+                </button>
+
+                <button
+                  onClick={() => setSponsorFilterStatus('has_invites')}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    sponsorFilterStatus === 'has_invites'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200'
+                  }`}
+                >
+                  <Users size={13} />
+                  Con Invitados Cargados ({countSponsorsWithInvites})
+                </button>
+
+                {sponsorFilterStatus !== 'all' && (
+                  <button
+                    onClick={() => setSponsorFilterStatus('all')}
+                    className="ml-auto text-xs font-bold text-red-600 hover:text-red-800 cursor-pointer underline"
+                  >
+                    Restablecer Filtros
+                  </button>
+                )}
               </div>
+
             </div>
 
             {/* TABLA PRINCIPAL DE PATROCINADORES */}
@@ -1965,15 +2255,16 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                     <tr className="bg-surface-variant/40 border-b border-outline-variant text-xs uppercase tracking-wider text-secondary">
                       <th className="p-4 font-bold">Patrocinador / Marca</th>
                       <th className="p-4 font-bold">Stand(s)</th>
-                      <th className="p-4 font-bold">Artes de Correo (Header / Footer)</th>
-                      <th className="p-4 font-bold text-center">Invitados</th>
+                      <th className="p-4 font-bold text-center">Envíos de Correo</th>
+                      <th className="p-4 font-bold text-center">Registrados vs Pendientes</th>
+                      <th className="p-4 font-bold text-center">Artes & Speech</th>
                       <th className="p-4 font-bold text-center">Carga & Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-outline-variant/60">
                     
                     {/* FILA ESPECIAL: INVITACIÓN GENERAL */}
-                    {(!sponsorSearchTerm || 'general expoferre'.includes(sponsorSearchTerm.toLowerCase())) && (
+                    {showGeneralRow && (
                       <tr className="bg-amber-50/40 hover:bg-amber-50/70 transition-colors">
                         <td className="p-4">
                           <div className="flex items-center gap-3">
@@ -1994,79 +2285,112 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                           <span className="text-xs text-slate-500 font-medium">Evento General</span>
                         </td>
 
+                        {/* Métrica: Envíos de Correo */}
+                        <td className="p-4 text-center">
+                          {(() => {
+                            const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
+                            const genWithEmail = genInv.filter(i => isValidEmailAddress(i.email)).length;
+                            const genEmailSent = genInv.filter(i => i.emailSent || i.emailSentAt).length;
+                            const genUnsent = genInv.filter(i => isValidEmailAddress(i.email) && !i.emailSentAt && i.status === 'pending').length;
+                            const genCoverage = genWithEmail > 0 ? Math.round((genEmailSent / genWithEmail) * 100) : 0;
+
+                            return (
+                              <div className="space-y-1.5 min-w-[130px] max-w-[160px] mx-auto">
+                                <div className="flex justify-between items-center text-xs">
+                                  <span className="font-bold text-slate-700 flex items-center gap-1">
+                                    <Mail size={12} className="text-amber-600" />
+                                    {genEmailSent}/{genWithEmail}
+                                  </span>
+                                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-black ${
+                                    genCoverage === 100 
+                                      ? 'bg-emerald-100 text-emerald-800' 
+                                      : genCoverage > 0 
+                                      ? 'bg-blue-100 text-blue-800' 
+                                      : 'bg-slate-100 text-slate-600'
+                                  }`}>
+                                    {genCoverage}%
+                                  </span>
+                                </div>
+                                <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden flex">
+                                  <div 
+                                    className="bg-emerald-500 h-full transition-all duration-300" 
+                                    style={{ width: `${genCoverage}%` }} 
+                                  />
+                                </div>
+                                <div className="text-[10px] text-slate-500 font-medium">
+                                  {genUnsent > 0 ? (
+                                    <span className="text-amber-700 font-bold">⏳ {genUnsent} pendientes de envío</span>
+                                  ) : genWithEmail > 0 ? (
+                                    <span className="text-emerald-700 font-bold">✓ 100% Despachado</span>
+                                  ) : (
+                                    <span className="text-slate-400">Sin correos</span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </td>
+
+                        {/* Métrica: Registrados vs Pendientes */}
+                        <td className="p-4 text-center">
+                          {(() => {
+                            const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
+                            const genUsed = genInv.filter(i => i.status === 'used').length;
+                            const genPending = genInv.length - genUsed;
+                            const genEffectiveRate = genInv.length > 0 ? Math.round((genUsed / genInv.length) * 100) : 0;
+
+                            return (
+                              <div className="space-y-1 min-w-[120px] max-w-[150px] mx-auto">
+                                <div className="text-sm font-black text-on-surface">
+                                  {genInv.length} <span className="text-[10px] font-normal text-slate-500">invitados</span>
+                                </div>
+                                <div className="flex items-center justify-center gap-2 text-xs font-bold">
+                                  <span className="text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200" title="Gafetes Emitidos">
+                                    ✓ {genUsed}
+                                  </span>
+                                  <span className="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200" title="Pendientes de Registro">
+                                    ⏳ {genPending}
+                                  </span>
+                                </div>
+                                {genInv.length > 0 && (
+                                  <div className="text-[10px] text-slate-500">
+                                    <span className="font-bold text-slate-700">{genEffectiveRate}%</span> efectividad
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </td>
+
                         {/* Artes */}
-                        <td className="p-4">
+                        <td className="p-4 text-center">
                           {(() => {
                             const genArt = getSponsorArt('general');
                             return (
-                              <div className="flex items-center gap-2">
-                                <div className="w-16 h-8 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Header General">
+                              <div className="flex items-center justify-center gap-2">
+                                <div className="w-12 h-6 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Header General">
                                   <img src={genArt.headerBannerUrl} alt="Header" className="w-full h-full object-cover" />
                                   {genArt.hasCustomHeader && (
-                                    <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-500 rounded-full"></span>
+                                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                                   )}
                                 </div>
-                                <div className="w-16 h-8 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Footer General">
+                                <div className="w-12 h-6 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Footer General">
                                   <img src={genArt.footerBannerUrl} alt="Footer" className="w-full h-full object-cover" />
                                   {genArt.hasCustomFooter && (
-                                    <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-500 rounded-full"></span>
+                                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                                   )}
                                 </div>
                                 <button
                                   onClick={() => handleOpenArtModal('general')}
-                                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
+                                  className={`p-1 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
                                     genArt.hasCustomHeader || genArt.hasCustomFooter
                                       ? 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
                                       : 'bg-white border border-outline-variant hover:bg-surface text-secondary'
                                   }`}
                                   title="Subir o cambiar artes de Header y Footer"
                                 >
-                                  <Palette size={12} />
-                                  {genArt.hasCustomHeader || genArt.hasCustomFooter ? 'Artes Listos' : 'Subir Artes'}
+                                  <Palette size={13} />
                                 </button>
-                              </div>
-                            );
-                          })()}
-                        </td>
-
-                        {/* Métricas e Indicador de Correo */}
-                        <td className="p-4 text-center">
-                          {(() => {
-                            const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general');
-                            const genUsed = genInv.filter(i => i.status === 'used').length;
-                            const genWithEmail = genInv.filter(i => isValidEmailAddress(i.email)).length;
-                            const genEmailSent = genInv.filter(i => i.emailSent || i.emailSentAt).length;
-                            const genPending = genInv.length - genUsed;
-                            const genCoverage = genWithEmail > 0 ? Math.round((genEmailSent / genWithEmail) * 100) : 0;
-
-                            return (
-                              <div className="space-y-1.5 min-w-[120px]">
-                                <div>
-                                  <span className="font-bold text-base text-on-surface">{genInv.length}</span>
-                                  <div className="text-[11px] text-slate-500">
-                                    <span className="text-green-600 font-bold">{genUsed}</span> reg. / <span className="text-amber-600 font-bold">{genPending}</span> pend.
-                                  </div>
-                                </div>
-
-                                {genInv.length > 0 && (
-                                  <div className="bg-white/80 p-1.5 rounded-lg border border-amber-200/80 text-[10px] space-y-1">
-                                    <div className="flex justify-between items-center font-bold text-slate-700">
-                                      <span className="flex items-center gap-1">
-                                        <Mail size={10} className="text-amber-600" />
-                                        {genEmailSent}/{genWithEmail}
-                                      </span>
-                                      <span className={genCoverage === 100 ? 'text-emerald-700 font-black' : 'text-slate-600'}>
-                                        {genCoverage}%
-                                      </span>
-                                    </div>
-                                    <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden flex">
-                                      <div 
-                                        className="bg-emerald-500 h-full transition-all" 
-                                        style={{ width: `${genWithEmail > 0 ? (genEmailSent / genWithEmail) * 100 : 0}%` }} 
-                                      />
-                                    </div>
-                                  </div>
-                                )}
                               </div>
                             );
                           })()}
@@ -2075,8 +2399,8 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                         {/* Acciones */}
                         <td className="p-4 text-center">
                           {(() => {
-                            const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general');
-                            const genPendingWithEmail = genInv.filter(i => i.status === 'pending' && i.email && i.email.includes('@'));
+                            const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
+                            const genPendingWithEmail = genInv.filter(i => i.status === 'pending' && isValidEmailAddress(i.email));
                             const genUnsentEmail = genPendingWithEmail.filter(i => !i.emailSentAt);
                             const countToSend = genUnsentEmail.length > 0 ? genUnsentEmail.length : genPendingWithEmail.length;
 
@@ -2161,9 +2485,13 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                       const spInvites = invites.filter(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp)));
                       const spUsed = spInvites.filter(i => i.status === 'used').length;
                       const spPending = spInvites.length - spUsed;
+                      const spWithEmail = spInvites.filter(i => isValidEmailAddress(i.email)).length;
+                      const spEmailSent = spInvites.filter(i => i.emailSent || i.emailSentAt).length;
                       const spPendingWithEmail = spInvites.filter(i => i.status === 'pending' && isValidEmailAddress(i.email));
                       const spUnsentEmail = spPendingWithEmail.filter(i => !i.emailSentAt);
                       const countToSend = spUnsentEmail.length > 0 ? spUnsentEmail.length : spPendingWithEmail.length;
+                      const spCoverage = spWithEmail > 0 ? Math.round((spEmailSent / spWithEmail) * 100) : 0;
+                      const spEffectiveRate = spInvites.length > 0 ? Math.round((spUsed / spInvites.length) * 100) : 0;
 
                       const art = getSponsorArt(sp);
                       const rawStands = sponsorsMap[sp]?.stands?.join(', ') || art.stands || 'N/A';
@@ -2197,78 +2525,95 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                             </span>
                           </td>
 
+                          {/* Métrica: Envíos de Correo */}
+                          <td className="p-4 text-center">
+                            <div className="space-y-1.5 min-w-[130px] max-w-[160px] mx-auto">
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="font-bold text-slate-700 flex items-center gap-1">
+                                  <Mail size={12} className="text-amber-600" />
+                                  {spEmailSent}/{spWithEmail}
+                                </span>
+                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-black ${
+                                  spCoverage === 100 
+                                    ? 'bg-emerald-100 text-emerald-800' 
+                                    : spCoverage > 0 
+                                    ? 'bg-blue-100 text-blue-800' 
+                                    : 'bg-slate-100 text-slate-600'
+                                }`}>
+                                  {spCoverage}%
+                                </span>
+                              </div>
+                              <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden flex">
+                                <div 
+                                  className="bg-emerald-500 h-full transition-all duration-300" 
+                                  style={{ width: `${spCoverage}%` }} 
+                                />
+                              </div>
+                              <div className="text-[10px] text-slate-500 font-medium">
+                                {spUnsentEmail.length > 0 ? (
+                                  <span className="text-amber-700 font-bold">⏳ {spUnsentEmail.length} pendientes de envío</span>
+                                ) : spWithEmail > 0 ? (
+                                  <span className="text-emerald-700 font-bold">✓ 100% Despachado</span>
+                                ) : (
+                                  <span className="text-slate-400">Sin correos</span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Métrica: Registrados vs Pendientes */}
+                          <td className="p-4 text-center">
+                            <div className="space-y-1 min-w-[120px] max-w-[150px] mx-auto">
+                              <div className="text-sm font-black text-on-surface">
+                                {spInvites.length} <span className="text-[10px] font-normal text-slate-500">invitados</span>
+                              </div>
+                              <div className="flex items-center justify-center gap-2 text-xs font-bold">
+                                <span className="text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200" title="Gafetes Emitidos">
+                                  ✓ {spUsed}
+                                </span>
+                                <span className="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200" title="Pendientes de Registro">
+                                  ⏳ {spPending}
+                                </span>
+                              </div>
+                              {spInvites.length > 0 && (
+                                <div className="text-[10px] text-slate-500">
+                                  <span className="font-bold text-slate-700">{spEffectiveRate}%</span> efectividad
+                                </div>
+                              )}
+                            </div>
+                          </td>
+
                           {/* Artes de Correo (Header & Footer) */}
-                          <td className="p-4">
-                            <div className="flex items-center gap-2">
+                          <td className="p-4 text-center">
+                            <div className="flex items-center justify-center gap-2">
                               {/* Miniatura Header */}
-                              <div className="w-16 h-8 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Header Banner">
+                              <div className="w-12 h-6 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Header Banner">
                                 <img src={art.headerBannerUrl} alt="Header" className="w-full h-full object-cover" />
                                 {art.hasCustomHeader && (
-                                  <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-500 rounded-full"></span>
+                                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                                 )}
                               </div>
 
                               {/* Miniatura Footer */}
-                              <div className="w-16 h-8 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Footer Banner de Marcas">
+                              <div className="w-12 h-6 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Footer Banner de Marcas">
                                 <img src={art.footerBannerUrl} alt="Footer" className="w-full h-full object-cover" />
                                 {art.hasCustomFooter && (
-                                  <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-500 rounded-full"></span>
+                                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                                 )}
                               </div>
 
                               <button
                                 onClick={() => handleOpenArtModal(sp)}
-                                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
+                                className={`p-1 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
                                   art.hasCustomHeader || art.hasCustomFooter
                                     ? 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
                                     : 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100'
                                 }`}
                                 title="Subir o cambiar artes de Header y Footer"
                               >
-                                <Palette size={12} />
-                                {art.hasCustomHeader || art.hasCustomFooter ? 'Artes Listos' : 'Subir Artes'}
+                                <Palette size={13} />
                               </button>
                             </div>
-                          </td>
-
-                          {/* Métricas e Indicador de Correo */}
-                          <td className="p-4 text-center">
-                            {(() => {
-                              const spWithEmail = spInvites.filter(i => isValidEmailAddress(i.email)).length;
-                              const spEmailSent = spInvites.filter(i => i.emailSent || i.emailSentAt).length;
-                              const spCoverage = spWithEmail > 0 ? Math.round((spEmailSent / spWithEmail) * 100) : 0;
-
-                              return (
-                                <div className="space-y-1.5 min-w-[120px]">
-                                  <div>
-                                    <span className="font-bold text-base text-on-surface">{spInvites.length}</span>
-                                    <div className="text-[11px] text-slate-500">
-                                      <span className="text-green-600 font-bold">{spUsed}</span> reg. / <span className="text-amber-600 font-bold">{spPending}</span> pend.
-                                    </div>
-                                  </div>
-
-                                  {spInvites.length > 0 && (
-                                    <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-[10px] space-y-1">
-                                      <div className="flex justify-between items-center font-bold text-slate-700">
-                                        <span className="flex items-center gap-1">
-                                          <Mail size={10} className="text-amber-600" />
-                                          {spEmailSent}/{spWithEmail}
-                                        </span>
-                                        <span className={spCoverage === 100 ? 'text-emerald-700 font-black' : 'text-slate-600'}>
-                                          {spCoverage}%
-                                        </span>
-                                      </div>
-                                      <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden flex">
-                                        <div 
-                                          className="bg-emerald-500 h-full transition-all" 
-                                          style={{ width: `${spWithEmail > 0 ? (spEmailSent / spWithEmail) * 100 : 0}%` }} 
-                                        />
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })()}
                           </td>
 
                           {/* Acciones de Carga y Gestión */}
