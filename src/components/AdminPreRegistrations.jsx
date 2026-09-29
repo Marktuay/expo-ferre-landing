@@ -5,6 +5,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getEventBasePath } from '../config/eventConfig';
 import AdminFollowUpModal from './AdminFollowUpModal';
+import AdminQRViewModal from './AdminQRViewModal';
 
 export default function AdminPreRegistrations({ onBack, adminUser }) {
   const [registrations, setRegistrations] = useState([]);
@@ -15,6 +16,10 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
   const [followUpModalOpen, setFollowUpModalOpen] = useState(false);
   const [selectedPersonForFollowUp, setSelectedPersonForFollowUp] = useState(null);
   const [needsFollowUpOnly, setNeedsFollowUpOnly] = useState(false);
+
+  // QR Modal States
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [selectedPersonForQR, setSelectedPersonForQR] = useState(null);
 
   // Migration States
   const [migrationModalOpen, setMigrationModalOpen] = useState(false);
@@ -430,6 +435,18 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                       </td>
                       <td className="p-4 text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
+                          {/* Ver Código QR */}
+                          <button 
+                            onClick={() => {
+                              setSelectedPersonForQR(reg);
+                              setQrModalOpen(true);
+                            }} 
+                            className="text-[#0d47a1] hover:bg-[#0d47a1]/10 p-2 rounded-full transition-colors" 
+                            title="Visualizar y Descargar Código QR"
+                          >
+                            <span className="material-symbols-outlined">qr_code_2</span>
+                          </button>
+
                           <button 
                             onClick={() => {
                               setSelectedPersonForFollowUp(reg);
@@ -575,6 +592,18 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
             </div>
           </div>
         </div>
+      )}
+
+      {qrModalOpen && selectedPersonForQR && (
+        <AdminQRViewModal
+          isOpen={qrModalOpen}
+          onClose={() => {
+            setQrModalOpen(false);
+            setSelectedPersonForQR(null);
+          }}
+          person={selectedPersonForQR}
+          roleLabel="Asistente Registrado"
+        />
       )}
     </div>
   );

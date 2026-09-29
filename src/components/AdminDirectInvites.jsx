@@ -45,8 +45,10 @@ import {
   ShieldAlert,
   Timer,
   Bell,
-  MessageSquare
+  MessageSquare,
+  QrCode
 } from 'lucide-react';
+import AdminQRViewModal from './AdminQRViewModal';
 
 export default function AdminDirectInvites({ onBack, adminUser }) {
   const [invites, setInvites] = useState([]);
@@ -54,6 +56,10 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [sponsorsMap, setSponsorsMap] = useState({});
   const [sponsorSettings, setSponsorSettings] = useState({});
   const [loading, setLoading] = useState(true);
+
+  // QR Modal
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [selectedPersonForQR, setSelectedPersonForQR] = useState(null);
   
   // Modo de Vista: 'sponsors' (Directorio de Patrocinadores) | 'invites' (Detalle de Invitados)
   const [viewMode, setViewMode] = useState('sponsors');
@@ -3029,6 +3035,30 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                             <td className="p-4 text-center">
                               <div className="flex items-center justify-center gap-1.5 flex-wrap">
                                 
+                                {/* Ver Código QR del Registrado */}
+                                {isUsed && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedPersonForQR({
+                                        id: inv.registeredAttendeeId || inv.id,
+                                        nombre: inv.registeredName || inv.nombre,
+                                        empresa: inv.registeredCompany || inv.empresa,
+                                        email: inv.registeredEmail || inv.email,
+                                        telefono: inv.registeredPhone || inv.telefono,
+                                        sponsorName: inv.sponsorName,
+                                        status: 'used'
+                                      });
+                                      setQrModalOpen(true);
+                                    }}
+                                    title="Visualizar y Descargar Código QR de Acceso del Registrado"
+                                    className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer"
+                                  >
+                                    <QrCode size={14} />
+                                    <span className="hidden xl:inline">Ver QR</span>
+                                  </button>
+                                )}
+
                                 {/* Editar Invitado */}
                                 <button
                                   onClick={() => handleOpenEditGuest(inv)}
@@ -4960,6 +4990,18 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
 
           </div>
         </div>
+      )}
+
+      {qrModalOpen && selectedPersonForQR && (
+        <AdminQRViewModal
+          isOpen={qrModalOpen}
+          onClose={() => {
+            setQrModalOpen(false);
+            setSelectedPersonForQR(null);
+          }}
+          person={selectedPersonForQR}
+          roleLabel="Invitado Registrado"
+        />
       )}
 
     </div>

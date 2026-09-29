@@ -4,6 +4,7 @@ import { db, auth } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import PrintableBadgeList from './PrintableBadgeList';
 import AdminFollowUpModal from './AdminFollowUpModal';
+import AdminQRViewModal from './AdminQRViewModal';
 
 export default function AdminGuests({ onBack }) {
   const [guestsList, setGuestsList] = useState([]);
@@ -11,6 +12,10 @@ export default function AdminGuests({ onBack }) {
   const [loading, setLoading] = useState(true);
   const [printItems, setPrintItems] = useState(null);
   
+  // QR Modal States
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [selectedPersonForQR, setSelectedPersonForQR] = useState(null);
+
   // CRM States
   const [followUpModalOpen, setFollowUpModalOpen] = useState(false);
   const [selectedPersonForFollowUp, setSelectedPersonForFollowUp] = useState(null);
@@ -189,6 +194,18 @@ export default function AdminGuests({ onBack }) {
                       </td>
                       <td className="p-4 text-center">
                         <div className="flex items-center justify-center gap-2">
+                          {/* Ver Código QR */}
+                          <button 
+                            onClick={() => {
+                              setSelectedPersonForQR(guest);
+                              setQrModalOpen(true);
+                            }} 
+                            className="p-2 text-[#0d47a1] hover:bg-[#0d47a1]/10 rounded-full transition-colors" 
+                            title="Visualizar y Descargar Código QR"
+                          >
+                            <span className="material-symbols-outlined">qr_code_2</span>
+                          </button>
+                          
                           <button 
                             onClick={() => {
                               setSelectedPersonForFollowUp({ ...guest, name: guest.nombre, company: guest.empresa, phone: guest.telefono });
@@ -232,6 +249,19 @@ export default function AdminGuests({ onBack }) {
           person={selectedPersonForFollowUp}
           collectionName="guests"
           adminUser={{ username: auth.currentUser?.email || 'Staff' }}
+        />
+      )}
+
+      {qrModalOpen && selectedPersonForQR && (
+        <AdminQRViewModal
+          isOpen={qrModalOpen}
+          onClose={() => {
+            setQrModalOpen(false);
+            setSelectedPersonForQR(null);
+          }}
+          person={selectedPersonForQR}
+          roleLabel="Invitado Especial"
+          onPrintBadge={(g) => setPrintItems([g])}
         />
       )}
     </div>
