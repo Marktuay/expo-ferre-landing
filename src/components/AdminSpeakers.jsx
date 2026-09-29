@@ -6,6 +6,7 @@ import PrintableBadgeList from './PrintableBadgeList';
 import CreateSpeakerModal from './CreateSpeakerModal';
 import InviteSpeakerModal from './InviteSpeakerModal';
 import AdminQRViewModal from './AdminQRViewModal';
+import JSZip from 'jszip';
 
 export default function AdminSpeakers({ onBack }) {
   const [speakers, setSpeakers] = useState([]);
@@ -20,9 +21,229 @@ export default function AdminSpeakers({ onBack }) {
   const [mediaModalSpeaker, setMediaModalSpeaker] = useState(null);
   const [downloadingType, setDownloadingType] = useState(null);
 
+  // ZIP Generation States
+  const [isGeneratingZip, setIsGeneratingZip] = useState(false);
+  const [zipProgress, setZipProgress] = useState({ current: 0, total: 0, status: '' });
+
   // QR Modal
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [selectedPersonForQR, setSelectedPersonForQR] = useState(null);
+
+  const getBlobFromUrl = async (url) => {
+    if (!url) return null;
+    if (url.startsWith('data:')) {
+      try {
+        const parts = url.split(';base64,');
+        const contentType = parts[0].split(':')[1] || 'image/png';
+        const raw = window.atob(parts[1]);
+        const uInt8Array = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; ++i) {
+          uInt8Array[i] = raw.charCodeAt(i);
+        }
+        const ext = contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
+        return { blob: new Blob([uInt8Array], { type: contentType }), ext };
+      } catch (e) {
+        console.warn('Error converting base64 to blob:', e);
+        return null;
+      }
+    }
+    try {
+      const res = await fetch(url, { mode: 'cors' });
+      if (res.ok) {
+        const blob = await res.blob();
+        const ext = blob.type.includes('jpeg') || blob.type.includes('jpg') ? 'jpg' : 'png';
+        return { blob, ext };
+      }
+    } catch (err) {
+      console.warn('Fetch error for media url:', url, err);
+    }
+    return null;
+  };
+
+  const buildSpeakerTextSummary = (speaker) => {
+    const speakerName = `${speaker.nombre || ''} ${speaker.apellido || ''}`.trim();
+    const sponsor = speaker.sponsorCompany || speaker.empresa || 'Independiente / ExpoFerre';
+    const formats = Array.isArray(speaker.formatos) ? speaker.formatos.join(', ') : (speaker.formato || 'Conferencia');
+    
+    return `=====================================================
+EXPO FERRE NICARAGUA 2026 - FICHA TÉCNICA DE CONFERENCIA
+=====================================================
+
+DATOS DEL CONFERENCISTA:
+------------------------
+• Nombre Completo: ${speakerName}
+• Cargo / Especialidad: ${speaker.cargo || 'Conferencista'}
+• Empresa / Organización: ${speaker.empresa || 'Particular'}
+• Patrocinador / Auspicio: ${sponsor}
+
+DATOS DE LA PONENCIA:
+---------------------
+• Título de la Ponencia: ${speaker.titulo || speaker.tema || 'Sin título'}
+• Formato de Participación: ${formats}
+• Resumen / Sinopsis:
+${speaker.resumen || 'No especificado.'}
+
+DATOS DE CONTACTO:
+------------------
+• Correo Electrónico: ${speaker.email || speaker.correo || 'No especificado'}
+• Teléfono / Celular: ${speaker.telefono || 'No especificado'}
+• LinkedIn: ${speaker.linkedin || 'No especificado'}
+• Facebook: ${speaker.facebook || 'No especificado'}
+• Instagram: ${speaker.instagram || 'No especificado'}
+
+AUTORIZACIONES Y REGISTRO:
+--------------------------
+• Autoriza compartir material: ${speaker.autorizaCompartir || 'Sí'}
+• Fecha de Registro: ${speaker.createdAt?.toLocaleString ? speaker.createdAt.toLocaleString('es-NI') : 'N/A'}
+• ID de Registro: ${speaker.id}
+`;
+  };
+
+  // Descarga Masiva Total (ZIP con carpetas, fotos, logos, fichas y excel)
+  const handleDownloadAllZip = async () => {
+    if (filteredSpeakers.length === 0) return;
+    setIsGeneratingZip(true);
+    setZipProgress({ current: 0, total: filteredSpeakers.length, status: 'Iniciando empaquetado...' });
+
+    try {
+      const zip = new JSZip();
+      const rootFolder = zip.folder("Conferencias_ExpoFerre_2026");
+
+      // 1. Procesar cada conferencista
+      for (let i = 0; i < filteredSpeakers.length; i++) {
+        const s = filteredSpeakers[i];
+        const speakerName = `${s.nombre || ''} ${s.apellido || ''}`.trim() || `Speaker_${i+1}`;
+        const safeName = speakerName.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]/g, '_');
+        const folderName = `${String(i + 1).padStart(2, '0')}_${safeName}`;
+        const speakerFolder = rootFolder.folder(folderName);
+
+        setZipProgress({ current: i + 1, total: filteredSpeakers.length, status: `Procesando ${speakerName}...` });
+
+        // Ficha técnica en texto plano
+        speakerFolder.file(`Ficha_Tecnica_${safeName}.txt`, buildSpeakerTextSummary(s));
+
+        // Descargar Foto si existe
+        if (s.foto) {
+          const fotoData = await getBlobFromUrl(s.foto);
+          if (fotoData) {
+            speakerFolder.file(`Foto_${safeName}.${fotoData.ext}`, fotoData.blob);
+          }
+        }
+
+        // Descargar Logo si existe
+        if (s.logo) {
+          const safeComp = (s.sponsorCompany || s.empresa || 'Empresa').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]/g, '_');
+          const logoData = await getBlobFromUrl(s.logo);
+          if (logoData) {
+            speakerFolder.file(`Logo_${safeComp}.${logoData.ext}`, logoData.blob);
+          }
+        }
+      }
+
+      // 2. Incluir Excel General consolidado
+      setZipProgress({ current: filteredSpeakers.length, total: filteredSpeakers.length, status: 'Generando Excel consolidado...' });
+      const XLSX = await import('xlsx');
+      const dataToExport = filteredSpeakers.map((s, idx) => ({
+        Numero: idx + 1,
+        Fecha_Registro: s.createdAt?.toLocaleDateString ? s.createdAt.toLocaleDateString() + ' ' + s.createdAt.toLocaleTimeString() : 'N/A',
+        Tipo_Auspicio: s.sponsorId ? 'Auspiciado por Patrocinador' : 'Independiente / Organización',
+        Patrocinador_Entidad: s.sponsorCompany || (s.sponsorId ? s.empresa : 'Organización ExpoFerre 2026'),
+        Nombre_Speaker: `${s.nombre || ''} ${s.apellido || ''}`.trim(),
+        Cargo: s.cargo || '',
+        Empresa: s.empresa || 'Independiente',
+        Email: s.email || s.correo || '',
+        Telefono: s.telefono || '',
+        LinkedIn: s.linkedin || '',
+        Facebook: s.facebook || '',
+        Instagram: s.instagram || '',
+        Titulo_Ponencia: s.titulo || s.tema || '',
+        Formato: Array.isArray(s.formatos) ? s.formatos.join(', ') : (s.formato || ''),
+        Resumen_Sinopsis: s.resumen || '',
+        Autoriza_Compartir: s.autorizaCompartir || '',
+        Tiene_Foto: s.foto ? 'SÍ' : 'NO',
+        Tiene_Logo: s.logo ? 'SÍ' : 'NO'
+      }));
+      const ws = XLSX.utils.json_to_sheet(dataToExport);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Conferencias");
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      rootFolder.file('Reporte_General_Conferencias_ExpoFerre_2026.xlsx', excelBuffer);
+
+      // README con metadata general
+      rootFolder.file('README_CONFERENCIAS.txt', `EXPO FERRE NICARAGUA 2026
+PAQUETE COMPLETO DE CONFERENCIAS Y MEDIA
+Total de conferencias incluidas: ${filteredSpeakers.length}
+Generado el: ${new Date().toLocaleString('es-NI')}
+
+Contenido del paquete:
+- Una carpeta por cada conferencista con su Fotografía Oficial, Logo de Marca y Ficha Técnica.
+- Archivo Excel "Reporte_General_Conferencias_ExpoFerre_2026.xlsx" con toda la base de datos completa.
+`);
+
+      // 3. Generar el archivo ZIP final
+      setZipProgress({ current: filteredSpeakers.length, total: filteredSpeakers.length, status: 'Comprimiendo archivo ZIP...' });
+      const content = await zip.generateAsync({ type: 'blob' });
+      
+      const downloadUrl = window.URL.createObjectURL(content);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `Conferencias_ExpoFerre_2026_Completo.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(downloadUrl);
+
+    } catch (err) {
+      console.error('Error generando descarga total ZIP:', err);
+      alert('Hubo un problema al generar el archivo ZIP: ' + err.message);
+    } finally {
+      setIsGeneratingZip(false);
+    }
+  };
+
+  // Descarga de Expediente Individual en ZIP
+  const handleDownloadSingleSpeakerZip = async (speaker) => {
+    const speakerName = `${speaker.nombre || ''} ${speaker.apellido || ''}`.trim() || 'Speaker';
+    const safeName = speakerName.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]/g, '_');
+    setDownloadingType('zip_single');
+
+    try {
+      const zip = new JSZip();
+      const folder = zip.folder(`Expediente_${safeName}`);
+
+      folder.file(`Ficha_Tecnica_${safeName}.txt`, buildSpeakerTextSummary(speaker));
+
+      if (speaker.foto) {
+        const fotoData = await getBlobFromUrl(speaker.foto);
+        if (fotoData) {
+          folder.file(`Foto_${safeName}.${fotoData.ext}`, fotoData.blob);
+        }
+      }
+
+      if (speaker.logo) {
+        const safeComp = (speaker.sponsorCompany || speaker.empresa || 'Empresa').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]/g, '_');
+        const logoData = await getBlobFromUrl(speaker.logo);
+        if (logoData) {
+          folder.file(`Logo_${safeComp}.${logoData.ext}`, logoData.blob);
+        }
+      }
+
+      const content = await zip.generateAsync({ type: 'blob' });
+      const downloadUrl = window.URL.createObjectURL(content);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `Expediente_Conferencia_${safeName}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (err) {
+      console.error('Error descargando expediente individual:', err);
+      alert('Error al descargar expediente: ' + err.message);
+    } finally {
+      setDownloadingType(null);
+    }
+  };
 
   const downloadImage = async (url, filename, type) => {
     if (!url) return;
@@ -158,6 +379,19 @@ export default function AdminSpeakers({ onBack }) {
               <span className="material-symbols-outlined text-base">print</span>
               Imprimir Gafetes
             </button>
+            <button 
+              onClick={handleDownloadAllZip}
+              disabled={isGeneratingZip || filteredSpeakers.length === 0}
+              className="px-4 py-2 bg-[#0d47a1] text-white border border-[#0d47a1] rounded-md hover:bg-[#1565c0] transition-colors font-label-lg flex items-center gap-2 shadow-xs text-sm disabled:opacity-50 cursor-pointer"
+              title="Descargar paquete ZIP completo con todas las fotos, logos, títulos de ponencia y contactos"
+            >
+              <span className={`material-symbols-outlined text-base ${isGeneratingZip ? 'animate-spin' : ''}`}>
+                {isGeneratingZip ? 'sync' : 'folder_zip'}
+              </span>
+              {isGeneratingZip 
+                ? `Procesando (${zipProgress.current}/${zipProgress.total})...` 
+                : 'Descarga Total (Fotos, Logos y Fichas ZIP)'}
+            </button>
             <button onClick={() => {
               import('xlsx').then(XLSX => {
                 const dataToExport = filteredSpeakers.map(s => ({
@@ -175,18 +409,19 @@ export default function AdminSpeakers({ onBack }) {
                   Tema: s.titulo || s.tema || '',
                   Formato: Array.isArray(s.formatos) ? s.formatos.join(', ') : (s.formato || ''),
                   AutorizaCompartir: s.autorizaCompartir || '',
-                  TieneFoto: s.foto ? 'SÍ' : 'NO'
+                  TieneFoto: s.foto ? 'SÍ' : 'NO',
+                  TieneLogo: s.logo ? 'SÍ' : 'NO'
                 }));
                 const worksheet = XLSX.utils.json_to_sheet(dataToExport);
                 const workbook = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Conferencias");
                 XLSX.writeFile(workbook, "Conferencias_ExpoFerre_2026.xlsx");
               });
-            }} className="px-4 py-2 bg-[#217346] text-white border border-[#217346] rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 text-sm">
+            }} className="px-4 py-2 bg-[#217346] text-white border border-[#217346] rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 text-sm cursor-pointer">
               <span className="material-symbols-outlined text-base">download</span>
               Exportar Excel
             </button>
-            <button onClick={onBack} className="px-4 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2 text-sm">
+            <button onClick={onBack} className="px-4 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2 text-sm cursor-pointer">
               <span className="material-symbols-outlined text-base">arrow_back</span>
               Volver al Menú
             </button>
@@ -564,9 +799,9 @@ export default function AdminSpeakers({ onBack }) {
 
               </div>
 
-              {/* Botón Descargar Ambos si los 2 están disponibles */}
-              {mediaModalSpeaker.foto && mediaModalSpeaker.logo && (
-                <div className="pt-2 text-center">
+              {/* Acciones de Descarga Combinada / Expediente Completo */}
+              <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+                {mediaModalSpeaker.foto && mediaModalSpeaker.logo && (
                   <button
                     type="button"
                     onClick={() => {
@@ -577,13 +812,26 @@ export default function AdminSpeakers({ onBack }) {
                         downloadImage(mediaModalSpeaker.logo, `Logo_${safeComp}.png`, 'logo');
                       }, 400);
                     }}
-                    className="px-6 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold text-xs inline-flex items-center gap-2 shadow-md transition-colors cursor-pointer"
+                    className="px-5 py-2.5 bg-slate-800 hover:bg-black text-white rounded-xl font-bold text-xs inline-flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[18px]">cloud_download</span>
-                    Descargar Ambos Archivos (Foto y Logo)
+                    Descargar Foto y Logo
                   </button>
-                </div>
-              )}
+                )}
+
+                <button
+                  type="button"
+                  disabled={downloadingType === 'zip_single'}
+                  onClick={() => handleDownloadSingleSpeakerZip(mediaModalSpeaker)}
+                  className="px-5 py-2.5 bg-[#0d47a1] hover:bg-[#1565c0] text-white rounded-xl font-bold text-xs inline-flex items-center gap-2 shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+                  title="Descargar paquete ZIP con Foto, Logo y Ficha Técnica completa de esta ponencia"
+                >
+                  <span className={`material-symbols-outlined text-[18px] ${downloadingType === 'zip_single' ? 'animate-spin' : ''}`}>
+                    {downloadingType === 'zip_single' ? 'sync' : 'folder_zip'}
+                  </span>
+                  {downloadingType === 'zip_single' ? 'Generando ZIP...' : 'Descargar Expediente Completo (ZIP)'}
+                </button>
+              </div>
 
             </div>
 
