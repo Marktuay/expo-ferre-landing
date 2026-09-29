@@ -6,15 +6,21 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
 
   if (!isOpen || !person) return null;
 
-  const id = person.registeredAttendeeId || person.id || '';
-  const name = person.name || person.nombre || person.registeredName || 'Sin Nombre';
+  const isPendingInvite = person.isInviteLink || person.status === 'pending';
+  
+  // Si es invitación pendiente, el QR debe ser la URL de registro. Si ya está registrado, el ID del documento para check-in.
+  const qrValue = isPendingInvite 
+    ? (person.inviteUrl || `${window.location.origin}/?invite=${encodeURIComponent(person.id)}`)
+    : (person.registeredAttendeeId || person.id || '');
+
+  const name = person.name || person.nombre || person.registeredName || 'Invitado Especial';
   const company = person.company || person.empresa || person.registeredCompany || 'Particular';
   const email = person.email || person.correo || person.registeredEmail || '';
   const phone = person.phone || person.telefono || person.registeredPhone || '';
   const sponsor = person.sponsorName || person.patrocinador || '';
 
-  const handleCopyId = () => {
-    navigator.clipboard.writeText(id);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(qrValue);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -35,15 +41,15 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
         ctx.drawImage(img, 20, 20);
         const pngFile = canvas.toDataURL('image/png');
         const downloadLink = document.createElement('a');
-        const safeName = (name || id).replace(/[^a-zA-Z0-9]/g, '_');
-        downloadLink.download = `QR_Acceso_${safeName}.png`;
+        const prefix = isPendingInvite ? 'QR_Invitacion_' : 'QR_Acceso_';
+        const safeName = (name || person.id).replace(/[^a-zA-Z0-9]/g, '_');
+        downloadLink.download = `${prefix}${safeName}.png`;
         downloadLink.href = pngFile;
         downloadLink.click();
       };
       img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
     } catch (e) {
-      // Fallback a servicio externo si el navegador bloquea canvas
-      const qrFallbackUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(id)}&margin=15`;
+      const qrFallbackUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(qrValue)}&margin=15`;
       window.open(qrFallbackUrl, '_blank');
     }
   };
@@ -53,38 +59,50 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
       <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col border border-slate-100">
         
         {/* Header con estilo ExpoFerre */}
-        <div className="bg-gradient-to-r from-[#0d47a1] to-[#1565c0] p-5 text-white relative flex-shrink-0">
+        <div className={`p-5 text-white relative flex-shrink-0 ${
+          isPendingInvite 
+            ? 'bg-gradient-to-r from-amber-600 to-amber-700' 
+            : 'bg-gradient-to-r from-[#0d47a1] to-[#1565c0]'
+        }`}>
           <button 
             onClick={onClose}
-            className="absolute top-4 right-4 text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors"
+            className="absolute top-4 right-4 text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
             title="Cerrar"
           >
             <span className="material-symbols-outlined text-2xl">close</span>
           </button>
           
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-amber-400 text-2xl">qr_code_2</span>
+          <div className="flex items-center gap-2.5">
+            <span className="material-symbols-outlined text-amber-300 text-3xl">
+              {isPendingInvite ? 'qr_code_scanner' : 'qr_code_2'}
+            </span>
             <div>
-              <h2 className="text-lg font-bold leading-tight">Código QR de Acceso Oficial</h2>
-              <p className="text-white/80 text-xs mt-0.5">EXPO FERRE Nicaragua 2026</p>
+              <h2 className="text-lg font-bold leading-tight">
+                {isPendingInvite ? 'QR de Invitación Directa' : 'Código QR Oficial de Acceso'}
+              </h2>
+              <p className="text-white/80 text-xs mt-0.5">
+                {isPendingInvite ? 'Escanear para abrir Registro' : 'EXPO FERRE Nicaragua 2026'}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Contenido del Modal */}
-        <div className="p-6 overflow-y-auto space-y-5 text-center">
+        <div className="p-6 overflow-y-auto space-y-4 text-center">
           
-          {/* Tarjeta de Información del Asistente */}
+          {/* Tarjeta de Información */}
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-left space-y-1">
             <div className="flex items-center justify-between">
-              <span className="inline-block px-2.5 py-0.5 bg-[#f39200]/10 text-[#f39200] font-bold text-xs rounded-full uppercase tracking-wider">
-                {roleLabel}
+              <span className={`inline-block px-2.5 py-0.5 font-bold text-xs rounded-full uppercase tracking-wider ${
+                isPendingInvite ? 'bg-amber-100 text-amber-800' : 'bg-[#f39200]/10 text-[#f39200]'
+              }`}>
+                {isPendingInvite ? 'Invitación Pendiente' : roleLabel}
               </span>
               {person.status && (
                 <span className={`text-[11px] font-bold uppercase ${
-                  person.status === 'approved' || person.status === 'used' ? 'text-green-600' : 'text-slate-500'
+                  person.status === 'approved' || person.status === 'used' ? 'text-green-600' : 'text-amber-600'
                 }`}>
-                  ● {person.status === 'approved' ? 'Aprobado' : person.status === 'used' ? 'Registrado' : person.status}
+                  ● {person.status === 'approved' ? 'Aprobado' : person.status === 'used' ? 'Registrado' : 'Disponible'}
                 </span>
               )}
             </div>
@@ -107,7 +125,7 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
 
             {sponsor && (
               <div className="text-[11px] text-amber-700 bg-amber-50/80 p-1.5 rounded-lg font-semibold mt-1">
-                ⭐ Patrocinador: {sponsor}
+                ⭐ Patrocinador: {sponsor} {person.sponsorStands ? `(Stand ${person.sponsorStands})` : ''}
               </div>
             )}
           </div>
@@ -117,21 +135,21 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
             <div className="p-3 bg-white rounded-xl shadow-xs border border-slate-100">
               <QRCodeSVG 
                 id="qr-modal-svg"
-                value={id} 
+                value={qrValue} 
                 size={210} 
                 level="M" 
                 includeMargin={true}
               />
             </div>
 
-            <div className="mt-3 flex items-center justify-center gap-2">
-              <span className="font-mono text-[11px] text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 break-all max-w-[260px] truncate">
-                ID: {id}
+            <div className="mt-3 flex items-center justify-center gap-2 max-w-full">
+              <span className="font-mono text-[10.5px] text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 truncate max-w-[240px]" title={qrValue}>
+                {isPendingInvite ? qrValue : `ID: ${qrValue}`}
               </span>
               <button
-                onClick={handleCopyId}
-                className="text-primary hover:bg-primary/10 p-1 rounded-md transition-colors text-xs flex items-center gap-1 font-semibold"
-                title="Copiar ID"
+                onClick={handleCopy}
+                className="text-primary hover:bg-primary/10 p-1 rounded-md transition-colors text-xs flex items-center gap-1 font-semibold shrink-0 cursor-pointer"
+                title={isPendingInvite ? "Copiar Enlace" : "Copiar ID"}
               >
                 <span className="material-symbols-outlined text-[16px]">
                   {copied ? 'check' : 'content_copy'}
@@ -140,22 +158,34 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
               </button>
             </div>
 
-            <p className="text-[11px] text-slate-400 mt-2">
-              Código QR compatible con el lector de Check-in en puerta.
+            <p className="text-[11px] text-slate-500 mt-2">
+              {isPendingInvite 
+                ? '📱 Escanea con la cámara del celular para abrir el formulario de registro de este invitado.' 
+                : '✅ Código QR oficial compatible con el escáner de Check-in en puerta.'}
             </p>
           </div>
 
           {/* Botones de Acción */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
             <button
               onClick={handleDownloadPNG}
-              className="px-4 py-2.5 bg-[#0d47a1] text-white rounded-xl hover:bg-[#1565c0] font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+              className="px-4 py-2.5 bg-[#0d47a1] hover:bg-[#1565c0] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px]">download</span>
               Descargar QR (PNG)
             </button>
 
-            {onPrintBadge ? (
+            {isPendingInvite ? (
+              <a
+                href={qrValue}
+                target="_blank"
+                rel="noreferrer"
+                className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+                Abrir Registro
+              </a>
+            ) : onPrintBadge ? (
               <button
                 onClick={() => {
                   onClose();

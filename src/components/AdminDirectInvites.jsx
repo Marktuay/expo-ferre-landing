@@ -3035,29 +3035,33 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                             <td className="p-4 text-center">
                               <div className="flex items-center justify-center gap-1.5 flex-wrap">
                                 
-                                {/* Ver Código QR del Registrado */}
-                                {isUsed && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedPersonForQR({
-                                        id: inv.registeredAttendeeId || inv.id,
-                                        nombre: inv.registeredName || inv.nombre,
-                                        empresa: inv.registeredCompany || inv.empresa,
-                                        email: inv.registeredEmail || inv.email,
-                                        telefono: inv.registeredPhone || inv.telefono,
-                                        sponsorName: inv.sponsorName,
-                                        status: 'used'
-                                      });
-                                      setQrModalOpen(true);
-                                    }}
-                                    title="Visualizar y Descargar Código QR de Acceso del Registrado"
-                                    className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer"
-                                  >
-                                    <QrCode size={14} />
-                                    <span className="hidden xl:inline">Ver QR</span>
-                                  </button>
-                                )}
+                                {/* Ver Código QR (Invitación o Pase de Acceso) */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedPersonForQR({
+                                      id: isUsed ? (inv.registeredAttendeeId || inv.id) : inv.id,
+                                      nombre: inv.registeredName || inv.nombre,
+                                      empresa: inv.registeredCompany || inv.empresa,
+                                      email: inv.registeredEmail || inv.email,
+                                      telefono: inv.registeredPhone || inv.telefono,
+                                      sponsorName: inv.sponsorName,
+                                      sponsorStands: inv.sponsorStands,
+                                      status: inv.status,
+                                      inviteUrl: getInviteUrl(inv.id)
+                                    });
+                                    setQrModalOpen(true);
+                                  }}
+                                  title={isUsed ? "Visualizar y Descargar Código QR de Acceso Oficial" : "Visualizar Código QR para escanear y abrir la invitación"}
+                                  className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer ${
+                                    isUsed 
+                                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
+                                      : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                                  }`}
+                                >
+                                  <QrCode size={14} />
+                                  <span className="hidden xl:inline">QR</span>
+                                </button>
 
                                 {/* Editar Invitado */}
                                 <button
