@@ -778,8 +778,8 @@ export default function App() {
                 <div className="flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/10 shadow-sm">
                   <span className="material-symbols-outlined text-[#f39200] text-xl shrink-0">schedule</span>
                   <div>
-                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Horario</span>
-                    <span className="font-semibold text-white">8:00 AM a 6:00 PM</span>
+                    <span className="text-[11px] text-slate-400 block uppercase font-medium">Horario (Registro desde 7:00 AM)</span>
+                    <span className="font-semibold text-white">8:00 AM a 5:00 PM</span>
                   </div>
                 </div>
 
@@ -1303,7 +1303,7 @@ export default function App() {
                   <span className="material-symbols-outlined text-primary-fixed text-3xl">event</span>
                   <div>
                     <p className="font-headline-md text-headline-md text-white">16 y 17 de Octubre de 2026</p>
-                    <p className="font-body-md text-surface-variant">Registro 7:30am | Inicia 8:00am a 5:00pm | Finalizando con Cóctel</p>
+                    <p className="font-body-md text-surface-variant">Registro 7:00 AM | Evento 8:00 AM a 5:00 PM | Finalizando con Cóctel</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">

@@ -279,7 +279,7 @@ Estamos muy felices de contar contigo en este primer capítulo de EXPO FERRE Nic
 
 📅 Fecha: 17 de Octubre
 📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00am
+⏰ Hora: 8:00 AM a 5:00 PM (Registro desde 7:00 AM)
 
 Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
 
@@ -306,7 +306,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
 📅 Fecha: 17 de Octubre
 📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00am
+⏰ Hora: 8:00 AM a 5:00 PM (Registro desde 7:00 AM)
 
 👉 Por favor activa tu pase completando tu registro en este enlace único:
 🔗 {enlace}
@@ -1212,7 +1212,7 @@ Tenemos el agrado de extenderte una invitación especial y exclusiva para que no
 
 📅 Fecha: 17 de Octubre
 📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00am
+⏰ Hora: 8:00 AM a 5:00 PM (Registro desde 7:00 AM)
 
 Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
 
@@ -1230,7 +1230,7 @@ Es un gusto saludarte y extenderte una invitación especial y personalizada para
 
 📅 Fecha: 17 de Octubre
 📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00am
+⏰ Hora: 8:00 AM a 5:00 PM (Registro desde 7:00 AM)
 
 Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
 
@@ -1363,7 +1363,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 6px; text-align: left;">
           <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 17 de Octubre, 2026</p>
           <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza Managua.</p>
-          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">⏰ <strong>Hora:</strong> 8:00am</p>
+          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">⏰ <strong>Hora:</strong> 8:00 AM a 5:00 PM (Registro desde 7:00 AM)</p>
           ${sponsorName && standsClean ? `<p style="margin: 4px 0; font-size: 13px; color: #d97706;">🏢 <strong>Stand Anfitrión:</strong> ${standsClean} (${sponsorName})</p>` : ''}
         </div>
 
@@ -1419,7 +1419,7 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 6px; text-align: left;">
           <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📅 <strong>Fecha:</strong> 17 de Octubre, 2026</p>
           <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza Managua.</p>
-          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">⏰ <strong>Hora:</strong> 8:00am</p>
+          <p style="margin: 4px 0; font-size: 13px; color: #1e3a8a;">⏰ <strong>Hora:</strong> 8:00 AM a 5:00 PM (Registro desde 7:00 AM)</p>
           ${sponsorName && standsClean ? `<p style="margin: 4px 0; font-size: 13px; color: #d97706;">🏢 <strong>Stand Anfitrión:</strong> ${standsClean} (${sponsorName})</p>` : ''}
         </div>
 
