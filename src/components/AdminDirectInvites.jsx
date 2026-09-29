@@ -107,6 +107,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [bulkData, setBulkData] = useState([]);
   const [bulkTargetSponsor, setBulkTargetSponsor] = useState('auto');
+  const [skipBulkDuplicates, setSkipBulkDuplicates] = useState(true);
   const [isBulkSaving, setIsBulkSaving] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const fileInputRef = useRef(null);
@@ -262,6 +263,37 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     const k2 = getSponsorKey(sp2);
     if (k1 && k2 && k1 !== 'general' && k1 === k2) return true;
     return clean1.includes(clean2) || clean2.includes(clean1);
+  };
+
+  const cleanPhoneDigits = (str) => String(str || '').replace(/\D/g, '');
+
+  const isExistingInvite = (candidate, existingInvites) => {
+    if (!existingInvites || existingInvites.length === 0 || !candidate) return null;
+    const candEmail = candidate.email ? candidate.email.trim().toLowerCase() : '';
+    const candPhoneDigits = candidate.telefono ? cleanPhoneDigits(candidate.telefono) : '';
+    const candName = candidate.nombre ? candidate.nombre.trim().toLowerCase() : '';
+    const candCompany = candidate.empresa ? candidate.empresa.trim().toLowerCase() : '';
+
+    return existingInvites.find(inv => {
+      // 1. Coincidencia por correo válido
+      if (candEmail && inv.email && inv.email.trim().toLowerCase() === candEmail) {
+        return true;
+      }
+      // 2. Coincidencia por teléfono (si tiene al menos 7 dígitos)
+      if (candPhoneDigits.length >= 7 && inv.telefono) {
+        const invPhoneDigits = cleanPhoneDigits(inv.telefono);
+        if (invPhoneDigits.length >= 7 && (invPhoneDigits === candPhoneDigits || invPhoneDigits.endsWith(candPhoneDigits) || candPhoneDigits.endsWith(invPhoneDigits))) {
+          return true;
+        }
+      }
+      // 3. Coincidencia por Nombre + Empresa exactos
+      if (candName && candCompany && inv.nombre && inv.empresa) {
+        if (inv.nombre.trim().toLowerCase() === candName && inv.empresa.trim().toLowerCase() === candCompany) {
+          return true;
+        }
+      }
+      return false;
+    }) || null;
   };
 
   const buildCorporateSpeech = (sponsorName, stands) => {
@@ -1100,19 +1132,33 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     setTargetedUploadSponsor(null);
   };
 
-  // Guardar Lote de Invitaciones Directas en Firestore
+  // Guardar Lote de Invitaciones Directas en Firestore con protección inteligente contra duplicados
   const handleConfirmBulkUpload = async () => {
     if (!bulkData || bulkData.length === 0) return;
+
+    const filteredToInsert = skipBulkDuplicates
+      ? bulkData.filter(item => !isExistingInvite(item, invites))
+      : bulkData;
+
+    const totalToInsert = filteredToInsert.length;
+    const totalSkipped = bulkData.length - totalToInsert;
+
+    if (totalToInsert === 0) {
+      alert(`Todos los ${bulkData.length} contactos del archivo ya están registrados previamente en el sistema. No se realizaron cambios ni duplicaciones.`);
+      setShowBulkModal(false);
+      setBulkData([]);
+      return;
+    }
+
     setIsBulkSaving(true);
-    setBulkProgress({ current: 0, total: bulkData.length });
+    setBulkProgress({ current: 0, total: totalToInsert });
 
     try {
       const adminEmail = adminUser?.email || auth.currentUser?.email || 'admin';
-      const total = bulkData.length;
       const chunkSize = 400;
 
-      for (let i = 0; i < total; i += chunkSize) {
-        const chunk = bulkData.slice(i, i + chunkSize);
+      for (let i = 0; i < totalToInsert; i += chunkSize) {
+        const chunk = filteredToInsert.slice(i, i + chunkSize);
         const batch = writeBatch(db);
 
         chunk.forEach((item) => {
@@ -1149,12 +1195,17 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         });
 
         await batch.commit();
-        setBulkProgress({ current: Math.min(i + chunkSize, total), total });
+        setBulkProgress({ current: Math.min(i + chunkSize, totalToInsert), total: totalToInsert });
       }
 
       setShowBulkModal(false);
       setBulkData([]);
-      alert(`¡Éxito! Se generaron correctamente ${total} invitaciones directas con enlaces únicos.`);
+      
+      const successMessage = totalSkipped > 0
+        ? `¡Éxito! Se importaron correctamente ${totalToInsert} contactos NUEVOS con enlaces únicos.\n\n🛡️ Se omitieron ${totalSkipped} contactos que ya existían previamente (sus datos, tokens y estados se mantuvieron intactos sin duplicarse).`
+        : `¡Éxito! Se generaron correctamente ${totalToInsert} invitaciones directas con enlaces únicos.`;
+      
+      alert(successMessage);
     } catch (err) {
       console.error('Error al guardar lote de invitaciones:', err);
       alert('Error al procesar la carga masiva: ' + err.message);
@@ -4329,131 +4380,194 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
             </div>
 
             {/* Contenido / Tabla de Vista Previa */}
-            <div className="p-6 space-y-4 overflow-y-auto flex-1">
-              
-              <div className="bg-blue-50 border border-blue-200 text-blue-950 p-4 rounded-xl text-xs space-y-3">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <Users size={18} className="text-blue-600 shrink-0" />
-                    <span>
-                      Se detectaron <strong>{bulkData.length} contactos válidos</strong> en el archivo.
-                    </span>
+            {(() => {
+              const newRows = bulkData.filter(item => !isExistingInvite(item, invites));
+              const duplicateRows = bulkData.filter(item => !!isExistingInvite(item, invites));
+              const targetCount = skipBulkDuplicates ? newRows.length : bulkData.length;
+
+              return (
+                <div className="p-6 space-y-4 overflow-y-auto flex-1">
+                  
+                  {/* Tarjetas de Diagnóstico de Duplicados */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl text-center">
+                      <span className="text-secondary block text-[10px] uppercase font-bold">Total en Archivo</span>
+                      <span className="text-xl font-black text-slate-800">{bulkData.length}</span>
+                    </div>
+                    <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-center">
+                      <span className="text-emerald-700 block text-[10px] uppercase font-bold">Nuevos Contactos</span>
+                      <span className="text-xl font-black text-emerald-900">{newRows.length}</span>
+                    </div>
+                    <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl text-center">
+                      <span className="text-amber-800 block text-[10px] uppercase font-bold">Ya Registrados</span>
+                      <span className="text-xl font-black text-amber-900">{duplicateRows.length}</span>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <label className="text-xs font-bold text-blue-950 shrink-0">Asignar a:</label>
-                    <select
-                      value={bulkTargetSponsor}
-                      onChange={(e) => setBulkTargetSponsor(e.target.value)}
-                      className="bg-white border border-blue-300 rounded-lg px-3 py-1.5 text-xs font-bold outline-none"
-                    >
-                      <option value="auto">⚡ Detectar automáticamente por Pestaña / Columna</option>
-                      <option value="general">⭐ Forzar Todos a Invitación General</option>
-                      {sponsorsList.map(sp => (
-                        <option key={sp} value={sp}>🏢 Forzar Todos a {sp}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+                  <div className="bg-blue-50 border border-blue-200 text-blue-950 p-4 rounded-xl text-xs space-y-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <Users size={18} className="text-blue-600 shrink-0" />
+                        <span>
+                          Se crearán <strong>{targetCount} invitaciones nuevas</strong> con enlaces únicos.
+                        </span>
+                      </div>
 
-                {/* Desglose por Patrocinador / Pestañas */}
-                {bulkTargetSponsor === 'auto' && (() => {
-                  const sponsorCounts = {};
-                  bulkData.forEach(d => {
-                    const sp = d.patrocinador || 'General';
-                    sponsorCounts[sp] = (sponsorCounts[sp] || 0) + 1;
-                  });
-                  const entries = Object.entries(sponsorCounts);
-                  if (entries.length <= 1 && !bulkData[0]?.sheetName) return null;
-
-                  return (
-                    <div className="pt-2 border-t border-blue-200/60">
-                      <span className="text-[11px] font-bold text-blue-900 block mb-1.5">Distribución por Pestaña / Patrocinador detectado ({entries.length}):</span>
-                      <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
-                        {entries.map(([spName, count]) => (
-                          <span key={spName} className="inline-flex items-center gap-1 bg-white border border-blue-200 text-blue-900 px-2.5 py-1 rounded-md text-[11px] font-bold shadow-2xs">
-                            🏢 {spName}: <span className="text-blue-600 font-black">{count}</span>
-                          </span>
-                        ))}
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <label className="text-xs font-bold text-blue-950 shrink-0">Asignar a:</label>
+                        <select
+                          value={bulkTargetSponsor}
+                          onChange={(e) => setBulkTargetSponsor(e.target.value)}
+                          className="bg-white border border-blue-300 rounded-lg px-3 py-1.5 text-xs font-bold outline-none"
+                        >
+                          <option value="auto">⚡ Detectar automáticamente por Pestaña / Columna</option>
+                          <option value="general">⭐ Forzar Todos a Invitación General</option>
+                          {sponsorsList.map(sp => (
+                            <option key={sp} value={sp}>🏢 Forzar Todos a {sp}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
-                  );
-                })()}
-              </div>
 
-              {/* Tabla con scroll */}
-              <div className="border border-outline-variant rounded-xl overflow-hidden shadow-2xs">
-                <div className="max-h-64 overflow-y-auto">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead className="bg-surface-variant/70 sticky top-0 border-b border-outline-variant text-secondary">
-                      <tr>
-                        <th className="p-3 font-bold text-center w-12">#</th>
-                        <th className="p-3 font-bold">Nombre</th>
-                        <th className="p-3 font-bold">Empresa</th>
-                        <th className="p-3 font-bold">Correo</th>
-                        <th className="p-3 font-bold">Teléfono</th>
-                        <th className="p-3 font-bold">Patrocinador</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-outline-variant/60">
-                      {bulkData.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-surface-variant/20 transition-colors">
-                          <td className="p-2.5 text-center font-mono text-secondary">{idx + 1}</td>
-                          <td className="p-2.5 font-bold text-on-surface">{item.nombre || <span className="text-slate-400 italic">Sin nombre</span>}</td>
-                          <td className="p-2.5 text-on-surface">{item.empresa || <span className="text-slate-400 italic">Sin empresa</span>}</td>
-                          <td className="p-2.5 font-mono text-slate-600">{item.email || <span className="text-slate-400 italic">Sin correo</span>}</td>
-                          <td className="p-2.5 font-mono text-slate-600">{item.telefono || <span className="text-slate-400 italic">Sin teléfono</span>}</td>
-                          <td className="p-2.5 font-bold text-slate-800">
-                            {bulkTargetSponsor !== 'auto' ? (bulkTargetSponsor === 'general' ? 'General' : bulkTargetSponsor) : (item.patrocinador || 'General')}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                    {/* Toggle Protección contra Duplicados */}
+                    {duplicateRows.length > 0 && (
+                      <div className="pt-2 border-t border-blue-200/70 flex items-center justify-between">
+                        <label className="flex items-center gap-2 cursor-pointer font-bold text-[11px] text-blue-900">
+                          <input
+                            type="checkbox"
+                            checked={skipBulkDuplicates}
+                            onChange={(e) => setSkipBulkDuplicates(e.target.checked)}
+                            className="rounded text-blue-600 focus:ring-0"
+                          />
+                          <span>🛡️ Omitir los {duplicateRows.length} contactos ya existentes (Recomendado para no sobreescribir ni duplicar tokens)</span>
+                        </label>
+                      </div>
+                    )}
 
-              {/* Barra de Progreso */}
-              {isBulkSaving && (
-                <div className="space-y-2 pt-2">
-                  <div className="flex justify-between text-xs font-bold text-on-surface">
-                    <span>Generando enlaces de invitación...</span>
-                    <span>{bulkProgress.current} / {bulkProgress.total}</span>
+                    {/* Desglose por Patrocinador / Pestañas */}
+                    {bulkTargetSponsor === 'auto' && (() => {
+                      const sponsorCounts = {};
+                      bulkData.forEach(d => {
+                        const sp = d.patrocinador || 'General';
+                        sponsorCounts[sp] = (sponsorCounts[sp] || 0) + 1;
+                      });
+                      const entries = Object.entries(sponsorCounts);
+                      if (entries.length <= 1 && !bulkData[0]?.sheetName) return null;
+
+                      return (
+                        <div className="pt-2 border-t border-blue-200/60">
+                          <span className="text-[11px] font-bold text-blue-900 block mb-1.5">Distribución por Pestaña / Patrocinador detectado ({entries.length}):</span>
+                          <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                            {entries.map(([spName, count]) => (
+                              <span key={spName} className="inline-flex items-center gap-1 bg-white border border-blue-200 text-blue-900 px-2.5 py-1 rounded-md text-[11px] font-bold shadow-2xs">
+                                🏢 {spName}: <span className="text-blue-600 font-black">{count}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
-                  <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
-                    <div 
-                      className="bg-blue-600 h-full transition-all duration-200"
-                      style={{ width: `${(bulkProgress.current / (bulkProgress.total || 1)) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              )}
 
-            </div>
+                  {/* Tabla con scroll */}
+                  <div className="border border-outline-variant rounded-xl overflow-hidden shadow-2xs">
+                    <div className="max-h-64 overflow-y-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead className="bg-surface-variant/70 sticky top-0 border-b border-outline-variant text-secondary">
+                          <tr>
+                            <th className="p-3 font-bold text-center w-10">#</th>
+                            <th className="p-3 font-bold">Estado</th>
+                            <th className="p-3 font-bold">Nombre</th>
+                            <th className="p-3 font-bold">Empresa</th>
+                            <th className="p-3 font-bold">Correo</th>
+                            <th className="p-3 font-bold">Teléfono</th>
+                            <th className="p-3 font-bold">Patrocinador</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-outline-variant/60">
+                          {bulkData.map((item, idx) => {
+                            const isDup = isExistingInvite(item, invites);
+                            return (
+                              <tr key={idx} className={`transition-colors ${isDup ? (skipBulkDuplicates ? 'bg-amber-50/40 text-slate-400 opacity-75' : 'bg-amber-50/60') : 'hover:bg-surface-variant/20'}`}>
+                                <td className="p-2.5 text-center font-mono text-secondary">{idx + 1}</td>
+                                <td className="p-2.5 whitespace-nowrap">
+                                  {isDup ? (
+                                    <span className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-amber-100 text-amber-900 border border-amber-200" title="Este contacto ya tiene una invitación en el sistema">
+                                      {skipBulkDuplicates ? 'Omitido (Ya existe)' : 'Ya existe'}
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                      + Nuevo
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="p-2.5 font-bold text-on-surface">{item.nombre || <span className="text-slate-400 italic">Sin nombre</span>}</td>
+                                <td className="p-2.5 text-on-surface">{item.empresa || <span className="text-slate-400 italic">Sin empresa</span>}</td>
+                                <td className="p-2.5 font-mono text-slate-600">{item.email || <span className="text-slate-400 italic">Sin correo</span>}</td>
+                                <td className="p-2.5 font-mono text-slate-600">{item.telefono || <span className="text-slate-400 italic">Sin teléfono</span>}</td>
+                                <td className="p-2.5 font-bold text-slate-800">
+                                  {bulkTargetSponsor !== 'auto' ? (bulkTargetSponsor === 'general' ? 'General' : bulkTargetSponsor) : (item.patrocinador || 'General')}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Barra de Progreso */}
+                  {isBulkSaving && (
+                    <div className="space-y-2 pt-2">
+                      <div className="flex justify-between text-xs font-bold text-on-surface">
+                        <span>Generando enlaces de invitación...</span>
+                        <span>{bulkProgress.current} / {bulkProgress.total}</span>
+                      </div>
+                      <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-blue-600 h-full transition-all duration-200"
+                          style={{ width: `${(bulkProgress.current / (bulkProgress.total || 1)) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              );
+            })()}
 
             {/* Footer */}
-            <div className="p-4 bg-surface-variant/30 border-t border-outline-variant flex items-center justify-end gap-3 shrink-0">
-              <button
-                type="button"
-                disabled={isBulkSaving}
-                onClick={() => {
-                  setShowBulkModal(false);
-                  setBulkData([]);
-                }}
-                className="py-2.5 px-4 bg-white border border-outline-variant hover:bg-surface text-on-surface font-bold rounded-xl text-xs transition-colors disabled:opacity-50 cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                disabled={isBulkSaving || bulkData.length === 0}
-                onClick={handleConfirmBulkUpload}
-                className="py-2.5 px-5 bg-blue-600 text-white font-bold rounded-xl text-xs hover:bg-blue-700 transition-all shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer"
-              >
-                <FileUp size={16} />
-                {isBulkSaving ? `Importando (${bulkProgress.current}/${bulkProgress.total})...` : `Generar ${bulkData.length} Invitaciones`}
-              </button>
-            </div>
+            {(() => {
+              const newRows = bulkData.filter(item => !isExistingInvite(item, invites));
+              const targetCount = skipBulkDuplicates ? newRows.length : bulkData.length;
+
+              return (
+                <div className="p-4 bg-surface-variant/30 border-t border-outline-variant flex items-center justify-end gap-3 shrink-0">
+                  <button
+                    type="button"
+                    disabled={isBulkSaving}
+                    onClick={() => {
+                      setShowBulkModal(false);
+                      setBulkData([]);
+                    }}
+                    className="py-2.5 px-4 bg-white border border-outline-variant hover:bg-surface text-on-surface font-bold rounded-xl text-xs transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isBulkSaving || targetCount === 0}
+                    onClick={handleConfirmBulkUpload}
+                    className="py-2.5 px-5 bg-blue-600 text-white font-bold rounded-xl text-xs hover:bg-blue-700 transition-all shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                  >
+                    <FileUp size={16} />
+                    {isBulkSaving 
+                      ? `Importando (${bulkProgress.current}/${bulkProgress.total})...` 
+                      : `Importar ${targetCount} Contacto(s) Nuevo(s)`}
+                  </button>
+                </div>
+              );
+            })()}
 
           </div>
         </div>
