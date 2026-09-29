@@ -834,6 +834,23 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   1. **Motor de Normalización NFD (`normStr` & `matchCompanyNames`):** Creado en `AdminSponsors.jsx` e importado en `AdminSponsorDetails.jsx`. Limpia acentos, diacríticos, convierte a minúsculas y remueve ruidos como "grupo", "sa", "safety", "nicaragua", "banco", etc.
   2. **Emparejamiento Flexible Inteligente:** Soporta coincidencia por ID de patrocinador (`sponsorId`, `officialId`), correo electrónico y coincidencia aproximada de tokens de empresa.
   3. **Fallbacks Dinámicos para Stands Huérfanos:** Si un stand en Firestore tiene estatus reservado pero ningún usuario o patrocinador oficial coincide, el sistema crea dinámicamente una entrada de patrocinador en la vista para no perder ningún estand reservado.
-  4. **Verificación Cuantitativa (24/24):** Auditados los 38 estands de Firestore (`events/2026/stands`), logrando la asignación perfecta del 100% de los 24 estands reservados (Sinsa x4, Cemex x2, Megalineas x2, Importaciones Balladares x2, Indenicsa x2, Grupo SUR, EXTEL, BAC Credomatic, Sherwin Williams, Plycem, SICSA, ARMOCONSA, Casco Safety, Fernández Sera, MIDESA, Noelito) sin perder un solo estand.
+
+### 📊 Filtros Avanzados, Métricas por Patrocinador e Informe Ejecutivo Excel en Invitaciones Directas (`28 de Septiembre de 2026`)
+- **Desglose de Métricas por Patrocinador y Global:**
+  1. *Envíos de Correo:* Cobertura porcentual, total enviados vs total con correo válido, y contador de pendientes de envío.
+  2. *Registrados vs Pendientes:* Conteo de gafetes emitidos (`status === 'used'`), pendientes por registrar (`status === 'pending'`) y tasa de conversión/efectividad.
+  3. *Monitor Global:* Píldoras de rendimiento en vivo con consolidado total del evento.
+- **Barra de Filtros Rápidos (Chips de Navegación):**
+  - `Todos`: Visualización completa de patrocinadores.
+  - `Con Registrados`: Filtra patrocinadores que ya tienen invitados con gafete emitido.
+  - `Con Pendientes`: Filtra marcas con invitados aún sin completar registro.
+  - `Con Envíos Pendientes`: Filtra marcas con correos listos por despachar.
+  - `Con Invitados Cargados`: Filtra únicamente patrocinadores con listas activas.
+- **Descarga de Informe Ejecutivo Multi-Hoja (`.xlsx`):**
+  - **Hoja 1 (`Resumen_Por_Patrocinador`):** Tabla ejecutiva con columnas de Patrocinador, Stands, Total Invitados, Correos Enviados, Correos Pendientes de Envío, Sin Correo Válido (WhatsApp Only), Cobertura %, Registrados (Gafetes Emitidos), Pendientes de Registro, Tasa de Efectividad %, y estado de artes/speech personalizados. Fila final de `=== TOTALES GLOBALES ===`.
+  - **Hoja 2 (`Detalle_General_Invitados`):** Base de datos completa con cada uno de los contactos, token único, datos de gafete emitido y enlace directo de acceso QR.
+- **Recordatorios por WhatsApp y Correo:**
+  - Botón individual `🔔 Recordar` por fila para envío de mensaje personalizado directo por WhatsApp Web.
+  - Botón de despacho masivo de recordatorio por correo con modal selector de 3 criterios.
 
 
