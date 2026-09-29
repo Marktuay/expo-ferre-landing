@@ -1234,94 +1234,41 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     return `${baseUrl}/?invite=${encodeURIComponent(token)}`;
   };
 
-  // Obtener speech dinámico personalizado
+  // Obtener mensaje directo y conciso para WhatsApp (Flyer + Enlace de Registro)
   const getWhatsAppSpeech = (invite) => {
     const link = getInviteUrl(invite.id);
-    const guestLabel = invite.nombre?.trim() || 'Estimado(a) Colega';
+    const guestLabel = invite.nombre?.trim() || '';
+    const greeting = guestLabel ? `¡Hola ${guestLabel}! 👋\n\n` : '';
     const sponsorName = invite.sponsorName || '';
     const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
-    const stands = invite.sponsorStands || art.stands || '';
 
-    if (art.customSpeech && art.customSpeech.trim()) {
+    // Si el usuario configuró un texto corto personalizado explícito en el modal
+    if (art.customSpeech && art.customSpeech.trim() && !art.customSpeech.includes('Nos complace invitarte a ser parte de la primera edición')) {
       let speech = art.customSpeech
-        .replace(/{invitado}/g, guestLabel)
-        .replace(/\[Nombre\]/g, guestLabel)
+        .replace(/{invitado}/g, guestLabel || 'Estimado(a)')
+        .replace(/\[Nombre\]/g, guestLabel || 'Estimado(a)')
         .replace(/{empresa_invitada}/g, invite.empresa || '')
         .replace(/{patrocinador}/g, sponsorName)
-        .replace(/{stands}/g, stands ? `Stand ${stands}` : 'nuestro stand');
+        .replace(/{stands}/g, art.stands ? `Stand ${art.stands}` : 'nuestro stand');
 
       if (speech.includes('{enlace}')) {
         speech = speech.replace(/{enlace}/g, link);
       } else {
-        speech += `\n\n🔗 ${link}\n\n⚠️ Nota: Este enlace es personal, intransferible y de un solo uso.`;
+        speech += `\n\n🔗 ${link}`;
       }
       return speech;
     }
 
-    if (sponsorName) {
-      return `¡Hola ${guestLabel}! 👋 Te saludamos en nombre de ${sponsorName} y el comité organizador de EXPO FERRE Nicaragua 2026.
-
-Tenemos el agrado de extenderte una invitación especial y exclusiva para que nos acompañes y nos visites en nuestro ${stands ? `Stand ${stands}` : 'stand oficial'}.
-
-📅 Fecha: 17 de Octubre
-📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00 AM a 5:00 PM (Registro desde 7:00 AM)
-
-Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
-
-🔗 ${link}
-
-⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
-
-¡Será un verdadero honor recibirte en nuestro stand! 🚀`;
-    }
-
-    // General Speech
-    return `¡Hola ${guestLabel}! Te saludamos en nombre del comité organizador de EXPO FERRE Nicaragua 2026.
-
-Es un gusto saludarte y extenderte una invitación especial y personalizada para ser parte del encuentro más importante de la industria ferretera y de la construcción en el país.
-
-📅 Fecha: 17 de Octubre
-📍 Lugar: Centro de Convenciones Crowne Plaza Managua
-⏰ Hora: 8:00 AM a 5:00 PM (Registro desde 7:00 AM)
-
-Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:
-
-🔗 ${link}
-
-⚠️ Nota: Este enlace es personal, intransferible y de un solo uso. Una vez completado tu registro, el enlace se desactivará automáticamente.
-
-¡Será un verdadero honor contar con tu presencia! 🚀`;
+    return `${greeting}🎟️ Activa tu pase exclusivo de acceso completando tu registro en este enlace:\n🔗 ${link}`;
   };
 
-  // Obtener speech de recordatorio para WhatsApp
+  // Obtener mensaje directo de recordatorio para WhatsApp (Flyer + Enlace de Registro)
   const getWhatsAppReminderSpeech = (invite) => {
     const link = getInviteUrl(invite.id);
-    const guestLabel = invite.nombre?.trim() || 'Estimado(a) Colega';
-    const sponsorName = invite.sponsorName || '';
-    const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
-    const stands = invite.sponsorStands || art.stands || '';
+    const guestLabel = invite.nombre?.trim() || '';
+    const greeting = guestLabel ? `¡Hola ${guestLabel}! 👋\n\n` : '';
 
-    if (art.customReminderSpeech && art.customReminderSpeech.trim()) {
-      let speech = art.customReminderSpeech
-        .replace(/{invitado}/g, guestLabel)
-        .replace(/\[Nombre\]/g, guestLabel)
-        .replace(/{empresa_invitada}/g, invite.empresa || '')
-        .replace(/{patrocinador}/g, sponsorName)
-        .replace(/{stands}/g, stands ? `Stand ${stands}` : 'nuestro stand');
-
-      if (speech.includes('{enlace}')) {
-        speech = speech.replace(/{enlace}/g, link);
-      } else {
-        speech += `\n\n🔗 ${link}\n\n⚠️ Nota: Este enlace es personal, intransferible y de un solo uso.`;
-      }
-      return speech;
-    }
-
-    return buildCorporateReminderSpeech(sponsorName, stands)
-      .replace(/{invitado}/g, guestLabel)
-      .replace(/\[Nombre\]/g, guestLabel)
-      .replace(/{enlace}/g, link);
+    return `${greeting}🔔 Recordatorio: Por favor activa tu pase exclusivo completando tu registro en este enlace:\n🔗 ${link}`;
   };
 
   const getWhatsAppUrl = (invite) => {
@@ -3978,20 +3925,6 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                       ? (artWhatsappReminderBannerUrl || artWhatsappBannerUrl) 
                       : artWhatsappBannerUrl;
 
-                    const rawSpeech = isRem
-                      ? buildCorporateReminderSpeech(artModal.sponsorName, artStands)
-                      : (artCustomSpeech && artCustomSpeech.trim() 
-                          ? artCustomSpeech 
-                          : buildCorporateSpeech(artModal.sponsorName, artStands));
-
-                    const formattedSpeech = rawSpeech
-                      .replace(/{invitado}/g, 'Carlos Mendoza')
-                      .replace(/\[Nombre\]/g, 'Carlos Mendoza')
-                      .replace(/{empresa_invitada}/g, 'Ferretería El Progreso')
-                      .replace(/{patrocinador}/g, artModal.sponsorName)
-                      .replace(/{stands}/g, artStands ? (artStands.toLowerCase().startsWith('stand') ? artStands : `Stand ${artStands}`) : 'nuestro stand')
-                      .replace(/{enlace}/g, 'https://expoferrenicaragua.com/inv/inv_demo_carlos_mendoza');
-
                     return (
                       <div className="space-y-4">
                         <div className={`p-3 rounded-xl text-xs flex items-center justify-between gap-2 border ${
@@ -4003,8 +3936,8 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                             <Phone size={16} className={isRem ? 'text-amber-600' : 'text-emerald-600'} />
                             <span>
                               {isRem 
-                                ? 'Simulación del mensaje y flyer vertical de recordatorio en la app de WhatsApp del invitado.' 
-                                : 'Simulación de la invitación oficial con flyer vertical y mensaje en el chat de WhatsApp.'}
+                                ? 'Simulación en WhatsApp: Flyer vertical de recordatorio + enlace único directo.' 
+                                : 'Simulación en WhatsApp: Flyer vertical con arte oficial + enlace único de registro.'}
                             </span>
                           </div>
                           {activeFlyer && (
@@ -4051,7 +3984,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                               </span>
                             </div>
 
-                            {/* Burbuja de Mensaje Enviada */}
+                            {/* Burbuja de Mensaje Enviada (Flyer + Enlace Único) */}
                             <div className="bg-[#d9fdd3] text-slate-900 rounded-2xl rounded-tr-xs p-2.5 shadow-sm max-w-[96%] ml-auto space-y-2.5 border border-[#c1e8ba]">
                               
                               {/* Arte Vertical WhatsApp */}
@@ -4060,7 +3993,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                                   <img 
                                     src={activeFlyer} 
                                     alt="Flyer Vertical WhatsApp" 
-                                    className="w-full h-auto max-h-[360px] object-contain mx-auto"
+                                    className="w-full h-auto max-h-[380px] object-contain mx-auto"
                                   />
                                 </div>
                               ) : (
@@ -4073,36 +4006,20 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                                 </div>
                               )}
 
-                              {/* Texto del Mensaje */}
-                              <div className="text-[11px] leading-relaxed text-slate-900 space-y-1.5 px-0.5">
-                                {formattedSpeech.split('\n\n').map((paragraph, pIdx) => {
-                                  if (paragraph.includes('https://expoferrenicaragua.com/inv/')) {
-                                    return (
-                                      <div key={pIdx} className="bg-white/80 p-2.5 rounded-xl border border-emerald-300/80 shadow-2xs my-1 text-emerald-950 space-y-1">
-                                        <p className="font-bold text-[11px]">🎟️ Enlace Exclusivo de Registro:</p>
-                                        <p className="text-[10px] font-mono font-bold text-blue-600 break-all underline">
-                                          https://expoferrenicaragua.com/inv/carlos-mendoza
-                                        </p>
-                                      </div>
-                                    );
-                                  }
+                              {/* Texto Directo: Saludo + Enlace de Registro */}
+                              <div className="text-[11.5px] leading-relaxed text-slate-900 space-y-1.5 px-0.5">
+                                <p className="font-semibold text-slate-800">
+                                  {isRem 
+                                    ? '🔔 ¡Hola Carlos Mendoza! Te recordamos activar tu pase exclusivo completando tu registro en este enlace:' 
+                                    : '¡Hola Carlos Mendoza! 👋 Activa tu pase exclusivo completando tu registro en este enlace:'}
+                                </p>
 
-                                  if (paragraph.includes('📅') || paragraph.includes('📍') || paragraph.includes('⏰')) {
-                                    return (
-                                      <div key={pIdx} className="bg-white/60 p-2 rounded-lg border border-emerald-200/60 text-[10.5px] space-y-0.5 font-medium my-1">
-                                        {paragraph.split('\n').map((line, lIdx) => (
-                                          <p key={lIdx}>{line}</p>
-                                        ))}
-                                      </div>
-                                    );
-                                  }
-
-                                  return (
-                                    <p key={pIdx} className="whitespace-pre-line">
-                                      {paragraph}
-                                    </p>
-                                  );
-                                })}
+                                <div className="bg-white/90 p-2 rounded-xl border border-emerald-300 shadow-2xs text-emerald-950 space-y-0.5">
+                                  <p className="font-bold text-[10.5px]">🎟️ Enlace Exclusivo:</p>
+                                  <p className="text-[10px] font-mono font-bold text-blue-600 break-all underline">
+                                    https://expoferrenicaragua.com/?invite=inv_carlos_mendoza
+                                  </p>
+                                </div>
                               </div>
 
                               {/* Hora y Visto Azul */}
