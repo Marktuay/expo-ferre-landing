@@ -98,6 +98,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [isUploadingWhatsappReminder, setIsUploadingWhatsappReminder] = useState(false);
   const [isSavingArt, setIsSavingArt] = useState(false);
   const [artTab, setArtTab] = useState('banners'); // 'banners' | 'whatsapp' | 'speech' | 'preview'
+  const [artPreviewChannel, setArtPreviewChannel] = useState('email'); // 'email' | 'whatsapp_invite' | 'whatsapp_reminder'
 
   // Modal para Envío y Recordatorio por WhatsApp con Arte de Patrocinador
   const [whatsAppModal, setWhatsAppModal] = useState({ open: false, invite: null, isReminder: false });
@@ -737,6 +738,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     setArtCustomSpeech(existing.customSpeech || official.customSpeech || '');
     setArtCustomSubject(existing.customEmailSubject || official.customEmailSubject || '');
     setArtTab('banners');
+    setArtPreviewChannel('email');
   };
 
   // Cerrar Modal de Artes con reseteo completo de estados
@@ -3776,102 +3778,296 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
               )}
 
               {artTab === 'preview' && (
-                <div className="space-y-4">
-                  <div className="bg-blue-50 border border-blue-200 text-blue-900 p-3 rounded-xl text-xs flex items-center gap-2">
-                    <Eye size={16} className="text-blue-600 shrink-0" />
-                    <span>Así es como el invitado verá el correo de invitación y la pantalla web de registro.</span>
+                <div className="space-y-5">
+                  {/* Selector de Canal de Previsualización */}
+                  <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 bg-surface-variant/40 rounded-2xl max-w-xl mx-auto border border-outline-variant">
+                    <button
+                      type="button"
+                      onClick={() => setArtPreviewChannel('email')}
+                      className={`flex-1 min-w-[140px] py-2.5 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        artPreviewChannel === 'email'
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'text-secondary hover:text-on-surface hover:bg-surface'
+                      }`}
+                    >
+                      <Mail size={14} />
+                      <span>📧 Correo Electrónico</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setArtPreviewChannel('whatsapp_invite')}
+                      className={`flex-1 min-w-[150px] py-2.5 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        artPreviewChannel === 'whatsapp_invite'
+                          ? 'bg-[#075E54] text-white shadow-sm'
+                          : 'text-secondary hover:text-on-surface hover:bg-surface'
+                      }`}
+                    >
+                      <MessageSquare size={14} />
+                      <span>📲 WhatsApp (Invitación)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setArtPreviewChannel('whatsapp_reminder')}
+                      className={`flex-1 min-w-[150px] py-2.5 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        artPreviewChannel === 'whatsapp_reminder'
+                          ? 'bg-amber-600 text-white shadow-sm'
+                          : 'text-secondary hover:text-on-surface hover:bg-surface'
+                      }`}
+                    >
+                      <Bell size={14} />
+                      <span>🔔 WhatsApp (Recordatorio)</span>
+                    </button>
                   </div>
 
-                  <div className="border border-outline-variant rounded-2xl overflow-hidden shadow-md max-w-lg mx-auto bg-white">
-                    {/* Header Image */}
-                    <img
-                      src={artHeaderUrl || 'https://expoferrenicaragua.com/email-header.png'}
-                      alt="Header Preview"
-                      className="w-full h-auto object-cover"
-                    />
-                    
-                    <div className="p-6 space-y-4 text-xs text-slate-700 leading-relaxed">
-                      {artCustomSpeech && artCustomSpeech.trim() ? (
-                        <div className="space-y-3">
-                          {artCustomSpeech
-                            .replace(/{invitado}/g, 'Carlos Mendoza')
-                            .replace(/\[Nombre\]/g, 'Carlos Mendoza')
-                            .replace(/{empresa_invitada}/g, 'Ferretería El Progreso')
-                            .replace(/{patrocinador}/g, artModal.sponsorName)
-                            .replace(/{stands}/g, artStands ? (artStands.toLowerCase().startsWith('stand') ? artStands : `Stand ${artStands}`) : 'nuestro stand')
-                            .split('\n\n')
-                            .map((paragraph, pIdx) => {
-                              if (paragraph.includes('{enlace}')) {
-                                return (
-                                  <div key={pIdx} className="my-3">
-                                    <div className="text-center py-2">
-                                      <span className="inline-block bg-[#f39200] text-white px-6 py-2.5 rounded-lg font-bold shadow-xs text-xs">
-                                        🎟️ Activar Mi Pase Exclusivo
-                                      </span>
-                                    </div>
+                  {/* VISTA PREVIA: CORREO ELECTRÓNICO */}
+                  {artPreviewChannel === 'email' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 border border-blue-200 text-blue-900 p-3 rounded-xl text-xs flex items-center gap-2">
+                        <Eye size={16} className="text-blue-600 shrink-0" />
+                        <span>Así es como el invitado verá el correo formal con Header y Footer de marcas.</span>
+                      </div>
+
+                      <div className="border border-outline-variant rounded-2xl overflow-hidden shadow-md max-w-lg mx-auto bg-white">
+                        {/* Header Image */}
+                        <img
+                          src={artHeaderUrl || 'https://expoferrenicaragua.com/email-header.png'}
+                          alt="Header Preview"
+                          className="w-full h-auto object-cover"
+                        />
+                        
+                        <div className="p-6 space-y-4 text-xs text-slate-700 leading-relaxed">
+                          {artCustomSpeech && artCustomSpeech.trim() ? (
+                            <div className="space-y-3">
+                              {artCustomSpeech
+                                .replace(/{invitado}/g, 'Carlos Mendoza')
+                                .replace(/\[Nombre\]/g, 'Carlos Mendoza')
+                                .replace(/{empresa_invitada}/g, 'Ferretería El Progreso')
+                                .replace(/{patrocinador}/g, artModal.sponsorName)
+                                .replace(/{stands}/g, artStands ? (artStands.toLowerCase().startsWith('stand') ? artStands : `Stand ${artStands}`) : 'nuestro stand')
+                                .split('\n\n')
+                                .map((paragraph, pIdx) => {
+                                  if (paragraph.includes('{enlace}')) {
+                                    return (
+                                      <div key={pIdx} className="my-3">
+                                        <div className="text-center py-2">
+                                          <span className="inline-block bg-[#f39200] text-white px-6 py-2.5 rounded-lg font-bold shadow-xs text-xs">
+                                            🎟️ Activar Mi Pase Exclusivo
+                                          </span>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+
+                                  if (paragraph.includes('📅') || paragraph.includes('📍') || paragraph.includes('⏰') || paragraph.includes('🏢')) {
+                                    return (
+                                      <div key={pIdx} className="bg-slate-50 border border-slate-200 p-3 rounded-lg text-[11px] space-y-1 font-medium text-slate-800 my-2">
+                                        {paragraph.split('\n').map((line, lIdx) => (
+                                          <p key={lIdx}>{line}</p>
+                                        ))}
+                                      </div>
+                                    );
+                                  }
+
+                                  return (
+                                    <p key={pIdx} className="whitespace-pre-line text-slate-600 leading-relaxed">
+                                      {paragraph}
+                                    </p>
+                                  );
+                                })}
+
+                              {!artCustomSpeech.includes('{enlace}') && (
+                                <div className="pt-2">
+                                  <div className="text-center py-2">
+                                    <span className="inline-block bg-[#f39200] text-white px-6 py-2.5 rounded-lg font-bold shadow-xs text-xs">
+                                      🎟️ Activar Mi Pase Exclusivo
+                                    </span>
                                   </div>
-                                );
-                              }
-
-                              if (paragraph.includes('📅') || paragraph.includes('📍') || paragraph.includes('⏰') || paragraph.includes('🏢')) {
-                                return (
-                                  <div key={pIdx} className="bg-slate-50 border border-slate-200 p-3 rounded-lg text-[11px] space-y-1 font-medium text-slate-800 my-2">
-                                    {paragraph.split('\n').map((line, lIdx) => (
-                                      <p key={lIdx}>{line}</p>
-                                    ))}
-                                  </div>
-                                );
-                              }
-
-                              return (
-                                <p key={pIdx} className="whitespace-pre-line text-slate-600 leading-relaxed">
-                                  {paragraph}
-                                </p>
-                              );
-                            })}
-
-                          {!artCustomSpeech.includes('{enlace}') && (
-                            <div className="pt-2">
-                              <div className="text-center py-2">
-                                <span className="inline-block bg-[#f39200] text-white px-6 py-2.5 rounded-lg font-bold shadow-xs text-xs">
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <>
+                              <h3 className="font-bold text-base text-[#0d47a1]">¡Hola Carlos Mendoza!</h3>
+                              <p className="text-slate-600 leading-relaxed">
+                                Te saludamos cordialmente en nombre de <strong>{artModal.sponsorName}</strong> y el comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.
+                              </p>
+                              <p className="text-slate-600 leading-relaxed">
+                                Tenemos el agrado de invitarte de forma exclusiva para que nos acompañes y conozcas nuestras últimas innovaciones en el <strong>{artStands ? (artStands.toLowerCase().startsWith('stand') ? artStands : `Stand ${artStands}`) : 'Stand Oficial'}</strong>.
+                              </p>
+                              
+                              <div className="text-center py-4">
+                                <span className="inline-block bg-[#f39200] text-white px-6 py-2.5 rounded-lg font-bold shadow-xs">
                                   🎟️ Activar Mi Pase Exclusivo
                                 </span>
                               </div>
-                            </div>
+
+                              <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg text-[11px]">
+                                <p>📅 <strong>Fecha:</strong> 17 de Octubre de 2026</p>
+                                <p>📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza, Managua</p>
+                                <p>🏢 <strong>Stand:</strong> {artStands ? (artStands.toLowerCase().startsWith('stand') ? artStands : `Stand ${artStands}`) : 'Stand Oficial'} ({artModal.sponsorName})</p>
+                              </div>
+                            </>
                           )}
                         </div>
-                      ) : (
-                        <>
-                          <h3 className="font-bold text-base text-[#0d47a1]">¡Hola Carlos Mendoza!</h3>
-                          <p className="text-slate-600 leading-relaxed">
-                            Te saludamos cordialmente en nombre de <strong>{artModal.sponsorName}</strong> y el comité organizador de <strong>EXPO FERRE Nicaragua 2026</strong>.
-                          </p>
-                          <p className="text-slate-600 leading-relaxed">
-                            Tenemos el agrado de invitarte de forma exclusiva para que nos acompañes y conozcas nuestras últimas innovaciones en el <strong>{artStands ? (artStands.toLowerCase().startsWith('stand') ? artStands : `Stand ${artStands}`) : 'Stand Oficial'}</strong>.
-                          </p>
-                          
-                          <div className="text-center py-4">
-                            <span className="inline-block bg-[#f39200] text-white px-6 py-2.5 rounded-lg font-bold shadow-xs">
-                              🎟️ Activar Mi Pase Exclusivo
+
+                        {/* Footer Image */}
+                        <img
+                          src={artFooterUrl || 'https://expoferrenicaragua.com/email-footer.png'}
+                          alt="Footer Preview"
+                          className="w-full h-auto object-cover"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* VISTA PREVIA: WHATSAPP (INVITACIÓN O RECORDATORIO) */}
+                  {(artPreviewChannel === 'whatsapp_invite' || artPreviewChannel === 'whatsapp_reminder') && (() => {
+                    const isRem = artPreviewChannel === 'whatsapp_reminder';
+                    const activeFlyer = isRem 
+                      ? (artWhatsappReminderBannerUrl || artWhatsappBannerUrl) 
+                      : artWhatsappBannerUrl;
+
+                    const rawSpeech = isRem
+                      ? buildCorporateReminderSpeech(artModal.sponsorName, artStands)
+                      : (artCustomSpeech && artCustomSpeech.trim() 
+                          ? artCustomSpeech 
+                          : buildCorporateSpeech(artModal.sponsorName, artStands));
+
+                    const formattedSpeech = rawSpeech
+                      .replace(/{invitado}/g, 'Carlos Mendoza')
+                      .replace(/\[Nombre\]/g, 'Carlos Mendoza')
+                      .replace(/{empresa_invitada}/g, 'Ferretería El Progreso')
+                      .replace(/{patrocinador}/g, artModal.sponsorName)
+                      .replace(/{stands}/g, artStands ? (artStands.toLowerCase().startsWith('stand') ? artStands : `Stand ${artStands}`) : 'nuestro stand')
+                      .replace(/{enlace}/g, 'https://expoferrenicaragua.com/inv/inv_demo_carlos_mendoza');
+
+                    return (
+                      <div className="space-y-4">
+                        <div className={`p-3 rounded-xl text-xs flex items-center justify-between gap-2 border ${
+                          isRem 
+                            ? 'bg-amber-50 border-amber-200 text-amber-900' 
+                            : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            <Phone size={16} className={isRem ? 'text-amber-600' : 'text-emerald-600'} />
+                            <span>
+                              {isRem 
+                                ? 'Simulación del mensaje y flyer vertical de recordatorio en la app de WhatsApp del invitado.' 
+                                : 'Simulación de la invitación oficial con flyer vertical y mensaje en el chat de WhatsApp.'}
                             </span>
                           </div>
+                          {activeFlyer && (
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadImage(activeFlyer, `Flyer_WhatsApp_${isRem ? 'Recordatorio' : 'Invitacion'}_${artModal.sponsorKey}.png`)}
+                              className="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-800 rounded-lg font-bold text-[11px] border border-slate-300 shadow-2xs flex items-center gap-1 cursor-pointer shrink-0"
+                            >
+                              <Download size={12} />
+                              Descargar Flyer
+                            </button>
+                          )}
+                        </div>
 
-                          <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg text-[11px]">
-                            <p>📅 <strong>Fecha:</strong> 17 de Octubre de 2026</p>
-                            <p>📍 <strong>Lugar:</strong> Centro de Convenciones Crowne Plaza, Managua</p>
-                            <p>🏢 <strong>Stand:</strong> {artStands ? (artStands.toLowerCase().startsWith('stand') ? artStands : `Stand ${artStands}`) : 'Stand Oficial'} ({artModal.sponsorName})</p>
+                        {/* Maqueta Smartphone / WhatsApp Chat */}
+                        <div className="max-w-sm mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-[#efeae2] flex flex-col font-sans">
+                          
+                          {/* Barra Superior WhatsApp */}
+                          <div className="bg-[#075E54] text-white px-3.5 py-3 flex items-center justify-between shadow-sm shrink-0">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 rounded-full bg-white/20 border border-white/30 flex items-center justify-center font-bold text-xs text-white uppercase overflow-hidden shrink-0">
+                                {artModal.sponsorName ? artModal.sponsorName.substring(0, 2) : 'EF'}
+                              </div>
+                              <div className="leading-tight">
+                                <h5 className="font-bold text-xs text-white truncate max-w-[170px]">
+                                  Carlos Mendoza
+                                </h5>
+                                <span className="text-[10px] text-emerald-200">en línea</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 text-white/90">
+                              <Phone size={14} />
+                              <Sparkles size={14} />
+                            </div>
                           </div>
-                        </>
-                      )}
-                    </div>
 
-                    {/* Footer Image */}
-                    <img
-                      src={artFooterUrl || 'https://expoferrenicaragua.com/email-footer.png'}
-                      alt="Footer Preview"
-                      className="w-full h-auto object-cover"
-                    />
-                  </div>
+                          {/* Área de Conversación */}
+                          <div className="p-3.5 space-y-3 min-h-[380px] flex flex-col justify-end">
+                            
+                            {/* Fecha Hoy */}
+                            <div className="text-center">
+                              <span className="bg-white/80 shadow-2xs text-[10px] text-slate-600 font-bold px-3 py-0.5 rounded-full uppercase tracking-wider">
+                                Hoy
+                              </span>
+                            </div>
+
+                            {/* Burbuja de Mensaje Enviada */}
+                            <div className="bg-[#d9fdd3] text-slate-900 rounded-2xl rounded-tr-xs p-2.5 shadow-sm max-w-[96%] ml-auto space-y-2.5 border border-[#c1e8ba]">
+                              
+                              {/* Arte Vertical WhatsApp */}
+                              {activeFlyer ? (
+                                <div className="rounded-xl overflow-hidden bg-slate-950 border border-slate-700/50 shadow-xs flex items-center justify-center">
+                                  <img 
+                                    src={activeFlyer} 
+                                    alt="Flyer Vertical WhatsApp" 
+                                    className="w-full h-auto max-h-[360px] object-contain mx-auto"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="p-4 bg-emerald-900/10 border border-dashed border-emerald-600/40 rounded-xl text-center space-y-1 text-emerald-950">
+                                  <ImageIcon size={26} className="mx-auto text-emerald-700" />
+                                  <p className="text-xs font-bold">Sin flyer vertical cargado</p>
+                                  <p className="text-[10px] text-emerald-800 leading-tight">
+                                    Sube tu arte en formato <strong>1080 × 1920 px</strong> en la pestaña &apos;Artes WhatsApp&apos;.
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Texto del Mensaje */}
+                              <div className="text-[11px] leading-relaxed text-slate-900 space-y-1.5 px-0.5">
+                                {formattedSpeech.split('\n\n').map((paragraph, pIdx) => {
+                                  if (paragraph.includes('https://expoferrenicaragua.com/inv/')) {
+                                    return (
+                                      <div key={pIdx} className="bg-white/80 p-2.5 rounded-xl border border-emerald-300/80 shadow-2xs my-1 text-emerald-950 space-y-1">
+                                        <p className="font-bold text-[11px]">🎟️ Enlace Exclusivo de Registro:</p>
+                                        <p className="text-[10px] font-mono font-bold text-blue-600 break-all underline">
+                                          https://expoferrenicaragua.com/inv/carlos-mendoza
+                                        </p>
+                                      </div>
+                                    );
+                                  }
+
+                                  if (paragraph.includes('📅') || paragraph.includes('📍') || paragraph.includes('⏰')) {
+                                    return (
+                                      <div key={pIdx} className="bg-white/60 p-2 rounded-lg border border-emerald-200/60 text-[10.5px] space-y-0.5 font-medium my-1">
+                                        {paragraph.split('\n').map((line, lIdx) => (
+                                          <p key={lIdx}>{line}</p>
+                                        ))}
+                                      </div>
+                                    );
+                                  }
+
+                                  return (
+                                    <p key={pIdx} className="whitespace-pre-line">
+                                      {paragraph}
+                                    </p>
+                                  );
+                                })}
+                              </div>
+
+                              {/* Hora y Visto Azul */}
+                              <div className="flex items-center justify-end gap-1 text-[9.5px] text-slate-500 pt-0.5 pr-1">
+                                <span>10:42 a. m.</span>
+                                <span className="text-[#34B7F1] font-bold text-xs leading-none">✓✓</span>
+                              </div>
+
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                 </div>
               )}
 
