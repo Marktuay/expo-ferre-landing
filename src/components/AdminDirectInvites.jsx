@@ -540,18 +540,23 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       ? 'Invitación Exclusiva: Acceso Oficial a EXPO FERRE Nicaragua 2026'
       : `¡Sé parte de EXPO FERRE Nicaragua 2026 con ${sponsorName}!`;
 
-    const defaultHeader = isGen ? 'https://expoferrenicaragua.com/email-header.png' : '';
-    const defaultFooter = isGen ? 'https://expoferrenicaragua.com/email-footer.png' : '';
+    const defaultHeader = '/email-header.png';
+    const defaultFooter = '/email-footer.png';
+
+    const header = setting.headerBannerUrl || official.headerBannerUrl || defaultHeader;
+    const footer = setting.footerBannerUrl || official.footerBannerUrl || defaultFooter;
+    const whatsapp = setting.whatsappBannerUrl || official.whatsappBannerUrl || header;
+    const whatsappReminder = setting.whatsappReminderBannerUrl || official.whatsappReminderBannerUrl || whatsapp;
 
     return {
-      headerBannerUrl: setting.headerBannerUrl || official.headerBannerUrl || defaultHeader,
-      footerBannerUrl: setting.footerBannerUrl || official.footerBannerUrl || defaultFooter,
-      whatsappBannerUrl: setting.whatsappBannerUrl || official.whatsappBannerUrl || setting.headerBannerUrl || official.headerBannerUrl || defaultHeader,
-      whatsappReminderBannerUrl: setting.whatsappReminderBannerUrl || official.whatsappReminderBannerUrl || setting.whatsappBannerUrl || official.whatsappBannerUrl || setting.headerBannerUrl || official.headerBannerUrl || defaultHeader,
-      hasCustomHeader: !!setting.headerBannerUrl || !!official.headerBannerUrl,
-      hasCustomFooter: !!setting.footerBannerUrl || !!official.footerBannerUrl,
-      hasCustomWhatsapp: !!setting.whatsappBannerUrl || !!official.whatsappBannerUrl,
-      hasCustomWhatsappReminder: !!setting.whatsappReminderBannerUrl || !!official.whatsappReminderBannerUrl,
+      headerBannerUrl: header,
+      footerBannerUrl: footer,
+      whatsappBannerUrl: whatsapp,
+      whatsappReminderBannerUrl: whatsappReminder,
+      hasCustomHeader: !!(setting.headerBannerUrl || official.headerBannerUrl),
+      hasCustomFooter: !!(setting.footerBannerUrl || official.footerBannerUrl),
+      hasCustomWhatsapp: !!(setting.whatsappBannerUrl || official.whatsappBannerUrl),
+      hasCustomWhatsappReminder: !!(setting.whatsappReminderBannerUrl || official.whatsappReminderBannerUrl),
       customSpeech: setting.customSpeech || official.customSpeech || defaultSpeech,
       customEmailSubject: setting.customEmailSubject || official.customEmailSubject || defaultSubject,
       stands: calculatedStands
@@ -2423,16 +2428,32 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                             const genArt = getSponsorArt('general');
                             return (
                               <div className="flex items-center justify-center gap-1.5 flex-wrap max-w-[150px] mx-auto">
-                                <div className="w-9 h-5 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Banner Correo General (Header)">
-                                  <img src={genArt.headerBannerUrl} alt="Header" className="w-full h-full object-cover" />
+                                <div className="w-10 h-6 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative flex items-center justify-center" title="Banner Correo General (Header)">
+                                  <img 
+                                    src={genArt.headerBannerUrl || '/email-header.png'} 
+                                    alt="Header" 
+                                    className="w-full h-full object-cover" 
+                                    onError={(e) => {
+                                      e.currentTarget.onerror = null;
+                                      e.currentTarget.src = '/email-header.png';
+                                    }}
+                                  />
                                   {genArt.hasCustomHeader && (
-                                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full" title="Header personalizado"></span>
                                   )}
                                 </div>
-                                <div className="w-6 h-5 bg-emerald-950 rounded border border-emerald-300 overflow-hidden shrink-0 relative" title="Flyer WhatsApp General">
-                                  <img src={genArt.whatsappBannerUrl} alt="WhatsApp" className="w-full h-full object-cover" />
+                                <div className="w-7 h-6 bg-emerald-950 rounded border border-emerald-300 overflow-hidden shrink-0 relative flex items-center justify-center" title="Flyer WhatsApp General">
+                                  <img 
+                                    src={genArt.whatsappBannerUrl || '/email-header.png'} 
+                                    alt="WhatsApp" 
+                                    className="w-full h-full object-cover" 
+                                    onError={(e) => {
+                                      e.currentTarget.onerror = null;
+                                      e.currentTarget.src = '/email-header.png';
+                                    }}
+                                  />
                                   {genArt.hasCustomWhatsapp && (
-                                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-400 rounded-full" title="Flyer personalizado"></span>
                                   )}
                                 </div>
                                 <button
@@ -2642,18 +2663,34 @@ Hemos reservado para ti un pase exclusivo. Para activar tu acceso y recibir tu G
                           <td className="p-4 text-center">
                             <div className="flex items-center justify-center gap-1.5 flex-wrap max-w-[150px] mx-auto">
                               {/* Miniatura Header Correo */}
-                              <div className="w-9 h-5 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative" title="Banner Correo (Header)">
-                                <img src={art.headerBannerUrl} alt="Header" className="w-full h-full object-cover" />
+                              <div className="w-10 h-6 bg-slate-800 rounded border border-slate-300 overflow-hidden shrink-0 relative flex items-center justify-center" title="Banner Correo (Header)">
+                                <img 
+                                  src={art.headerBannerUrl || '/email-header.png'} 
+                                  alt="Header" 
+                                  className="w-full h-full object-cover" 
+                                  onError={(e) => {
+                                    e.currentTarget.onerror = null;
+                                    e.currentTarget.src = '/email-header.png';
+                                  }}
+                                />
                                 {art.hasCustomHeader && (
-                                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full" title="Header personalizado"></span>
                                 )}
                               </div>
 
                               {/* Miniatura WhatsApp */}
-                              <div className="w-6 h-5 bg-emerald-950 rounded border border-emerald-300 overflow-hidden shrink-0 relative" title="Flyer WhatsApp">
-                                <img src={art.whatsappBannerUrl} alt="WhatsApp" className="w-full h-full object-cover" />
+                              <div className="w-7 h-6 bg-emerald-950 rounded border border-emerald-300 overflow-hidden shrink-0 relative flex items-center justify-center" title="Flyer WhatsApp">
+                                <img 
+                                  src={art.whatsappBannerUrl || '/email-header.png'} 
+                                  alt="WhatsApp" 
+                                  className="w-full h-full object-cover" 
+                                  onError={(e) => {
+                                    e.currentTarget.onerror = null;
+                                    e.currentTarget.src = '/email-header.png';
+                                  }}
+                                />
                                 {art.hasCustomWhatsapp && (
-                                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-emerald-400 rounded-full" title="Flyer personalizado"></span>
                                 )}
                               </div>
 
