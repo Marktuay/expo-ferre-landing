@@ -855,4 +855,28 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - Botón individual `🔔 Recordar` por fila para envío de mensaje personalizado directo por WhatsApp Web.
   - Botón de despacho masivo de recordatorio por correo con modal selector de 3 criterios.
 
+---
+
+## 📅 Resumen de Cambios y Avances de la Sesión (30 de Septiembre de 2026)
+
+### 🏆 Módulo de Jurados Calificadores - Envío por WhatsApp & Etiquetas Dinámicas de Entrega (`AdminJury.jsx`)
+- **Botón `[📱 WhatsApp]` por Jurado Calificador:**
+  - Integración de despacho oficial a WhatsApp Web/App con un solo clic.
+  - Mensaje corporativo personalizado que incluye el nombre del jurado, saludo formal del Comité Organizador de ExpoFerre 2026, enlace directo confidencial de evaluación (`inviteLink`), explicación de la metodología (5 ferreterías por categoría con ranking 1 a 5) y agradecimiento.
+  - Formateo inteligente del número internacional (añade prefijo `505` si falta o purga caracteres especiales).
+  - Modal reactivo con selector de teléfono si el jurado no tenía número registrado (`N/D`), permitiendo guardar el teléfono en Firestore (`invitedJudges/{id}`) y abrir WhatsApp instantáneamente.
+- **Etiquetas Visuales Dinámicas de Estado de Entrega:**
+  - 🏆 **`Votos Registrados` (Dorado/Ámbar con estrella):** Se sincroniza en tiempo real con `juryEvaluations` para identificar de inmediato a los jurados que ya completaron su votación. Fila resaltada en ámbar suave con borde izquierdo dorado.
+  - 📱 **`WhatsApp Enviado` (Verde esmeralda):** Se activa automáticamente al presionar el botón de WhatsApp (`whatsappSent: true` en Firestore). Fila resaltada en verde suave con borde izquierdo verde WhatsApp.
+  - ✅ **`Enlace Entregado` (Verde menta):** Estado de confirmación manual mediante el nuevo botón toggle `[Marcar Entregado]`.
+  - ✉️ **`Correo Despachado` (Azul suave):** Estado inicial para invitaciones generadas por correo.
+  - ⏳ **`Pendiente` (Gris):** Para enlaces recién generados sin confirmación de despacho.
+- **Buscador en Tiempo Real y Filtros Rápidos (Chips):**
+  - Buscador predictivo por nombre, empresa, correo o teléfono.
+  - Píldoras de filtrado: `Todos`, `🏆 Evaluaron`, `📱 WhatsApp`, `✅ Entregados` y `⏳ Pendientes`.
+  - Píldoras de métricas superiores con conteos consolidados en vivo.
+- **Historial de Commits:**
+  - `ccede71`: *feat(jury): agregar integracion directa de WhatsApp y etiquetas dinamicas de estado de entrega para jurados*
+
+
 
