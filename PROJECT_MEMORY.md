@@ -878,5 +878,22 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Historial de Commits:**
   - `ccede71`: *feat(jury): agregar integracion directa de WhatsApp y etiquetas dinamicas de estado de entrega para jurados*
 
+### 💬 Optimización y Personalización de Invitaciones por WhatsApp (`AdminDirectInvites.jsx`)
+- **Speech Corporativo Completo con Nombre de Marca y Stands:**
+  - El mensaje generado para WhatsApp ahora menciona explícitamente a la marca patrocinadora que realiza la invitación (ej. `*Precom (Monolit)* tiene el agrado de invitarte a la primera edición de *EXPO FERRE Nicaragua 2026*`).
+  - Incluye automáticamente los números de stands asignados (ej. `Te esperamos en nuestros Stands 8, 14 para compartir novedades y oportunidades comerciales`), fecha (`17 de Octubre`), sede (`Centro de Convenciones Crowne Plaza Managua`), horario (`8:00 AM a 5:00 PM`) y el enlace único e intransferible para generar el Gafete Oficial con Código QR.
+  - Versión para invitaciones generales sin patrocinador adaptada automáticamente.
+  - Mensaje de recordatorio enriquecido con cortesía de la marca (`por cortesía de *[Patrocinador]* (Stand X)`).
+- **Resolución Automática de Enlace de Producción en Pruebas Locales:**
+  - `getInviteUrl` detecta si se está ejecutando en `localhost`, `127.0.0.1` o IP de red local (`192.168.x.x`), y sustituye automáticamente el host por el dominio oficial `https://expoferrenicaragua.com/?invite=...`. Esto permite hacer pruebas desde la computadora y abrir los enlaces en cualquier dispositivo móvil sin errores de red.
+- **Eliminación de Rombos Negros y Corrección de Detección de Speeches:**
+  - Se eliminaron emojis y caracteres con selectores de variación que provocaban que WhatsApp Web renderizara rombos negros de reemplazo Unicode.
+  - Se corrigió la lógica de discriminación entre el template por defecto y textos personalizados explícitos (controlando variantes con y sin tilde en "edición"), garantizando que siempre se emita el mensaje con la marca correspondiente.
+- **Historial de Commits Recientes:**
+  - `ccede71`: *feat(jury): agregar integracion directa de WhatsApp y etiquetas dinamicas de estado de entrega para jurados*
+  - `e08e7b6`: *docs: actualizar memoria del proyecto con mejoras de jurados whatsapp y estados*
+  - `065acda`: *feat(whatsapp): restaurar speech corporativo con patrocinador, stands y datos del evento*
+  - `4826e09`: *fix(whatsapp): corregir deteccion de speech corporativo generico vs personalizado*
+
 
 
