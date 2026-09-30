@@ -1236,45 +1236,67 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   };
 
   const getInviteUrl = (token) => {
-    const baseUrl = window.location.origin;
+    const host = window.location.hostname;
+    const baseUrl = (host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168'))
+      ? 'https://expoferrenicaragua.com'
+      : window.location.origin;
     return `${baseUrl}/?invite=${encodeURIComponent(token)}`;
   };
 
-  // Obtener mensaje directo y conciso para WhatsApp (Flyer + Enlace de Registro)
+  // Obtener mensaje corporativo completo para WhatsApp (con patrocinador, stands, evento)
   const getWhatsAppSpeech = (invite) => {
     const link = getInviteUrl(invite.id);
     const guestLabel = invite.nombre?.trim() || '';
-    const greeting = guestLabel ? `¡Hola ${guestLabel}! 👋\n\n` : '';
     const sponsorName = invite.sponsorName || '';
     const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
+    const stands = art.stands || '';
 
-    // Si el usuario configuró un texto corto personalizado explícito en el modal
-    if (art.customSpeech && art.customSpeech.trim() && !art.customSpeech.includes('Nos complace invitarte a ser parte de la primera edición')) {
+    // Si el usuario configuro un texto personalizado explicito en el modal
+    if (art.customSpeech && art.customSpeech.trim() && !art.customSpeech.includes('Nos complace invitarte a ser parte de la primera edicion')) {
       let speech = art.customSpeech
         .replace(/{invitado}/g, guestLabel || 'Estimado(a)')
         .replace(/\[Nombre\]/g, guestLabel || 'Estimado(a)')
         .replace(/{empresa_invitada}/g, invite.empresa || '')
         .replace(/{patrocinador}/g, sponsorName)
-        .replace(/{stands}/g, art.stands ? `Stand ${art.stands}` : 'nuestro stand');
+        .replace(/{stands}/g, stands ? (stands.toLowerCase().startsWith('stand') ? stands : `Stand ${stands}`) : 'nuestro stand');
 
       if (speech.includes('{enlace}')) {
         speech = speech.replace(/{enlace}/g, link);
       } else {
-        speech += `\n\n🔗 ${link}`;
+        speech += `\n\n${link}`;
       }
       return speech;
     }
 
-    return `${greeting}🎟️ Activa tu pase exclusivo de acceso completando tu registro en este enlace:\n🔗 ${link}`;
+    // Speech corporativo con patrocinador
+    const greeting = guestLabel ? `Hola ${guestLabel},\n\n` : 'Hola,\n\n';
+    const standsClean = stands ? (stands.toLowerCase().startsWith('stand') ? stands : `Stand ${stands}`) : '';
+
+    if (sponsorName && sponsorName !== 'general' && sponsorName.toLowerCase() !== 'invitacion general') {
+      const standsLine = standsClean ? `Te esperamos en nuestros ${standsClean} para compartir novedades y oportunidades comerciales.\n\n` : '';
+      return `${greeting}*${sponsorName}* tiene el agrado de invitarte a la primera edicion de *EXPO FERRE Nicaragua 2026*.\n\n${standsLine}Fecha: 17 de Octubre\nLugar: Centro de Convenciones Crowne Plaza Managua\nHora: 8:00 AM a 5:00 PM\n\nHemos reservado para ti un pase exclusivo. Completa tu registro para generar tu Gafete Oficial con Codigo QR:\n\n${link}\n\nEste enlace es personal e intransferible.\n\nContamos con tu presencia!`;
+    }
+
+    // Sin patrocinador (invitacion general)
+    return `${greeting}Tienes reservado un pase exclusivo para la primera edicion de *EXPO FERRE Nicaragua 2026*.\n\nFecha: 17 de Octubre\nLugar: Centro de Convenciones Crowne Plaza Managua\nHora: 8:00 AM a 5:00 PM\n\nCompleta tu registro para generar tu Gafete Oficial con Codigo QR:\n\n${link}\n\nEste enlace es personal e intransferible.\n\nContamos con tu presencia!`;
   };
 
-  // Obtener mensaje directo de recordatorio para WhatsApp (Flyer + Enlace de Registro)
+  // Obtener mensaje de recordatorio para WhatsApp (con patrocinador)
   const getWhatsAppReminderSpeech = (invite) => {
     const link = getInviteUrl(invite.id);
     const guestLabel = invite.nombre?.trim() || '';
-    const greeting = guestLabel ? `¡Hola ${guestLabel}! 👋\n\n` : '';
+    const sponsorName = invite.sponsorName || '';
+    const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
+    const stands = art.stands || '';
+    const greeting = guestLabel ? `Hola ${guestLabel},\n\n` : 'Hola,\n\n';
+    const standsClean = stands ? (stands.toLowerCase().startsWith('stand') ? stands : `Stand ${stands}`) : '';
 
-    return `${greeting}🔔 Recordatorio: Por favor activa tu pase exclusivo completando tu registro en este enlace:\n🔗 ${link}`;
+    if (sponsorName && sponsorName !== 'general' && sponsorName.toLowerCase() !== 'invitacion general') {
+      const cortesia = standsClean ? `por cortesia de *${sponsorName}* (${standsClean})` : `por cortesia de *${sponsorName}*`;
+      return `${greeting}Te recordamos que tienes reservado tu pase exclusivo ${cortesia} para *EXPO FERRE Nicaragua 2026*.\n\nFecha: 17 de Octubre\nLugar: Centro de Convenciones Crowne Plaza Managua\nHora: 8:00 AM a 5:00 PM\n\nActiva tu pase completando tu registro:\n\n${link}\n\nEste enlace es personal e intransferible.\n\nContamos con tu presencia!`;
+    }
+
+    return `${greeting}Te recordamos que tienes reservado tu pase exclusivo para *EXPO FERRE Nicaragua 2026*.\n\nFecha: 17 de Octubre\nLugar: Centro de Convenciones Crowne Plaza Managua\nHora: 8:00 AM a 5:00 PM\n\nActiva tu pase completando tu registro:\n\n${link}\n\nEste enlace es personal e intransferible.\n\nContamos con tu presencia!`;
   };
 
   const getWhatsAppUrl = (invite) => {
