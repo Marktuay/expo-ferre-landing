@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Award, Plus, FileSpreadsheet, ArrowLeft, Search, Eye, Building2, UserCheck, Star, Sparkles, ChevronDown, ChevronUp, Copy, Check, MessageSquare } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Award, Plus, FileSpreadsheet, ArrowLeft, Search, Building2, UserCheck, Sparkles, Copy, Check, MessageSquare, Phone, Mail, CheckCircle2, Clock, ExternalLink, X, Send } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 import InviteJudgeModal from './InviteJudgeModal';
 
@@ -10,10 +10,14 @@ export default function AdminJury({ onBack }) {
   const [invitedJudges, setInvitedJudges] = useState([]);
   const [activeTab, setActiveTab] = useState('ranking'); // 'ranking', 'evaluations', 'invited'
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [selectedEvaluation, setSelectedEvaluation] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+  const [copiedSpeechId, setCopiedSpeechId] = useState(null);
+
+  // Estados para Filtros y WhatsApp en Jurados Invitados
+  const [invitedSearch, setInvitedSearch] = useState('');
+  const [invitedFilter, setInvitedFilter] = useState('all'); // 'all' | 'evaluated' | 'whatsapp' | 'delivered' | 'pending'
+  const [whatsAppModal, setWhatsAppModal] = useState({ open: false, judge: null, phoneInput: '', saving: false });
 
   useEffect(() => {
     // Listener para Evaluaciones de Jurados
@@ -85,6 +89,129 @@ export default function AdminJury({ onBack }) {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  // Helper para verificar si un jurado ya envió su evaluación
+  const isJudgeEvaluated = (judge) => {
+    const jName = (judge.name || '').trim().toLowerCase();
+    const jEmail = (judge.email || '').trim().toLowerCase();
+    return evaluations.some(ev => {
+      const evName = (ev.judgeName || ev.juradoNombre || '').trim().toLowerCase();
+      const evEmail = (ev.judgeEmail || ev.juradoEmail || '').trim().toLowerCase();
+      return (jEmail && evEmail && jEmail === evEmail) || 
+             (jName && evName && (evName === jName || evName.includes(jName) || jName.includes(evName)));
+    });
+  };
+
+  // Helper para generar el discurso oficial de WhatsApp para Jurado
+  const buildJurySpeech = (judge) => {
+    const name = judge.name?.trim() || 'Estimado(a)';
+    return `¡Hola ${name}! Te saludamos cordialmente del Comité Organizador de EXPO FERRE 2026. 🏆
+
+Para nosotros es un honor contar con tu trayectoria y criterio experto como parte del Jurado Calificador de los Premios a la Excelencia Ferretera (Ferretería Familiar, Ferretería Oro y Ferretería Promesa).
+
+Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aquí:
+🔗 ${judge.inviteLink}
+
+📋 Metodología: Podrás nominar hasta 5 ferreterías por categoría asignándoles un ranking del 1 al 5 según tu valoración.
+
+¡Agradecemos tu valiosa contribución al sector ferretero nicaragüense! 🚀`;
+  };
+
+  // Helper para formatear número telefónico para wa.me
+  const formatPhoneForWa = (phone) => {
+    const clean = (phone || '').replace(/[^\d]/g, '');
+    if (!clean) return '';
+    if (clean.length === 8) return '505' + clean;
+    if (clean.startsWith('00505')) return clean.replace('00505', '505');
+    if (clean.startsWith('505')) return clean;
+    return clean;
+  };
+
+  // Abrir WhatsApp directo (o modal si no hay teléfono)
+  const handleOpenWhatsApp = async (judge) => {
+    const waPhone = formatPhoneForWa(judge.phone);
+    if (!waPhone || waPhone.length < 8) {
+      setWhatsAppModal({
+        open: true,
+        judge,
+        phoneInput: judge.phone && judge.phone !== 'N/D' ? judge.phone : '',
+        saving: false
+      });
+      return;
+    }
+
+    const speech = buildJurySpeech(judge);
+    const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(speech)}`;
+
+    try {
+      await updateDoc(doc(db, `${getEventBasePath()}/invitedJudges`, judge.id), {
+        whatsappSent: true,
+        whatsappSentAt: serverTimestamp(),
+        delivered: true,
+        deliveryStatus: 'whatsapp'
+      });
+    } catch (e) {
+      console.warn('No se pudo actualizar estado en Firestore:', e);
+    }
+
+    window.open(waUrl, '_blank');
+  };
+
+  // Guardar teléfono desde el modal y abrir WhatsApp
+  const handleSavePhoneAndSendWa = async (e) => {
+    e.preventDefault();
+    if (!whatsAppModal.judge) return;
+    const clean = formatPhoneForWa(whatsAppModal.phoneInput);
+    if (!clean || clean.length < 8) {
+      alert('Por favor ingresa un número de teléfono válido (ej. 8888 8888 o +505 8888 8888).');
+      return;
+    }
+
+    setWhatsAppModal(prev => ({ ...prev, saving: true }));
+    try {
+      const speech = buildJurySpeech(whatsAppModal.judge);
+      const waUrl = `https://wa.me/${clean}?text=${encodeURIComponent(speech)}`;
+
+      await updateDoc(doc(db, `${getEventBasePath()}/invitedJudges`, whatsAppModal.judge.id), {
+        phone: whatsAppModal.phoneInput.trim(),
+        whatsappSent: true,
+        whatsappSentAt: serverTimestamp(),
+        delivered: true,
+        deliveryStatus: 'whatsapp'
+      });
+
+      setWhatsAppModal({ open: false, judge: null, phoneInput: '', saving: false });
+      window.open(waUrl, '_blank');
+    } catch (err) {
+      console.error('Error al guardar teléfono:', err);
+      alert('Error al guardar teléfono: ' + err.message);
+      setWhatsAppModal(prev => ({ ...prev, saving: false }));
+    }
+  };
+
+  // Alternar estado manual de "Entregado / Confirmado"
+  const handleToggleDelivered = async (judge) => {
+    const isDelivered = judge.delivered || judge.whatsappSent;
+    const newStatus = !isDelivered;
+    try {
+      await updateDoc(doc(db, `${getEventBasePath()}/invitedJudges`, judge.id), {
+        delivered: newStatus,
+        deliveredAt: newStatus ? serverTimestamp() : null,
+        deliveryStatus: newStatus ? (judge.whatsappSent ? 'whatsapp' : 'delivered') : (judge.sentVia || 'email')
+      });
+    } catch (e) {
+      console.error('Error toggling delivered:', e);
+      alert('Error al actualizar estado: ' + e.message);
+    }
+  };
+
+  // Copiar Speech Completo de WhatsApp
+  const handleCopySpeech = (judge) => {
+    const text = buildJurySpeech(judge);
+    navigator.clipboard.writeText(text);
+    setCopiedSpeechId(judge.id);
+    setTimeout(() => setCopiedSpeechId(null), 2500);
   };
 
   const handleExportExcel = async () => {
@@ -421,66 +548,381 @@ export default function AdminJury({ onBack }) {
       )}
 
       {/* 3. JURADOS INVITADOS */}
-      {activeTab === 'invited' && (
-        <div className="bg-white rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="font-bold text-gray-900">Historial de Invitaciones Generadas</h3>
-            <button
-              onClick={() => setIsInviteModalOpen(true)}
-              className="bg-[#f39200] hover:bg-[#d98200] text-black font-black px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5"
-            >
-              <Plus size={14} /> Nueva Invitación
-            </button>
-          </div>
+      {activeTab === 'invited' && (() => {
+        const totalEvaluated = invitedJudges.filter(isJudgeEvaluated).length;
+        const totalWa = invitedJudges.filter(j => j.whatsappSent || j.deliveryStatus === 'whatsapp').length;
+        const totalDelivered = invitedJudges.filter(j => j.delivered || j.whatsappSent || isJudgeEvaluated(j)).length;
+        const totalPending = invitedJudges.filter(j => !j.delivered && !j.whatsappSent && !isJudgeEvaluated(j)).length;
 
-          {invitedJudges.length === 0 ? (
-            <div className="p-10 text-center text-gray-400 text-sm">
-              No hay jurados invitados aún. Haz clic en "Nueva Invitación" para generar un enlace.
+        // Filtrado por buscador y chips
+        const filteredJudges = invitedJudges.filter(j => {
+          const s = `${j.name || ''} ${j.email || ''} ${j.phone || ''}`.toLowerCase();
+          const matchesSearch = !invitedSearch.trim() || s.includes(invitedSearch.trim().toLowerCase());
+          if (!matchesSearch) return false;
+
+          const evaluated = isJudgeEvaluated(j);
+          const isWa = j.whatsappSent || j.deliveryStatus === 'whatsapp';
+          const isDeliv = j.delivered || isWa || evaluated;
+
+          if (invitedFilter === 'evaluated') return evaluated;
+          if (invitedFilter === 'whatsapp') return isWa;
+          if (invitedFilter === 'delivered') return isDeliv && !evaluated;
+          if (invitedFilter === 'pending') return !isDeliv;
+          return true;
+        });
+
+        return (
+          <div className="bg-white rounded-2xl border border-outline-variant shadow-sm overflow-hidden space-y-0">
+            {/* Header del Bloque */}
+            <div className="p-5 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4 bg-white">
+              <div>
+                <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                  <MessageSquare size={20} className="text-[#f39200]" />
+                  Historial de Enlaces y Jurados Invitados
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Monitorea el estado de entrega del enlace (Correo o WhatsApp) y la recepción de votos de cada jurado.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsInviteModalOpen(true)}
+                className="bg-[#f39200] hover:bg-[#d98200] text-black font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all hover:scale-105"
+              >
+                <Plus size={16} /> Nueva Invitación
+              </button>
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-gray-50 text-gray-500 font-bold text-xs uppercase border-b border-gray-100">
-                  <tr>
-                    <th className="py-3 px-4">Nombre del Jurado</th>
-                    <th className="py-3 px-4">Correo</th>
-                    <th className="py-3 px-4">Teléfono</th>
-                    <th className="py-3 px-4">Enlace de Evaluación</th>
-                    <th className="py-3 px-4 text-right">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {invitedJudges.map((j) => (
-                    <tr key={j.id} className="hover:bg-gray-50">
-                      <td className="py-3 px-4 font-bold text-gray-900">{j.name}</td>
-                      <td className="py-3 px-4 text-gray-500 text-xs">{j.email || 'N/D'}</td>
-                      <td className="py-3 px-4 text-gray-500 text-xs">{j.phone || 'N/D'}</td>
-                      <td className="py-3 px-4 text-xs font-mono text-gray-400 truncate max-w-xs">
-                        {j.inviteLink}
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <button
-                          onClick={() => handleCopyLink(j.inviteLink, j.id)}
-                          className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-xs font-bold inline-flex items-center gap-1"
-                        >
-                          {copiedId === j.id ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
-                          {copiedId === j.id ? 'Copiado' : 'Copiar'}
-                        </button>
-                      </td>
+
+            {/* Píldoras de Métricas de Entrega */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-gray-50/70 border-b border-gray-100">
+              <div className="bg-white p-3 rounded-xl border border-gray-200/80 shadow-2xs">
+                <span className="text-[11px] font-bold text-gray-500 uppercase block">Total Invitados</span>
+                <span className="text-xl font-black text-gray-900">{invitedJudges.length}</span>
+              </div>
+              <div className="bg-white p-3 rounded-xl border border-amber-200 shadow-2xs bg-amber-50/30">
+                <span className="text-[11px] font-bold text-amber-700 uppercase flex items-center gap-1">
+                  <Award size={12} className="text-[#f39200]" /> Votos Recibidos
+                </span>
+                <span className="text-xl font-black text-amber-900">{totalEvaluated}</span>
+              </div>
+              <div className="bg-white p-3 rounded-xl border border-emerald-200 shadow-2xs bg-emerald-50/30">
+                <span className="text-[11px] font-bold text-emerald-700 uppercase flex items-center gap-1">
+                  <Phone size={12} className="text-[#25D366]" /> Vía WhatsApp
+                </span>
+                <span className="text-xl font-black text-emerald-900">{totalWa}</span>
+              </div>
+              <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-2xs">
+                <span className="text-[11px] font-bold text-gray-500 uppercase flex items-center gap-1">
+                  <Clock size={12} className="text-gray-400" /> Pendientes
+                </span>
+                <span className="text-xl font-black text-gray-700">{totalPending}</span>
+              </div>
+            </div>
+
+            {/* Barra de Búsqueda y Filtros Rápidos */}
+            <div className="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+              <div className="relative flex-1 min-w-[240px] max-w-md">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar por jurado, empresa, correo o teléfono..."
+                  value={invitedSearch}
+                  onChange={(e) => setInvitedSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 focus:bg-white focus:border-[#f39200] outline-none transition-all"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                {[
+                  { id: 'all', label: `Todos (${invitedJudges.length})` },
+                  { id: 'evaluated', label: `🏆 Evaluaron (${totalEvaluated})` },
+                  { id: 'whatsapp', label: `📱 WhatsApp (${totalWa})` },
+                  { id: 'delivered', label: `✅ Entregados (${totalDelivered})` },
+                  { id: 'pending', label: `⏳ Pendientes (${totalPending})` }
+                ].map(chip => (
+                  <button
+                    key={chip.id}
+                    onClick={() => setInvitedFilter(chip.id)}
+                    className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                      invitedFilter === chip.id
+                        ? 'bg-[#f39200] text-black shadow-xs'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tabla de Jurados */}
+            {filteredJudges.length === 0 ? (
+              <div className="p-12 text-center text-gray-400 text-sm space-y-2">
+                <MessageSquare size={36} className="mx-auto text-gray-300" />
+                <p className="font-bold">No se encontraron jurados con el filtro aplicado.</p>
+                <p className="text-xs text-gray-400">Intenta cambiar la búsqueda o el criterio de filtro.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm border-collapse">
+                  <thead className="bg-gray-50 text-gray-600 font-black text-[11px] uppercase tracking-wider border-b border-gray-200">
+                    <tr>
+                      <th className="py-3.5 px-4">Jurado Calificador</th>
+                      <th className="py-3.5 px-4">Contacto</th>
+                      <th className="py-3.5 px-4">Estado de Entrega</th>
+                      <th className="py-3.5 px-4">Enlace de Evaluación</th>
+                      <th className="py-3.5 px-4 text-right">Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filteredJudges.map((j) => {
+                      const evaluated = isJudgeEvaluated(j);
+                      const isWa = j.whatsappSent || j.deliveryStatus === 'whatsapp';
+                      const isDeliv = j.delivered || isWa || evaluated;
+                      const hasPhone = j.phone && j.phone.trim() !== '' && j.phone !== 'N/D';
+
+                      // Color de fila dinámico según estado
+                      let rowBg = 'hover:bg-gray-50/80';
+                      if (evaluated) {
+                        rowBg = 'bg-amber-50/40 hover:bg-amber-50/70 border-l-4 border-l-[#f39200]';
+                      } else if (isWa) {
+                        rowBg = 'bg-emerald-50/40 hover:bg-emerald-50/70 border-l-4 border-l-[#25D366]';
+                      } else if (isDeliv) {
+                        rowBg = 'bg-teal-50/30 hover:bg-teal-50/60 border-l-4 border-l-teal-500';
+                      }
+
+                      return (
+                        <tr key={j.id} className={`transition-colors ${rowBg}`}>
+                          {/* Jurado */}
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-gray-900 block text-sm">
+                                {j.name}
+                              </span>
+                              {evaluated && (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                                  🏆 Votó
+                                </span>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Contacto: Correo y Teléfono */}
+                          <td className="py-3.5 px-4 space-y-1">
+                            <div className="flex items-center gap-1.5 text-xs text-gray-700">
+                              <Mail size={12} className="text-gray-400 shrink-0" />
+                              <span className="truncate max-w-[200px]" title={j.email}>{j.email || 'N/D'}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs">
+                              <Phone size={12} className={hasPhone ? 'text-emerald-600 shrink-0' : 'text-gray-300 shrink-0'} />
+                              {hasPhone ? (
+                                <span className="font-mono text-gray-800 font-medium">{j.phone}</span>
+                              ) : (
+                                <button
+                                  onClick={() => setWhatsAppModal({ open: true, judge: j, phoneInput: '', saving: false })}
+                                  className="text-[11px] text-amber-700 hover:text-amber-900 font-bold underline cursor-pointer"
+                                >
+                                  + Agregar Teléfono
+                                </button>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Etiqueta de Estado de Entrega */}
+                          <td className="py-3.5 px-4">
+                            {evaluated ? (
+                              <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 inline-flex items-center gap-1.5 shadow-2xs">
+                                <Award size={13} className="text-[#f39200]" />
+                                🏆 Votos Registrados
+                              </span>
+                            ) : isWa ? (
+                              <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-[#075E54] border border-emerald-300 inline-flex items-center gap-1.5 shadow-2xs">
+                                <Phone size={13} className="text-[#25D366]" />
+                                📱 WhatsApp Enviado
+                              </span>
+                            ) : isDeliv ? (
+                              <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-800 border border-teal-300 inline-flex items-center gap-1.5 shadow-2xs">
+                                <CheckCircle2 size={13} className="text-teal-600" />
+                                ✅ Enlace Entregado
+                              </span>
+                            ) : j.sentVia === 'email' ? (
+                              <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 inline-flex items-center gap-1.5">
+                                <Mail size={13} className="text-blue-500" />
+                                ✉️ Correo Despachado
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 inline-flex items-center gap-1.5">
+                                <Clock size={13} className="text-gray-400" />
+                                ⏳ Pendiente
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Enlace de Evaluación */}
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-center gap-2 max-w-xs">
+                              <span className="text-xs font-mono text-gray-500 truncate select-all bg-gray-50 px-2 py-1 rounded border border-gray-200 block flex-1">
+                                {j.inviteLink}
+                              </span>
+                              <a
+                                href={j.inviteLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                title="Abrir portal de jurado en nueva pestaña"
+                                className="p-1 hover:bg-gray-200 rounded text-gray-600 hover:text-gray-900 transition-colors"
+                              >
+                                <ExternalLink size={14} />
+                              </a>
+                            </div>
+                          </td>
+
+                          {/* Botonera de Acciones */}
+                          <td className="py-3.5 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {/* Botón WhatsApp */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenWhatsApp(j)}
+                                title={hasPhone ? `Enviar enlace por WhatsApp a ${j.phone}` : 'Agregar teléfono y enviar por WhatsApp'}
+                                className="px-3 py-1.5 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg text-xs font-bold inline-flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer hover:scale-105"
+                              >
+                                <Phone size={13} />
+                                <span>WhatsApp</span>
+                              </button>
+
+                              {/* Botón Marcar / Desmarcar Entregado */}
+                              <button
+                                type="button"
+                                onClick={() => handleToggleDelivered(j)}
+                                title={isDeliv ? "Marcar como pendiente" : "Marcar enlace como entregado / confirmado"}
+                                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1 transition-all cursor-pointer border ${
+                                  isDeliv
+                                    ? 'bg-teal-50 text-teal-800 border-teal-300 hover:bg-teal-100'
+                                    : 'bg-white hover:bg-gray-100 text-gray-600 border-gray-200'
+                                }`}
+                              >
+                                <CheckCircle2 size={13} className={isDeliv ? 'text-teal-600' : 'text-gray-400'} />
+                                <span className="hidden xl:inline">{isDeliv ? 'Entregado' : 'Marcar'}</span>
+                              </button>
+
+                              {/* Botón Copiar Enlace */}
+                              <button
+                                type="button"
+                                onClick={() => handleCopyLink(j.inviteLink, j.id)}
+                                title="Copiar enlace directo"
+                                className="bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 px-2.5 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1 transition-colors cursor-pointer"
+                              >
+                                {copiedId === j.id ? <Check size={13} className="text-green-600" /> : <Copy size={13} />}
+                                <span>{copiedId === j.id ? '¡Copiado!' : 'Copiar'}</span>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Modal de Invitación a Jurado */}
       <InviteJudgeModal
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
       />
+
+      {/* Modal para Enviar por WhatsApp / Guardar Teléfono */}
+      {whatsAppModal.open && whatsAppModal.judge && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-150">
+            {/* Cabecera */}
+            <div className="bg-[#075E54] p-4 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center text-white font-bold shrink-0">
+                  <Phone size={16} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm">Enviar Enlace por WhatsApp</h3>
+                  <p className="text-[11px] text-emerald-100">
+                    Jurado: <span className="font-bold text-white">{whatsAppModal.judge.name}</span>
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWhatsAppModal({ open: false, judge: null, phoneInput: '', saving: false })}
+                className="p-1 hover:bg-white/20 rounded-full text-white cursor-pointer transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Formulario */}
+            <form onSubmit={handleSavePhoneAndSendWa} className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Número de Teléfono / WhatsApp:
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej: +505 8888 8888 o 88888888"
+                  value={whatsAppModal.phoneInput}
+                  onChange={(e) => setWhatsAppModal(prev => ({ ...prev, phoneInput: e.target.value }))}
+                  className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-mono font-bold text-gray-900 focus:bg-white focus:border-[#25D366] outline-none"
+                />
+                <p className="text-[11px] text-gray-500 mt-1">
+                  Si no incluyes el código de país +505, se agregará automáticamente al abrir el chat.
+                </p>
+              </div>
+
+              {/* Vista previa del mensaje */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-gray-700">
+                    Mensaje Oficial con Enlace:
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => handleCopySpeech(whatsAppModal.judge)}
+                    className="text-[11px] text-[#075E54] hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    {copiedSpeechId === whatsAppModal.judge.id ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+                    <span>{copiedSpeechId === whatsAppModal.judge.id ? '¡Copiado!' : 'Copiar Texto'}</span>
+                  </button>
+                </div>
+                <textarea
+                  readOnly
+                  rows={6}
+                  value={buildJurySpeech(whatsAppModal.judge)}
+                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs font-sans text-gray-800 outline-none resize-none leading-relaxed select-all"
+                />
+              </div>
+
+              {/* Botones de acción */}
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setWhatsAppModal({ open: false, judge: null, phoneInput: '', saving: false })}
+                  className="px-4 py-2 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={whatsAppModal.saving}
+                  className="px-5 py-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-all hover:scale-105 disabled:opacity-50"
+                >
+                  <Send size={14} />
+                  <span>{whatsAppModal.saving ? 'Abriendo...' : 'Enviar por WhatsApp'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       </div>
     </div>
