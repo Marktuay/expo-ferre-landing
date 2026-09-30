@@ -889,11 +889,12 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Eliminación de Rombos Negros y Corrección de Detección de Speeches:**
   - Se eliminaron emojis y caracteres con selectores de variación que provocaban que WhatsApp Web renderizara rombos negros de reemplazo Unicode.
   - Se corrigió la lógica de discriminación entre el template por defecto y textos personalizados explícitos (controlando variantes con y sin tilde en "edición"), garantizando que siempre se emita el mensaje con la marca correspondiente.
-- **Historial de Commits Recientes:**
-  - `ccede71`: *feat(jury): agregar integracion directa de WhatsApp y etiquetas dinamicas de estado de entrega para jurados*
-  - `e08e7b6`: *docs: actualizar memoria del proyecto con mejoras de jurados whatsapp y estados*
-  - `065acda`: *feat(whatsapp): restaurar speech corporativo con patrocinador, stands y datos del evento*
-  - `4826e09`: *fix(whatsapp): corregir deteccion de speech corporativo generico vs personalizado*
+### 🏷️ Actualización de Nombre de Marca Oficial: Monolit (`defaultStands.js` & `AdminDirectInvites.jsx`)
+- **Homologación de Nombre de Marca:**
+  - Se actualizó la denominación oficial de la empresa patrocinadora de los Stands 8 y 14 de `Precom (Monolit)` a únicamente **`Monolit`**.
+  - Se actualizaron las plantillas oficiales, speeches corporativos (`buildCorporateSpeech('Monolit', 'Stands 8, 14')`), asuntos de correo y asignaciones de stands.
+  - Se mantuvo la compatibilidad total con configuraciones previas (`sponsorSettings`) e importación de Excel con sinónimos de `Precom` o `Monolit`.
+
 
 
 

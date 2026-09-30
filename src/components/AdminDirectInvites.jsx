@@ -188,7 +188,10 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
         const s = d.data();
         stands.push({ id: d.id, ...s });
         
-        const comp = (s.company || s.reservationDetails?.empresa || '').trim();
+        let comp = (s.company || s.reservationDetails?.empresa || '').trim();
+        if (comp.toLowerCase().includes('monolit') || comp.toLowerCase().includes('precom')) {
+          comp = 'Monolit';
+        }
         const isReserved = s.status !== 'available' && s.status !== 'free' && s.status !== 'libre' && (s.status === 'reserved' || s.status === 'reserved_official' || s.status === 'sold' || s.status === 'occupied' || s.reservationDetails || s.sponsorId || s.sponsorEmail || s.reservedBy);
         if (comp && isReserved) {
           if (!sMap[comp]) {
@@ -248,7 +251,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     if (clean.includes('megalina') || clean.includes('megalinea')) return 'megalineas';
     if (clean.includes('amanco') || clean.includes('wavin')) return 'amanco_wavin';
     if (clean.includes('holcim') || clean.includes('disensa')) return 'holcim_disensa';
-    if (clean.includes('monolit') || clean.includes('precom')) return 'precom_monolit';
+    if (clean.includes('monolit') || clean.includes('precom')) return 'monolit';
     if (clean.includes('futec')) return 'futec';
     if (clean.includes('madinisa') || clean.includes('sonax')) return 'madinisa';
     if (clean.includes('incasa') || clean.includes('ipsm')) return 'incasa';
@@ -388,16 +391,16 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       customSpeech: buildCorporateSpeech('FUTEC', 'Stand 7')
     },
     precom_monolit: {
-      sponsorName: 'Precom (Monolit)',
+      sponsorName: 'Monolit',
       stands: 'Stands 8, 14',
-      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Precom y Monolit!',
-      customSpeech: buildCorporateSpeech('Precom (Monolit)', 'Stands 8, 14')
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Monolit!',
+      customSpeech: buildCorporateSpeech('Monolit', 'Stands 8, 14')
     },
     monolit: {
-      sponsorName: 'Precom (Monolit)',
+      sponsorName: 'Monolit',
       stands: 'Stands 8, 14',
-      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Precom y Monolit!',
-      customSpeech: buildCorporateSpeech('Precom (Monolit)', 'Stands 8, 14')
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Monolit!',
+      customSpeech: buildCorporateSpeech('Monolit', 'Stands 8, 14')
     },
     extel: {
       sponsorName: 'Extel',
@@ -570,8 +573,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   const getSponsorArt = (sponsorName) => {
     const isGen = !sponsorName || sponsorName === 'general';
     const key = getSponsorKey(sponsorName);
-    const setting = sponsorSettings[key] || {};
-    const official = OFFICIAL_SPONSOR_CONFIGS[key] || {};
+    const setting = sponsorSettings[key] || (key === 'monolit' ? sponsorSettings['precom_monolit'] : {}) || {};
+    const official = OFFICIAL_SPONSOR_CONFIGS[key] || (key === 'monolit' ? OFFICIAL_SPONSOR_CONFIGS['precom_monolit'] : {}) || {};
     const calculatedStands = setting.stands || official.stands || (sponsorsMap[sponsorName]?.stands?.join(', ') || '');
 
     const defaultSpeech = isGen ? '' : generateDefaultSponsorSpeech(sponsorName, calculatedStands);
@@ -975,7 +978,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     if (clean.includes('megalina') || clean.includes('megalinea')) return 'Megalineas';
     if (clean.includes('amanco') || clean.includes('wavin')) return 'AMANCO - WAVIN';
     if (clean.includes('holcim') || clean.includes('disensa')) return 'Holcim (Disensa)';
-    if (clean.includes('monolit') || clean.includes('precom')) return 'Precom (Monolit)';
+    if (clean.includes('monolit') || clean.includes('precom')) return 'Monolit';
     if (clean.includes('futec')) return 'FUTEC';
     if (clean.includes('madinisa')) return 'Madinisa';
     if (clean.includes('incasa') || clean.includes('ipsm')) return 'INCASA (GRUPO IPSM)';

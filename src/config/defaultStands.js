@@ -155,7 +155,7 @@ export const DEFAULT_OFFICIAL_STANDS = [
     sponsorId: 'official-precom-monolit',
     sponsorEmail: 'ventas@monolit.com.ni',
     reservationDetails: {
-      empresa: 'Precom (Monolit)',
+      empresa: 'Monolit',
       nombre: 'Atención',
       apellido: 'Monolit',
       correo: 'ventas@monolit.com.ni',
@@ -215,7 +215,7 @@ export const DEFAULT_OFFICIAL_STANDS = [
     sponsorId: 'official-precom-monolit',
     sponsorEmail: 'ventas@monolit.com.ni',
     reservationDetails: {
-      empresa: 'Precom (Monolit)',
+      empresa: 'Monolit',
       nombre: 'Atención',
       apellido: 'Monolit',
       correo: 'ventas@monolit.com.ni',
