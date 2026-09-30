@@ -1251,8 +1251,13 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
     const stands = art.stands || '';
 
-    // Si el usuario configuro un texto personalizado explicito en el modal
-    if (art.customSpeech && art.customSpeech.trim() && !art.customSpeech.includes('Nos complace invitarte a ser parte de la primera edicion')) {
+    // Si el usuario configuro un texto personalizado explicito en el modal (no el generico de buildCorporateSpeech)
+    const isDefaultCorporate = art.customSpeech && (
+      art.customSpeech.includes('Nos complace invitarte a ser parte de la primera edici') ||
+      art.customSpeech.includes('Un espacio exclusivo creado para') ||
+      art.customSpeech.includes('Hemos reservado para ti un pase exclusivo. Para activar tu acceso')
+    );
+    if (art.customSpeech && art.customSpeech.trim() && !isDefaultCorporate) {
       let speech = art.customSpeech
         .replace(/{invitado}/g, guestLabel || 'Estimado(a)')
         .replace(/\[Nombre\]/g, guestLabel || 'Estimado(a)')
