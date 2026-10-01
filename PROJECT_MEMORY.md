@@ -86,6 +86,23 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ---
 
+## 📅 Resumen de Cambios y Avances de la Sesión (01 de Octubre de 2026)
+
+### 🏷️ Actualización de Logotipos y Carrusel de Patrocinadores (`App.jsx` & `AdminSponsors.jsx`)
+- **Inclusión de 6 Logotipos en Categoría Diamante (`02-logos`):**
+  - Se añadieron e integraron en el reel de logotipos y directorio oficial las 6 marcas ubicadas dentro de `/public/diamante/02-logos/`, ubicadas inmediatamente después del logotipo de **Sinsa**:
+    1. **DEWALT** (`/diamante/02-logos/DEWALT.png`)
+    2. **INGCO** (`/diamante/02-logos/INGCO.png`)
+    3. **LIGHTMAX** (`/diamante/02-logos/LIGHTMAX.png`)
+    4. **Phelps Dodge** (`/diamante/02-logos/PhelpsDodge.jpg`)
+    5. **Porcelanite** (`/diamante/02-logos/Porcelanite.png`)
+    6. **Electrix** (`/diamante/02-logos/electrix.png`)
+  - Configurados con contenedor blanco estilizado (`bgWhite: true`) para consistencia visual con el resto de marcas Diamante.
+- **Inclusión de "La Casa del Perno" en Categoría Plata:**
+  - Se incorporó el logotipo oficial de **La Casa del Perno** (`/plata/la-casa-del-perno.png`) posicionado al final de la categoría Plata en el reel principal y listado de patrocinadores.
+
+---
+
 ## 📅 Resumen de Cambios y Avances de la Sesión (28 de Septiembre de 2026)
 
 ### ✉️ Motor de Recordatorios Masivos por Correo Electrónico (`AdminDirectInvites.jsx`)
