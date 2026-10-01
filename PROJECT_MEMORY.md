@@ -895,6 +895,27 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - Se actualizaron las plantillas oficiales, speeches corporativos (`buildCorporateSpeech('Monolit', 'Stands 8, 14')`), asuntos de correo y asignaciones de stands.
   - Se mantuvo la compatibilidad total con configuraciones previas (`sponsorSettings`) e importación de Excel con sinónimos de `Precom` o `Monolit`.
 
+---
+
+## 📅 Resumen de Cambios y Avances de la Sesión (01 de Octubre de 2026)
+
+### 🏷️ Adición de Logotipo: La Casa del Perno en Categoría Plata (`App.jsx` & `AdminSponsors.jsx`)
+- **Archivo Integrado:** `/plata/lacasadelperno.jpeg`
+- **Posición:** Se incorporó al final del carrusel/reel de la categoría **Plata** en la última posición (después de Mobius).
+- **Secuencia actualizada en Categoría Plata:**
+  1. Fernández Sera (`/plata/ferdandezsera.png`)
+  2. Sherwin-Williams (`/plata/logo-sherwin-williams.jpg`)
+  3. Casco (`/plata/casco.png`)
+  4. Midesa (`/plata/midesa.png`)
+  5. Madinisa (`/plata/madinisa.png`)
+  6. Sonax (`/plata/sonax.jpg`)
+  7. Dat Analytics (`/plata/dataanalytics.jpg`)
+  8. Monolit (`/plata/monolit.png`)
+  9. Mobius (`/plata/mobius.png`)
+  10. **La Casa del Perno** (`/plata/lacasadelperno.jpeg`) 👈 *(Nuevo - Última posición)*
+- **Directorio de Patrocinadores:** Agregado en `OFFICIAL_SPONSORS` en [`src/components/AdminSponsors.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsors.jsx).
+
+
 
 
 

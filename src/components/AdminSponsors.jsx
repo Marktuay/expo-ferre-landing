@@ -50,7 +50,8 @@ const OFFICIAL_SPONSORS = [
   { company: 'Sonax', category: 'Plata', logo: '/plata/sonax.jpg' },
   { company: 'Dat Analytics', category: 'Plata', logo: '/plata/dataanalytics.jpg' },
   { company: 'Monolit', category: 'Plata', logo: '/plata/monolit.png' },
-  { company: 'Mobius', category: 'Plata', logo: '/plata/mobius.png' }
+  { company: 'Mobius', category: 'Plata', logo: '/plata/mobius.png' },
+  { company: 'La Casa del Perno', category: 'Plata', logo: '/plata/lacasadelperno.jpeg' }
 ];
 
 export function normStr(str) {
