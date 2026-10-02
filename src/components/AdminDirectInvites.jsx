@@ -46,9 +46,16 @@ import {
   Timer,
   Bell,
   MessageSquare,
-  QrCode
+  QrCode,
+  Loader2
 } from 'lucide-react';
 import AdminQRViewModal from './AdminQRViewModal';
+import { 
+  checkTemplateStatus, 
+  sendDirectInviteViaWati, 
+  cleanPhoneNumber, 
+  DEFAULT_WATI_CONFIG 
+} from '../services/watiService';
 
 export default function AdminDirectInvites({ onBack, adminUser }) {
   const [invites, setInvites] = useState([]);
@@ -136,8 +143,35 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   });
   const [isBulkSendingEmail, setIsBulkSendingEmail] = useState(false);
   const [bulkEmailProgress, setBulkEmailProgress] = useState({ current: 0, total: 0, failed: 0 });
-  const [bulkEmailResult, setBulkEmailResult] = useState(null);
   const cancelBulkEmailRef = useRef(false);
+
+  // Estados para WATI WhatsApp API (Individual y Masivo por Patrocinador)
+  const [isSendingWatiId, setIsSendingWatiId] = useState(null);
+  const [watiNotification, setWatiNotification] = useState(null);
+  const [watiTemplateInfo, setWatiTemplateInfo] = useState(null);
+
+  // Modal para Envío Masivo de WhatsApp por WATI (por Patrocinador)
+  const [bulkWatiModal, setBulkWatiModal] = useState({
+    open: false,
+    sponsorName: 'general',
+    sponsorDisplayName: 'Invitación General',
+    filterType: 'never_sent', // 'never_sent' | 'all_pending'
+    batchLimit: 'all', // 'all' | '10' | '25' | '50'
+    paceSpeed: 'safe' // 'safe' (1000ms) | 'normal' (600ms)
+  });
+  const [isBulkSendingWati, setIsBulkSendingWati] = useState(false);
+  const [bulkWatiProgress, setBulkWatiProgress] = useState({ current: 0, total: 0, failed: 0, stopped: false });
+  const [bulkWatiResult, setBulkWatiResult] = useState(null);
+  const cancelBulkWatiRef = useRef(false);
+
+  // Consultar estado de plantilla de Wati al montar
+  useEffect(() => {
+    checkTemplateStatus().then(info => {
+      setWatiTemplateInfo(info);
+    }).catch(err => {
+      console.warn('No se pudo verificar plantilla Wati al inicio:', err);
+    });
+  }, []);
 
   // Helper para validación estricta de formato de correo
   const isValidEmailAddress = (email) => {
@@ -1678,6 +1712,206 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     }
   };
 
+  // -------------------------------------------------------------
+  // CONTROLADORES DE WATI WHATSAPP API (INDIVIDUAL & MASIVO)
+  // -------------------------------------------------------------
+
+  // Enviar invitación individual automática por WATI (1-Click)
+  const handleSendSingleWati = async (invite) => {
+    if (!invite || !invite.telefono) {
+      alert('El invitado no tiene un número de teléfono registrado.');
+      return;
+    }
+
+    const phoneValidation = cleanPhoneNumber(invite.telefono);
+    if (!phoneValidation.isValid) {
+      alert(`El número "${invite.telefono}" no tiene un formato válido (debe tener al menos 8 dígitos).`);
+      return;
+    }
+
+    setIsSendingWatiId(invite.id);
+    setWatiNotification(null);
+
+    try {
+      const inviteUrl = getInviteUrl(invite.id);
+      const sponsorName = invite.sponsorName || 'general';
+
+      const res = await sendDirectInviteViaWati({
+        invite,
+        sponsorName,
+        inviteUrl
+      });
+
+      if (res.success) {
+        await updateDoc(doc(db, `${getEventBasePath()}/directInvites`, invite.id), {
+          whatsappSent: true,
+          whatsappSentAt: serverTimestamp(),
+          whatsappSentVia: 'wati',
+          whatsappPhone: res.phone,
+          whatsappSendCount: (invite.whatsappSendCount || 0) + 1
+        });
+
+        setWatiNotification({
+          type: 'success',
+          message: `¡Invitación enviada por WATI con éxito a ${res.phone} (${invite.nombre || 'Invitado'})!`
+        });
+        setTimeout(() => setWatiNotification(null), 4000);
+      } else {
+        alert(`No se pudo enviar el mensaje por WATI:\n${res.error}\n\n(Aviso: Si la plantilla sigue en revisión por Meta, el mensaje no saldrá hasta que sea APROBADA).`);
+      }
+    } catch (err) {
+      console.error('Error al enviar WhatsApp Wati:', err);
+      alert('Error inesperado al conectar con Wati: ' + err.message);
+    } finally {
+      setIsSendingWatiId(null);
+    }
+  };
+
+  // Abrir Modal de Envío Masivo de WhatsApp por WATI (por Patrocinador)
+  const handleOpenBulkWatiModal = (sponsorName) => {
+    const isGen = !sponsorName || sponsorName === 'general';
+    setBulkWatiModal({
+      open: true,
+      sponsorName: isGen ? 'general' : sponsorName,
+      sponsorDisplayName: isGen ? 'Invitación General (ExpoFerre)' : sponsorName,
+      filterType: 'never_sent',
+      batchLimit: 'all',
+      paceSpeed: 'safe'
+    });
+    setBulkWatiResult(null);
+    setBulkWatiProgress({ current: 0, total: 0, failed: 0, stopped: false });
+    cancelBulkWatiRef.current = false;
+  };
+
+  // Detener Envío Masivo Wati en curso
+  const handleStopBulkWati = () => {
+    cancelBulkWatiRef.current = true;
+  };
+
+  // Ejecutar Envío Masivo de WhatsApp a través de WATI
+  const handleExecuteBulkWati = async () => {
+    const targetSp = bulkWatiModal.sponsorName;
+    const filterType = bulkWatiModal.filterType;
+    const batchLimit = bulkWatiModal.batchLimit;
+    const paceSpeed = bulkWatiModal.paceSpeed || 'safe';
+    
+    // Intervalo de seguridad entre mensajes (1000ms safe, 600ms normal)
+    const delayMs = paceSpeed === 'safe' ? 1000 : 600;
+
+    let targets = invites.filter(inv => {
+      // 1. Filtrar patrocinador
+      if (targetSp === 'general') {
+        if (inv.sponsorName && inv.sponsorId !== 'general' && getSponsorKey(inv.sponsorName) !== 'general') return false;
+      } else if (targetSp !== 'all') {
+        if (!isMatchingSponsor(inv.sponsorName, targetSp) && inv.sponsorId !== getSponsorKey(targetSp)) return false;
+      }
+
+      // 2. Debe tener teléfono válido
+      const phoneValidation = cleanPhoneNumber(inv.telefono);
+      if (!phoneValidation.isValid) return false;
+
+      // 3. Debe estar pendiente (no registrado)
+      if (inv.status === 'used') return false;
+
+      // 4. Filtro: solo nunca enviados
+      if (filterType === 'never_sent' && (inv.whatsappSent || inv.whatsappSentAt)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    if (targets.length === 0) {
+      alert('No se encontraron invitados pendientes con número de WhatsApp válido para procesar.');
+      return;
+    }
+
+    if (batchLimit !== 'all') {
+      const limitNum = parseInt(batchLimit, 10);
+      if (!isNaN(limitNum) && limitNum > 0) {
+        targets = targets.slice(0, limitNum);
+      }
+    }
+
+    cancelBulkWatiRef.current = false;
+    setIsBulkSendingWati(true);
+    setBulkWatiProgress({ current: 0, total: targets.length, failed: 0, stopped: false });
+    setBulkWatiResult(null);
+
+    let sentCount = 0;
+    let failCount = 0;
+    const failedList = [];
+    let wasStopped = false;
+
+    try {
+      for (let i = 0; i < targets.length; i++) {
+        if (cancelBulkWatiRef.current) {
+          wasStopped = true;
+          break;
+        }
+
+        const inv = targets[i];
+        const inviteUrl = getInviteUrl(inv.id);
+        const sponsorName = inv.sponsorName || targetSp;
+
+        try {
+          const res = await sendDirectInviteViaWati({
+            invite,
+            sponsorName,
+            inviteUrl
+          });
+
+          if (res.success) {
+            await updateDoc(doc(db, `${getEventBasePath()}/directInvites`, inv.id), {
+              whatsappSent: true,
+              whatsappSentAt: serverTimestamp(),
+              whatsappSentVia: 'wati',
+              whatsappPhone: res.phone,
+              whatsappSendCount: (inv.whatsappSendCount || 0) + 1
+            });
+            sentCount++;
+          } else {
+            failCount++;
+            failedList.push({
+              name: inv.nombre || 'Sin nombre',
+              phone: inv.telefono || 'Sin teléfono',
+              company: inv.empresa || '',
+              error: res.error || 'Fallo de entrega Wati'
+            });
+          }
+        } catch (err) {
+          failCount++;
+          failedList.push({
+            name: inv.nombre || 'Sin nombre',
+            phone: inv.telefono || 'Sin teléfono',
+            company: inv.empresa || '',
+            error: err.message
+          });
+        }
+
+        setBulkWatiProgress({ current: i + 1, total: targets.length, failed: failCount, stopped: wasStopped });
+
+        if (i < targets.length - 1 && !cancelBulkWatiRef.current) {
+          await sleep(delayMs);
+        }
+      }
+
+      setBulkWatiResult({
+        success: true,
+        total: targets.length,
+        sent: sentCount,
+        failed: failCount,
+        failedList,
+        wasStopped
+      });
+    } catch (globalErr) {
+      console.error('Error durante el envío masivo por Wati:', globalErr);
+      alert('Ocurrió un error inesperado durante el envío masivo: ' + globalErr.message);
+    } finally {
+      setIsBulkSendingWati(false);
+    }
+  };
+
   // Exportar Excel de lista actual (Respeta el filtro de patrocinador seleccionado)
   const handleExportExcel = (targetSponsor = null) => {
     const spFilter = targetSponsor || selectedSponsorFilter;
@@ -2519,6 +2753,10 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                             const genUnsentEmail = genPendingWithEmail.filter(i => !i.emailSentAt);
                             const countToSend = genUnsentEmail.length > 0 ? genUnsentEmail.length : genPendingWithEmail.length;
 
+                            const genPendingWithPhone = genInv.filter(i => i.status === 'pending' && cleanPhoneNumber(i.telefono).isValid);
+                            const genUnsentPhone = genPendingWithPhone.filter(i => !i.whatsappSent && !i.whatsappSentAt);
+                            const countGenWaToSend = genUnsentPhone.length > 0 ? genUnsentPhone.length : genPendingWithPhone.length;
+
                             return (
                               <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap bg-surface-variant/30 p-1.5 rounded-xl border border-outline-variant/60">
                                 {/* Botón Cargar Excel */}
@@ -2553,6 +2791,32 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   {genPendingWithEmail.length > 0 && (
                                     <span className="ml-0.5 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
                                       {countToSend}
+                                    </span>
+                                  )}
+                                </button>
+
+                                {/* Botón Enviar WhatsApp Wati Masivo */}
+                                <button
+                                  onClick={() => handleOpenBulkWatiModal('general')}
+                                  disabled={genPendingWithPhone.length === 0}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
+                                    genUnsentPhone.length > 0
+                                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                      : genPendingWithPhone.length > 0
+                                      ? 'bg-teal-600 hover:bg-teal-700 text-white'
+                                      : 'bg-slate-200 text-slate-500'
+                                  }`}
+                                  title={
+                                    genPendingWithPhone.length === 0
+                                      ? 'No hay teléfonos válidos pendientes en la lista general'
+                                      : `Enviar invitaciones masivas por WhatsApp (WATI) (${countGenWaToSend} disponibles)`
+                                  }
+                                >
+                                  <Zap size={13} />
+                                  <span>WhatsApp Wati</span>
+                                  {genPendingWithPhone.length > 0 && (
+                                    <span className="ml-0.5 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
+                                      {countGenWaToSend}
                                     </span>
                                   )}
                                 </button>
@@ -2605,6 +2869,11 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                       const spPendingWithEmail = spInvites.filter(i => i.status === 'pending' && isValidEmailAddress(i.email));
                       const spUnsentEmail = spPendingWithEmail.filter(i => !i.emailSentAt);
                       const countToSend = spUnsentEmail.length > 0 ? spUnsentEmail.length : spPendingWithEmail.length;
+                      
+                      const spPendingWithPhone = spInvites.filter(i => i.status === 'pending' && cleanPhoneNumber(i.telefono).isValid);
+                      const spUnsentPhone = spPendingWithPhone.filter(i => !i.whatsappSent && !i.whatsappSentAt);
+                      const countWaToSend = spUnsentPhone.length > 0 ? spUnsentPhone.length : spPendingWithPhone.length;
+                      
                       const spCoverage = spWithEmail > 0 ? Math.round((spEmailSent / spWithEmail) * 100) : 0;
                       const spEffectiveRate = spInvites.length > 0 ? Math.round((spUsed / spInvites.length) * 100) : 0;
 
@@ -2786,6 +3055,32 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                 {spPendingWithEmail.length > 0 && (
                                   <span className="ml-0.5 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
                                     {countToSend}
+                                  </span>
+                                )}
+                              </button>
+
+                              {/* Botón Enviar WhatsApp Wati Masivo */}
+                              <button
+                                onClick={() => handleOpenBulkWatiModal(sp)}
+                                disabled={spPendingWithPhone.length === 0}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
+                                  spUnsentPhone.length > 0
+                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                    : spPendingWithPhone.length > 0
+                                    ? 'bg-teal-600 hover:bg-teal-700 text-white'
+                                    : 'bg-slate-200 text-slate-500'
+                                }`}
+                                title={
+                                  spPendingWithPhone.length === 0
+                                    ? `No hay teléfonos válidos pendientes para ${sp}`
+                                    : `Enviar invitaciones masivas por WhatsApp (WATI) para ${sp} (${countWaToSend} disponibles)`
+                                }
+                              >
+                                <Zap size={13} />
+                                <span>WhatsApp Wati</span>
+                                {spPendingWithPhone.length > 0 && (
+                                  <span className="ml-0.5 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
+                                    {countWaToSend}
                                   </span>
                                 )}
                               </button>
@@ -3100,6 +3395,35 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   className="p-2 bg-white border border-outline-variant hover:bg-surface text-secondary hover:text-primary rounded-lg transition-colors cursor-pointer"
                                 >
                                   <Edit2 size={14} />
+                                </button>
+
+                                {/* WhatsApp WATI Oficial (1-Click) */}
+                                <button
+                                  type="button"
+                                  disabled={!inv.telefono || isSendingWatiId === inv.id}
+                                  onClick={() => handleSendSingleWati(inv)}
+                                  title={
+                                    !inv.telefono
+                                      ? "Sin teléfono registrado"
+                                      : inv.whatsappSent
+                                      ? `Reenviar por WATI API (Enviado previamente: ${inv.whatsappSendCount || 1} veces)`
+                                      : "Disparar invitación oficial por WATI (WhatsApp API)"
+                                  }
+                                  className={`p-2 rounded-lg transition-all flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer disabled:opacity-40 ${
+                                    inv.whatsappSent
+                                      ? 'bg-teal-700 hover:bg-teal-800 text-white'
+                                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                  }`}
+                                >
+                                  {isSendingWatiId === inv.id ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                  ) : (
+                                    <Zap size={14} />
+                                  )}
+                                  <span className="hidden xl:inline">Wati</span>
+                                  {inv.whatsappSent && (
+                                    <span className="text-[10px] bg-black/20 px-1 rounded-full">✓</span>
+                                  )}
                                 </button>
 
                                 {/* WhatsApp Directo (Invitación Oficial con Arte de Patrocinador) */}
@@ -4277,11 +4601,51 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                         className="w-full p-3.5 bg-slate-50 border border-outline-variant rounded-xl text-xs font-mono text-slate-800 outline-none resize-none leading-relaxed flex-1 shadow-inner select-all"
                       />
 
+                      {/* Envío Automático Directo por WATI API */}
+                      <div className="bg-emerald-50/90 border border-emerald-300 rounded-xl p-3.5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                            <Zap size={14} className="text-emerald-600 fill-emerald-600" />
+                            Envío Directo Automatizado (WATI API)
+                          </span>
+                          {watiTemplateInfo && (
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              watiTemplateInfo.status === 'APPROVED' 
+                                ? 'bg-emerald-200 text-emerald-900 border border-emerald-400' 
+                                : 'bg-amber-100 text-amber-900 border border-amber-300'
+                            }`}>
+                              Plantilla: {watiTemplateInfo.status === 'APPROVED' ? '✅ Aprobada Meta' : '⏳ En revisión Meta'}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-emerald-800 leading-snug">
+                          Envía la plantilla oficial con el enlace único de acceso directamente al WhatsApp del invitado sin abrir WhatsApp Web ni interactuar manualmente.
+                        </p>
+                        <button
+                          type="button"
+                          disabled={!inv.telefono || isSendingWatiId === inv.id}
+                          onClick={() => handleSendSingleWati(inv)}
+                          className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                        >
+                          {isSendingWatiId === inv.id ? (
+                            <>
+                              <Loader2 size={15} className="animate-spin" />
+                              <span>Enviando por WATI API...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Zap size={15} />
+                              <span>⚡ Disparar Invitación por WATI Ahora</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+
                       {/* Guía rápida de flujo */}
                       <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-[11px] text-amber-900 flex items-start gap-2">
                         <Sparkles size={15} className="text-amber-600 shrink-0 mt-0.5" />
                         <div>
-                          <strong>Flujo 1-Click:</strong> 1. Descarga el arte gráfico. 2. Presiona <strong>Abrir WhatsApp</strong>. 3. Pega el texto y adjunta la imagen descargada en el chat.
+                          <strong>Flujo Manual Alternativo:</strong> 1. Descarga el arte gráfico. 2. Presiona <strong>Abrir WhatsApp</strong>. 3. Pega el texto y adjunta la imagen descargada en el chat.
                         </div>
                       </div>
 
@@ -5023,6 +5387,369 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
             </div>
 
           </div>
+        </div>
+      )}
+
+      {/* MODAL: Envío Masivo de WhatsApp a través de WATI por Patrocinador */}
+      {bulkWatiModal.open && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-outline-variant overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]">
+            
+            {/* Header */}
+            <div className="bg-emerald-700 p-5 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-md">
+                  <Zap size={22} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base flex items-center gap-2">
+                    Envío Masivo por WhatsApp (WATI API)
+                  </h3>
+                  <p className="text-white/80 text-xs">
+                    {bulkWatiModal.sponsorName === 'all' 
+                      ? 'Todas las listas activas' 
+                      : bulkWatiModal.sponsorName === 'general' 
+                      ? 'Lista General (ExpoFerre)' 
+                      : `Lista Oficial de ${bulkWatiModal.sponsorName}`}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (!isBulkSendingWati) {
+                    setBulkWatiModal({ open: false, sponsorName: 'general', sponsorDisplayName: '', filterType: 'never_sent', batchLimit: 'all', paceSpeed: 'safe' });
+                    setBulkWatiResult(null);
+                  }
+                }}
+                disabled={isBulkSendingWati}
+                className="p-1 hover:bg-white/20 rounded-full text-white disabled:opacity-50 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Contenido */}
+            <div className="p-6 space-y-5 overflow-y-auto flex-1">
+              
+              {bulkWatiResult ? (
+                <div className="space-y-4">
+                  <div className={`p-5 rounded-xl text-center space-y-2 border ${
+                    bulkWatiResult.wasStopped 
+                      ? 'bg-amber-50 border-amber-200 text-amber-900' 
+                      : bulkWatiResult.failed > 0 
+                      ? 'bg-orange-50 border-orange-200 text-orange-900' 
+                      : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                  }`}>
+                    {bulkWatiResult.wasStopped ? (
+                      <AlertTriangle size={36} className="text-amber-600 mx-auto" />
+                    ) : bulkWatiResult.failed > 0 ? (
+                      <ShieldAlert size={36} className="text-orange-600 mx-auto" />
+                    ) : (
+                      <CheckCircle2 size={36} className="text-emerald-600 mx-auto" />
+                    )}
+
+                    <h4 className="font-bold text-lg">
+                      {bulkWatiResult.wasStopped 
+                        ? 'Envío Detenido por el Usuario' 
+                        : bulkWatiResult.failed > 0 
+                        ? 'Envío Finalizado con Observaciones' 
+                        : '¡Envío Masivo Completado con Éxito!'}
+                    </h4>
+
+                    <p className="text-xs">
+                      Se enviaron <strong>{bulkWatiResult.sent}</strong> de <strong>{bulkWatiResult.total}</strong> mensajes por WhatsApp WATI.
+                    </p>
+
+                    {bulkWatiResult.wasStopped && (
+                      <p className="text-xs text-amber-800 font-semibold">
+                        El proceso se detuvo de forma segura. Los invitados restantes pueden enviarse en el siguiente lote.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Listado de Fallos si existen */}
+                  {bulkWatiResult.failedList && bulkWatiResult.failedList.length > 0 && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
+                      <div className="flex items-center gap-2 text-red-800 font-bold text-xs">
+                        <AlertCircle size={15} />
+                        <span>Números que no pudieron ser entregados ({bulkWatiResult.failedList.length}):</span>
+                      </div>
+                      <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1">
+                        {bulkWatiResult.failedList.map((f, idx) => (
+                          <div key={idx} className="bg-white/80 p-2 rounded-lg text-[11px] border border-red-100 flex justify-between items-center">
+                            <div>
+                              <strong className="text-red-950">{f.name}</strong> • <span className="font-mono text-slate-700">{f.phone}</span> {f.company ? `(${f.company})` : ''}
+                            </div>
+                            <span className="text-[10px] text-red-600 font-medium">{f.error}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {/* Resumen y Diagnóstico de Contactos de WATI */}
+                  {(() => {
+                    const targetSp = bulkWatiModal.sponsorName;
+                    const availableInvites = invites.filter(inv => {
+                      if (targetSp === 'general') {
+                        if (inv.sponsorName && inv.sponsorId !== 'general' && getSponsorKey(inv.sponsorName) !== 'general') return false;
+                      } else if (targetSp !== 'all') {
+                        if (!isMatchingSponsor(inv.sponsorName, targetSp) && inv.sponsorId !== getSponsorKey(targetSp)) return false;
+                      }
+                      return true;
+                    });
+
+                    const pendingTotal = availableInvites.filter(i => i.status === 'pending');
+                    
+                    const withValidPhone = pendingTotal.filter(i => cleanPhoneNumber(i.telefono).isValid);
+                    const withoutPhone = pendingTotal.filter(i => !cleanPhoneNumber(i.telefono).isValid);
+
+                    const neverSent = withValidPhone.filter(i => !i.whatsappSent && !i.whatsappSentAt);
+                    const alreadySent = withValidPhone.filter(i => i.whatsappSent || i.whatsappSentAt);
+
+                    const currentFilterTargets = bulkWatiModal.filterType === 'never_sent' 
+                      ? neverSent 
+                      : withValidPhone;
+                    
+                    const batchSize = bulkWatiModal.batchLimit === 'all' 
+                      ? currentFilterTargets.length 
+                      : Math.min(parseInt(bulkWatiModal.batchLimit, 10) || currentFilterTargets.length, currentFilterTargets.length);
+
+                    const delayMs = bulkWatiModal.paceSpeed === 'safe' ? 1000 : 600;
+                    const estimatedSeconds = Math.ceil((batchSize * (delayMs + 100)) / 1000);
+
+                    return (
+                      <div className="space-y-4">
+                        
+                        {/* Estado de la Plantilla en WATI / Meta */}
+                        <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-emerald-950 flex items-center gap-1.5">
+                              <Zap size={14} className="text-emerald-700 fill-emerald-700" />
+                              Plantilla Oficial: <code className="font-mono text-emerald-800 bg-emerald-100/70 px-1 py-0.5 rounded">invitacion_expoferre</code>
+                            </span>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              watiTemplateInfo?.status === 'APPROVED' 
+                                ? 'bg-emerald-200 text-emerald-900 border border-emerald-400' 
+                                : 'bg-amber-100 text-amber-900 border border-amber-300'
+                            }`}>
+                              {watiTemplateInfo?.status === 'APPROVED' ? '✅ Aprobada por Meta' : '⏳ En revisión Meta (PENDING)'}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-emerald-800">
+                            Cada mensaje se despachará de forma individual a cada invitado, inyectando su nombre, patrocinador anfitrión y su token único criptográfico de acceso.
+                          </p>
+                        </div>
+
+                        {/* Desglose de Diagnóstico */}
+                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                          <div className="bg-blue-50 border border-blue-100 p-2.5 rounded-xl">
+                            <span className="text-secondary block text-[10px] uppercase font-bold">Listos (Primer Envío)</span>
+                            <span className="text-xl font-black text-blue-900">{neverSent.length}</span>
+                          </div>
+                          <div className="bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl">
+                            <span className="text-secondary block text-[10px] uppercase font-bold">Ya Enviados</span>
+                            <span className="text-xl font-black text-emerald-900">{alreadySent.length}</span>
+                          </div>
+                          <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xl">
+                            <span className="text-secondary block text-[10px] uppercase font-bold">Sin Teléfono</span>
+                            <span className="text-xl font-black text-slate-500">{withoutPhone.length}</span>
+                          </div>
+                        </div>
+
+                        {/* Selector de Criterio de Envío */}
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-on-surface uppercase tracking-wider block">
+                            Criterio de Selección:
+                          </label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <label className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${
+                              bulkWatiModal.filterType === 'never_sent' ? 'bg-emerald-50/70 border-emerald-500 text-emerald-950 font-medium' : 'bg-surface border-outline-variant hover:bg-surface-variant/30 text-secondary'
+                            }`}>
+                              <input
+                                type="radio"
+                                name="watiFilterType"
+                                value="never_sent"
+                                checked={bulkWatiModal.filterType === 'never_sent'}
+                                onChange={() => setBulkWatiModal(prev => ({ ...prev, filterType: 'never_sent' }))}
+                                className="mt-0.5 accent-emerald-600"
+                              />
+                              <div className="text-xs">
+                                <strong className="block text-on-surface">Solo Nunca Enviados ({neverSent.length})</strong>
+                                <span className="text-[11px] text-secondary">Ideal para el primer lanzamiento sin duplicados.</span>
+                              </div>
+                            </label>
+
+                            <label className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${
+                              bulkWatiModal.filterType === 'all_pending' ? 'bg-blue-50/70 border-blue-500 text-blue-950 font-medium' : 'bg-surface border-outline-variant hover:bg-surface-variant/30 text-secondary'
+                            }`}>
+                              <input
+                                type="radio"
+                                name="watiFilterType"
+                                value="all_pending"
+                                checked={bulkWatiModal.filterType === 'all_pending'}
+                                onChange={() => setBulkWatiModal(prev => ({ ...prev, filterType: 'all_pending' }))}
+                                className="mt-0.5 accent-emerald-600"
+                              />
+                              <div className="text-xs">
+                                <strong className="block text-on-surface">Todos con Teléfono ({withValidPhone.length})</strong>
+                                <span className="text-[11px] text-secondary">Incluye reenvíos a quienes no se han registrado.</span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Selector de Lote / Tamaño */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="font-bold text-on-surface uppercase tracking-wider">Cantidad a Despachar:</span>
+                            <span className="text-secondary font-mono">
+                              Objetivos disponibles: <strong>{currentFilterTargets.length}</strong>
+                            </span>
+                          </div>
+                          
+                          <div className="grid grid-cols-4 gap-2">
+                            {[
+                              { id: '10', label: '10 msgs' },
+                              { id: '25', label: '25 msgs' },
+                              { id: '50', label: '50 msgs' },
+                              { id: 'all', label: `Todos (${currentFilterTargets.length})` }
+                            ].map(opt => (
+                              <button
+                                key={opt.id}
+                                type="button"
+                                onClick={() => setBulkWatiModal(prev => ({ ...prev, batchLimit: opt.id }))}
+                                className={`py-2 px-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                                  bulkWatiModal.batchLimit === opt.id
+                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                                    : 'bg-white border-outline-variant hover:bg-surface-variant/30 text-on-surface'
+                                }`}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Velocidad / Intervalo de Entrega Antispam */}
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center justify-between">
+                            <span>Intervalo de Envío (Protección Antispam Meta):</span>
+                            <span className="text-[11px] font-normal text-secondary">Tiempo estimado: ~{estimatedSeconds}s</span>
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { id: 'safe', label: '🛡️ Seguro (1.0 seg)', desc: 'Recomendado por Meta' },
+                              { id: 'normal', label: '⚡ Normal (0.6 seg)', desc: 'Lotes medianos' }
+                            ].map(spd => (
+                              <button
+                                key={spd.id}
+                                type="button"
+                                onClick={() => setBulkWatiModal(prev => ({ ...prev, paceSpeed: spd.id }))}
+                                className={`p-2 rounded-xl border text-left transition-all cursor-pointer ${
+                                  bulkWatiModal.paceSpeed === spd.id
+                                    ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold shadow-sm'
+                                    : 'bg-white border-outline-variant hover:bg-surface-variant/30 text-secondary'
+                                }`}
+                              >
+                                <span className="block text-[11px] font-bold text-on-surface">{spd.label}</span>
+                                <span className="block text-[9px] text-secondary">{spd.desc}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Barra de Progreso en Vivo */}
+                        {isBulkSendingWati && (
+                          <div className="space-y-2 pt-2 bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200">
+                            <div className="flex justify-between text-xs font-bold text-on-surface">
+                              <span className="flex items-center gap-1.5 text-emerald-800">
+                                <RefreshCw size={13} className="animate-spin text-emerald-600" />
+                                Despachando WhatsApp por WATI ({bulkWatiProgress.current} de {bulkWatiProgress.total})...
+                              </span>
+                              <span className="text-emerald-900 font-black">
+                                {Math.round((bulkWatiProgress.current / (bulkWatiProgress.total || 1)) * 100)}%
+                              </span>
+                            </div>
+
+                            <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
+                              <div
+                                className="bg-emerald-600 h-full transition-all duration-150"
+                                style={{ width: `${(bulkWatiProgress.current / (bulkWatiProgress.total || 1)) * 100}%` }}
+                              />
+                            </div>
+
+                            <div className="flex items-center justify-between text-[11px] text-emerald-900 pt-1">
+                              <span>Fallidos: <strong>{bulkWatiProgress.failed}</strong></span>
+                              <button
+                                type="button"
+                                onClick={handleStopBulkWati}
+                                className="py-1 px-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-[11px] flex items-center gap-1 cursor-pointer transition-colors shadow"
+                              >
+                                <StopCircle size={13} />
+                                Detener Envío
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                      </div>
+                    );
+                  })()}
+                </>
+              )}
+
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-surface-variant/30 border-t border-outline-variant flex items-center justify-end gap-3 shrink-0">
+              {bulkWatiResult ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBulkWatiModal({ open: false, sponsorName: 'general', sponsorDisplayName: '', filterType: 'never_sent', batchLimit: 'all', paceSpeed: 'safe' });
+                    setBulkWatiResult(null);
+                  }}
+                  className="py-2.5 px-6 bg-slate-900 text-white font-bold rounded-xl text-xs hover:bg-black transition-all cursor-pointer"
+                >
+                  Cerrar
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    disabled={isBulkSendingWati}
+                    onClick={() => setBulkWatiModal({ open: false, sponsorName: 'general', sponsorDisplayName: '', filterType: 'never_sent', batchLimit: 'all', paceSpeed: 'safe' })}
+                    className="py-2.5 px-4 bg-white border border-outline-variant hover:bg-surface text-on-surface font-bold rounded-xl text-xs transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isBulkSendingWati}
+                    onClick={handleExecuteBulkWati}
+                    className="py-2.5 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                  >
+                    <Zap size={16} />
+                    {isBulkSendingWati
+                      ? `Enviando (${bulkWatiProgress.current}/${bulkWatiProgress.total})...`
+                      : 'Iniciar Envío Masivo Wati'}
+                  </button>
+                </>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification para WATI */}
+      {watiNotification && (
+        <div className="fixed bottom-6 right-6 z-50 bg-emerald-800 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-600 animate-in fade-in slide-in-from-bottom duration-300">
+          <CheckCircle2 size={20} className="text-emerald-300 shrink-0" />
+          <span className="text-xs font-bold">{watiNotification.message}</span>
         </div>
       )}
 

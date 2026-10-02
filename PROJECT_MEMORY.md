@@ -121,11 +121,23 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     - `{{2}}`: Patrocinador anfitrión (o *El Comité Organizador de EXPO FERRE*).
     - `{{3}}`: Enlace único de acceso y generación de gafete con QR.
   - Estado al cierre de sesión: ⏳ **`PENDING`** (Esperando aprobación de Meta).
-- **Plan para Mañana (Siguiente Sesión):**
-  1. Verificar si Meta aprobó la plantilla `invitacion_expoferre` (`status === 'APPROVED'`).
-  2. Conectar el botón de envío automático de Wati en el modal de WhatsApp y/o en la fila de cada invitado en `AdminDirectInvites.jsx`.
-  3. Realizar prueba de envío real al número celular del administrador.
-  4. Habilitar actualización de estado en Firestore (`whatsappSent: true`, `whatsappSentAt`, badge visual verde).
+- **Estado de Aprobación en Meta (Consultado en vivo):**
+  - Plantilla `invitacion_expoferre`: ⏳ **`PENDING`** (En revisión activa por Meta).
+
+### 🚀 Implementación de Flujos de Envío WATI (02 de Octubre de 2026)
+- **Opción 1: Envío Masivo por Patrocinador y General:**
+  - Botón **`⚡ WhatsApp WATI`** añadido en el encabezado de "Invitación General" y en cada una de las 27 pestañas/listas de patrocinadores.
+  - Modal interactivo de despacho masivo (`bulkWatiModal`) con:
+    - Selector de filtro: *Solo pendientes de enviar WhatsApp*, *Todos los que tienen teléfono*, o *Solo reenvío*.
+    - Barra de progreso en tiempo real con contador (Enviados, Omitidos, Fallidos).
+    - Cadencia segura antispam de 1.0s entre cada mensaje para proteger el número contra flags de WhatsApp/Meta.
+    - Botón de cancelación / parada de emergencia en cualquier momento.
+    - Resumen detallado al finalizar y actualización automática de Firestore (`whatsappSent: true`, `whatsappSentAt`).
+- **Opción 3: Envío Individual 1-Click:**
+  - Botón **`⚡ Wati`** directo en cada fila de la tabla de invitados para envío instantáneo sin abrir la app de WhatsApp.
+  - Tarjeta de envío directo 1-click vía API de WATI integrada dentro del modal de WhatsApp (`whatsAppModal`).
+  - Indicador de estado de la plantilla (avisa si la plantilla aún está en revisión por Meta o si ya está lista).
+  - Toast de confirmación en pantalla al completar el envío.
 
 ---
 
