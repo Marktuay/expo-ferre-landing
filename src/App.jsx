@@ -180,6 +180,8 @@ export default function App() {
     { url: '/diamante/panelconsa.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/steelmax.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/eaton.jpeg', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/pbs.png', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/chevrolet.jpg', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/oro/plycem%20.png', category: 'Oro', order: 2, bgWhite: true },
     { url: '/oro/sicsa.png', category: 'Oro', order: 2, bgWhite: true },
     { url: '/oro/up.png', category: 'Oro', order: 2, bgWhite: true },

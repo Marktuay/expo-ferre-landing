@@ -139,6 +139,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   - Indicador de estado de la plantilla (avisa si la plantilla aún está en revisión por Meta o si ya está lista).
   - Toast de confirmación en pantalla al completar el envío.
 
+### 🏷️ Inclusión de PBS y Chevrolet en Categoría Diamante (02 de Octubre de 2026)
+- Se integraron los logotipos oficiales de **PBS** (`/diamante/pbs.png`) y **Chevrolet** (`/diamante/chevrolet.jpg`) dentro del reel de marcas patrocinadoras Diamante en la Landing Page (`App.jsx`) y en el directorio de patrocinadores (`AdminSponsors.jsx`), estilizados con fondo blanco uniforme.
+
 ---
 
 ## 📅 Resumen de Cambios y Avances de la Sesión (28 de Septiembre de 2026)
