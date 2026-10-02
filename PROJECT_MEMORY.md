@@ -141,6 +141,17 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ### 🏷️ Inclusión de PBS y Chevrolet en Categoría Plata (02 de Octubre de 2026)
 - Se integraron los logotipos oficiales de **PBS** (`/plata/pbs.png`) y **Chevrolet** (`/plata/chevrolet.jpg`) dentro del reel de marcas patrocinadoras en la **Categoría Plata** en la Landing Page (`App.jsx`) y en el directorio de patrocinadores (`AdminSponsors.jsx`), estilizados con contenedor blanco uniforme (`bgWhite: true`).
+- **Ajuste de Escala:** Se aumentó el tamaño visual del logo de Chevrolet en un 10% (`scale: 1.1`) para garantizar máxima presencia y balance con el resto de marcas.
+
+### 📐 Corrección y Optimización de la Interfaz de Invitaciones Directas (`AdminDirectInvites.jsx`)
+- **Problema Solucionado:** La columna de acciones acumulaba demasiado ancho horizontal, lo que ocasionaba que el botón de *Exportar a Excel* se cortara en el borde derecho en pantallas de resolución estándar de laptop.
+- **Solución Implementada:**
+  - Etiquetas compactadas y ergonómicas (`Cargar`, `Correos`, `Wati`, `Ver`, `Descargar Plantilla`, `Exportar Excel`), ahorrando más de 110px de espacio horizontal.
+  - Reglas de contención responsivas: `overflow-x-auto pb-1`, `min-w-[1200px]` en la tabla de patrocinadores y `min-w-[1120px]` en la tabla de invitados, más padding de seguridad (`pr-6`), garantizando que ningún botón se oculte bajo ningún tamaño de pantalla.
+
+### 📌 Estado Actual y Siguientes Pasos
+- **Plantilla WATI (`invitacion_expoferre`):** En cola de revisión de Meta (estado `PENDING`, sin rechazo ni observaciones).
+- **Próxima acción inmediata al aprobarse:** Disparar prueba de envío 1-click al número de WhatsApp del organizador antes del despacho general/por patrocinador.
 
 ---
 
