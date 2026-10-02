@@ -2579,16 +2579,16 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
             {/* TABLA PRINCIPAL DE PATROCINADORES */}
             <div className="bg-white rounded-2xl border border-outline-variant shadow-md overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-sm">
+              <div className="overflow-x-auto pb-1">
+                <table className="w-full text-left border-collapse text-sm min-w-[1200px]">
                   <thead>
                     <tr className="bg-surface-variant/40 border-b border-outline-variant text-xs uppercase tracking-wider text-secondary">
-                      <th className="p-4 font-bold">Patrocinador / Marca</th>
-                      <th className="p-4 font-bold">Stand(s)</th>
-                      <th className="p-4 font-bold text-center">Envíos de Correo</th>
-                      <th className="p-4 font-bold text-center">Registrados vs Pendientes</th>
-                      <th className="p-4 font-bold text-center">Artes & Speech</th>
-                      <th className="p-4 font-bold text-center">Carga & Acciones</th>
+                      <th className="p-4 font-bold min-w-[200px]">Patrocinador / Marca</th>
+                      <th className="p-3 font-bold min-w-[80px]">Stand(s)</th>
+                      <th className="p-3 font-bold text-center min-w-[130px]">Envíos de Correo</th>
+                      <th className="p-3 font-bold text-center min-w-[130px]">Registrados vs Pendientes</th>
+                      <th className="p-3 font-bold text-center min-w-[90px]">Artes & Speech</th>
+                      <th className="p-4 pr-6 font-bold text-center min-w-[380px]">Carga & Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-outline-variant/60">
@@ -2746,7 +2746,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                         </td>
 
                         {/* Acciones */}
-                        <td className="p-4 text-center">
+                        <td className="p-3 pr-6 text-center">
                           {(() => {
                             const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
                             const genPendingWithEmail = genInv.filter(i => i.status === 'pending' && isValidEmailAddress(i.email));
@@ -2758,22 +2758,22 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                             const countGenWaToSend = genUnsentPhone.length > 0 ? genUnsentPhone.length : genPendingWithPhone.length;
 
                             return (
-                              <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap bg-surface-variant/30 p-1.5 rounded-xl border border-outline-variant/60">
+                              <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap bg-surface-variant/30 p-1.5 rounded-xl border border-outline-variant/60 shadow-2xs">
                                 {/* Botón Cargar Excel */}
                                 <button
                                   onClick={() => handleTriggerUploadForSponsor('general')}
-                                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                  className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1 cursor-pointer shrink-0"
                                   title="Cargar archivo Excel para la lista General"
                                 >
                                   <FileUp size={13} />
-                                  <span>Cargar Excel</span>
+                                  <span>Cargar</span>
                                 </button>
 
                                 {/* Botón Enviar Correos Masivos */}
                                 <button
                                   onClick={() => handleOpenBulkEmailModal('general')}
                                   disabled={genPendingWithEmail.length === 0}
-                                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
+                                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1 cursor-pointer disabled:opacity-40 shrink-0 ${
                                     genUnsentEmail.length > 0
                                       ? 'bg-amber-600 hover:bg-amber-700 text-white'
                                       : genPendingWithEmail.length > 0
@@ -2787,7 +2787,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   }
                                 >
                                   <MailCheck size={13} />
-                                  <span>Enviar Correos</span>
+                                  <span>Correos</span>
                                   {genPendingWithEmail.length > 0 && (
                                     <span className="ml-0.5 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
                                       {countToSend}
@@ -2799,7 +2799,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                 <button
                                   onClick={() => handleOpenBulkWatiModal('general')}
                                   disabled={genPendingWithPhone.length === 0}
-                                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
+                                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1 cursor-pointer disabled:opacity-40 shrink-0 ${
                                     genUnsentPhone.length > 0
                                       ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                                       : genPendingWithPhone.length > 0
@@ -2813,7 +2813,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   }
                                 >
                                   <Zap size={13} />
-                                  <span>WhatsApp Wati</span>
+                                  <span>Wati</span>
                                   {genPendingWithPhone.length > 0 && (
                                     <span className="ml-0.5 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
                                       {countGenWaToSend}
@@ -2827,7 +2827,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                     setSelectedSponsorFilter('general');
                                     setViewMode('invites');
                                   }}
-                                  className="px-2.5 py-1.5 bg-white border border-outline-variant hover:bg-surface text-on-surface rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+                                  className="px-2 py-1.5 bg-white border border-outline-variant hover:bg-surface text-on-surface rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs shrink-0"
                                   title={`Ver los ${genInv.length} invitados de la lista General`}
                                 >
                                   <Users size={13} />
@@ -2837,7 +2837,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                 {/* Plantilla */}
                                 <button
                                   onClick={() => handleDownloadTemplateForSponsor('general')}
-                                  className="p-1.5 bg-white border border-outline-variant hover:bg-surface text-secondary rounded-lg text-xs transition-colors cursor-pointer shadow-2xs"
+                                  className="p-1.5 bg-white border border-outline-variant hover:bg-surface text-secondary rounded-lg text-xs transition-colors cursor-pointer shadow-2xs shrink-0"
                                   title="Descargar plantilla Excel para la lista General"
                                 >
                                   <Download size={13} />
@@ -2847,7 +2847,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                 <button
                                   onClick={() => handleExportExcel('general')}
                                   disabled={genInv.length === 0}
-                                  className="p-1.5 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-lg text-xs transition-colors disabled:opacity-40 cursor-pointer shadow-2xs"
+                                  className="p-1.5 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-lg text-xs transition-colors disabled:opacity-40 cursor-pointer shadow-2xs shrink-0"
                                   title="Exportar a Excel los invitados de la lista General"
                                 >
                                   <FileSpreadsheet size={13} />
@@ -3020,24 +3020,24 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                           </td>
 
                           {/* Acciones de Carga y Gestión */}
-                          <td className="p-4 text-center">
-                            <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap bg-surface-variant/30 p-1.5 rounded-xl border border-outline-variant/60">
+                          <td className="p-3 pr-6 text-center">
+                            <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap bg-surface-variant/30 p-1.5 rounded-xl border border-outline-variant/60 shadow-2xs">
                               
                               {/* Botón Cargar Excel */}
                               <button
                                 onClick={() => handleTriggerUploadForSponsor(sp)}
-                                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1 cursor-pointer shrink-0"
                                 title={`Cargar archivo Excel de invitados para ${sp}`}
                               >
                                 <FileUp size={13} />
-                                <span>Cargar Excel</span>
+                                <span>Cargar</span>
                               </button>
 
                               {/* Botón Enviar Correos Masivos */}
                               <button
                                 onClick={() => handleOpenBulkEmailModal(sp)}
                                 disabled={spPendingWithEmail.length === 0}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
+                                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1 cursor-pointer disabled:opacity-40 shrink-0 ${
                                   spUnsentEmail.length > 0
                                     ? 'bg-amber-600 hover:bg-amber-700 text-white'
                                     : spPendingWithEmail.length > 0
@@ -3051,7 +3051,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                 }
                               >
                                 <MailCheck size={13} />
-                                <span>Enviar Correos</span>
+                                <span>Correos</span>
                                 {spPendingWithEmail.length > 0 && (
                                   <span className="ml-0.5 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
                                     {countToSend}
@@ -3063,7 +3063,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                               <button
                                 onClick={() => handleOpenBulkWatiModal(sp)}
                                 disabled={spPendingWithPhone.length === 0}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 ${
+                                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1 cursor-pointer disabled:opacity-40 shrink-0 ${
                                   spUnsentPhone.length > 0
                                     ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                                     : spPendingWithPhone.length > 0
@@ -3077,7 +3077,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                 }
                               >
                                 <Zap size={13} />
-                                <span>WhatsApp Wati</span>
+                                <span>Wati</span>
                                 {spPendingWithPhone.length > 0 && (
                                   <span className="ml-0.5 px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
                                     {countWaToSend}
@@ -3091,7 +3091,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   setSelectedSponsorFilter(sp);
                                   setViewMode('invites');
                                 }}
-                                className="px-2.5 py-1.5 bg-white border border-outline-variant hover:bg-surface text-on-surface rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+                                className="px-2 py-1.5 bg-white border border-outline-variant hover:bg-surface text-on-surface rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs shrink-0"
                                 title={`Ver los ${spInvites.length} invitados de ${sp}`}
                               >
                                 <Users size={13} />
@@ -3101,7 +3101,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                               {/* Plantilla */}
                               <button
                                 onClick={() => handleDownloadTemplateForSponsor(sp)}
-                                className="p-1.5 bg-white border border-outline-variant hover:bg-surface text-secondary rounded-lg text-xs transition-colors cursor-pointer shadow-2xs"
+                                className="p-1.5 bg-white border border-outline-variant hover:bg-surface text-secondary rounded-lg text-xs transition-colors cursor-pointer shadow-2xs shrink-0"
                                 title={`Descargar plantilla Excel para ${sp}`}
                               >
                                 <Download size={13} />
@@ -3111,7 +3111,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                               <button
                                 onClick={() => handleExportExcel(sp)}
                                 disabled={spInvites.length === 0}
-                                className="p-1.5 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-lg text-xs transition-colors disabled:opacity-40 cursor-pointer shadow-2xs"
+                                className="p-1.5 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-lg text-xs transition-colors disabled:opacity-40 cursor-pointer shadow-2xs shrink-0"
                                 title={`Exportar a Excel los invitados de ${sp}`}
                               >
                                 <FileSpreadsheet size={13} />
@@ -3245,15 +3245,15 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
             {/* TABLA DE INVITACIONES */}
             <div className="bg-white rounded-2xl border border-outline-variant shadow-md overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-sm">
+              <div className="overflow-x-auto pb-1">
+                <table className="w-full text-left border-collapse text-sm min-w-[1120px]">
                   <thead>
                     <tr className="bg-surface-variant/40 border-b border-outline-variant text-xs uppercase tracking-wider text-secondary">
-                      <th className="p-4 font-bold">Invitado / Destinatario</th>
-                      <th className="p-4 font-bold">Patrocinador / Stand</th>
-                      <th className="p-4 font-bold">Estado Enlace & Correo</th>
-                      <th className="p-4 font-bold">Resultado de Registro</th>
-                      <th className="p-4 font-bold text-center">Acciones & Envíos</th>
+                      <th className="p-4 font-bold min-w-[240px]">Invitado / Destinatario</th>
+                      <th className="p-4 font-bold min-w-[180px]">Patrocinador / Stand</th>
+                      <th className="p-4 font-bold min-w-[180px]">Estado Enlace & Correo</th>
+                      <th className="p-4 font-bold min-w-[180px]">Resultado de Registro</th>
+                      <th className="p-4 pr-6 font-bold text-center min-w-[220px]">Acciones & Envíos</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-outline-variant/60">
