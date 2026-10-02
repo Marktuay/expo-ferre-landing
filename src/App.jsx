@@ -200,7 +200,7 @@ export default function App() {
     { url: '/plata/mobius.png', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/lacasadelperno.jpeg', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/pbs.png', category: 'Plata', order: 3, bgWhite: true },
-    { url: '/plata/chevrolet.jpg', category: 'Plata', order: 3, bgWhite: true },
+    { url: '/plata/chevrolet.jpg', category: 'Plata', order: 3, scale: 1.1, bgWhite: true },
   ];
   
   const sponsorLogos = initialPlaceholders;
