@@ -101,6 +101,32 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Inclusión de "La Casa del Perno" en Categoría Plata:**
   - Se incorporó el logotipo oficial de **La Casa del Perno** (`/plata/la-casa-del-perno.png`) posicionado al final de la categoría Plata en el reel principal y listado de patrocinadores.
 
+### 📲 Integración Oficial de WhatsApp Business API vía WATI (`src/services/watiService.js`)
+- **Conexión Exitosa con Servidor WATI:**
+  - Se validó y autenticó la conexión directa con el Tenant ID oficial de WATI (`10262044`).
+  - **Endpoint API Oficial:** `https://live-mt-server.wati.io/10262044`
+  - **Token de Acceso Bearer:** Configurado y verificado mediante llamadas directas.
+  - **Soporte de Navegador / CORS:** Verificado mediante preflight OPTIONS (`Access-Control-Allow-Origin: *` reflejado), permitiendo llamadas directas desde la aplicación web sin depender de intermediarios.
+- **Creación de Servicio Especializado (`src/services/watiService.js`):**
+  - Módulo con normalización automática de teléfonos para Nicaragua (formato internacional `505` para números de 8 dígitos, limpieza de espacios y guiones).
+  - Funciones preparadas:
+    - `getWatiMessageTemplates()`: Para consultar las plantillas activas y su estado en Meta.
+    - `checkTemplateStatus()`: Verifica si la plantilla está `APPROVED`, `PENDING` o `REJECTED`.
+    - `sendWatiTemplateMessage()`: Envío por API con payload de parámetros dinámicos a través de `POST /api/v1/sendTemplateMessage`.
+    - `sendDirectInviteViaWati()`: Helper directo para vincular con las invitaciones de Firestore (`directInvites`).
+- **Plantilla Oficial Creada en WATI (`invitacion_expoferre`):**
+  - Creada en el panel de Wati y enviada a revisión de Meta.
+  - Parámetros dinámicos definidos:
+    - `{{1}}`: Nombre del invitado.
+    - `{{2}}`: Patrocinador anfitrión (o *El Comité Organizador de EXPO FERRE*).
+    - `{{3}}`: Enlace único de acceso y generación de gafete con QR.
+  - Estado al cierre de sesión: ⏳ **`PENDING`** (Esperando aprobación de Meta).
+- **Plan para Mañana (Siguiente Sesión):**
+  1. Verificar si Meta aprobó la plantilla `invitacion_expoferre` (`status === 'APPROVED'`).
+  2. Conectar el botón de envío automático de Wati en el modal de WhatsApp y/o en la fila de cada invitado en `AdminDirectInvites.jsx`.
+  3. Realizar prueba de envío real al número celular del administrador.
+  4. Habilitar actualización de estado en Firestore (`whatsappSent: true`, `whatsappSentAt`, badge visual verde).
+
 ---
 
 ## 📅 Resumen de Cambios y Avances de la Sesión (28 de Septiembre de 2026)
