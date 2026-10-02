@@ -39,8 +39,6 @@ const OFFICIAL_SPONSORS = [
   { company: 'Panelconsa', category: 'Diamante', logo: '/diamante/panelconsa.png' },
   { company: 'Steelmax', category: 'Diamante', logo: '/diamante/steelmax.png' },
   { company: 'Eaton', category: 'Diamante', logo: '/diamante/eaton.jpeg' },
-  { company: 'PBS', category: 'Diamante', logo: '/diamante/pbs.png' },
-  { company: 'Chevrolet', category: 'Diamante', logo: '/diamante/chevrolet.jpg' },
   { company: 'Sherwin Williams', category: 'Diamante', logo: '/diamante/sherwin.png' },
   { company: 'Plycem', category: 'Oro', logo: '/oro/plycem%20.png' },
   { company: 'Sicsa', category: 'Oro', logo: '/oro/sicsa.png' },
@@ -59,7 +57,9 @@ const OFFICIAL_SPONSORS = [
   { company: 'Dat Analytics', category: 'Plata', logo: '/plata/dataanalytics.jpg' },
   { company: 'Monolit', category: 'Plata', logo: '/plata/monolit.png' },
   { company: 'Mobius', category: 'Plata', logo: '/plata/mobius.png' },
-  { company: 'La Casa del Perno', category: 'Plata', logo: '/plata/lacasadelperno.jpeg' }
+  { company: 'La Casa del Perno', category: 'Plata', logo: '/plata/lacasadelperno.jpeg' },
+  { company: 'PBS', category: 'Plata', logo: '/plata/pbs.png' },
+  { company: 'Chevrolet', category: 'Plata', logo: '/plata/chevrolet.jpg' }
 ];
 
 export function normStr(str) {
