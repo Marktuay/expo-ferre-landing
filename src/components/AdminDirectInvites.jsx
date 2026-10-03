@@ -1856,7 +1856,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
         try {
           const res = await sendDirectInviteViaWati({
-            invite,
+            invite: inv,
             sponsorName,
             inviteUrl
           });

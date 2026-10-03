@@ -148,10 +148,13 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 - **Solución Implementada:**
   - Etiquetas compactadas y ergonómicas (`Cargar`, `Correos`, `Wati`, `Ver`, `Descargar Plantilla`, `Exportar Excel`), ahorrando más de 110px de espacio horizontal.
   - Reglas de contención responsivas: `overflow-x-auto pb-1`, `min-w-[1200px]` en la tabla de patrocinadores y `min-w-[1120px]` en la tabla de invitados, más padding de seguridad (`pr-6`), garantizando que ningún botón se oculte bajo ningún tamaño de pantalla.
+- **Corrección en Envío Masivo WATI (`handleExecuteBulkWati`):**
+  - Se corrigió el error `invite is not defined` en el bucle de despacho masivo (se reemplazó la variable no declarada `invite` por `invite: inv`). El envío masivo por patrocinador ahora procesa cada contacto de la lista sin interrupciones.
 
 ### 📌 Estado Actual y Siguientes Pasos
 - **Plantilla WATI (`invitacion_expoferre`):** ✅ **`APPROVED` por Meta** (Aprobada oficialmente y lista para envíos reales).
-- **Próxima acción inmediata:** Realizar una prueba de envío 1-click al número de WhatsApp del organizador/administrador para validar el mensaje final y proceder con los envíos.
+- **Prueba individual:** Ejecutada con éxito rotundo al número del administrador (+50558711106) con entrega confirmada.
+- **Envío masivo:** Corregido y listo para despacho lista por lista.
 
 ---
 
