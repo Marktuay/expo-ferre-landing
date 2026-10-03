@@ -150,8 +150,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   - Reglas de contención responsivas: `overflow-x-auto pb-1`, `min-w-[1200px]` en la tabla de patrocinadores y `min-w-[1120px]` en la tabla de invitados, más padding de seguridad (`pr-6`), garantizando que ningún botón se oculte bajo ningún tamaño de pantalla.
 
 ### 📌 Estado Actual y Siguientes Pasos
-- **Plantilla WATI (`invitacion_expoferre`):** En cola de revisión de Meta (estado `PENDING`, sin rechazo ni observaciones).
-- **Próxima acción inmediata al aprobarse:** Disparar prueba de envío 1-click al número de WhatsApp del organizador antes del despacho general/por patrocinador.
+- **Plantilla WATI (`invitacion_expoferre`):** ✅ **`APPROVED` por Meta** (Aprobada oficialmente y lista para envíos reales).
+- **Próxima acción inmediata:** Realizar una prueba de envío 1-click al número de WhatsApp del organizador/administrador para validar el mensaje final y proceder con los envíos.
 
 ---
 
