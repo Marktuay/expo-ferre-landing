@@ -969,23 +969,17 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 
 ---
 
-## 📅 Resumen de Cambios y Avances de la Sesión (01 de Octubre de 2026)
+## 📅 Resumen de Cambios y Avances de la Sesión (04 de Octubre de 2026)
 
-### 🏷️ Adición de Logotipo: La Casa del Perno en Categoría Plata (`App.jsx` & `AdminSponsors.jsx`)
-- **Archivo Integrado:** `/plata/lacasadelperno.jpeg`
-- **Posición:** Se incorporó al final del carrusel/reel de la categoría **Plata** en la última posición (después de Mobius).
-- **Secuencia actualizada en Categoría Plata:**
-  1. Fernández Sera (`/plata/ferdandezsera.png`)
-  2. Sherwin-Williams (`/plata/logo-sherwin-williams.jpg`)
-  3. Casco (`/plata/casco.png`)
-  4. Midesa (`/plata/midesa.png`)
-  5. Madinisa (`/plata/madinisa.png`)
-  6. Sonax (`/plata/sonax.jpg`)
-  7. Dat Analytics (`/plata/dataanalytics.jpg`)
-  8. Monolit (`/plata/monolit.png`)
-  9. Mobius (`/plata/mobius.png`)
-  10. **La Casa del Perno** (`/plata/lacasadelperno.jpeg`) 👈 *(Nuevo - Última posición)*
-- **Directorio de Patrocinadores:** Agregado en `OFFICIAL_SPONSORS` en [`src/components/AdminSponsors.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsors.jsx).
+### 🏆 Mejoras en Panel de Jurados Calificadores (`AdminJury.jsx`)
+- **Emparejamiento Inteligente de Nombres con Normalización NFD (`cleanNorm`):**
+  - **Problema Resuelto:** Jurados como Karla Téllez aparecían con estado `✉️ Correo Despachado` en lugar de `🏆 Votos Registrados`, a pesar de haber enviado su evaluación, debido a que en la invitación figuraba como `"Karla Tellez"` y en el formulario envió `"Karla Elsania Téllez Ruiz"` (con acentos y segundo nombre/apellido intercalado).
+  - **Solución Implementada:** Se introdujo `cleanNorm` (eliminación de tildes/diacríticos y minúsculas) y comparación por tokens significativos. Ahora el sistema detecta coincidencias parciales inteligentes ("Karla" + "Tellez/Téllez"), marcando a Karla y futuros jurados con `🏆 Votos Registrados` y fila dorada inmediatamente.
+- **Botón para Eliminar Evaluaciones de Prueba (`handleDeleteEvaluation`):**
+  - Se añadió el botón **`[🗑️ Eliminar]`** en cada tarjeta de la pestaña **«Evaluaciones de Jurados»** con ventana de confirmación previa. Permite eliminar votos de prueba (como los de Karen Torres) para que no alteren el ranking ni las métricas de ferreterías.
+- **Botón para Eliminar Enlaces/Invitaciones (`handleDeleteInvitedJudge`):**
+  - Se agregó botón de eliminación en la columna de acciones de la tabla de **«Enlaces / Jurados Invitados»** para descartar registros de prueba.
+
 
 
 
