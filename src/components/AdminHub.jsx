@@ -13,6 +13,8 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isBackingUp, setIsBackingUp] = useState(false);
+  const [activeActionType, setActiveActionType] = useState(null); // 'backup' | 'restore' | null
+  const [backupStatusText, setBackupStatusText] = useState('');
   const [unreadContactsCount, setUnreadContactsCount] = useState(0);
   const [directInvitesStats, setDirectInvitesStats] = useState({ total: 0, sent: 0, pending: 0, withEmail: 0 });
 
@@ -190,8 +192,13 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
       return;
     }
     setIsBackingUp(true);
+    setActiveActionType('backup');
+    setBackupStatusText('Iniciando respaldo seguro...');
     try {
-      const res = await createFullFirestoreBackup(db);
+      const res = await createFullFirestoreBackup(db, {
+        triggerDownload: true,
+        onProgress: (status) => setBackupStatusText(status)
+      });
       const details = Object.entries(res.summary).map(([k,v])=>`• ${k}: ${v} docs`).join('\n');
       alert(`¡Respaldo Completo de Firestore creado con éxito!\n\nID Snapshot: ${res.snapshotId}\nTotal documentos protegidos: ${res.totalDocs}\n\nResumen por colección:\n${details}\n\n💾 Además, se ha descargado un archivo .JSON con la copia completa a tu computadora.`);
     } catch (err) {
@@ -199,6 +206,8 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
       alert("Hubo un error al crear el respaldo de Firestore.");
     } finally {
       setIsBackingUp(false);
+      setActiveActionType(null);
+      setBackupStatusText('');
     }
   };
 
@@ -208,8 +217,12 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
       return;
     }
     setIsBackingUp(true);
+    setActiveActionType('restore');
+    setBackupStatusText('Iniciando restauración...');
     try {
-      const res = await restoreFullFirestoreBackup(db);
+      const res = await restoreFullFirestoreBackup(db, {
+        onProgress: (status) => setBackupStatusText(status)
+      });
       const details = Object.entries(res.summary).map(([k,v])=>`• ${k}: ${v} docs`).join('\n');
       alert(`¡Restauración Completa de Firestore finalizada!\n\nTotal documentos restaurados: ${res.totalDocs}\n\nResumen por colección:\n${details}`);
     } catch (err) {
@@ -217,6 +230,8 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
       alert("Hubo un error al restaurar Firestore.");
     } finally {
       setIsBackingUp(false);
+      setActiveActionType(null);
+      setBackupStatusText('');
     }
   };
 
@@ -552,14 +567,36 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
                   setPendingAction('backup');
                   setShowPinModal(true);
                 }}
-                className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-blue-600 hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group md:col-span-1 ${isBackingUp ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`bg-white p-8 rounded-lg shadow-md border transition-all flex flex-col items-center text-center gap-4 group md:col-span-1 ${
+                  activeActionType === 'backup'
+                    ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-lg cursor-wait'
+                    : isBackingUp
+                    ? 'opacity-40 cursor-not-allowed border-outline-variant'
+                    : 'border-outline-variant hover:border-blue-600 hover:shadow-lg'
+                }`}
               >
-                <div className="w-16 h-16 bg-blue-600/10 text-blue-700 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-3xl">cloud_sync</span>
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-transform ${
+                  activeActionType === 'backup'
+                    ? 'bg-blue-100 text-blue-600'
+                    : 'bg-blue-600/10 text-blue-700 group-hover:scale-110'
+                }`}>
+                  <span className={`material-symbols-outlined text-3xl ${activeActionType === 'backup' ? 'animate-spin' : ''}`}>
+                    {activeActionType === 'backup' ? 'sync' : 'cloud_sync'}
+                  </span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-on-surface mb-2">Respaldo Completo Firestore</h3>
-                  <p className="text-secondary text-sm">Crea una copia de respaldo instantánea en tiempo real de TODAS las colecciones en Firestore.</p>
+                  <h3 className={`text-xl font-bold mb-2 ${
+                    activeActionType === 'backup' ? 'text-blue-700' : 'text-slate-900'
+                  }`}>
+                    {activeActionType === 'backup' ? 'Respaldando...' : 'Respaldo Completo Firestore'}
+                  </h3>
+                  <p className={`text-sm ${
+                    activeActionType === 'backup' ? 'text-blue-600 font-semibold animate-pulse' : 'text-slate-600'
+                  }`}>
+                    {activeActionType === 'backup' 
+                      ? (backupStatusText || 'Procesando documentos...') 
+                      : 'Crea una copia de respaldo instantánea en tiempo real de TODAS las colecciones en Firestore.'}
+                  </p>
                 </div>
               </button>
 
@@ -569,14 +606,36 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
                   setPendingAction('restore');
                   setShowPinModal(true);
                 }}
-                className={`bg-white p-8 rounded-lg shadow-md border border-outline-variant hover:border-amber-600 hover:shadow-lg transition-all flex flex-col items-center text-center gap-4 group md:col-span-1 ${isBackingUp ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`bg-white p-8 rounded-lg shadow-md border transition-all flex flex-col items-center text-center gap-4 group md:col-span-1 ${
+                  activeActionType === 'restore'
+                    ? 'border-amber-500 ring-2 ring-amber-500/20 shadow-lg cursor-wait'
+                    : isBackingUp
+                    ? 'opacity-40 cursor-not-allowed border-outline-variant'
+                    : 'border-outline-variant hover:border-amber-600 hover:shadow-lg'
+                }`}
               >
-                <div className="w-16 h-16 bg-amber-600/10 text-amber-700 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-3xl">restore</span>
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-transform ${
+                  activeActionType === 'restore'
+                    ? 'bg-amber-100 text-amber-600'
+                    : 'bg-amber-600/10 text-amber-700 group-hover:scale-110'
+                }`}>
+                  <span className={`material-symbols-outlined text-3xl ${activeActionType === 'restore' ? 'animate-spin' : ''}`}>
+                    {activeActionType === 'restore' ? 'sync' : 'restore'}
+                  </span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-on-surface mb-2">Restaurar Firestore</h3>
-                  <p className="text-secondary text-sm">Restaura todas las colecciones desde la copia de respaldo almacenada en Firestore.</p>
+                  <h3 className={`text-xl font-bold mb-2 ${
+                    activeActionType === 'restore' ? 'text-amber-700' : 'text-slate-900'
+                  }`}>
+                    {activeActionType === 'restore' ? 'Restaurando...' : 'Restaurar Firestore'}
+                  </h3>
+                  <p className={`text-sm ${
+                    activeActionType === 'restore' ? 'text-amber-600 font-semibold animate-pulse' : 'text-slate-600'
+                  }`}>
+                    {activeActionType === 'restore'
+                      ? (backupStatusText || 'Reestableciendo base de datos...')
+                      : 'Restaura todas las colecciones desde la copia de respaldo almacenada en Firestore.'}
+                  </p>
                 </div>
               </button>
             </>

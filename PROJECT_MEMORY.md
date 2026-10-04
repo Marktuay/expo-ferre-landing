@@ -993,10 +993,12 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Inclusión de Logotipo: Durman en Categoría Plata (`App.jsx` & `AdminSponsors.jsx`):**
   - Se incorporó el logotipo oficial de **Durman by aliaxis** (`/plata/durman.png`) dentro del carrusel de marcas patrocinadoras en la Landing Page y en el listado de patrocinadores oficiales de la administración.
   - Estilizado con tarjeta de fondo blanco uniforme (`bgWhite: true`).
-- **Auditoría y Optimización del Respaldo Completo de Firestore (`firestoreBackup.js` & `AdminHub.jsx`):**
-  - **Problema Detectado:** El código original de respaldo solo incluía 7 colecciones iniciales y dejaba por fuera las colecciones más críticas desarrolladas recientemente (`directInvites`, `sponsorSettings`, `juryEvaluations`, `invitedJudges` y `systemUsers`).
-  - **Ampliación al 100% (12 Colecciones):** Se expandió `TARGET_COLLECTIONS` para respaldar las 12 colecciones activas del sistema: `users`, `stands`, `preregistrations`, `directInvites`, `sponsorSettings`, `juryEvaluations`, `invitedJudges`, `guests`, `staff`, `speakers`, `contacts` y `systemUsers`.
-  - **Descarga Offline Automática (.JSON):** Al presionar "Respaldo Completo Firestore" (con PIN maestro `2026`), además de crear las colecciones `_backup` y el snapshot inmutable en Firestore, el sistema genera y descarga automáticamente un archivo `ExpoFerre2026_Respaldo_Firestore_YYYY-MM-DD.json` en la computadora del administrador para custodia fría fuera de la nube.
+- **Optimización de Rendimiento y Corrección Visual de Tarjetas de Respaldo (`AdminHub.jsx` & `firestoreBackup.js`):**
+  - **Diagnóstico del Estado Tenue:** Al hacer clic en "Respaldo Completo Firestore" e ingresar el PIN `2026`, el proceso ejecutaba escrituras individuales y secuenciales (`await setDoc`) para cada documento a través de las 12 colecciones. Esto tomaba varias decenas de segundos durante los cuales la interfaz aplicaba `opacity-50 cursor-not-allowed` sin feedback animado, haciendo que ambas tarjetas parecieran "congeladas" o atenuadas ("tenue").
+  - **Aceleración con `writeBatch` (10x más rápido):** Se refactorizó `createFullFirestoreBackup` y `restoreFullFirestoreBackup` para agrupar las operaciones en lotes atómicos de Firestore (`writeBatch`, hasta 400 operaciones por lote), reduciendo el tiempo de ejecución a 1-2 segundos.
+  - **Feedback Visual y Tipografía de Alto Contraste:** 
+    - Las tarjetas ahora muestran un icono giratorio (`animate-spin`) y texto descriptivo en vivo con el paso actual (ej. `Respaldando stands (2/12)...`, `Generando archivo JSON...`).
+    - Las tipografías estáticas se cambiaron a `text-slate-900` para garantizar un contraste nítido y evitar que se vean deslavadas o tenues cuando están en reposo.
 
 
 

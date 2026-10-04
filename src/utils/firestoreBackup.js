@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, writeBatch } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 
 export const TARGET_COLLECTIONS = [
@@ -18,9 +18,9 @@ export const TARGET_COLLECTIONS = [
 
 /**
  * Crea una copia de respaldo instantánea en Firestore de todas las colecciones principales del sistema
- * y además genera la descarga automática de un archivo .JSON con todos los datos a la computadora.
+ * de forma ultra rápida usando writeBatch, y además genera la descarga automática de un archivo .JSON con todos los datos.
  */
-export async function createFullFirestoreBackup(db, { triggerDownload = true } = {}) {
+export async function createFullFirestoreBackup(db, { triggerDownload = true, onProgress } = {}) {
   const basePath = getEventBasePath();
   const summary = {};
   const exportData = {};
@@ -28,7 +28,12 @@ export async function createFullFirestoreBackup(db, { triggerDownload = true } =
   const snapshotDate = new Date();
   const snapshotId = `snapshot_${snapshotDate.toISOString().replace(/[:.]/g, '-')}`;
 
-  for (const colName of TARGET_COLLECTIONS) {
+  for (let i = 0; i < TARGET_COLLECTIONS.length; i++) {
+    const colName = TARGET_COLLECTIONS[i];
+    if (onProgress) {
+      onProgress(`Respaldando ${colName} (${i + 1}/${TARGET_COLLECTIONS.length})...`);
+    }
+
     const isGlobal = colName === 'users';
     const sourcePath = isGlobal ? 'users' : `${basePath}/${colName}`;
     const backupPath = isGlobal ? 'users_backup' : `${basePath}/${colName}_backup`;
@@ -39,24 +44,40 @@ export async function createFullFirestoreBackup(db, { triggerDownload = true } =
       let count = 0;
 
       if (!snap.empty) {
+        let currentBatch = writeBatch(db);
+        let opCount = 0;
+
         for (const d of snap.docs) {
           const docData = d.data();
 
           // 1. Guardar en colección de respaldo espejo (_backup)
           const backupRef = doc(db, backupPath, d.id);
-          await setDoc(backupRef, docData, { merge: true });
+          currentBatch.set(backupRef, docData, { merge: true });
+          opCount++;
 
-          // 2. Guardar también una copia en el historial inmutable indexado por snapshotId
+          // 2. Guardar en historial inmutable indexado por snapshotId
           const historyRef = doc(db, `firestore_snapshots/${snapshotId}/${colName}`, d.id);
-          await setDoc(historyRef, docData, { merge: true });
+          currentBatch.set(historyRef, docData, { merge: true });
+          opCount++;
 
-          // 3. Agregar al paquete de datos para exportación JSON
+          // 3. Paquete JSON
           exportData[colName].push({
             id: d.id,
             ...docData
           });
 
           count++;
+
+          // Límite de Firestore es 500 ops por lote, enviamos cada 400
+          if (opCount >= 400) {
+            await currentBatch.commit();
+            currentBatch = writeBatch(db);
+            opCount = 0;
+          }
+        }
+
+        if (opCount > 0) {
+          await currentBatch.commit();
         }
       }
       summary[colName] = count;
@@ -65,6 +86,10 @@ export async function createFullFirestoreBackup(db, { triggerDownload = true } =
       console.error(`Error respaldando colección ${colName}:`, err);
       summary[colName] = 0;
     }
+  }
+
+  if (onProgress) {
+    onProgress('Registrando snapshot y generando archivo JSON...');
   }
 
   // Guardar metadata del snapshot en Firestore
@@ -111,12 +136,17 @@ export async function createFullFirestoreBackup(db, { triggerDownload = true } =
 /**
  * Restaura todas las colecciones activas en Firestore desde la última copia de respaldo (_backup).
  */
-export async function restoreFullFirestoreBackup(db) {
+export async function restoreFullFirestoreBackup(db, { onProgress } = {}) {
   const basePath = getEventBasePath();
   const summary = {};
   let totalDocs = 0;
 
-  for (const colName of TARGET_COLLECTIONS) {
+  for (let i = 0; i < TARGET_COLLECTIONS.length; i++) {
+    const colName = TARGET_COLLECTIONS[i];
+    if (onProgress) {
+      onProgress(`Restaurando ${colName} (${i + 1}/${TARGET_COLLECTIONS.length})...`);
+    }
+
     const isGlobal = colName === 'users';
     const activePath = isGlobal ? 'users' : `${basePath}/${colName}`;
     const backupPath = isGlobal ? 'users_backup' : `${basePath}/${colName}_backup`;
@@ -126,10 +156,24 @@ export async function restoreFullFirestoreBackup(db) {
       let count = 0;
 
       if (!backupSnap.empty) {
+        let currentBatch = writeBatch(db);
+        let opCount = 0;
+
         for (const d of backupSnap.docs) {
           const activeRef = doc(db, activePath, d.id);
-          await setDoc(activeRef, d.data(), { merge: true });
+          currentBatch.set(activeRef, d.data(), { merge: true });
+          opCount++;
           count++;
+
+          if (opCount >= 400) {
+            await currentBatch.commit();
+            currentBatch = writeBatch(db);
+            opCount = 0;
+          }
+        }
+
+        if (opCount > 0) {
+          await currentBatch.commit();
         }
       }
       summary[colName] = count;
