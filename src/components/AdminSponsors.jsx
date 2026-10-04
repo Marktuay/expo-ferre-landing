@@ -59,7 +59,8 @@ const OFFICIAL_SPONSORS = [
   { company: 'Mobius', category: 'Plata', logo: '/plata/mobius.png' },
   { company: 'La Casa del Perno', category: 'Plata', logo: '/plata/lacasadelperno.jpeg' },
   { company: 'PBS', category: 'Plata', logo: '/plata/pbs.png' },
-  { company: 'Chevrolet', category: 'Plata', logo: '/plata/chevrolet.jpg' }
+  { company: 'Chevrolet', category: 'Plata', logo: '/plata/chevrolet.jpg' },
+  { company: 'Durman', category: 'Plata', logo: '/plata/durman.png' }
 ];
 
 export function normStr(str) {
