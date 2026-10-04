@@ -193,7 +193,7 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
     try {
       const res = await createFullFirestoreBackup(db);
       const details = Object.entries(res.summary).map(([k,v])=>`• ${k}: ${v} docs`).join('\n');
-      alert(`¡Respaldo Completo de Firestore creado con éxito!\n\nID Snapshot: ${res.snapshotId}\nTotal documentos protegidos: ${res.totalDocs}\n\nResumen por colección:\n${details}`);
+      alert(`¡Respaldo Completo de Firestore creado con éxito!\n\nID Snapshot: ${res.snapshotId}\nTotal documentos protegidos: ${res.totalDocs}\n\nResumen por colección:\n${details}\n\n💾 Además, se ha descargado un archivo .JSON con la copia completa a tu computadora.`);
     } catch (err) {
       console.error("Error creando respaldo:", err);
       alert("Hubo un error al crear el respaldo de Firestore.");
