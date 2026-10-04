@@ -980,6 +980,12 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - **Seguridad y Control de Acceso:** Restringido exclusivamente al Super Administrador (`marktuay@gmail.com`). Ningún otro usuario u operador del panel verá ni podrá activar los botones de eliminación.
 - **Botón para Eliminar Enlaces/Invitaciones (`handleDeleteInvitedJudge`):**
   - Se agregó botón de eliminación en la columna de acciones de la tabla de **«Enlaces / Jurados Invitados»**, igualmente protegido de forma exclusiva para `marktuay@gmail.com`.
+- **Notificación Automática por Correo a Karen Torres (`juryEmailService.js`):**
+  - **Destinatario Oficial:** `karen.torres@rinsa.red`
+  - **Disparador Automático:** Al momento en que cualquier jurado presiona "Confirmar y Enviar Nominaciones" en el formulario público (`JudgeEvaluationForm.jsx`), el sistema inyecta automáticamente una orden en la colección `mail` de Firestore con el resumen ejecutivo.
+  - **Plantilla HTML Corporativa:** Incluye cabecera oficial, datos del jurado (Nombre, Empresa/Institución, Fecha/Hora), el listado ordenado de las 5 ferreterías nominadas en cada una de las 3 categorías (Familiar, Oro y Promesa) con su ciudad/departamento, y botón de acceso directo al panel administrativo.
+  - **Botón de Reenvío en el Panel:** En la pestaña **«Evaluaciones de Jurados»** de `AdminJury.jsx`, se agregó el botón **`[✉️ Notificar a Karen]`** en cada evaluación para enviar o reenviar el informe con un solo clic.
+  - **Prueba Real Ejecutada:** Se despachó con éxito un correo de prueba a `karen.torres@rinsa.red` con la evaluación real de Karla Téllez (Doc ID: `PUSrM82UVNdT3gADLDZM`).
 
 
 
