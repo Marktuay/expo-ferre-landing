@@ -985,6 +985,10 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - **Disparador Automático:** Al momento en que cualquier jurado presiona "Confirmar y Enviar Nominaciones" en el formulario público (`JudgeEvaluationForm.jsx`), el sistema inyecta automáticamente una orden en la colección `mail` de Firestore con el resumen ejecutivo.
   - **Plantilla HTML Corporativa:** Incluye cabecera oficial, datos del jurado (Nombre, Empresa/Institución, Fecha/Hora), el listado ordenado de las 5 ferreterías nominadas en cada una de las 3 categorías (Familiar, Oro y Promesa) con su ciudad/departamento, y botón de acceso directo al panel administrativo.
   - **Botón de Reenvío en el Panel:** En la pestaña **«Evaluaciones de Jurados»** de `AdminJury.jsx`, se agregó el botón **`[✉️ Notificar a Karen]`** en cada evaluación para enviar o reenviar el informe con un solo clic.
+- **Exportación a Excel Ampliada (5 Hojas Ejecutivas):**
+  - **Hoja 1 (`Nominaciones Detalladas`):** Voto por voto con Jurado, Empresa, Categoría, Ferretería, Ciudad, Puesto y Puntos.
+  - **Hojas 2, 3 y 4 (`Ranking Familiar`, `Ranking Oro`, `Ranking Promesa`):** Posición, Ferretería, Ciudad, Puntos Ponderados, Total Nominaciones y Desglose de Jurados.
+  - **Hoja 5 (`Control Jurados Invitados`):** Directorio de los 12 jurados con Correo, Celular/WhatsApp, Estado de Evaluación (`🏆 Evaluación Completada` vs `⏳ Pendiente de Votar`), Canal de Entrega (`🏆 Votos Registrados`, `📱 WhatsApp Enviado`, `✉️ Correo Despachado`, etc.), Enlace confidencial de evaluación y fecha de invitación.
   - **Prueba Real Ejecutada:** Se despachó con éxito un correo de prueba a `karen.torres@rinsa.red` con la evaluación real de Karla Téllez (Doc ID: `PUSrM82UVNdT3gADLDZM`).
 
 
