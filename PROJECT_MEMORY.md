@@ -1003,6 +1003,11 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - **Script de Servidor VM (`npm run backup`):** Creado en `scripts/auto_backup_12_collections.js`. Lee exclusivamente las 12 colecciones (`users`, `stands`, `preregistrations`, `directInvites`, `sponsorSettings`, `juryEvaluations`, `invitedJudges`, `guests`, `staff`, `speakers`, `contacts`, `systemUsers`), actualiza Firestore `_backup` y genera copias físicas `.json` fechadas en `./backups/` conservando los últimos 30 días.
   - **Manejo de Límite de Payload en Firestore (10 MB):** Para colecciones pesadas con imágenes base64 como `sponsorSettings`, el tamaño de lote se ajusta automáticamente a 2-4 operaciones por batch, previniendo el error `INVALID_ARGUMENT: Request payload size exceeds the limit`.
   - **Respaldo Silencioso en Intranet Web:** `AdminHub.jsx` evalúa diariamente si el Super Admin `marktuay@gmail.com` ha iniciado sesión; si han transcurrido más de 24 horas desde el último respaldo, ejecuta un snapshot silencioso en segundo plano sin bloquear la UI ni requerir ingreso de PIN.
+  - **Programación en Producción en la VM de Google Cloud:**
+    - Se configuró el proceso de respaldo programado utilizando PM2 con la directiva cron:
+      `pm2 start scripts/auto_backup_12_collections.js --name "backup-expoferre" --cron "0 2 * * *" --no-autorestart && pm2 save`
+    - Ejecución automática programada todos los días a las **2:00 AM**.
+    - Monitoreo y consulta de logs disponible mediante `pm2 logs backup-expoferre`.
 
 
 
