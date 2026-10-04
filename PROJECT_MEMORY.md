@@ -976,9 +976,10 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - **Problema Resuelto:** Jurados como Karla Téllez aparecían con estado `✉️ Correo Despachado` en lugar de `🏆 Votos Registrados`, a pesar de haber enviado su evaluación, debido a que en la invitación figuraba como `"Karla Tellez"` y en el formulario envió `"Karla Elsania Téllez Ruiz"` (con acentos y segundo nombre/apellido intercalado).
   - **Solución Implementada:** Se introdujo `cleanNorm` (eliminación de tildes/diacríticos y minúsculas) y comparación por tokens significativos. Ahora el sistema detecta coincidencias parciales inteligentes ("Karla" + "Tellez/Téllez"), marcando a Karla y futuros jurados con `🏆 Votos Registrados` y fila dorada inmediatamente.
 - **Botón para Eliminar Evaluaciones de Prueba (`handleDeleteEvaluation`):**
-  - Se añadió el botón **`[🗑️ Eliminar]`** en cada tarjeta de la pestaña **«Evaluaciones de Jurados»** con ventana de confirmación previa. Permite eliminar votos de prueba (como los de Karen Torres) para que no alteren el ranking ni las métricas de ferreterías.
+  - Se añadió el botón **`[🗑️ Eliminar]`** en cada tarjeta de la pestaña **«Evaluaciones de Jurados»** con ventana de confirmación previa.
+  - **Seguridad y Control de Acceso:** Restringido exclusivamente al Super Administrador (`marktuay@gmail.com`). Ningún otro usuario u operador del panel verá ni podrá activar los botones de eliminación.
 - **Botón para Eliminar Enlaces/Invitaciones (`handleDeleteInvitedJudge`):**
-  - Se agregó botón de eliminación en la columna de acciones de la tabla de **«Enlaces / Jurados Invitados»** para descartar registros de prueba.
+  - Se agregó botón de eliminación en la columna de acciones de la tabla de **«Enlaces / Jurados Invitados»**, igualmente protegido de forma exclusiva para `marktuay@gmail.com`.
 
 
 
