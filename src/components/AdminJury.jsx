@@ -4,6 +4,7 @@ import { db, auth } from '../firebase';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 import InviteJudgeModal from './InviteJudgeModal';
+import { notifyAdminJuryCompleted, ADMIN_NOTIFICATION_EMAIL } from '../services/juryEmailService';
 
 export default function AdminJury({ onBack, adminUser }) {
   // Verificación de Super Administrador (Exclusivo marktuay@gmail.com)
@@ -23,6 +24,8 @@ export default function AdminJury({ onBack, adminUser }) {
   const [isExporting, setIsExporting] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
   const [copiedSpeechId, setCopiedSpeechId] = useState(null);
+  const [sendingEmailId, setSendingEmailId] = useState(null);
+  const [emailSuccessId, setEmailSuccessId] = useState(null);
 
   // Estados para Filtros y WhatsApp en Jurados Invitados
   const [invitedSearch, setInvitedSearch] = useState('');
@@ -181,6 +184,27 @@ export default function AdminJury({ onBack, adminUser }) {
     } catch (err) {
       console.error('Error al eliminar invitación:', err);
       alert('Error al eliminar la invitación: ' + err.message);
+    }
+  };
+
+  // Notificar por correo a Karen Torres (karen.torres@rinsa.red) sobre una evaluación completada
+  const handleNotifyKaren = async (ev) => {
+    setSendingEmailId(ev.id);
+    try {
+      await notifyAdminJuryCompleted({
+        judgeName: ev.judgeName,
+        judgeCompany: ev.judgeCompany,
+        submittedAtStr: ev.submittedAtStr,
+        evaluations: ev.evaluations
+      });
+      setEmailSuccessId(ev.id);
+      setTimeout(() => setEmailSuccessId(null), 3500);
+      alert(`¡Notificación enviada con éxito a ${ADMIN_NOTIFICATION_EMAIL}!`);
+    } catch (err) {
+      console.error('Error al enviar correo:', err);
+      alert('Error al enviar correo de notificación: ' + err.message);
+    } finally {
+      setSendingEmailId(null);
     }
   };
 
@@ -590,6 +614,29 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                         Tel: {ev.judgePhone}
                       </span>
                     )}
+
+                    {/* Botón para Notificar / Reenviar correo a Karen Torres */}
+                    <button
+                      type="button"
+                      disabled={sendingEmailId === ev.id}
+                      onClick={() => handleNotifyKaren(ev)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 border shadow-2xs ${
+                        emailSuccessId === ev.id
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                          : 'bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white border-blue-200'
+                      }`}
+                      title={`Enviar reporte completo de esta evaluación a ${ADMIN_NOTIFICATION_EMAIL}`}
+                    >
+                      <Mail size={13} />
+                      <span>
+                        {emailSuccessId === ev.id
+                          ? '¡Enviado a Karen!'
+                          : sendingEmailId === ev.id
+                          ? 'Enviando...'
+                          : 'Notificar a Karen'}
+                      </span>
+                    </button>
+
                     {isSuperAdmin && (
                       <button
                         type="button"

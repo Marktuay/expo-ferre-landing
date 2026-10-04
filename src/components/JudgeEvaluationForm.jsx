@@ -3,6 +3,7 @@ import { Award, CheckCircle2, ChevronRight, ChevronLeft, Send, Building2, Check,
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
+import { notifyAdminJuryCompleted } from '../services/juryEmailService';
 
 const CATEGORIES = [
   {
@@ -120,6 +121,15 @@ export default function JudgeEvaluationForm({ onClose }) {
 
       const docRef = await addDoc(collection(db, `${getEventBasePath()}/juryEvaluations`), payload);
       setSubmittedId(docRef.id);
+
+      // Notificación automática por correo a Karen Torres (karen.torres@rinsa.red)
+      notifyAdminJuryCompleted({
+        judgeName: payload.judgeName,
+        judgeCompany: payload.judgeCompany,
+        submittedAtStr: payload.submittedAtStr,
+        evaluations: payload.evaluations
+      }).catch(err => console.warn('No se pudo enviar notificación por correo a administración:', err));
+
       setIsSuccess(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
