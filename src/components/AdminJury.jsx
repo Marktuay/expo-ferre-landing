@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Award, Plus, FileSpreadsheet, ArrowLeft, Search, Building2, UserCheck, Sparkles, Copy, Check, MessageSquare, Phone, Mail, CheckCircle2, Clock, ExternalLink, X, Send } from 'lucide-react';
+import { Award, Plus, FileSpreadsheet, ArrowLeft, Search, Building2, UserCheck, Sparkles, Copy, Check, MessageSquare, Phone, Mail, CheckCircle2, Clock, ExternalLink, X, Send, Trash2 } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 import InviteJudgeModal from './InviteJudgeModal';
 
@@ -91,16 +91,79 @@ export default function AdminJury({ onBack }) {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  // Helper para verificar si un jurado ya envió su evaluación
+  // Normalizar cadenas para comparar sin acentos, espacios extra o mayúsculas
+  const cleanNorm = (str) => {
+    return (str || '')
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+  };
+
+  // Helper inteligente para verificar si un jurado ya envió su evaluación
   const isJudgeEvaluated = (judge) => {
-    const jName = (judge.name || '').trim().toLowerCase();
-    const jEmail = (judge.email || '').trim().toLowerCase();
+    const jNameNorm = cleanNorm(judge.name);
+    const jEmailNorm = cleanNorm(judge.email);
+
     return evaluations.some(ev => {
-      const evName = (ev.judgeName || ev.juradoNombre || '').trim().toLowerCase();
-      const evEmail = (ev.judgeEmail || ev.juradoEmail || '').trim().toLowerCase();
-      return (jEmail && evEmail && jEmail === evEmail) || 
-             (jName && evName && (evName === jName || evName.includes(jName) || jName.includes(evName)));
+      const evNameNorm = cleanNorm(ev.judgeName || ev.juradoNombre);
+      const evEmailNorm = cleanNorm(ev.judgeEmail || ev.juradoEmail);
+
+      // 1. Coincidencia por correo si ambos existen
+      if (jEmailNorm && evEmailNorm && jEmailNorm === evEmailNorm) return true;
+
+      // 2. Coincidencia directa de nombre
+      if (jNameNorm && evNameNorm) {
+        if (evNameNorm === jNameNorm || evNameNorm.includes(jNameNorm) || jNameNorm.includes(evNameNorm)) {
+          return true;
+        }
+
+        // 3. Token matching inteligente:
+        // Divide en palabras clave (ej: "Karla Tellez" -> ["karla", "tellez"])
+        // Comprueba si están contenidas en "Karla Elsania Téllez Ruiz" -> ["karla", "elsania", "tellez", "ruiz"]
+        const jTokens = jNameNorm.split(/\s+/).filter(t => t.length >= 3);
+        const evTokens = evNameNorm.split(/\s+/).filter(t => t.length >= 3);
+
+        if (jTokens.length > 0 && jTokens.every(jt => evTokens.includes(jt))) {
+          return true;
+        }
+        if (evTokens.length > 0 && evTokens.every(et => jTokens.includes(et))) {
+          return true;
+        }
+      }
+
+      return false;
     });
+  };
+
+  // Eliminar una evaluación (ej. pruebas de Karen Torres)
+  const handleDeleteEvaluation = async (ev) => {
+    const confirmDelete = window.confirm(
+      `¿Estás seguro de que deseas eliminar la evaluación de "${ev.judgeName}"?\n\nEsta acción eliminará sus votos del ranking de ferreterías de forma permanente.`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await deleteDoc(doc(db, `${getEventBasePath()}/juryEvaluations`, ev.id));
+    } catch (err) {
+      console.error('Error al eliminar evaluación:', err);
+      alert('Error al eliminar la evaluación: ' + err.message);
+    }
+  };
+
+  // Eliminar un jurado invitado / enlace de prueba
+  const handleDeleteInvitedJudge = async (judge) => {
+    const confirmDelete = window.confirm(
+      `¿Estás seguro de que deseas eliminar la invitación de "${judge.name}"?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await deleteDoc(doc(db, `${getEventBasePath()}/invitedJudges`, judge.id));
+    } catch (err) {
+      console.error('Error al eliminar invitación:', err);
+      alert('Error al eliminar la invitación: ' + err.message);
+    }
   };
 
   // Helper para generar el discurso oficial de WhatsApp para Jurado
@@ -503,11 +566,22 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                       {ev.judgeCompany ? `${ev.judgeCompany} · ` : ''}{ev.submittedAtStr || 'Fecha reciente'}
                     </p>
                   </div>
-                  {ev.judgePhone && (
-                    <span className="text-xs text-gray-500 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border">
-                      Tel: {ev.judgePhone}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {ev.judgePhone && (
+                      <span className="text-xs text-gray-500 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border">
+                        Tel: {ev.judgePhone}
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteEvaluation(ev)}
+                      className="px-2.5 py-1.5 text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-lg text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+                      title="Eliminar esta evaluación (ej. pruebas)"
+                    >
+                      <Trash2 size={13} />
+                      <span>Eliminar</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Resumen de Nominaciones */}
@@ -813,6 +887,16 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                               >
                                 {copiedId === j.id ? <Check size={13} className="text-green-600" /> : <Copy size={13} />}
                                 <span>{copiedId === j.id ? '¡Copiado!' : 'Copiar'}</span>
+                              </button>
+
+                              {/* Botón Eliminar Jurado Invitado */}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteInvitedJudge(j)}
+                                title="Eliminar invitación"
+                                className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-lg transition-colors cursor-pointer"
+                              >
+                                <Trash2 size={14} />
                               </button>
                             </div>
                           </td>
