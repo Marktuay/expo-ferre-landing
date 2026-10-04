@@ -990,6 +990,9 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - **Hojas 2, 3 y 4 (`Ranking Familiar`, `Ranking Oro`, `Ranking Promesa`):** Posición, Ferretería, Ciudad, Puntos Ponderados, Total Nominaciones y Desglose de Jurados.
   - **Hoja 5 (`Control Jurados Invitados`):** Directorio de los 12 jurados con Correo, Celular/WhatsApp, Estado de Evaluación (`🏆 Evaluación Completada` vs `⏳ Pendiente de Votar`), Canal de Entrega (`🏆 Votos Registrados`, `📱 WhatsApp Enviado`, `✉️ Correo Despachado`, etc.), Enlace confidencial de evaluación y fecha de invitación.
   - **Prueba Real Ejecutada:** Se despachó con éxito un correo de prueba a `karen.torres@rinsa.red` con la evaluación real de Karla Téllez (Doc ID: `PUSrM82UVNdT3gADLDZM`).
+- **Inclusión de Logotipo: Durman en Categoría Plata (`App.jsx` & `AdminSponsors.jsx`):**
+  - Se incorporó el logotipo oficial de **Durman by aliaxis** (`/plata/durman.png`) dentro del carrusel de marcas patrocinadoras en la Landing Page y en el listado de patrocinadores oficiales de la administración.
+  - Estilizado con tarjeta de fondo blanco uniforme (`bgWhite: true`).
 
 
 
