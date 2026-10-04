@@ -993,6 +993,11 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Inclusión de Logotipo: Durman en Categoría Plata (`App.jsx` & `AdminSponsors.jsx`):**
   - Se incorporó el logotipo oficial de **Durman by aliaxis** (`/plata/durman.png`) dentro del carrusel de marcas patrocinadoras en la Landing Page y en el listado de patrocinadores oficiales de la administración.
   - Estilizado con tarjeta de fondo blanco uniforme (`bgWhite: true`).
+- **Auditoría y Optimización del Respaldo Completo de Firestore (`firestoreBackup.js` & `AdminHub.jsx`):**
+  - **Problema Detectado:** El código original de respaldo solo incluía 7 colecciones iniciales y dejaba por fuera las colecciones más críticas desarrolladas recientemente (`directInvites`, `sponsorSettings`, `juryEvaluations`, `invitedJudges` y `systemUsers`).
+  - **Ampliación al 100% (12 Colecciones):** Se expandió `TARGET_COLLECTIONS` para respaldar las 12 colecciones activas del sistema: `users`, `stands`, `preregistrations`, `directInvites`, `sponsorSettings`, `juryEvaluations`, `invitedJudges`, `guests`, `staff`, `speakers`, `contacts` y `systemUsers`.
+  - **Descarga Offline Automática (.JSON):** Al presionar "Respaldo Completo Firestore" (con PIN maestro `2026`), además de crear las colecciones `_backup` y el snapshot inmutable en Firestore, el sistema genera y descarga automáticamente un archivo `ExpoFerre2026_Respaldo_Firestore_YYYY-MM-DD.json` en la computadora del administrador para custodia fría fuera de la nube.
+
 
 
 
