@@ -384,6 +384,36 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
       })));
       XLSX.utils.book_append_sheet(wb, wsProm, "Ranking Promesa");
 
+      // Hoja 5: Directorio y Estado de Entrega de Jurados Invitados
+      const judgesData = invitedJudges.map(j => {
+        const evaluated = isJudgeEvaluated(j);
+        const isWa = j.whatsappSent || j.deliveryStatus === 'whatsapp';
+        const isDeliv = j.delivered || isWa || evaluated;
+        
+        let canalEnvio = '⏳ Pendiente';
+        if (evaluated) canalEnvio = '🏆 Votos Registrados';
+        else if (isWa) canalEnvio = '📱 WhatsApp Enviado';
+        else if (isDeliv) canalEnvio = '✅ Enlace Entregado';
+        else if (j.sentVia === 'email') canalEnvio = '✉️ Correo Despachado';
+
+        let fechaInvitacion = 'N/D';
+        if (j.createdAt?.toDate) {
+          fechaInvitacion = j.createdAt.toDate().toLocaleString('es-NI', { timeZone: 'America/Managua' });
+        }
+
+        return {
+          'Jurado Calificador': j.name || 'Sin nombre',
+          'Correo Electrónico': j.email || 'N/D',
+          'Teléfono / Celular': j.phone && j.phone !== 'N/D' ? j.phone : 'Sin teléfono',
+          'Estado de Evaluación': evaluated ? '🏆 Evaluación Completada' : '⏳ Pendiente de Votar',
+          'Canal de Entrega': canalEnvio,
+          'Enlace de Evaluación': j.inviteLink || 'N/D',
+          'Fecha de Registro': fechaInvitacion
+        };
+      });
+      const wsJudges = XLSX.utils.json_to_sheet(judgesData);
+      XLSX.utils.book_append_sheet(wb, wsJudges, "Control Jurados Invitados");
+
       XLSX.writeFile(wb, `Nominaciones_Jurado_Premios_ExpoFerre_2026.xlsx`);
     } catch (e) {
       console.error("Error exporting jury excel:", e);
