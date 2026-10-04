@@ -116,6 +116,28 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
     };
   }, [adminUser, setAdminUser]);
 
+  // Respaldo Automático Diario Silencioso de las 12 Colecciones para marktuay@gmail.com
+  useEffect(() => {
+    if (!isMasterAdmin) return;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const lastAutoBackup = localStorage.getItem('lastAutoBackupDate');
+
+    if (lastAutoBackup !== todayStr) {
+      const timer = setTimeout(async () => {
+        try {
+          console.log('[AutoBackup] Ejecutando respaldo automático diario de las 12 colecciones...');
+          await createFullFirestoreBackup(db, { triggerDownload: false });
+          localStorage.setItem('lastAutoBackupDate', todayStr);
+          console.log('[AutoBackup] Respaldo automático diario completado.');
+        } catch (autoErr) {
+          console.warn('[AutoBackup] Error en respaldo silencioso:', autoErr);
+        }
+      }, 3500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isMasterAdmin]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) {

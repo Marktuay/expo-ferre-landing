@@ -47,6 +47,8 @@ export async function createFullFirestoreBackup(db, { triggerDownload = true, on
         let currentBatch = writeBatch(db);
         let opCount = 0;
 
+        const maxOpsPerBatch = colName === 'sponsorSettings' ? 4 : 200;
+
         for (const d of snap.docs) {
           const docData = d.data();
 
@@ -68,8 +70,8 @@ export async function createFullFirestoreBackup(db, { triggerDownload = true, on
 
           count++;
 
-          // Límite de Firestore es 500 ops por lote, enviamos cada 400
-          if (opCount >= 400) {
+          // Límite de Firestore es 10MB por request (sponsorSettings tiene imágenes base64)
+          if (opCount >= maxOpsPerBatch) {
             await currentBatch.commit();
             currentBatch = writeBatch(db);
             opCount = 0;
@@ -158,6 +160,7 @@ export async function restoreFullFirestoreBackup(db, { onProgress } = {}) {
       if (!backupSnap.empty) {
         let currentBatch = writeBatch(db);
         let opCount = 0;
+        const maxOpsPerBatch = colName === 'sponsorSettings' ? 2 : 200;
 
         for (const d of backupSnap.docs) {
           const activeRef = doc(db, activePath, d.id);
@@ -165,7 +168,7 @@ export async function restoreFullFirestoreBackup(db, { onProgress } = {}) {
           opCount++;
           count++;
 
-          if (opCount >= 400) {
+          if (opCount >= maxOpsPerBatch) {
             await currentBatch.commit();
             currentBatch = writeBatch(db);
             opCount = 0;

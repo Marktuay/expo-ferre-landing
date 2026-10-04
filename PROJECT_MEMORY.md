@@ -999,6 +999,10 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - **Feedback Visual y Tipografía de Alto Contraste:** 
     - Las tarjetas ahora muestran un icono giratorio (`animate-spin`) y texto descriptivo en vivo con el paso actual (ej. `Respaldando stands (2/12)...`, `Generando archivo JSON...`).
     - Las tipografías estáticas se cambiaron a `text-slate-900` para garantizar un contraste nítido y evitar que se vean deslavadas o tenues cuando están en reposo.
+- **Sistema de Respaldos Automáticos de las 12 Colecciones (`scripts/auto_backup_12_collections.js` & `AdminHub.jsx`):**
+  - **Script de Servidor VM (`npm run backup`):** Creado en `scripts/auto_backup_12_collections.js`. Lee exclusivamente las 12 colecciones (`users`, `stands`, `preregistrations`, `directInvites`, `sponsorSettings`, `juryEvaluations`, `invitedJudges`, `guests`, `staff`, `speakers`, `contacts`, `systemUsers`), actualiza Firestore `_backup` y genera copias físicas `.json` fechadas en `./backups/` conservando los últimos 30 días.
+  - **Manejo de Límite de Payload en Firestore (10 MB):** Para colecciones pesadas con imágenes base64 como `sponsorSettings`, el tamaño de lote se ajusta automáticamente a 2-4 operaciones por batch, previniendo el error `INVALID_ARGUMENT: Request payload size exceeds the limit`.
+  - **Respaldo Silencioso en Intranet Web:** `AdminHub.jsx` evalúa diariamente si el Super Admin `marktuay@gmail.com` ha iniciado sesión; si han transcurrido más de 24 horas desde el último respaldo, ejecuta un snapshot silencioso en segundo plano sin bloquear la UI ni requerir ingreso de PIN.
 
 
 
