@@ -1,11 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Award, Plus, FileSpreadsheet, ArrowLeft, Search, Building2, UserCheck, Sparkles, Copy, Check, MessageSquare, Phone, Mail, CheckCircle2, Clock, ExternalLink, X, Send, Trash2 } from 'lucide-react';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 import InviteJudgeModal from './InviteJudgeModal';
 
-export default function AdminJury({ onBack }) {
+export default function AdminJury({ onBack, adminUser }) {
+  // Verificación de Super Administrador (Exclusivo marktuay@gmail.com)
+  const MASTER_EMAIL = 'marktuay@gmail.com';
+  const currentEmail = (
+    adminUser?.email || 
+    adminUser?.username || 
+    auth?.currentUser?.email || 
+    ''
+  ).trim().toLowerCase();
+  const isSuperAdmin = currentEmail === MASTER_EMAIL || currentEmail.includes('marktuay');
+
   const [evaluations, setEvaluations] = useState([]);
   const [invitedJudges, setInvitedJudges] = useState([]);
   const [activeTab, setActiveTab] = useState('ranking'); // 'ranking', 'evaluations', 'invited'
@@ -136,8 +146,12 @@ export default function AdminJury({ onBack }) {
     });
   };
 
-  // Eliminar una evaluación (ej. pruebas de Karen Torres)
+  // Eliminar una evaluación (Exclusivo Super Administrador: marktuay@gmail.com)
   const handleDeleteEvaluation = async (ev) => {
+    if (!isSuperAdmin) {
+      alert("Acceso denegado: Solo el Super Administrador (marktuay@gmail.com) tiene permiso para eliminar evaluaciones.");
+      return;
+    }
     const confirmDelete = window.confirm(
       `¿Estás seguro de que deseas eliminar la evaluación de "${ev.judgeName}"?\n\nEsta acción eliminará sus votos del ranking de ferreterías de forma permanente.`
     );
@@ -151,8 +165,12 @@ export default function AdminJury({ onBack }) {
     }
   };
 
-  // Eliminar un jurado invitado / enlace de prueba
+  // Eliminar un jurado invitado / enlace de prueba (Exclusivo Super Administrador: marktuay@gmail.com)
   const handleDeleteInvitedJudge = async (judge) => {
+    if (!isSuperAdmin) {
+      alert("Acceso denegado: Solo el Super Administrador (marktuay@gmail.com) tiene permiso para eliminar invitaciones.");
+      return;
+    }
     const confirmDelete = window.confirm(
       `¿Estás seguro de que deseas eliminar la invitación de "${judge.name}"?`
     );
@@ -572,15 +590,17 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                         Tel: {ev.judgePhone}
                       </span>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteEvaluation(ev)}
-                      className="px-2.5 py-1.5 text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-lg text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
-                      title="Eliminar esta evaluación (ej. pruebas)"
-                    >
-                      <Trash2 size={13} />
-                      <span>Eliminar</span>
-                    </button>
+                    {isSuperAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteEvaluation(ev)}
+                        className="px-2.5 py-1.5 text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-lg text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+                        title="Eliminar esta evaluación (Super Administrador)"
+                      >
+                        <Trash2 size={13} />
+                        <span>Eliminar</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -889,15 +909,17 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                                 <span>{copiedId === j.id ? '¡Copiado!' : 'Copiar'}</span>
                               </button>
 
-                              {/* Botón Eliminar Jurado Invitado */}
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteInvitedJudge(j)}
-                                title="Eliminar invitación"
-                                className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-lg transition-colors cursor-pointer"
-                              >
-                                <Trash2 size={14} />
-                              </button>
+                              {/* Botón Eliminar Jurado Invitado (Exclusivo Super Administrador) */}
+                              {isSuperAdmin && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteInvitedJudge(j)}
+                                  title="Eliminar invitación (Super Administrador)"
+                                  className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>

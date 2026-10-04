@@ -1561,7 +1561,7 @@ export default function App() {
         )}
 
         {currentView === 'adminJury' && (
-          <AdminJury onBack={() => setCurrentView('adminHub')} />
+          <AdminJury onBack={() => setCurrentView('adminHub')} adminUser={adminUser} />
         )}
 
         {currentView === 'adminDirectInvites' && (
