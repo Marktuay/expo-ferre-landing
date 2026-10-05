@@ -97,7 +97,12 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ---
 
-### 📋 Otras Tareas Pendientes
+### 📋 Tareas Pendientes y Prioridad Próxima Sesión
+
+- [ ] **🎯 PRIORIDAD MAÑANA: Revisión y Validación del Escáner de Códigos QR para Check-In del Evento:**
+  - **Objetivo:** Verificar y poner a punto la funcionalidad de escaneo de Códigos QR para el registro de asistencia en tiempo real de invitados, participantes, preregistros y patrocinadores.
+  - **Componentes involucrados:** `AdminCheckIn.jsx`, `ScannerModule.jsx`, `SponsorScanner.jsx` y actualización de estado en Firestore (`events/2026/...` y `attendance`).
+  - **Puntos a probar:** Compatibilidad de cámara en dispositivos móviles/laptops, velocidad de lectura de QR, feedback sonoro/visual, validación de pases ya utilizados o duplicados, y soporte para personal de staff (`usuario1` / `tech_staff`).
 
 - **1. Revisión y Adjudicación de los 9 Contactos Duplicados Inter-Patrocinador (En espera de decisión del organizador):**
   - Josué David (*Ferretería Gonzalez Sevilla*): Fernández Sera vs Importaciones Balladares.
