@@ -74,6 +74,28 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ## 📌 Tareas Pendientes
 
+### 🚨 Tareas Críticas de Seguridad (PROGRAMADAS PARA EJECUTARSE HOY POR LA NOCHE - 05/OCT/2026)
+
+- [ ] **1. Implementar Bloqueo Estricto Fail-Closed en Autenticación Administrativa ([AdminHub.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx#L155-L194)):**
+  - **Problema:** En `handleLogin`, si un usuario autenticado mediante Firebase Auth no existe en la colección `systemUsers`, la variable `role` se mantiene en su valor inicial `'admin'`, otorgando acceso total indebido al panel de control a cualquier cuenta registrada (ej. patrocinadores o visitantes).
+  - **Acción a ejecutar:** Si `querySnapshot.empty` en `systemUsers`, forzar de inmediato `await signOut(auth)` y mostrar error: *"Acceso denegado: Esta cuenta no cuenta con permisos administrativos"*. Solo otorgar acceso si existe un registro válido con rol asignado.
+
+- [ ] **2. Erradicación de Contraseñas en Texto Plano en Firestore ([AdminUsers.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminUsers.jsx#L78-L83), [AdminSponsorDetails.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsorDetails.jsx#L252-L264), [AuthPage.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AuthPage.jsx#L83-L86)):**
+  - **Problema:** Al registrar o editar administradores y patrocinadores, el campo `password` se almacena sin cifrar dentro de Firestore (`systemUsers` y `users`).
+  - **Acción a ejecutar:** Eliminar el campo `password` de todas las escrituras a Firestore (`addDoc`, `setDoc`, `updateDoc`). Delegar el 100% de la gestión y verificación de credenciales a Firebase Authentication. Para recuperación o cambio de claves, utilizar exclusivamente `sendPasswordResetEmail` y `updatePassword`.
+
+- [ ] **3. Endurecimiento de Validación de Super Administrador Maestro ([AdminHub.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx#L28-L34)):**
+  - **Problema:** La validación usa coincidencia parcial laxa: `adminUser.username.trim().toLowerCase().includes('marktuay')`.
+  - **Acción a ejecutar:** Restringir mediante comparación estricta de igualdad `=== 'marktuay@gmail.com'` contra el correo autenticado verificado o contra su UID inmutable de Firebase Auth.
+
+- [ ] **4. Validación Criptográfica de Sesión con Firebase Auth ([App.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx#L130-L145)):**
+  - **Problema:** `adminUser` se inicializa y confía ciegamente en un JSON plano guardado en `localStorage` sin comprobar la existencia de una sesión activa en Firebase Auth.
+  - **Acción a ejecutar:** Escuchar `onAuthStateChanged(auth)`. Si no hay usuario autenticado en Firebase Auth, forzar `setAdminUser(null)` y limpiar `localStorage` para evitar manipulación manual desde DevTools.
+
+---
+
+### 📋 Otras Tareas Pendientes
+
 - **1. Revisión y Adjudicación de los 9 Contactos Duplicados Inter-Patrocinador (En espera de decisión del organizador):**
   - Josué David (*Ferretería Gonzalez Sevilla*): Fernández Sera vs Importaciones Balladares.
   - Delvis / Devil (*Ferretería Areas*): Fernández Sera vs Importaciones Balladares.
@@ -1024,6 +1046,15 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - **Causa Raíz:** Meta cobra una tarifa por cada mensaje saliente de Marketing de forma independiente a la tarifa fija mensual del software de WATI ($119/mes).
   - **Acción Realizada:** El usuario recargó con éxito el saldo prepago de créditos en la billetera de WATI (`live.wati.io/10262044`).
 - **Estado Operativo:** La plantilla corporativa `invitacion_expoferre` (Aprobada por Meta bajo categoría `MARKETING`) cuenta con fondos activos para el despacho masivo e individual de invitaciones con gafete y Código QR.
+
+### 🛡️ Auditoría de Seguridad de Endpoints y Flujos de Autenticación
+- **Diagnóstico Integral Realizado:** Se auditó el flujo de login administrativo, persistencia de sesiones, manejo de roles y almacenamiento de contraseñas.
+- **Vulnerabilidades Identificadas:**
+  1. *Elevación de Privilegios por Rol por Defecto:* En `AdminHub.jsx`, cualquier usuario autenticado en Firebase Auth que no existía en `systemUsers` recibía el rol `'admin'` por defecto.
+  2. *Contraseñas en Texto Plano en Base de Datos:* Se detectó almacenamiento del campo `password` en texto claro en `systemUsers` y `users`.
+  3. *Coincidencia Laxa de Super Admin:* Validación de permisos maestros mediante `.includes('marktuay')`.
+  4. *Persistencia Insegura en LocalStorage:* Confianza ciega en `adminUser` sin verificar sesión criptográfica activa en Firebase Auth.
+- **Estatus:** Registrados como **Cambios Críticos Pendientes** programados para ser implementados y desplegados hoy por la noche (05/Oct/2026).
 
 
 
