@@ -74,19 +74,23 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ## 📌 Tareas Pendientes
 
-### 🚨 Tareas Críticas de Seguridad (PROGRAMADAS PARA EJECUTARSE HOY POR LA NOCHE - 05/OCT/2026)
+### 🚨 Tareas Críticas de Seguridad (EN EJECUCIÓN - 05/OCT/2026)
 
-- [ ] **1. Implementar Bloqueo Estricto Fail-Closed en Autenticación Administrativa ([AdminHub.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx#L155-L194)):**
-  - **Problema:** En `handleLogin`, si un usuario autenticado mediante Firebase Auth no existe en la colección `systemUsers`, la variable `role` se mantiene en su valor inicial `'admin'`, otorgando acceso total indebido al panel de control a cualquier cuenta registrada (ej. patrocinadores o visitantes).
-  - **Acción a ejecutar:** Si `querySnapshot.empty` en `systemUsers`, forzar de inmediato `await signOut(auth)` y mostrar error: *"Acceso denegado: Esta cuenta no cuenta con permisos administrativos"*. Solo otorgar acceso si existe un registro válido con rol asignado.
+- [x] **1. Implementar Bloqueo Estricto Fail-Closed en Autenticación Administrativa ([AdminHub.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx#L148-L215)):**
+  - **Estado:** ✅ **Completado y Verificado.**
+  - **Detalle de Solución:**
+    1. Si `cleanEmail === MASTER_EMAIL` (`marktuay@gmail.com`), concede acceso directo de Super Admin sin depender de Firestore.
+    2. Para cualquier otro usuario autenticado con Firebase Auth, se realiza una búsqueda estricta en `events/2026/systemUsers`.
+    3. Si la cuenta NO existe en `systemUsers` (o falla la consulta), ejecuta de inmediato `await auth.signOut()` y arroja *"Acceso denegado: Esta cuenta no cuenta con permisos administrativos."*
+    4. Si existe, asigna su rol oficial (`role: foundUser.role`).
 
 - [ ] **2. Erradicación de Contraseñas en Texto Plano en Firestore ([AdminUsers.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminUsers.jsx#L78-L83), [AdminSponsorDetails.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsorDetails.jsx#L252-L264), [AuthPage.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AuthPage.jsx#L83-L86)):**
   - **Problema:** Al registrar o editar administradores y patrocinadores, el campo `password` se almacena sin cifrar dentro de Firestore (`systemUsers` y `users`).
   - **Acción a ejecutar:** Eliminar el campo `password` de todas las escrituras a Firestore (`addDoc`, `setDoc`, `updateDoc`). Delegar el 100% de la gestión y verificación de credenciales a Firebase Authentication. Para recuperación o cambio de claves, utilizar exclusivamente `sendPasswordResetEmail` y `updatePassword`.
 
-- [ ] **3. Endurecimiento de Validación de Super Administrador Maestro ([AdminHub.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx#L28-L34)):**
-  - **Problema:** La validación usa coincidencia parcial laxa: `adminUser.username.trim().toLowerCase().includes('marktuay')`.
-  - **Acción a ejecutar:** Restringir mediante comparación estricta de igualdad `=== 'marktuay@gmail.com'` contra el correo autenticado verificado o contra su UID inmutable de Firebase Auth.
+- [x] **3. Endurecimiento de Validación de Super Administrador Maestro ([AdminHub.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx#L28-L34)):**
+  - **Estado:** ✅ **Completado y Verificado.**
+  - **Detalle de Solución:** Se eliminó la coincidencia parcial laxa `.includes('marktuay')`. Ahora se restringe mediante comparación de igualdad estricta `=== 'marktuay@gmail.com'` sobre el correo verificado.
 
 - [ ] **4. Validación Criptográfica de Sesión con Firebase Auth ([App.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/App.jsx#L130-L145)):**
   - **Problema:** `adminUser` se inicializa y confía ciegamente en un JSON plano guardado en `localStorage` sin comprobar la existencia de una sesión activa en Firebase Auth.

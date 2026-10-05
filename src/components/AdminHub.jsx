@@ -26,12 +26,11 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
 
   const lastActivityRef = useRef(Date.now());
 
-  // Correo maestro exclusivamente autorizado para respaldos
+  // Correo maestro exclusivamente autorizado para respaldos y acciones críticas
   const MASTER_EMAIL = 'marktuay@gmail.com';
   const isMasterAdmin = adminUser && (
     (adminUser.email && adminUser.email.trim().toLowerCase() === MASTER_EMAIL) ||
-    (adminUser.username && adminUser.username.trim().toLowerCase() === MASTER_EMAIL) ||
-    (adminUser.username && adminUser.username.trim().toLowerCase().includes('marktuay'))
+    (adminUser.username && adminUser.username.trim().toLowerCase() === MASTER_EMAIL)
   );
 
   // Listener en tiempo real de mensajes de contacto sin leer e invitaciones directas
@@ -149,16 +148,26 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
     setIsLoggingIn(true);
 
     try {
-      // 1. Iniciar sesión con Firebase Auth
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-
       const cleanEmail = email.trim().toLowerCase();
-      let role = 'admin';
-      const nameParts = cleanEmail.split('@')[0];
-      let username = nameParts.charAt(0).toUpperCase() + nameParts.slice(1);
+
+      // 1. Iniciar sesión con Firebase Auth
+      await signInWithEmailAndPassword(auth, cleanEmail, password);
+
+      // Si es el Super Administrador Maestro, acceso directo con privilegios totales
+      if (cleanEmail === MASTER_EMAIL) {
+        setAdminUser({ 
+          id: cleanEmail,
+          username: 'Mark Tuay', 
+          role: 'admin', 
+          email: cleanEmail 
+        });
+        return;
+      }
+
+      // 2. Verificar membresía OBLIGATORIA en systemUsers (Fail-Closed)
+      let foundUser = null;
       let userId = cleanEmail;
 
-      // 2. Intentar buscar en systemUsers de forma no bloqueante
       try {
         let q = query(
           collection(db, `${getEventBasePath()}/systemUsers`), 
@@ -175,21 +184,29 @@ export default function AdminHub({ onBack, onNavigate, adminUser, setAdminUser }
         }
         
         if (!querySnapshot.empty) {
-          querySnapshot.forEach((docSnap) => {
-            const userData = docSnap.data();
-            userId = docSnap.id;
-            username = userData.username || userData.email || username;
-            role = userData.role || 'admin';
-          });
+          const docSnap = querySnapshot.docs[0];
+          foundUser = docSnap.data();
+          userId = docSnap.id;
         }
       } catch (firestoreErr) {
-        console.warn("Consulta a systemUsers omitida:", firestoreErr);
+        console.warn("Error consultando systemUsers:", firestoreErr);
       }
+
+      // 3. Si la cuenta NO está en systemUsers, expulsar inmediatamente
+      if (!foundUser) {
+        await auth.signOut();
+        setError('Acceso denegado: Esta cuenta no cuenta con permisos administrativos.');
+        return;
+      }
+
+      // 4. Si existe, otorgar sesión con su rol asignado
+      const nameParts = cleanEmail.split('@')[0];
+      const fallbackName = nameParts.charAt(0).toUpperCase() + nameParts.slice(1);
 
       setAdminUser({ 
         id: userId,
-        username: username, 
-        role: role, 
+        username: foundUser.username || foundUser.email || fallbackName, 
+        role: foundUser.role || 'tech_staff', 
         email: cleanEmail 
       });
     } catch (err) {
