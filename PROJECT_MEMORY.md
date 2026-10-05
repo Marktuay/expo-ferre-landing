@@ -29,6 +29,10 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 **Causa:** Las reglas de Firestore exigen que el usuario esté autenticado (`request.auth != null`). Si la sesión de Firebase Auth del admin caducó o no se ha inicializado correctamente, Firebase bloquea la escritura.
 **Solución:** Asegurarse de que el cierre de sesión (`auth.signOut()`) no ocurrió por inactividad y que la regla de Firestore permite escrituras al rol adecuado.
 
+**Problema:** Al enviar invitaciones masivas por WhatsApp con WATI, la ventana de resultados arroja el error: `"Not enough credits to send the message"`.
+**Causa:** Meta (WhatsApp) factura las conversaciones de Marketing de forma independiente al costo de suscripción mensual de WATI ($119/mes). Si la billetera de créditos de WATI está en $0.00, WATI rechaza el envío de la plantilla.
+**Solución:** Recargar saldo prepago en la billetera de WATI (`live.wati.io/10262044`) desde **Información de facturación -> Detalles de facturación / Wallet** o desde el módulo de **Broadcast (Megáfono) -> Add Credits**.
+
 ### 2. Panel de Patrocinadores (Acceso Privado)
 - **Autenticación:** Login y Registro propio para patrocinadores.
 - **Dashboard:**
@@ -1008,6 +1012,18 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
       `pm2 start scripts/auto_backup_12_collections.js --name "backup-expoferre" --cron "0 2 * * *" --no-autorestart && pm2 save`
     - Ejecución automática programada todos los días a las **2:00 AM**.
     - Monitoreo y consulta de logs disponible mediante `pm2 logs backup-expoferre`.
+
+---
+
+## 📅 Resumen de Cambios y Avances de la Sesión (05 de Octubre de 2026)
+
+### 📲 Activación y Recarga de Billetera de WhatsApp WATI (`AdminDirectInvites.jsx` & `watiService.js`)
+- **Estado de Suscripción WATI:** Cuenta oficial activa con plan mensual ($119/mes, hasta 1,000 MAC) y número oficial conectado (`+50589439877`).
+- **Resolución de Error de Créditos de Conversación Meta:**
+  - **Problema Inicial:** Al disparar envíos masivos o individuales por WATI, el sistema arrojaba `Not enough credits to send the message` (0 de 2 mensajes entregados).
+  - **Causa Raíz:** Meta cobra una tarifa por cada mensaje saliente de Marketing de forma independiente a la tarifa fija mensual del software de WATI ($119/mes).
+  - **Acción Realizada:** El usuario recargó con éxito el saldo prepago de créditos en la billetera de WATI (`live.wati.io/10262044`).
+- **Estado Operativo:** La plantilla corporativa `invitacion_expoferre` (Aprobada por Meta bajo categoría `MARKETING`) cuenta con fondos activos para el despacho masivo e individual de invitaciones con gafete y Código QR.
 
 
 
