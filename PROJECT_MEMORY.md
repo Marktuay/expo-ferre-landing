@@ -84,9 +84,8 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     3. Si la cuenta NO existe en `systemUsers` (o falla la consulta), ejecuta de inmediato `await auth.signOut()` y arroja *"Acceso denegado: Esta cuenta no cuenta con permisos administrativos."*
     4. Si existe, asigna su rol oficial (`role: foundUser.role`).
 
-- [ ] **2. Erradicación de Contraseñas en Texto Plano en Firestore ([AdminUsers.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminUsers.jsx#L78-L83), [AdminSponsorDetails.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminSponsorDetails.jsx#L252-L264), [AuthPage.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AuthPage.jsx#L83-L86)):**
-  - **Problema:** Al registrar o editar administradores y patrocinadores, el campo `password` se almacena sin cifrar dentro de Firestore (`systemUsers` y `users`).
-  - **Acción a ejecutar:** Eliminar el campo `password` de todas las escrituras a Firestore (`addDoc`, `setDoc`, `updateDoc`). Delegar el 100% de la gestión y verificación de credenciales a Firebase Authentication. Para recuperación o cambio de claves, utilizar exclusivamente `sendPasswordResetEmail` y `updatePassword`.
+- [ ] **2. Erradicación de Contraseñas en Texto Plano en Firestore (Pospuesto para Post-Evento):**
+  - **Decisión Operativa (05/Oct/2026):** Se mantiene la funcionalidad tal cual está para no alterar la logística operativa del staff y organizadores a pocos días del evento (16-17 de Octubre de 2026). El equipo administrativo (`karen.torres`, `admoneventkt`, etc.) requiere tener las claves legibles para coordinar el acceso de `usuario1` (personal de escáner en puerta) y patrocinadores sin riesgo de fricción técnica o bloqueos. Queda documentado como mejora arquitectónica para la fase posterior al evento.
 
 - [x] **3. Endurecimiento de Validación de Super Administrador Maestro ([AdminHub.jsx](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminHub.jsx#L28-L34)):**
   - **Estado:** ✅ **Completado y Verificado.**
