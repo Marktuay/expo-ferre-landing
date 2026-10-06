@@ -120,6 +120,30 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ---
 
+## 📅 Resumen de Cambios y Avances de la Sesión (06 de Octubre de 2026)
+
+### 📥 Carga Masiva Exitosa de 155 Nuevas Invitaciones Directas en Firestore (`events/2026/directInvites`)
+- **Total de la Base Actual:** Subió de **246** a **401 invitaciones directas** en total.
+- **Protección contra Sobrescritura y Duplicados:**
+  - 112 invitaciones con registro completado (`status: 'used'`) permanecen 100% intactas.
+  - 258 contactos existentes en la lista fueron filtrados y omitidos automáticamente para evitar duplicaciones.
+  - 155 contactos totalmente nuevos fueron insertados con tokens únicos criptográficos (`inv_...`), vinculación automática de banners/stands y estado `pending`.
+- **Desglose de los 155 Nuevos Invitados Agregados:**
+  - **Grupo Sur (Kermil):** +58 invitados nuevos (ferreterías, pinturerías y distribuidores con teléfonos normalizados).
+  - **Invitación General (ExpoFerre):** +28 invitados nuevos (Codinsa, Color Servin, Cyrsa, Ferrecentro, Imfesa, etc.).
+  - **Indenicsa:** +26 invitados nuevos (MTI, Construtotal, Ferretería Angie López, etc.).
+  - **Comasa:** +23 invitados nuevos (marcas Ingco, Lightmax, Dewalt, Phelps Dodge, Porcelanite).
+  - **Holcim (Disensa):** +10 invitados nuevos (Maderas del Bosque, Monteverde, San Judas Tadeo, Solfi, etc.).
+  - **Parques Industriales (ZF Saratoga):** +7 invitados nuevos (FETESA, FERROMAX, CORSARIO, MEGA GYPSUM, INCOGASA, etc.).
+  - **Importaciones Balladares Nicaragua:** +2 invitados nuevos (Angie Reyes - Ferretería Guadalupe y Anabell Jarquín - Ferretería Valenzuela).
+  - **Plycem:** +1 invitado nuevo (Pedro Elvert Medina Sirias - Ferretería JM).
+- **Totales de Control Verificados en Firestore:**
+  - **Registrados (utilizados):** 112
+  - **Pendientes de Registro:** 289
+  - **Total:** 401 invitaciones directas activas.
+
+---
+
 ## 📅 Resumen de Cambios y Avances de la Sesión (01 de Octubre de 2026)
 
 ### 🏷️ Actualización de Logotipos y Carrusel de Patrocinadores (`App.jsx` & `AdminSponsors.jsx`)
