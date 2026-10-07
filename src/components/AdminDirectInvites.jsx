@@ -3556,17 +3556,6 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   )}
                                 </button>
 
-                                {/* WhatsApp Directo (Invitación Oficial con Arte de Patrocinador) */}
-                                <button
-                                  type="button"
-                                  onClick={() => setWhatsAppModal({ open: true, invite: inv, isReminder: false })}
-                                  title="Ver arte personalizado y abrir WhatsApp con Invitación Oficial"
-                                  className="p-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer"
-                                >
-                                  <Phone size={14} />
-                                  <span className="hidden xl:inline">WhatsApp</span>
-                                </button>
-
                                 {/* Recordatorio WhatsApp (Para Pendientes de Registro) */}
                                 {inv.status === 'pending' && (
                                   <button
