@@ -203,3 +203,57 @@ export const sendDirectInviteViaWati = async ({
     config
   });
 };
+
+/**
+ * Helper para despachar la confirmación de registro oficial y pase con QR a través de WATI
+ */
+export const sendRegistrationConfirmationViaWati = async ({
+  phone,
+  guestName,
+  companyName,
+  attendeeId,
+  passUrl,
+  sponsorName = 'Comité Organizador EXPO FERRE',
+  templateName = 'confirmacion_registro_qr',
+  config = DEFAULT_WATI_CONFIG
+}) => {
+  if (!phone) {
+    return {
+      success: false,
+      error: 'No se proporcionó número de teléfono para enviar la confirmación.'
+    };
+  }
+
+  const phoneInfo = cleanPhoneNumber(phone);
+  if (!phoneInfo.isValid) {
+    return {
+      success: false,
+      error: `Número de teléfono inválido: "${phone}"`
+    };
+  }
+
+  const cleanName = (guestName || 'Estimado(a) Asistente').trim();
+  const cleanCompany = (companyName || 'General').trim();
+  const sponsorClean = (sponsorName && sponsorName !== 'general') ? sponsorName : 'Comité Organizador EXPO FERRE';
+
+  // Parámetros para la plantilla de confirmación 'confirmacion_registro_qr':
+  // {{1}} = Nombre del asistente
+  // {{2}} = Empresa
+  // {{3}} = Código de Registro / ID
+  // {{4}} = Enlace al Gafete Digital con Código QR
+  const parameters = [
+    { name: '1', value: cleanName },
+    { name: '2', value: cleanCompany },
+    { name: '3', value: String(attendeeId || '') },
+    { name: '4', value: passUrl || 'https://expoferrenicaragua.com' }
+  ];
+
+  return await sendWatiTemplateMessage({
+    phone: phoneInfo.phone,
+    templateName,
+    broadcastName: `PaseQR_${cleanName.replace(/\s+/g, '_').substring(0, 15)}_${attendeeId || Date.now()}`,
+    parameters,
+    config
+  });
+};
+

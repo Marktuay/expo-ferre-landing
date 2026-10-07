@@ -54,6 +54,28 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
     }
   };
 
+  const handleShareWhatsApp = () => {
+    let cleanPhone = (phone || '').replace(/[^0-9]/g, '');
+    if (cleanPhone.length === 8) cleanPhone = '505' + cleanPhone;
+
+    const passUrl = isPendingInvite 
+      ? qrValue 
+      : `${window.location.origin}/?invite=${encodeURIComponent(person.inviteToken || person.id)}&src=wa_admin_qr`;
+
+    let msg = '';
+    if (isPendingInvite) {
+      msg = `¡Hola ${name}! 👋 Te compartimos tu enlace de registro exclusivo para *EXPO FERRE Nicaragua 2026*:\n\n${passUrl}\n\nCompleta tus datos para activar tu Pase Oficial con Código QR.`;
+    } else {
+      msg = `¡Hola ${name}! 👋 Aquí tienes tu *Pase Oficial y Código QR* para *EXPO FERRE Nicaragua 2026*:\n\n👤 *Titular:* ${name}\n🏢 *Empresa:* ${company}\n🎟️ *Código de Registro:* ${qrValue}\n📅 *Fecha:* 17 de Octubre, 2026 (8:00 AM - 5:00 PM)\n📍 *Lugar:* Centro de Convenciones Crowne Plaza Managua\n\n📲 *Accede a tu Gafete con Código QR aquí:*\n${passUrl}\n\nPresenta tu código QR en tu celular al llegar al evento. ¡Te esperamos!`;
+    }
+
+    const waLink = cleanPhone 
+      ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`
+      : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+
+    window.open(waLink, '_blank');
+  };
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
       <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col border border-slate-100">
@@ -175,12 +197,20 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
               Descargar QR (PNG)
             </button>
 
+            <button
+              onClick={handleShareWhatsApp}
+              className="px-4 py-2.5 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[18px]">chat</span>
+              Enviar por WhatsApp
+            </button>
+
             {isPendingInvite ? (
               <a
                 href={qrValue}
                 target="_blank"
                 rel="noreferrer"
-                className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+                className="col-span-1 sm:col-span-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">open_in_new</span>
                 Abrir Registro
@@ -191,7 +221,7 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
                   onClose();
                   onPrintBadge(person);
                 }}
-                className="px-4 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-700 font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+                className="col-span-1 sm:col-span-2 px-4 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-700 font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">print</span>
                 Imprimir Gafete
@@ -199,7 +229,7 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
             ) : (
               <button
                 onClick={() => window.print()}
-                className="px-4 py-2.5 bg-slate-100 text-slate-800 border border-slate-200 rounded-xl hover:bg-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                className="col-span-1 sm:col-span-2 px-4 py-2.5 bg-slate-100 text-slate-800 border border-slate-200 rounded-xl hover:bg-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">print</span>
                 Imprimir Pantalla

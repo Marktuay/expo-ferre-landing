@@ -53,6 +53,7 @@ import AdminQRViewModal from './AdminQRViewModal';
 import { 
   checkTemplateStatus, 
   sendDirectInviteViaWati, 
+  sendRegistrationConfirmationViaWati,
   cleanPhoneNumber, 
   DEFAULT_WATI_CONFIG 
 } from '../services/watiService';
@@ -1360,6 +1361,31 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     return phoneClean ? `https://wa.me/${phoneClean}?text=${text}` : `https://wa.me/?text=${text}`;
   };
 
+  const getWhatsAppPassSpeech = (invite) => {
+    const link = getInviteUrl(invite.id, 'wa_qr');
+    const guestName = (invite.registeredName || invite.nombre || '').trim() || 'Estimado(a) Asistente';
+    const company = (invite.registeredCompany || invite.empresa || '').trim();
+    const attendeeId = invite.registeredAttendeeId || invite.id;
+    const sponsorName = invite.sponsorName || '';
+    const standsClean = (invite.sponsorStands || '').trim();
+
+    let cortesia = '';
+    if (sponsorName && sponsorName !== 'general' && sponsorName.toLowerCase() !== 'invitacion general') {
+      cortesia = standsClean ? `\n⭐ *Cortesía de:* ${sponsorName} (${standsClean})` : `\n⭐ *Cortesía de:* ${sponsorName}`;
+    }
+
+    return `¡Hola ${guestName}! 👋\n\nTu *Pase Oficial y Código QR* para *EXPO FERRE Nicaragua 2026* está confirmado y emitido 🎉\n\n👤 *Titular:* ${guestName}${company ? `\n🏢 *Empresa:* ${company}` : ''}${cortesia}\n🎟️ *Código de Registro:* ${attendeeId}\n📅 *Fecha:* 17 de Octubre, 2026 (8:00 AM - 5:00 PM)\n📍 *Lugar:* Centro de Convenciones Crowne Plaza Managua\n\n📲 *Visualiza tu Gafete y Código QR oficial aquí:*\n${link}\n\nPresenta tu código QR en tu celular al llegar a la entrada para tu acceso directo sin filas. ¡Te esperamos!`;
+  };
+
+  const getWhatsAppPassUrl = (invite) => {
+    const text = encodeURIComponent(getWhatsAppPassSpeech(invite));
+    let phoneClean = (invite.registeredPhone || invite.telefono || '').replace(/[^0-9]/g, '');
+    if (phoneClean && phoneClean.length === 8) {
+      phoneClean = '505' + phoneClean;
+    }
+    return phoneClean ? `https://wa.me/${phoneClean}?text=${text}` : `https://wa.me/?text=${text}`;
+  };
+
   const handleCopyWhatsApp = (invite) => {
     const text = getWhatsAppSpeech(invite);
     navigator.clipboard.writeText(text);
@@ -1371,6 +1397,13 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     const text = getWhatsAppReminderSpeech(invite);
     navigator.clipboard.writeText(text);
     setCopiedToken(`wa_rem_${invite.id}`);
+    setTimeout(() => setCopiedToken(null), 2500);
+  };
+
+  const handleCopyWhatsAppPass = (invite) => {
+    const text = getWhatsAppPassSpeech(invite);
+    navigator.clipboard.writeText(text);
+    setCopiedToken(`wa_pass_${invite.id}`);
     setTimeout(() => setCopiedToken(null), 2500);
   };
 
@@ -1734,31 +1767,51 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     setWatiNotification(null);
 
     try {
-      const inviteUrl = getInviteUrl(invite.id, 'wa');
-      const sponsorName = invite.sponsorName || 'general';
+      const isUsed = invite.status === 'used';
+      let res;
 
-      const res = await sendDirectInviteViaWati({
-        invite,
-        sponsorName,
-        inviteUrl
-      });
+      if (isUsed) {
+        // Enviar Pase Oficial y Código QR a persona ya registrada
+        res = await sendRegistrationConfirmationViaWati({
+          phone: invite.registeredPhone || invite.telefono,
+          guestName: invite.registeredName || invite.nombre,
+          companyName: invite.registeredCompany || invite.empresa,
+          attendeeId: invite.registeredAttendeeId || invite.id,
+          token: invite.id,
+          passUrl: getInviteUrl(invite.id, 'wa_qr'),
+          sponsorName: invite.sponsorName
+        });
+      } else {
+        // Enviar Invitación Inicial
+        const inviteUrl = getInviteUrl(invite.id, 'wa');
+        const sponsorName = invite.sponsorName || 'general';
+
+        res = await sendDirectInviteViaWati({
+          invite,
+          sponsorName,
+          inviteUrl
+        });
+      }
 
       if (res.success) {
         await updateDoc(doc(db, `${getEventBasePath()}/directInvites`, invite.id), {
           whatsappSent: true,
           whatsappSentAt: serverTimestamp(),
-          whatsappSentVia: 'wati',
+          whatsappSentVia: isUsed ? 'wati_pass' : 'wati',
+          whatsappPassSent: isUsed ? true : (invite.whatsappPassSent || false),
           whatsappPhone: res.phone,
           whatsappSendCount: (invite.whatsappSendCount || 0) + 1
         });
 
         setWatiNotification({
           type: 'success',
-          message: `¡Invitación enviada por WATI con éxito a ${res.phone} (${invite.nombre || 'Invitado'})!`
+          message: isUsed
+            ? `¡Pase Oficial con Código QR enviado por WATI con éxito a ${res.phone} (${invite.registeredName || invite.nombre || 'Invitado'})!`
+            : `¡Invitación enviada por WATI con éxito a ${res.phone} (${invite.nombre || 'Invitado'})!`
         });
         setTimeout(() => setWatiNotification(null), 4000);
       } else {
-        alert(`No se pudo enviar el mensaje por WATI:\n${res.error}\n\n(Aviso: Si la plantilla sigue en revisión por Meta, el mensaje no saldrá hasta que sea APROBADA).`);
+        alert(`No se pudo enviar el mensaje por WATI:\n${res.error}\n\n(Aviso: Si la plantilla sigue en revisión por Meta o no cuenta con créditos, el mensaje no saldrá).`);
       }
     } catch (err) {
       console.error('Error al enviar WhatsApp Wati:', err);
@@ -2327,9 +2380,9 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && i.status === 'pending');
   }).length + (invites.some(i => (!i.sponsorName || i.sponsorId === 'general') && i.status === 'pending') ? 1 : 0);
 
-  const countSponsorsWithUnsentEmails = sponsorsList.filter(sp => {
-    return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && i.status === 'pending' && isValidEmailAddress(i.email) && !i.emailSentAt);
-  }).length + (invites.some(i => (!i.sponsorName || i.sponsorId === 'general') && i.status === 'pending' && isValidEmailAddress(i.email) && !i.emailSentAt) ? 1 : 0);
+  const countSponsorsWithUnsentInvites = sponsorsList.filter(sp => {
+    return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && i.status === 'pending' && !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt);
+  }).length + (invites.some(i => (!i.sponsorName || i.sponsorId === 'general') && i.status === 'pending' && !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt) ? 1 : 0);
 
   // Filtrar lista de patrocinadores para el directorio (Búsqueda + Filtro de Estado)
   const filteredSponsorsList = sponsorsList.filter(sp => {
@@ -2342,7 +2395,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     if (sponsorFilterStatus === 'has_invites') return spInvites.length > 0;
     if (sponsorFilterStatus === 'has_registered') return spInvites.some(i => i.status === 'used');
     if (sponsorFilterStatus === 'has_pending') return spInvites.some(i => i.status === 'pending');
-    if (sponsorFilterStatus === 'has_unsent_emails') return spInvites.some(i => i.status === 'pending' && isValidEmailAddress(i.email) && !i.emailSentAt);
+    if (sponsorFilterStatus === 'has_unsent_emails') return spInvites.some(i => i.status === 'pending' && !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt);
 
     return true;
   });
@@ -2357,7 +2410,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     if (sponsorFilterStatus === 'has_invites') return genInv.length > 0;
     if (sponsorFilterStatus === 'has_registered') return genInv.some(i => i.status === 'used');
     if (sponsorFilterStatus === 'has_pending') return genInv.some(i => i.status === 'pending');
-    if (sponsorFilterStatus === 'has_unsent_emails') return genInv.some(i => i.status === 'pending' && isValidEmailAddress(i.email) && !i.emailSentAt);
+    if (sponsorFilterStatus === 'has_unsent_emails') return genInv.some(i => i.status === 'pending' && !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt);
 
     return true;
   })();
@@ -2367,14 +2420,30 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   const totalPendingCount = invites.filter(i => i.status === 'pending').length;
   const totalUsedCount = invites.filter(i => i.status === 'used').length;
 
-  // Métricas Detalladas del Medidor de Correos
-  const totalWithValidEmail = invites.filter(i => isValidEmailAddress(i.email)).length;
+  // Métricas Globales Multicanal (Correo + WhatsApp + Enlace Directo)
   const totalEmailsSent = invites.filter(i => i.emailSent || i.emailSentAt).length;
+  const totalWhatsAppSent = invites.filter(i => i.whatsappSent || i.whatsappSentAt).length;
+
+  // Invitados que han recibido invitación por cualquier canal (Correo O WhatsApp)
+  const totalContacted = invites.filter(i => i.emailSent || i.emailSentAt || i.whatsappSent || i.whatsappSentAt).length;
+
+  // Contactados que todavía están pendientes de completar su registro
+  const totalPendingContacted = invites.filter(i => (i.emailSent || i.emailSentAt || i.whatsappSent || i.whatsappSentAt) && i.status === 'pending').length;
+
+  // Invitados a los que aún no se les ha enviado invitación por ningún canal
+  const totalNeverContacted = invites.filter(i => !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt && i.status === 'pending').length;
+
+  // Porcentajes Globales Multicanal
+  const globalCoveragePercent = totalInvitesCount > 0 ? Math.round((totalContacted / totalInvitesCount) * 100) : 0;
+  const globalEffectiveRate = totalInvitesCount > 0 ? Math.round((totalUsedCount / totalInvitesCount) * 100) : 0;
+  const contactConversionPct = totalContacted > 0 ? Math.round((totalUsedCount / (totalContacted || 1)) * 100) : 0;
+
+  // Métricas de Correo (mantenidas para compatibilidad con tablas y exportación)
+  const totalWithValidEmail = invites.filter(i => isValidEmailAddress(i.email)).length;
   const totalEmailsPending = invites.filter(i => isValidEmailAddress(i.email) && !i.emailSentAt && i.status === 'pending').length;
   const totalUnregisteredWithEmail = invites.filter(i => isValidEmailAddress(i.email) && i.status === 'pending').length;
   const totalRegisteredFromEmail = invites.filter(i => (i.emailSent || i.emailSentAt) && i.status === 'used').length;
   const totalWithoutValidEmail = totalInvitesCount - totalWithValidEmail;
-  
   const emailCoveragePercent = totalWithValidEmail > 0 ? Math.round((totalEmailsSent / totalWithValidEmail) * 100) : 0;
   const emailConversionPercent = totalEmailsSent > 0 ? Math.round((totalRegisteredFromEmail / (totalEmailsSent || 1)) * 100) : 0;
 
@@ -2478,7 +2547,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
           </div>
         </div>
 
-        {/* 📊 MEDIDOR VISUAL & MONITOR DE DESPACHO DE CORREOS */}
+        {/* 📊 MEDIDOR VISUAL & MONITOR GLOBAL DE DESPACHO MULTICANAL */}
         <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white p-6 rounded-3xl shadow-xl border border-slate-700/50 space-y-5 relative overflow-hidden">
           
           {/* Background Ambient Glow */}
@@ -2488,12 +2557,12 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 relative z-10">
             <div className="flex items-center gap-3.5">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold shrink-0 shadow-inner">
-                <MailCheck size={26} />
+                <SendHorizontal size={26} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-lg md:text-xl font-black text-white tracking-wide">
-                    Medidor de Despacho & Seguimiento de Correos
+                    Medidor Global de Despacho & Conversión (Multicanal)
                   </h2>
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -2501,54 +2570,32 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                   </span>
                 </div>
                 <p className="text-slate-300 text-xs">
-                  {totalEmailsSent} de {totalWithValidEmail} invitados con correo han recibido su invitación oficial co-brandeada ({emailCoveragePercent}% de cobertura).
+                  {totalContacted} de {totalInvitesCount} invitados han sido contactados por Correo o WhatsApp ({globalCoveragePercent}% de cobertura global). Total registrados: {totalUsedCount} ({globalEffectiveRate}% de efectividad).
                 </p>
               </div>
             </div>
 
-            {/* Botones de Despacho Global & Recordatorio */}
-            <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
-              <button
-                onClick={() => handleOpenBulkEmailModal('all', 'never_sent')}
-                disabled={totalEmailsPending === 0}
-                className="flex-1 sm:flex-initial px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transform active:scale-95"
-                title={totalEmailsPending === 0 ? "No hay invitaciones iniciales pendientes por enviar" : "Enviar invitación inicial a los que nunca han recibido correo"}
-              >
-                <SendHorizontal size={15} className="text-slate-950" />
-                <span>Despachar Nuevos ({totalEmailsPending})</span>
-              </button>
-
-              <button
-                onClick={() => handleOpenBulkEmailModal('all', 'unregistered_reminder')}
-                disabled={totalUnregisteredWithEmail === 0}
-                className="flex-1 sm:flex-initial px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black rounded-xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transform active:scale-95 border border-white/10"
-                title="Enviar correo de recordatorio a todos los contactos que aún no han completado su pase"
-              >
-                <Bell size={15} className="text-amber-300" />
-                <span>🔔 Recordatorio Masivo ({totalUnregisteredWithEmail})</span>
-              </button>
-            </div>
           </div>
 
-          {/* Barra Medidora / Termómetro de Cobertura */}
+          {/* Barra Medidora / Termómetro de Cobertura Global */}
           <div className="space-y-2 relative z-10 bg-black/30 p-4 rounded-2xl border border-white/10">
             <div className="flex justify-between items-end text-xs">
               <div className="flex items-center gap-4">
-                <span className="font-black text-2xl text-white">{emailCoveragePercent}%</span>
-                <span className="text-slate-300 text-xs font-medium">Progreso Global de Envíos</span>
+                <span className="font-black text-2xl text-white">{globalCoveragePercent}%</span>
+                <span className="text-slate-300 text-xs font-medium">Progreso Global de Envíos (WhatsApp + Correo)</span>
               </div>
               <div className="flex items-center gap-3 text-[11px] font-bold text-slate-300">
                 <span className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                  Enviados: {totalEmailsSent}
+                  Registrados: {totalUsedCount}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                  Pendientes: {totalEmailsPending}
+                  En Espera: {totalPendingContacted}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
-                  Sin Correo: {totalWithoutValidEmail}
+                  Sin Enviar aún: {totalNeverContacted}
                 </span>
               </div>
             </div>
@@ -2557,18 +2604,18 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
             <div className="w-full h-4 bg-slate-800 rounded-full overflow-hidden flex border border-white/10 shadow-inner">
               <div
                 className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full transition-all duration-500"
-                style={{ width: `${totalInvitesCount > 0 ? (totalEmailsSent / totalInvitesCount) * 100 : 0}%` }}
-                title={`Enviados: ${totalEmailsSent}`}
+                style={{ width: `${totalInvitesCount > 0 ? (totalUsedCount / totalInvitesCount) * 100 : 0}%` }}
+                title={`Registrados con pase (WhatsApp + Correo): ${totalUsedCount}`}
               />
               <div
                 className="bg-gradient-to-r from-amber-500 to-amber-400 h-full transition-all duration-500"
-                style={{ width: `${totalInvitesCount > 0 ? (totalEmailsPending / totalInvitesCount) * 100 : 0}%` }}
-                title={`Pendientes con correo: ${totalEmailsPending}`}
+                style={{ width: `${totalInvitesCount > 0 ? (totalPendingContacted / totalInvitesCount) * 100 : 0}%` }}
+                title={`Contactados en espera de completar pase: ${totalPendingContacted}`}
               />
               <div
                 className="bg-slate-600 h-full transition-all duration-500"
-                style={{ width: `${totalInvitesCount > 0 ? (totalWithoutValidEmail / totalInvitesCount) * 100 : 0}%` }}
-                title={`Sin correo o inválido: ${totalWithoutValidEmail}`}
+                style={{ width: `${totalInvitesCount > 0 ? (totalNeverContacted / totalInvitesCount) * 100 : 0}%` }}
+                title={`Sin enviar invitación aún: ${totalNeverContacted}`}
               />
             </div>
           </div>
@@ -2580,18 +2627,11 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                 <Check size={16} />
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">Correos Enviados</span>
-                <span className="text-base font-black text-white">{totalEmailsSent}</span>
-              </div>
-            </div>
-
-            <div className="bg-white/5 border border-white/10 p-3 rounded-xl flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold shrink-0">
-                <Clock size={16} />
-              </div>
-              <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">Listos p/ Enviar</span>
-                <span className="text-base font-black text-white">{totalEmailsPending}</span>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block">Total Enviados</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-base font-black text-white">{totalContacted}</span>
+                  <span className="text-[10px] text-slate-400 font-normal">({totalEmailsSent} E / {totalWhatsAppSent} W)</span>
+                </div>
               </div>
             </div>
 
@@ -2602,8 +2642,21 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
               <div>
                 <span className="text-slate-400 text-[10px] uppercase font-bold block">Gafetes Emitidos</span>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-base font-black text-white">{totalRegisteredFromEmail}</span>
-                  <span className="text-[10px] text-emerald-400 font-bold">({emailConversionPercent}% tasa)</span>
+                  <span className="text-base font-black text-white">{totalUsedCount}</span>
+                  <span className="text-[10px] text-emerald-400 font-bold">({globalEffectiveRate}% tasa)</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 p-3 rounded-xl flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold shrink-0">
+                <Clock size={16} />
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block">Pendientes Registro</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-base font-black text-white">{totalPendingCount}</span>
+                  <span className="text-[10px] text-amber-400 font-normal">({totalPendingContacted} env)</span>
                 </div>
               </div>
             </div>
@@ -2613,8 +2666,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                 <AlertTriangle size={16} />
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">Sin Correo Válido</span>
-                <span className="text-base font-black text-white">{totalWithoutValidEmail}</span>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block">Sin Enviar aún</span>
+                <span className="text-base font-black text-white">{totalNeverContacted}</span>
               </div>
             </div>
           </div>
@@ -2749,8 +2802,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                       : 'bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200'
                   }`}
                 >
-                  <Mail size={13} />
-                  Con Envíos Pendientes ({countSponsorsWithUnsentEmails})
+                  <SendHorizontal size={13} />
+                  Con Envíos Pendientes ({countSponsorsWithUnsentInvites})
                 </button>
 
                 <button
@@ -2785,7 +2838,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                     <tr className="bg-surface-variant/40 border-b border-outline-variant text-xs uppercase tracking-wider text-secondary">
                       <th className="p-4 font-bold min-w-[200px]">Patrocinador / Marca</th>
                       <th className="p-3 font-bold min-w-[80px]">Stand(s)</th>
-                      <th className="p-3 font-bold text-center min-w-[130px]">Envíos de Correo</th>
+                      <th className="p-3 font-bold text-center min-w-[160px]">Envíos (Correo + WhatsApp)</th>
                       <th className="p-3 font-bold text-center min-w-[130px]">Registrados vs Pendientes</th>
                       <th className="p-3 font-bold text-center min-w-[90px]">Artes & Speech</th>
                       <th className="p-4 pr-6 font-bold text-center min-w-[380px]">Carga & Acciones</th>
@@ -2815,21 +2868,23 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                           <span className="text-xs text-slate-500 font-medium">Evento General</span>
                         </td>
 
-                        {/* Métrica: Envíos de Correo */}
+                        {/* Métrica: Envíos Multicanal (Correo + WhatsApp) */}
                         <td className="p-4 text-center">
                           {(() => {
                             const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
-                            const genWithEmail = genInv.filter(i => isValidEmailAddress(i.email)).length;
+                            const genTotal = genInv.length;
                             const genEmailSent = genInv.filter(i => i.emailSent || i.emailSentAt).length;
-                            const genUnsent = genInv.filter(i => isValidEmailAddress(i.email) && !i.emailSentAt && i.status === 'pending').length;
-                            const genCoverage = genWithEmail > 0 ? Math.round((genEmailSent / genWithEmail) * 100) : 0;
+                            const genWhatsAppSent = genInv.filter(i => i.whatsappSent || i.whatsappSentAt).length;
+                            const genContacted = genInv.filter(i => i.emailSent || i.emailSentAt || i.whatsappSent || i.whatsappSentAt).length;
+                            const genNeverContacted = genInv.filter(i => !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt && i.status === 'pending').length;
+                            const genCoverage = genTotal > 0 ? Math.round((genContacted / genTotal) * 100) : 0;
 
                             return (
-                              <div className="space-y-1.5 min-w-[130px] max-w-[160px] mx-auto">
+                              <div className="space-y-1.5 min-w-[140px] max-w-[175px] mx-auto">
                                 <div className="flex justify-between items-center text-xs">
-                                  <span className="font-bold text-slate-700 flex items-center gap-1">
-                                    <Mail size={12} className="text-amber-600" />
-                                    {genEmailSent}/{genWithEmail}
+                                  <span className="font-bold text-slate-800 flex items-center gap-1.5" title="Invitados contactados sobre el total">
+                                    <SendHorizontal size={12} className="text-primary" />
+                                    <span>{genContacted}/{genTotal}</span>
                                   </span>
                                   <span className={`px-1.5 py-0.5 rounded text-[10px] font-black ${
                                     genCoverage === 100 
@@ -2841,19 +2896,31 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                     {genCoverage}%
                                   </span>
                                 </div>
+
+                                {/* Desglose exacto de Correo y WhatsApp */}
+                                <div className="flex items-center justify-between gap-1 text-[10px] font-bold bg-slate-50 px-2 py-0.5 rounded border border-slate-200/60">
+                                  <span className="flex items-center gap-1 text-amber-700" title="Correos enviados">
+                                    <Mail size={10} /> {genEmailSent} correo{genEmailSent !== 1 ? 's' : ''}
+                                  </span>
+                                  <span className="text-slate-300">|</span>
+                                  <span className="flex items-center gap-1 text-emerald-700" title="WhatsApps enviados">
+                                    <MessageSquare size={10} /> {genWhatsAppSent} WA
+                                  </span>
+                                </div>
+
                                 <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden flex">
                                   <div 
-                                    className="bg-emerald-500 h-full transition-all duration-300" 
+                                    className="bg-gradient-to-r from-blue-500 to-emerald-500 h-full transition-all duration-300" 
                                     style={{ width: `${genCoverage}%` }} 
                                   />
                                 </div>
                                 <div className="text-[10px] text-slate-500 font-medium">
-                                  {genUnsent > 0 ? (
-                                    <span className="text-amber-700 font-bold">⏳ {genUnsent} pendientes de envío</span>
-                                  ) : genWithEmail > 0 ? (
+                                  {genNeverContacted > 0 ? (
+                                    <span className="text-amber-700 font-bold">⏳ {genNeverContacted} pendientes de envío</span>
+                                  ) : genTotal > 0 ? (
                                     <span className="text-emerald-700 font-bold">✓ 100% Despachado</span>
                                   ) : (
-                                    <span className="text-slate-400">Sin correos</span>
+                                    <span className="text-slate-400">Sin invitados</span>
                                   )}
                                 </div>
                               </div>
@@ -3066,6 +3133,9 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                       const spPending = spInvites.length - spUsed;
                       const spWithEmail = spInvites.filter(i => isValidEmailAddress(i.email)).length;
                       const spEmailSent = spInvites.filter(i => i.emailSent || i.emailSentAt).length;
+                      const spWhatsAppSent = spInvites.filter(i => i.whatsappSent || i.whatsappSentAt).length;
+                      const spContacted = spInvites.filter(i => i.emailSent || i.emailSentAt || i.whatsappSent || i.whatsappSentAt).length;
+                      const spNeverContacted = spInvites.filter(i => !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt && i.status === 'pending').length;
                       const spPendingWithEmail = spInvites.filter(i => i.status === 'pending' && isValidEmailAddress(i.email));
                       const spUnsentEmail = spPendingWithEmail.filter(i => !i.emailSentAt);
                       const countToSend = spUnsentEmail.length > 0 ? spUnsentEmail.length : spPendingWithEmail.length;
@@ -3074,7 +3144,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                       const spUnsentPhone = spPendingWithPhone.filter(i => !i.whatsappSent && !i.whatsappSentAt);
                       const countWaToSend = spUnsentPhone.length > 0 ? spUnsentPhone.length : spPendingWithPhone.length;
                       
-                      const spCoverage = spWithEmail > 0 ? Math.round((spEmailSent / spWithEmail) * 100) : 0;
+                      const spCoverage = spInvites.length > 0 ? Math.round((spContacted / spInvites.length) * 100) : 0;
                       const spEffectiveRate = spInvites.length > 0 ? Math.round((spUsed / spInvites.length) * 100) : 0;
 
                       const art = getSponsorArt(sp);
@@ -3109,13 +3179,13 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                             </span>
                           </td>
 
-                          {/* Métrica: Envíos de Correo */}
+                          {/* Métrica: Envíos Multicanal (Correo + WhatsApp) */}
                           <td className="p-4 text-center">
-                            <div className="space-y-1.5 min-w-[130px] max-w-[160px] mx-auto">
+                            <div className="space-y-1.5 min-w-[140px] max-w-[175px] mx-auto">
                               <div className="flex justify-between items-center text-xs">
-                                <span className="font-bold text-slate-700 flex items-center gap-1">
-                                  <Mail size={12} className="text-amber-600" />
-                                  {spEmailSent}/{spWithEmail}
+                                <span className="font-bold text-slate-800 flex items-center gap-1.5" title="Invitados contactados sobre el total">
+                                  <SendHorizontal size={12} className="text-primary" />
+                                  <span>{spContacted}/{spInvites.length}</span>
                                 </span>
                                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-black ${
                                   spCoverage === 100 
@@ -3127,19 +3197,31 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   {spCoverage}%
                                 </span>
                               </div>
+
+                              {/* Desglose exacto de Correo y WhatsApp */}
+                              <div className="flex items-center justify-between gap-1 text-[10px] font-bold bg-slate-50 px-2 py-0.5 rounded border border-slate-200/60">
+                                <span className="flex items-center gap-1 text-amber-700" title="Correos enviados">
+                                  <Mail size={10} /> {spEmailSent} correo{spEmailSent !== 1 ? 's' : ''}
+                                </span>
+                                <span className="text-slate-300">|</span>
+                                <span className="flex items-center gap-1 text-emerald-700" title="WhatsApps enviados">
+                                  <MessageSquare size={10} /> {spWhatsAppSent} WA
+                                </span>
+                              </div>
+
                               <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden flex">
                                 <div 
-                                  className="bg-emerald-500 h-full transition-all duration-300" 
+                                  className="bg-gradient-to-r from-blue-500 to-emerald-500 h-full transition-all duration-300" 
                                   style={{ width: `${spCoverage}%` }} 
                                 />
                               </div>
                               <div className="text-[10px] text-slate-500 font-medium">
-                                {spUnsentEmail.length > 0 ? (
-                                  <span className="text-amber-700 font-bold">⏳ {spUnsentEmail.length} pendientes de envío</span>
-                                ) : spWithEmail > 0 ? (
+                                {spNeverContacted > 0 ? (
+                                  <span className="text-amber-700 font-bold">⏳ {spNeverContacted} pendientes de envío</span>
+                                ) : spInvites.length > 0 ? (
                                   <span className="text-emerald-700 font-bold">✓ 100% Despachado</span>
                                 ) : (
-                                  <span className="text-slate-400">Sin correos</span>
+                                  <span className="text-slate-400">Sin invitados</span>
                                 )}
                               </div>
                             </div>
@@ -3605,12 +3687,16 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   title={
                                     !inv.telefono
                                       ? "Sin teléfono registrado"
+                                      : isUsed
+                                      ? "Disparar Pase Oficial con Código QR por WATI (WhatsApp API)"
                                       : inv.whatsappSent
                                       ? `Reenviar por WATI API (Enviado previamente: ${inv.whatsappSendCount || 1} veces)`
                                       : "Disparar invitación oficial por WATI (WhatsApp API)"
                                   }
                                   className={`p-2 rounded-lg transition-all flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer disabled:opacity-40 ${
-                                    inv.whatsappSent
+                                    isUsed
+                                      ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
+                                      : inv.whatsappSent
                                       ? 'bg-teal-700 hover:bg-teal-800 text-white'
                                       : 'bg-emerald-600 hover:bg-emerald-700 text-white'
                                   }`}
@@ -3626,15 +3712,43 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   )}
                                 </button>
 
-                                {/* Copiar Speech WhatsApp */}
+                                {/* Asistente de WhatsApp con Arte o Pase QR */}
                                 <button
-                                  onClick={() => inv.status === 'pending' && inv.emailSentAt ? handleCopyWhatsAppReminder(inv) : handleCopyWhatsApp(inv)}
-                                  title={inv.status === 'pending' && inv.emailSentAt ? "Copiar texto de Recordatorio de WhatsApp" : "Copiar texto de WhatsApp al portapapeles"}
-                                  className={`p-2 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                                    isWaCopied || isWaRemCopied ? 'bg-green-600 text-white' : 'bg-surface hover:bg-surface-variant text-on-surface border border-outline-variant'
+                                  type="button"
+                                  onClick={() => setWhatsAppModal({
+                                    open: true,
+                                    invite: inv,
+                                    mode: isUsed ? 'pass' : (inv.emailSentAt ? 'reminder' : 'invite'),
+                                    isReminder: !isUsed && !!inv.emailSentAt
+                                  })}
+                                  title={isUsed ? "Enviar Pase Oficial con QR por WhatsApp (Web/App)" : "Enviar invitación por WhatsApp con Arte"}
+                                  className={`p-2 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1 ${
+                                    isUsed
+                                      ? 'bg-[#25D366] hover:bg-[#20bd5a] text-white shadow-2xs'
+                                      : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300'
                                   }`}
                                 >
-                                  {isWaCopied || isWaRemCopied ? <Check size={14} /> : <Copy size={14} />}
+                                  <Phone size={14} />
+                                  <span className="hidden xl:inline">{isUsed ? 'Pase QR' : 'WA'}</span>
+                                </button>
+
+                                {/* Copiar Speech WhatsApp */}
+                                <button
+                                  onClick={() => {
+                                    if (isUsed) handleCopyWhatsAppPass(inv);
+                                    else if (inv.status === 'pending' && inv.emailSentAt) handleCopyWhatsAppReminder(inv);
+                                    else handleCopyWhatsApp(inv);
+                                  }}
+                                  title={
+                                    isUsed
+                                      ? "Copiar texto de Pase Oficial y Código QR para WhatsApp"
+                                      : (inv.status === 'pending' && inv.emailSentAt ? "Copiar texto de Recordatorio de WhatsApp" : "Copiar texto de WhatsApp al portapapeles")
+                                  }
+                                  className={`p-2 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                                    isWaCopied || isWaRemCopied || copiedToken === `wa_pass_${inv.id}` ? 'bg-green-600 text-white' : 'bg-surface hover:bg-surface-variant text-on-surface border border-outline-variant'
+                                  }`}
+                                >
+                                  {isWaCopied || isWaRemCopied || copiedToken === `wa_pass_${inv.id}` ? <Check size={14} /> : <Copy size={14} />}
                                 </button>
 
                                 {/* Enviar Correo */}
@@ -4643,36 +4757,55 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                 </div>
                 <div>
                   <h3 className="font-bold text-base flex items-center gap-2">
-                    {whatsAppModal.isReminder ? '🔔 Recordatorio de Registro por WhatsApp' : '📲 Invitación Oficial por WhatsApp'}
+                    {whatsAppModal.mode === 'pass' || (!whatsAppModal.mode && whatsAppModal.invite.status === 'used')
+                      ? '🎟️ Pase Oficial y Código QR por WhatsApp'
+                      : (whatsAppModal.isReminder ? '🔔 Recordatorio de Registro por WhatsApp' : '📲 Invitación Oficial por WhatsApp')}
                   </h3>
                   <p className="text-white/80 text-xs">
-                    Destinatario: <span className="font-bold text-white">{whatsAppModal.invite.nombre || 'Invitado sin nombre'}</span> {whatsAppModal.invite.empresa ? `(${whatsAppModal.invite.empresa})` : ''} • Patrocinador: <span className="font-bold text-amber-300">{whatsAppModal.invite.sponsorName || 'General'}</span>
+                    Destinatario: <span className="font-bold text-white">{whatsAppModal.invite.registeredName || whatsAppModal.invite.nombre || 'Invitado sin nombre'}</span> {whatsAppModal.invite.registeredCompany || whatsAppModal.invite.empresa ? `(${whatsAppModal.invite.registeredCompany || whatsAppModal.invite.empresa})` : ''} • Patrocinador: <span className="font-bold text-amber-300">{whatsAppModal.invite.sponsorName || 'General'}</span>
                   </p>
                 </div>
               </div>
               <button 
-                onClick={() => setWhatsAppModal({ open: false, invite: null, isReminder: false })} 
+                onClick={() => setWhatsAppModal({ open: false, invite: null, isReminder: false, mode: 'invite' })} 
                 className="p-1 hover:bg-white/20 rounded-full text-white cursor-pointer transition-colors"
               >
                 <X size={20} />
               </button>
             </div>
 
-            {/* Selector de Modo: Invitación Inicial vs Recordatorio */}
-            <div className="flex border-b border-outline-variant bg-surface px-6 pt-3 shrink-0 gap-2">
+            {/* Selector de Modo: Pase Oficial vs Invitación Inicial vs Recordatorio */}
+            <div className="flex border-b border-outline-variant bg-surface px-6 pt-3 shrink-0 gap-2 overflow-x-auto">
+              {whatsAppModal.invite.status === 'used' && (
+                <button
+                  onClick={() => setWhatsAppModal(prev => ({ ...prev, mode: 'pass', isReminder: false }))}
+                  className={`py-2 px-4 font-bold text-xs rounded-t-lg transition-all cursor-pointer flex items-center gap-2 border-b-2 ${
+                    whatsAppModal.mode === 'pass' || (!whatsAppModal.mode && whatsAppModal.invite.status === 'used')
+                      ? 'border-[#25D366] text-[#075E54] bg-emerald-50/60'
+                      : 'border-transparent text-secondary hover:text-on-surface'
+                  }`}
+                >
+                  <QrCode size={14} />
+                  Pase Oficial y QR (Registrado)
+                </button>
+              )}
               <button
-                onClick={() => setWhatsAppModal(prev => ({ ...prev, isReminder: false }))}
+                onClick={() => setWhatsAppModal(prev => ({ ...prev, mode: 'invite', isReminder: false }))}
                 className={`py-2 px-4 font-bold text-xs rounded-t-lg transition-all cursor-pointer flex items-center gap-2 border-b-2 ${
-                  !whatsAppModal.isReminder ? 'border-[#25D366] text-[#075E54] bg-emerald-50/60' : 'border-transparent text-secondary hover:text-on-surface'
+                  whatsAppModal.mode === 'invite' || (!whatsAppModal.mode && !whatsAppModal.isReminder && whatsAppModal.invite.status !== 'used')
+                    ? 'border-[#25D366] text-[#075E54] bg-emerald-50/60'
+                    : 'border-transparent text-secondary hover:text-on-surface'
                 }`}
               >
                 <MessageSquare size={14} />
                 Invitación Inicial
               </button>
               <button
-                onClick={() => setWhatsAppModal(prev => ({ ...prev, isReminder: true }))}
+                onClick={() => setWhatsAppModal(prev => ({ ...prev, mode: 'reminder', isReminder: true }))}
                 className={`py-2 px-4 font-bold text-xs rounded-t-lg transition-all cursor-pointer flex items-center gap-2 border-b-2 ${
-                  whatsAppModal.isReminder ? 'border-amber-500 text-amber-700 bg-amber-50/60' : 'border-transparent text-secondary hover:text-on-surface'
+                  whatsAppModal.mode === 'reminder' || (whatsAppModal.isReminder && whatsAppModal.mode !== 'pass')
+                    ? 'border-amber-500 text-amber-700 bg-amber-50/60'
+                    : 'border-transparent text-secondary hover:text-on-surface'
                 }`}
               >
                 <Bell size={14} />
@@ -4684,23 +4817,28 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
             <div className="p-6 space-y-5 overflow-y-auto flex-1">
               {(() => {
                 const inv = whatsAppModal.invite;
-                const isRem = whatsAppModal.isReminder;
+                const isPass = whatsAppModal.mode === 'pass' || (!whatsAppModal.mode && inv.status === 'used');
+                const isRem = !isPass && (whatsAppModal.mode === 'reminder' || whatsAppModal.isReminder);
                 const spName = inv.sponsorName || 'general';
                 const art = getSponsorArt(spName);
                 const currentFlyerUrl = isRem ? (art.whatsappReminderBannerUrl || art.whatsappBannerUrl) : art.whatsappBannerUrl;
-                const speechText = isRem ? getWhatsAppReminderSpeech(inv) : getWhatsAppSpeech(inv);
-                const waUrl = isRem ? getWhatsAppReminderUrl(inv) : getWhatsAppUrl(inv);
-                const isCopied = copiedToken === (isRem ? `wa_rem_${inv.id}` : `wa_${inv.id}`);
+                const speechText = isPass 
+                  ? getWhatsAppPassSpeech(inv) 
+                  : (isRem ? getWhatsAppReminderSpeech(inv) : getWhatsAppSpeech(inv));
+                const waUrl = isPass 
+                  ? getWhatsAppPassUrl(inv) 
+                  : (isRem ? getWhatsAppReminderUrl(inv) : getWhatsAppUrl(inv));
+                const isCopied = copiedToken === (isPass ? `wa_pass_${inv.id}` : (isRem ? `wa_rem_${inv.id}` : `wa_${inv.id}`));
 
                 return (
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
                     
-                    {/* Columna Izquierda: Flyer de WhatsApp */}
+                    {/* Columna Izquierda: Flyer de WhatsApp / Arte */}
                     <div className="md:col-span-5 space-y-3 flex flex-col">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
                           <ImageIcon size={15} className="text-[#25D366]" />
-                          Arte Oficial {isRem ? 'Recordatorio' : 'Invitación'}
+                          {isPass ? 'Arte Oficial del Pase' : (isRem ? 'Arte Oficial Recordatorio' : 'Arte Oficial Invitación')}
                         </span>
                         {spName && spName !== 'general' && (
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
@@ -4731,7 +4869,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                         <button
                           type="button"
                           disabled={!currentFlyerUrl}
-                          onClick={() => handleDownloadImage(currentFlyerUrl, `Arte_WhatsApp_${isRem ? 'Recordatorio' : 'Invitacion'}_${getSponsorKey(spName)}.png`)}
+                          onClick={() => handleDownloadImage(currentFlyerUrl, `Arte_WhatsApp_${isPass ? 'Pase' : (isRem ? 'Recordatorio' : 'Invitacion')}_${getSponsorKey(spName)}.png`)}
                           className="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
                         >
                           <Download size={15} />
@@ -4760,11 +4898,11 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
                           <MessageSquare size={15} className="text-[#25D366]" />
-                          Mensaje Personalizado con Enlace Único
+                          {isPass ? 'Mensaje con Gafete y Código QR Oficial' : 'Mensaje Personalizado con Enlace Único'}
                         </span>
-                        {inv.telefono && (
+                        {(inv.registeredPhone || inv.telefono) && (
                           <span className="text-xs text-slate-600 font-mono font-bold bg-slate-100 px-2 py-0.5 rounded-md">
-                            📱 {inv.telefono}
+                            📱 {inv.registeredPhone || inv.telefono}
                           </span>
                         )}
                       </div>
@@ -4795,11 +4933,13 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                           )}
                         </div>
                         <p className="text-[11px] text-emerald-800 leading-snug">
-                          Envía la plantilla oficial con el enlace único de acceso directamente al WhatsApp del invitado sin abrir WhatsApp Web ni interactuar manualmente.
+                          {isPass
+                            ? 'Envía la confirmación oficial con el enlace directo al Gafete y Código QR al WhatsApp del asistente registrado.'
+                            : 'Envía la plantilla oficial con el enlace único de acceso directamente al WhatsApp del invitado sin abrir WhatsApp Web.'}
                         </p>
                         <button
                           type="button"
-                          disabled={!inv.telefono || isSendingWatiId === inv.id}
+                          disabled={!(inv.registeredPhone || inv.telefono) || isSendingWatiId === inv.id}
                           onClick={() => handleSendSingleWati(inv)}
                           className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                         >
@@ -4811,7 +4951,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                           ) : (
                             <>
                               <Zap size={15} />
-                              <span>⚡ Disparar Invitación por WATI Ahora</span>
+                              <span>{isPass ? '⚡ Disparar Pase QR por WATI Ahora' : '⚡ Disparar Invitación por WATI Ahora'}</span>
                             </>
                           )}
                         </button>
@@ -4829,7 +4969,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                       <div className="grid grid-cols-2 gap-3 pt-1">
                         <button
                           type="button"
-                          onClick={() => isRem ? handleCopyWhatsAppReminder(inv) : handleCopyWhatsApp(inv)}
+                          onClick={() => isPass ? handleCopyWhatsAppPass(inv) : (isRem ? handleCopyWhatsAppReminder(inv) : handleCopyWhatsApp(inv))}
                           className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer border ${
                             isCopied
                               ? 'bg-green-600 text-white border-green-600'
