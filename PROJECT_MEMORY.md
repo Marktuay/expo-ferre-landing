@@ -1122,6 +1122,20 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
    - Base total actual en Firestore: **419 invitaciones directas** (113 registrados `used`, 306 pendientes `pending`).
    - Cero sobrescrituras de datos previos. Se preservaron intactos los 113 gafetes confirmados.
 
+### 🔔 Sistema de Recordatorio Inteligente y Seguro por WATI (`AdminDirectInvites.jsx` & `scripts/auto_reminder_wati.js`):
+1. **Limpieza de la UI:**
+   - Se removieron los botones manuales redundantes de WhatsApp (`wa.me`) y `[🔔 Recordar]` de la tabla de acciones individuales.
+2. **Selector de Recordatorio Inteligente en Modal Masivo de Wati:**
+   - Se añadió la opción **`Recordatorio Inteligente`** en el modal de envío de Wati para cada patrocinador.
+   - Aplica filtros de seguridad automáticos:
+     - Estado estrictamente `pending` (quienes completan su gafete quedan 100% excluidos).
+     - **Cooldown de 48 horas:** Solo personas cuyo último mensaje fue hace más de 48 horas.
+     - **Tope de frecuencia:** Máximo 2 recordatorios por invitado para prevenir reportes de spam.
+3. **Script Desatendido Programable (`scripts/auto_reminder_wati.js`):**
+   - Ejecutable manual o vía Cron/PM2 (`node scripts/auto_reminder_wati.js [--dry-run] [--limit=50]`).
+   - Respeta el límite diario de seguridad (50 mensajes/día por defecto) y cadencia segura de 1.5s entre mensajes.
+   - Probado con éxito en modo simulación (`--dry-run`).
+
 
 
 
