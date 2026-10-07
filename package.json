@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "backup": "node scripts/auto_backup_12_collections.js"
+    "backup": "node scripts/auto_backup_12_collections.js",
+    "auto-reminder": "node scripts/auto_reminder_wati.js"
   },
   "dependencies": {
     "firebase": "^12.14.0",

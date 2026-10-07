@@ -18,6 +18,7 @@ import {
   getDocs, 
   doc, 
   updateDoc, 
+  setDoc,
   serverTimestamp 
 } from 'firebase/firestore';
 
@@ -213,6 +214,23 @@ async function runAutoReminder() {
   console.log(`Fallidos: ${sentFailed}`);
   console.log(`Pendientes restantes para siguientes días: ${candidates.length - targets.length}`);
   console.log(`=======================================================`);
+
+  if (!isDryRun) {
+    try {
+      await setDoc(doc(db, 'events/2026/systemStatus', 'watiReminders'), {
+        lastRunAt: serverTimestamp(),
+        lastRunDate: new Date().toISOString().slice(0, 10),
+        processedCount: targets.length,
+        successCount: sentOk,
+        failedCount: sentFailed,
+        pendingRemaining: candidates.length - targets.length,
+        status: 'completed'
+      }, { merge: true });
+      console.log('📌 Estado de ejecución registrado en Firestore (systemStatus/watiReminders).');
+    } catch (logErr) {
+      console.warn('Advertencia: No se pudo registrar estado en Firestore:', logErr.message);
+    }
+  }
 
   process.exit(0);
 }

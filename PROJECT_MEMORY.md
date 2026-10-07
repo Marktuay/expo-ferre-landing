@@ -1132,9 +1132,22 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
      - **Cooldown de 48 horas:** Solo personas cuyo último mensaje fue hace más de 48 horas.
      - **Tope de frecuencia:** Máximo 2 recordatorios por invitado para prevenir reportes de spam.
 3. **Script Desatendido Programable (`scripts/auto_reminder_wati.js`):**
-   - Ejecutable manual o vía Cron/PM2 (`node scripts/auto_reminder_wati.js [--dry-run] [--limit=50]`).
+   - Ejecutable manual, vía npm (`npm run auto-reminder`) o vía Cron/PM2 (`pm2 start scripts/auto_reminder_wati.js --name "reminder-wati" --cron "0 10 * * *" --no-autorestart && pm2 save`).
    - Respeta el límite diario de seguridad (50 mensajes/día por defecto) y cadencia segura de 1.5s entre mensajes.
-   - Probado con éxito en modo simulación (`--dry-run`).
+   - Registra el estatus y métricas de cada corrida en `events/2026/systemStatus/watiReminders`.
+4. **Primera Ejecución en Vivo (06/Oct/2026 - 9:54 PM):**
+   - Se procesó el primer lote de candidatos que ya cumplían más de 84h de espera:
+     - Huberth (Construmarket de Nicaragua) -> 50589067115
+     - Israel (Israel Ernesto Paniagua) -> 50584241212
+     - Calin (Ferretería House Solutions) -> 50584789010
+     - Nohelia (Fetesa) -> 50584198116
+     - Ronald (Multiservicios Serproci) -> 50583734994
+     - Oscar (Miscelánea) -> 50589056482
+     - María Luisa (Ferreteria y Lubricanta Luisa) -> 50589056482
+     - Christopher (NIMAC) -> 50576568586
+   - **Resultado:** 8 de 8 mensajes entregados con éxito (100% efectividad). Documentos en Firestore actualizados con `whatsappSendCount: 2` y `lastReminderAt`.
+   - Cero pendientes restantes para hoy (los demás siguen en periodo de enfriamiento de 48h).
+
 
 
 
