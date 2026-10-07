@@ -2362,7 +2362,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
               onClick={handleExportExecutiveReport}
               disabled={invites.length === 0}
               className="px-4 py-2.5 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-xl font-bold transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer disabled:opacity-40"
-              title="Descargar reporte ejecutivo consolidado en Excel con resumen por patrocinador y detalle completo"
+              title="Descargar informe ejecutivo consolidado en Excel (4 pestañas: 1. Registrados, 2. Pendientes, 3. Consolidado, 4. Resumen por Patrocinador)"
             >
               <FileSpreadsheet size={16} />
               <span>Informe Ejecutivo (Excel)</span>
