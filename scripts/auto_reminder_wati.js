@@ -51,7 +51,7 @@ function cleanPhoneNumber(rawPhone) {
 }
 
 function getInviteUrl(token) {
-  return `https://expoferrenicaragua.com/?invite=${encodeURIComponent(token)}`;
+  return `https://expoferrenicaragua.com/?invite=${encodeURIComponent(token)}&src=wa`;
 }
 
 async function sendWatiMessage(phone, guestName, sponsorName, inviteUrl) {

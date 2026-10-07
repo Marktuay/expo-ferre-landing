@@ -134,6 +134,17 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
         isDirectInvite: true,
         inviteToken: token,
         source: 'Invitación Directa',
+        registeredViaChannel: (() => {
+          const srcParam = (urlParams.get('src') || urlParams.get('utm_source') || '').toLowerCase();
+          if (srcParam === 'wa' || srcParam === 'whatsapp') return 'WhatsApp (WATI)';
+          if (srcParam === 'email' || srcParam === 'mail') return 'Correo Electrónico';
+          const hasWa = !!(inviteData?.whatsappSent || inviteData?.whatsappSentAt);
+          const hasEmail = !!(inviteData?.emailSent || inviteData?.emailSentAt);
+          if (hasWa && hasEmail) return 'Ambos (WhatsApp y Correo)';
+          if (hasWa) return 'WhatsApp (WATI)';
+          if (hasEmail) return 'Correo Electrónico';
+          return 'Enlace Directo / Manual';
+        })(),
         createdAt: serverTimestamp(),
         approvedAt: serverTimestamp()
       };
@@ -149,7 +160,8 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
         registeredName: `${cleanNombre} ${cleanApellido}`,
         registeredEmail: cleanEmail,
         registeredPhone: cleanCelular,
-        registeredCompany: cleanEmpresa
+        registeredCompany: cleanEmpresa,
+        registeredViaChannel: attendeeDoc.registeredViaChannel
       });
 
       // 4. Enviar Correo de Confirmación con el Speech Oficial y Código QR

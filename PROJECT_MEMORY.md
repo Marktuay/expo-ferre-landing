@@ -1152,6 +1152,13 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
      - Christopher (NIMAC) -> 50576568586
    - **Resultado:** 8 de 8 mensajes entregados con éxito (100% efectividad). Documentos en Firestore actualizados con `whatsappSendCount: 2` y `lastReminderAt`.
    - Cero pendientes restantes para esa hora.
+5. **Atribución de Canal de Registro en Informe Ejecutivo (`AdminDirectInvites.jsx` & `DirectInviteRegistration.jsx`):**
+   - **Columnas añadidas en Excel:**
+     - En **Hoja 1 (`1. Registrados (Confirmados)`)**: `Canal_De_Registro` ('WhatsApp (WATI)', 'Correo Electrónico', 'Ambos', 'Enlace Directo / Manual') y `Detalle_Envios_Recibidos` (desglose exacto de mensajes y correos enviados a cada persona).
+     - En **Hoja 2 (`2. Pendientes de Registro`)**: `Canal_Contactado` y `Detalle_Intentos`.
+     - En **Hoja 3 (`3. Consolidado General`)**: `Canal_De_Invitacion` y `Detalle_Envios`.
+     - En **Hoja 4 (`4. Resumen por Patrocinador`)**: Desglose de conversión: `Registrados_Via_WhatsApp`, `Registrados_Via_Correo` y `Registrados_Via_Enlace_Directo`.
+   - **Trazabilidad en Vivo:** Parámetro `&src=wa` y `&src=email` inyectado automáticamente en los enlaces generados; `DirectInviteRegistration.jsx` almacena de forma persistente `registeredViaChannel` en el documento del asistente y en la invitación.
 
 
 

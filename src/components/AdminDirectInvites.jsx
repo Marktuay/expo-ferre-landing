@@ -1272,17 +1272,18 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     }
   };
 
-  const getInviteUrl = (token) => {
+  const getInviteUrl = (token, source = '') => {
     const host = window.location.hostname;
     const baseUrl = (host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168'))
       ? 'https://expoferrenicaragua.com'
       : window.location.origin;
-    return `${baseUrl}/?invite=${encodeURIComponent(token)}`;
+    const srcParam = source ? `&src=${encodeURIComponent(source)}` : '';
+    return `${baseUrl}/?invite=${encodeURIComponent(token)}${srcParam}`;
   };
 
   // Obtener mensaje corporativo completo para WhatsApp (con patrocinador, stands, evento)
   const getWhatsAppSpeech = (invite) => {
-    const link = getInviteUrl(invite.id);
+    const link = getInviteUrl(invite.id, 'wa');
     const guestLabel = invite.nombre?.trim() || '';
     const sponsorName = invite.sponsorName || '';
     const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
@@ -1325,7 +1326,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
   // Obtener mensaje de recordatorio para WhatsApp (con patrocinador)
   const getWhatsAppReminderSpeech = (invite) => {
-    const link = getInviteUrl(invite.id);
+    const link = getInviteUrl(invite.id, 'wa');
     const guestLabel = invite.nombre?.trim() || '';
     const sponsorName = invite.sponsorName || '';
     const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
@@ -1382,7 +1383,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
   // Función generadora del HTML del correo formal co-brandeado
   const buildInviteEmail = (invite, customRecipientEmail = null, isReminder = false) => {
-    const link = getInviteUrl(invite.id);
+    const link = getInviteUrl(invite.id, 'email');
     const guestLabel = invite.nombre?.trim() || 'Estimado(a) Invitado(a)';
     const sponsorName = invite.sponsorName || '';
     const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
@@ -1733,7 +1734,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     setWatiNotification(null);
 
     try {
-      const inviteUrl = getInviteUrl(invite.id);
+      const inviteUrl = getInviteUrl(invite.id, 'wa');
       const sponsorName = invite.sponsorName || 'general';
 
       const res = await sendDirectInviteViaWati({
@@ -1862,7 +1863,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         }
 
         const inv = targets[i];
-        const inviteUrl = getInviteUrl(inv.id);
+        const inviteUrl = getInviteUrl(inv.id, 'wa');
         const sponsorName = inv.sponsorName || targetSp;
 
         try {
@@ -1995,6 +1996,32 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         return fDate && fTime ? `${fDate} ${fTime}` : fDate;
       };
 
+      // Funciones auxiliares para determinar el canal de invitación y registro
+      const getContactChannel = (inv) => {
+        if (inv.registeredViaChannel) {
+          return inv.registeredViaChannel;
+        }
+        const hasWa = !!(inv.whatsappSent || inv.whatsappSentAt);
+        const hasEmail = !!(inv.emailSent || inv.emailSentAt);
+        if (hasWa && hasEmail) return 'Ambos (WhatsApp y Correo)';
+        if (hasWa) return 'WhatsApp (WATI)';
+        if (hasEmail) return 'Correo Electrónico';
+        return 'Enlace Directo / Manual';
+      };
+
+      const getContactDetail = (inv) => {
+        const parts = [];
+        if (inv.whatsappSent || inv.whatsappSentAt) {
+          const count = inv.whatsappSendCount || 1;
+          parts.push(`WhatsApp (${count} mensaje${count > 1 ? 's' : ''})`);
+        }
+        if (inv.emailSent || inv.emailSentAt) {
+          const count = inv.emailSendCount || 1;
+          parts.push(`Correo (${count} envío${count > 1 ? 's' : ''})`);
+        }
+        return parts.length > 0 ? parts.join(' + ') : 'Enlace Directo / Compartido Manual';
+      };
+
       // 1. Hoja 1: Personas Registradas (Confirmadas con Gafete)
       const registeredList = invites
         .filter(inv => inv.status === 'used')
@@ -2007,6 +2034,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       const registeredRows = registeredList.map((inv, idx) => ({
         No: idx + 1,
         Nombre_Persona_Registrada: inv.registeredName || inv.nombre || 'N/A',
+        Canal_De_Registro: getContactChannel(inv),
+        Detalle_Envios_Recibidos: getContactDetail(inv),
         Fecha_Registro: formatCustomDate(inv.usedAt) || 'Registrado',
         Hora_Registro: formatCustomTime(inv.usedAt) || 'N/A',
         Fecha_Y_Hora_Registro: formatCustomDateTime(inv.usedAt) || 'Registrado',
@@ -2036,6 +2065,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         return {
           No: idx + 1,
           Nombre_Persona_Invitada: inv.nombre || 'Pendiente',
+          Canal_Contactado: getContactChannel(inv),
+          Detalle_Intentos: getContactDetail(inv),
           Empresa: inv.empresa || 'N/A',
           Patrocinador_Que_Invito: inv.sponsorName || 'Invitación General (ExpoFerre)',
           Stands_Patrocinador: inv.sponsorStands || 'N/A',
@@ -2049,7 +2080,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         };
       });
 
-      // 3. Hoja 3: Consolidado General (Todos los 401 Invitados)
+      // 3. Hoja 3: Consolidado General (Todos los Invitados)
       const allSortedList = [...invites].sort((a, b) => {
         if (a.status === 'used' && b.status !== 'used') return -1;
         if (a.status !== 'used' && b.status === 'used') return 1;
@@ -2063,6 +2094,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         return {
           No: idx + 1,
           Estado_Registro: isUsed ? 'REGISTRADO' : 'PENDIENTE',
+          Canal_De_Invitacion: getContactChannel(inv),
+          Detalle_Envios: getContactDetail(inv),
           Nombre_Persona: isUsed ? (inv.registeredName || inv.nombre || 'N/A') : (inv.nombre || 'Pendiente'),
           Fecha_Registro: isUsed ? (formatCustomDate(inv.usedAt) || 'Registrado') : 'Pendiente',
           Hora_Registro: isUsed ? (formatCustomTime(inv.usedAt) || 'N/A') : 'Pendiente',
@@ -2090,6 +2123,9 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       const genCoveragePct = genWithEmail > 0 ? Math.round((genSent / genWithEmail) * 100) : 0;
       const genConversionPct = genInv.length > 0 ? Math.round((genUsed / genInv.length) * 100) : 0;
       const genArt = getSponsorArt('general');
+      const genUsedWa = genInv.filter(i => i.status === 'used' && getContactChannel(i).includes('WhatsApp')).length;
+      const genUsedEmail = genInv.filter(i => i.status === 'used' && getContactChannel(i).includes('Correo')).length;
+      const genUsedDirect = genInv.filter(i => i.status === 'used' && getContactChannel(i).includes('Directo')).length;
 
       summaryRows.push({
         Patrocinador: 'Invitación General (Comité EXPO FERRE 2026)',
@@ -2098,6 +2134,9 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         Registrados_Gafetes_Emitidos: genUsed,
         Pendientes_Completar_Registro: genPending,
         Tasa_Efectividad_Registro_Pct: `${genConversionPct}%`,
+        Registrados_Via_WhatsApp: genUsedWa,
+        Registrados_Via_Correo: genUsedEmail,
+        Registrados_Via_Enlace_Directo: genUsedDirect,
         Correos_Enviados: genSent,
         Correos_Pendientes_Envio: genUnsent,
         Sin_Correo_Valido_WhatsApp_Only: genNoEmail,
@@ -2122,6 +2161,10 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         const rawStands = sponsorsMap[sp]?.stands?.join(', ') || art.stands || 'N/A';
         const cleanStands = rawStands.replace(/stand\s*/gi, '').trim();
 
+        const spUsedWa = spInvites.filter(i => i.status === 'used' && getContactChannel(i).includes('WhatsApp')).length;
+        const spUsedEmail = spInvites.filter(i => i.status === 'used' && getContactChannel(i).includes('Correo')).length;
+        const spUsedDirect = spInvites.filter(i => i.status === 'used' && getContactChannel(i).includes('Directo')).length;
+
         summaryRows.push({
           Patrocinador: sp,
           Stands: cleanStands ? `Stand ${cleanStands}` : 'N/A',
@@ -2129,6 +2172,9 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
           Registrados_Gafetes_Emitidos: spUsed,
           Pendientes_Completar_Registro: spPending,
           Tasa_Efectividad_Registro_Pct: `${spConversionPct}%`,
+          Registrados_Via_WhatsApp: spUsedWa,
+          Registrados_Via_Correo: spUsedEmail,
+          Registrados_Via_Enlace_Directo: spUsedDirect,
           Correos_Enviados: spSent,
           Correos_Pendientes_Envio: spUnsent,
           Sin_Correo_Valido_WhatsApp_Only: spNoEmail,
@@ -2141,6 +2187,10 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
       // Fila Final de Totales Globales
       const globalEffectiveRate = totalInvitesCount > 0 ? Math.round((totalUsedCount / totalInvitesCount) * 100) : 0;
+      const totalUsedWa = invites.filter(i => i.status === 'used' && getContactChannel(i).includes('WhatsApp')).length;
+      const totalUsedEmail = invites.filter(i => i.status === 'used' && getContactChannel(i).includes('Correo')).length;
+      const totalUsedDirect = invites.filter(i => i.status === 'used' && getContactChannel(i).includes('Directo')).length;
+
       summaryRows.push({
         Patrocinador: '=== TOTALES GLOBALES ===',
         Stands: '35 Stands Reservados',
@@ -2148,6 +2198,9 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         Registrados_Gafetes_Emitidos: totalUsedCount,
         Pendientes_Completar_Registro: totalPendingCount,
         Tasa_Efectividad_Registro_Pct: `${globalEffectiveRate}%`,
+        Registrados_Via_WhatsApp: totalUsedWa,
+        Registrados_Via_Correo: totalUsedEmail,
+        Registrados_Via_Enlace_Directo: totalUsedDirect,
         Correos_Enviados: totalEmailsSent,
         Correos_Pendientes_Envio: totalEmailsPending,
         Sin_Correo_Valido_WhatsApp_Only: totalWithoutValidEmail,
@@ -2168,6 +2221,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       wsRegistered['!cols'] = [
         { wch: 6 },  // No
         { wch: 32 }, // Nombre
+        { wch: 28 }, // Canal de Registro
+        { wch: 34 }, // Detalle de Envíos
         { wch: 15 }, // Fecha
         { wch: 14 }, // Hora
         { wch: 24 }, // Fecha y Hora
@@ -2184,6 +2239,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       wsPending['!cols'] = [
         { wch: 6 },  // No
         { wch: 30 }, // Nombre
+        { wch: 28 }, // Canal Contactado
+        { wch: 34 }, // Detalle de Intentos
         { wch: 32 }, // Empresa
         { wch: 32 }, // Patrocinador
         { wch: 18 }, // Stands
@@ -2199,6 +2256,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       wsConsolidated['!cols'] = [
         { wch: 6 },  // No
         { wch: 16 }, // Estado
+        { wch: 28 }, // Canal Invitacion
+        { wch: 34 }, // Detalle Envios
         { wch: 32 }, // Nombre
         { wch: 15 }, // Fecha
         { wch: 14 }, // Hora
@@ -2213,8 +2272,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
       wsSummary['!cols'] = [
         { wch: 35 }, { wch: 20 }, { wch: 16 }, { wch: 28 }, { wch: 28 },
-        { wch: 28 }, { wch: 18 }, { wch: 24 }, { wch: 30 }, { wch: 22 },
-        { wch: 22 }, { wch: 22 }, { wch: 22 }
+        { wch: 28 }, { wch: 26 }, { wch: 24 }, { wch: 28 }, { wch: 18 },
+        { wch: 24 }, { wch: 30 }, { wch: 22 }, { wch: 22 }, { wch: 22 }, { wch: 22 }
       ];
 
       XLSX.utils.book_append_sheet(wb, wsRegistered, "1. Registrados (Confirmados)");
