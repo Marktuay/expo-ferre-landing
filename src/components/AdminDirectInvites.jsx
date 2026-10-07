@@ -1813,9 +1813,20 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       // 3. Debe estar pendiente (no registrado)
       if (inv.status === 'used') return false;
 
-      // 4. Filtro: solo nunca enviados
-      if (filterType === 'never_sent' && (inv.whatsappSent || inv.whatsappSentAt)) {
-        return false;
+      // 4. Criterio de Selección:
+      if (filterType === 'never_sent') {
+        // Solo primer envío (nunca enviado)
+        if (inv.whatsappSent || inv.whatsappSentAt) return false;
+      } else if (filterType === 'smart_reminder') {
+        // Recordatorio Inteligente: Ya fue enviado previamente pero pasaron al menos 48h (cooldown) y no más de 3 envíos
+        const lastSentMillis = inv.whatsappSentAt?.toMillis ? inv.whatsappSentAt.toMillis() : (inv.whatsappSentAt ? new Date(inv.whatsappSentAt).getTime() : 0);
+        const now = Date.now();
+        const hoursPassed = (now - lastSentMillis) / (1000 * 60 * 60);
+        const sendCount = inv.whatsappSendCount || 1;
+        // Requiere haber sido enviado al menos una vez, mínimo 48h de enfriamiento y menos de 3 recordatorios
+        if (!inv.whatsappSent && !inv.whatsappSentAt) return false;
+        if (hoursPassed < 48) return false;
+        if (sendCount >= 3) return false;
       }
 
       return true;
@@ -3555,19 +3566,6 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                     <span className="text-[10px] bg-black/20 px-1 rounded-full">✓</span>
                                   )}
                                 </button>
-
-                                {/* Recordatorio WhatsApp (Para Pendientes de Registro) */}
-                                {inv.status === 'pending' && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setWhatsAppModal({ open: true, invite: inv, isReminder: true })}
-                                    title="Ver arte de recordatorio y enviar mensaje por WhatsApp"
-                                    className="p-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer"
-                                  >
-                                    <Bell size={14} />
-                                    <span className="hidden xl:inline">Recordar</span>
-                                  </button>
-                                )}
 
                                 {/* Copiar Speech WhatsApp */}
                                 <button
@@ -5628,8 +5626,18 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                     const neverSent = withValidPhone.filter(i => !i.whatsappSent && !i.whatsappSentAt);
                     const alreadySent = withValidPhone.filter(i => i.whatsappSent || i.whatsappSentAt);
 
+                    const nowMillis = Date.now();
+                    const readyForReminder = alreadySent.filter(i => {
+                      const lastSentMillis = i.whatsappSentAt?.toMillis ? i.whatsappSentAt.toMillis() : (i.whatsappSentAt ? new Date(i.whatsappSentAt).getTime() : 0);
+                      const hours = (nowMillis - lastSentMillis) / (1000 * 60 * 60);
+                      const sendCount = i.whatsappSendCount || 1;
+                      return hours >= 48 && sendCount < 3;
+                    });
+
                     const currentFilterTargets = bulkWatiModal.filterType === 'never_sent' 
                       ? neverSent 
+                      : bulkWatiModal.filterType === 'smart_reminder'
+                      ? readyForReminder
                       : withValidPhone;
                     
                     const batchSize = bulkWatiModal.batchLimit === 'all' 
@@ -5663,10 +5671,14 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                         </div>
 
                         {/* Desglose de Diagnóstico */}
-                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div className="grid grid-cols-4 gap-2 text-center text-xs">
                           <div className="bg-blue-50 border border-blue-100 p-2.5 rounded-xl">
-                            <span className="text-secondary block text-[10px] uppercase font-bold">Listos (Primer Envío)</span>
+                            <span className="text-secondary block text-[10px] uppercase font-bold">Primer Envío</span>
                             <span className="text-xl font-black text-blue-900">{neverSent.length}</span>
+                          </div>
+                          <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-xl">
+                            <span className="text-amber-800 block text-[10px] uppercase font-bold">Listos Recordar</span>
+                            <span className="text-xl font-black text-amber-900">{readyForReminder.length}</span>
                           </div>
                           <div className="bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl">
                             <span className="text-secondary block text-[10px] uppercase font-bold">Ya Enviados</span>
@@ -5683,7 +5695,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                           <label className="text-xs font-bold text-on-surface uppercase tracking-wider block">
                             Criterio de Selección:
                           </label>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                             <label className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${
                               bulkWatiModal.filterType === 'never_sent' ? 'bg-emerald-50/70 border-emerald-500 text-emerald-950 font-medium' : 'bg-surface border-outline-variant hover:bg-surface-variant/30 text-secondary'
                             }`}>
@@ -5696,8 +5708,25 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                                 className="mt-0.5 accent-emerald-600"
                               />
                               <div className="text-xs">
-                                <strong className="block text-on-surface">Solo Nunca Enviados ({neverSent.length})</strong>
-                                <span className="text-[11px] text-secondary">Ideal para el primer lanzamiento sin duplicados.</span>
+                                <strong className="block text-on-surface">Primer Lanzamiento ({neverSent.length})</strong>
+                                <span className="text-[11px] text-secondary">Solo invitados que nunca han recibido mensaje.</span>
+                              </div>
+                            </label>
+
+                            <label className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${
+                              bulkWatiModal.filterType === 'smart_reminder' ? 'bg-amber-50/80 border-amber-500 text-amber-950 font-medium' : 'bg-surface border-outline-variant hover:bg-surface-variant/30 text-secondary'
+                            }`}>
+                              <input
+                                type="radio"
+                                name="watiFilterType"
+                                value="smart_reminder"
+                                checked={bulkWatiModal.filterType === 'smart_reminder'}
+                                onChange={() => setBulkWatiModal(prev => ({ ...prev, filterType: 'smart_reminder' }))}
+                                className="mt-0.5 accent-amber-600"
+                              />
+                              <div className="text-xs">
+                                <strong className="block text-amber-950">Recordatorio Inteligente ({readyForReminder.length})</strong>
+                                <span className="text-[11px] text-amber-800">Pendientes con más de 48h desde el último envío.</span>
                               </div>
                             </label>
 
@@ -5714,7 +5743,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                               />
                               <div className="text-xs">
                                 <strong className="block text-on-surface">Todos con Teléfono ({withValidPhone.length})</strong>
-                                <span className="text-[11px] text-secondary">Incluye reenvíos a quienes no se han registrado.</span>
+                                <span className="text-[11px] text-secondary">Incluye todos los pendientes sin importar fecha.</span>
                               </div>
                             </label>
                           </div>
