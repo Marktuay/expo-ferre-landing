@@ -1160,6 +1160,49 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
      - En **Hoja 4 (`4. Resumen por Patrocinador`)**: Desglose de conversión: `Registrados_Via_WhatsApp`, `Registrados_Via_Correo` y `Registrados_Via_Enlace_Directo`.
    - **Trazabilidad en Vivo:** Parámetro `&src=wa` y `&src=email` inyectado automáticamente en los enlaces generados; `DirectInviteRegistration.jsx` almacena de forma persistente `registeredViaChannel` en el documento del asistente y en la invitación.
 
+---
+
+## 📅 Resumen de Avances y Cambios de la Sesión (07 de Octubre de 2026)
+
+### 🤖 1. Puesta en Producción y Operación del Bot de WATI (`reminder-wati` en PM2)
+- **Configuración de Producción en VM:**
+  - El bot desatendido de WATI (`scripts/auto_reminder_wati.js`) fue desplegado y registrado exitosamente en la VM de Google Cloud bajo el proceso ID 2:
+    `pm2 start scripts/auto_reminder_wati.js --name "reminder-wati" --cron "0 10,15 * * *" --no-autorestart && pm2 save`
+  - La configuración quedó guardada en el dump persistente de PM2 (`~/.pm2/dump.pm2`).
+- **Arquitectura de Ejecución en Dos Ventanas (10:00 AM y 3:00 PM):**
+  - **Ventana 10:00 AM / 3:00 PM:**
+    1. Procesa prioritariamente contactos nuevos (`!whatsappSent`) enviando su primera invitación.
+    2. Procesa recordatorios pendientes que hayan cumplido al menos 48 horas desde su último envío (máximo 2 recordatorios por persona).
+    3. Si no hay candidatos para la ventana, finaliza de inmediato sin enviar mensajes ni consumir créditos.
+  - **Estado Operativo:** El estado `stopped` en PM2 es el comportamiento esperado y óptimo para tareas programadas con `--no-autorestart`. Mantiene el consumo en 0% CPU y 0 MB RAM hasta que el temporizador interno de PM2 lo despierta.
+- **Análisis de Costos en Firebase Firestore:**
+  - Consumo total diario estimado del bot: ~838 lecturas y ~50-100 escrituras.
+  - Cuota gratuita diaria de Firestore: 50,000 lecturas y 20,000 escrituras.
+  - **Costo económico en Firestore:** **$0.00 USD** (utiliza menos del 2% del límite gratuito).
+
+### 📊 2. Atribución Completa de Canal (WhatsApp vs Correo) en el Informe Ejecutivo Excel
+- **Diagnóstico de Base de Datos:**
+  - Al 07/Oct/2026, la base aumentó a **135 registrados con gafete emitido** (`status: 'used'`).
+  - Auditoría de canales en Firestore: 92 invitados contactados por Correo Electrónico, 20 por WhatsApp (WATI), 16 por Ambos canales y 7 por Enlace Directo / Copiado Manual.
+- **Actualización de Enlaces con Parámetros UTM/Fuente:**
+  - `getInviteUrl` en `AdminDirectInvites.jsx` y `scripts/auto_reminder_wati.js` inyecta automáticamente el parámetro `&src=wa` para mensajes de WhatsApp y `&src=email` para correos electrónicos.
+- **Captura Persistente en Registro (`DirectInviteRegistration.jsx`):**
+  - Al completar el formulario de registro, el sistema analiza el parámetro `src` de la URL (o los registros previos en la base de datos) y almacena de forma inmutable el campo `registeredViaChannel` tanto en `preregistrations` como en `directInvites`.
+- **Nuevas Columnas en el Libro de Excel (`handleExportExecutiveReport`):**
+  - **Hoja 1 (`1. Registrados (Confirmados)`):**
+    - `Canal_De_Registro`: 'WhatsApp (WATI)', 'Correo Electrónico', 'Ambos (WhatsApp y Correo)', 'Enlace Directo / Manual'.
+    - `Detalle_Envios_Recibidos`: Conteo exacto de despachos recibidos (ej. *"WhatsApp (2 mensajes) + Correo (1 envío)"*).
+  - **Hoja 2 (`2. Pendientes de Registro`):**
+    - `Canal_Contactado` y `Detalle_Intentos`.
+  - **Hoja 3 (`3. Consolidado General`):**
+    - `Canal_De_Invitacion` y `Detalle_Envios`.
+  - **Hoja 4 (`4. Resumen por Patrocinador`):**
+    - Desglose métrico de conversión por patrocinador: `Registrados_Via_WhatsApp`, `Registrados_Via_Correo` y `Registrados_Via_Enlace_Directo`.
+- **Despliegue y Verificación:**
+  - Commits `18c50f6`, `dbb12f8`, `b309a2b`, `a8f6b17` integrados y probados.
+  - Compilación exitosa en producción (`npm run build` en 2.37s) y servicio reiniciado con `pm2 restart 0`.
+
+
 
 
 
