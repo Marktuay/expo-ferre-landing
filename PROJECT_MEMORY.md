@@ -1108,6 +1108,20 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   4. *Persistencia Insegura en LocalStorage:* Confianza ciega en `adminUser` sin verificar sesión criptográfica activa en Firebase Auth.
 - **Estatus:** Registrados como **Cambios Críticos Pendientes** programados para ser implementados y desplegados hoy por la noche (05/Oct/2026).
 
+---
+
+## 📅 Resumen de Cargas de Invitados Directos (06 de Octubre de 2026)
+
+### 🚀 Cargas Masivas por Patrocinador (`events/2026/directInvites`):
+1. **Primera Carga (155 Invitados Nuevos):**
+   - Grupo Sur (+58), Indenicsa (+26), Comasa (+23), Invitación General (+28), Holcim (+10), ZF Saratoga (+7), Balladares (+2), Plycem (+1).
+   - Subió la base de 246 a 401 invitados.
+2. **Segunda Carga (18 Invitados Nuevos):**
+   - **TIGO (+12 invitados, Stand 33):** Jose Angel, Franz, Roberto, Alberto, Michele, Jennifer Karolina, Claudia, Emelda, Yessenia, Noel, Jomara, Valery.
+   - **Invitación General (+6 invitados):** Dayna Cabrera (Semcomer), William Cabrera (Semcomer), Heidy Rosalia (Ferretería Shemá Israel), Margarita (Rinsa), Karen Torres (Rinsa), Elvin Ignacio (Ferretería Gutiérrez).
+   - Base total actual en Firestore: **419 invitaciones directas** (113 registrados `used`, 306 pendientes `pending`).
+   - Cero sobrescrituras de datos previos. Se preservaron intactos los 113 gafetes confirmados.
+
 
 
 
