@@ -138,9 +138,29 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   - **Importaciones Balladares Nicaragua:** +2 invitados nuevos (Angie Reyes - Ferretería Guadalupe y Anabell Jarquín - Ferretería Valenzuela).
   - **Plycem:** +1 invitado nuevo (Pedro Elvert Medina Sirias - Ferretería JM).
 - **Totales de Control Verificados en Firestore:**
-  - **Registrados (utilizados):** 112
-  - **Pendientes de Registro:** 289
+  - **Registrados (utilizados):** 113
+  - **Pendientes de Registro:** 288
   - **Total:** 401 invitaciones directas activas.
+
+### 📊 Rediseño del Informe Ejecutivo en Excel (`handleExportExecutiveReport` en `AdminDirectInvites.jsx`)
+- **Solicitud Operativa:** Proveer un informe en Excel que detalle explícitamente:
+  1. Nombre de la persona registrada.
+  2. Fecha y hora exacta de registro (formato `DD/MM/AAAA` y `HH:MM AM/PM`).
+  3. Nombre de la empresa.
+  4. Patrocinador anfitrión que lo invitó.
+  5. Listado de personas que aún no se han registrado.
+- **Estructura Multi-Pestaña Implementada:**
+  - **Pestaña 1: `1. Registrados (Confirmados)`:**
+    - Contiene los 113 invitados con gafete emitido, ordenados de forma descendente por fecha/hora de registro (los más recientes primero).
+    - Columnas: *No., Nombre_Persona_Registrada, Fecha_Registro, Hora_Registro, Fecha_Y_Hora_Registro, Empresa, Patrocinador_Que_Invito, Stands_Patrocinador, Telefono_Celular, Correo_Electronico, Estado_Registro, Token_Pase, Enlace_Gafete_QR*.
+  - **Pestaña 2: `2. Pendientes de Registro`:**
+    - Contiene los 288 invitados pendientes para labores de seguimiento, llamadas o recordatorios por WhatsApp.
+    - Columnas: *No., Nombre_Persona_Invitada, Empresa, Patrocinador_Que_Invito, Stands_Patrocinador, Estado_Registro, Fecha_Y_Hora_Registro ("Pendiente"), Telefono_WhatsApp, Correo_Electronico, Correo_Despachado, WhatsApp_Despachado, Enlace_Unico_Invitacion*.
+  - **Pestaña 3: `3. Consolidado General`:**
+    - Lista unificada de los 401 invitados con columna de Estado (`REGISTRADO` o `PENDIENTE`) y todos sus datos de contacto y enlace.
+  - **Pestaña 4: `4. Resumen por Patrocinador`:**
+    - Métricas ejecutivas por marca (Total Invitados, Registrados, Pendientes, Tasa de Registro %, Correos Despachados) y fila de Totales Globales.
+- **Formateo y Ergonomía:** Anchos de columnas ajustados dinámicamente (`!cols`) para visualización instantánea sin celdas cortadas.
 
 ---
 

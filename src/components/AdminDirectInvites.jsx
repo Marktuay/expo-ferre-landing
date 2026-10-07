@@ -1952,7 +1952,120 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   // Exportar Informe Ejecutivo Completo Multi-Hoja en Excel
   const handleExportExecutiveReport = () => {
     import('xlsx').then((XLSX) => {
-      // 1. Hoja 1: Resumen por Patrocinador y Totales Globales
+      // Funciones auxiliares de formato de fecha y hora (es-NI)
+      const formatCustomDate = (d) => {
+        if (!d) return '';
+        const dateObj = d instanceof Date ? d : (d?.toDate ? d.toDate() : new Date(d));
+        if (isNaN(dateObj.getTime())) return '';
+        return dateObj.toLocaleDateString('es-NI', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+      };
+
+      const formatCustomTime = (d) => {
+        if (!d) return '';
+        const dateObj = d instanceof Date ? d : (d?.toDate ? d.toDate() : new Date(d));
+        if (isNaN(dateObj.getTime())) return '';
+        return dateObj.toLocaleTimeString('es-NI', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      };
+
+      const formatCustomDateTime = (d) => {
+        if (!d) return '';
+        const dateObj = d instanceof Date ? d : (d?.toDate ? d.toDate() : new Date(d));
+        if (isNaN(dateObj.getTime())) return '';
+        const fDate = formatCustomDate(dateObj);
+        const fTime = formatCustomTime(dateObj);
+        return fDate && fTime ? `${fDate} ${fTime}` : fDate;
+      };
+
+      // 1. Hoja 1: Personas Registradas (Confirmadas con Gafete)
+      const registeredList = invites
+        .filter(inv => inv.status === 'used')
+        .sort((a, b) => {
+          const timeA = a.usedAt ? (a.usedAt instanceof Date ? a.usedAt.getTime() : new Date(a.usedAt).getTime()) : 0;
+          const timeB = b.usedAt ? (b.usedAt instanceof Date ? b.usedAt.getTime() : new Date(b.usedAt).getTime()) : 0;
+          return timeB - timeA;
+        });
+
+      const registeredRows = registeredList.map((inv, idx) => ({
+        No: idx + 1,
+        Nombre_Persona_Registrada: inv.registeredName || inv.nombre || 'N/A',
+        Fecha_Registro: formatCustomDate(inv.usedAt) || 'Registrado',
+        Hora_Registro: formatCustomTime(inv.usedAt) || 'N/A',
+        Fecha_Y_Hora_Registro: formatCustomDateTime(inv.usedAt) || 'Registrado',
+        Empresa: inv.registeredCompany || inv.empresa || 'N/A',
+        Patrocinador_Que_Invito: inv.sponsorName || 'Invitación General (ExpoFerre)',
+        Stands_Patrocinador: inv.sponsorStands || 'N/A',
+        Telefono_Celular: inv.registeredPhone || inv.telefono || 'N/A',
+        Correo_Electronico: inv.registeredEmail || inv.email || 'N/A',
+        Estado_Registro: 'REGISTRADO (GAFETE EMITIDO)',
+        Token_Pase: inv.id,
+        Enlace_Gafete_QR: getInviteUrl(inv.id)
+      }));
+
+      // 2. Hoja 2: Personas Pendientes de Registro
+      const pendingList = invites
+        .filter(inv => inv.status !== 'used')
+        .sort((a, b) => {
+          const spA = (a.sponsorName || 'Invitación General').toLowerCase();
+          const spB = (b.sponsorName || 'Invitación General').toLowerCase();
+          if (spA !== spB) return spA.localeCompare(spB);
+          return (a.nombre || '').localeCompare(b.nombre || '');
+        });
+
+      const pendingRows = pendingList.map((inv, idx) => {
+        const hasEmailSent = inv.emailSent || inv.emailSentAt;
+        const hasWatiSent = inv.whatsappSent || inv.whatsappSentAt;
+        return {
+          No: idx + 1,
+          Nombre_Persona_Invitada: inv.nombre || 'Pendiente',
+          Empresa: inv.empresa || 'N/A',
+          Patrocinador_Que_Invito: inv.sponsorName || 'Invitación General (ExpoFerre)',
+          Stands_Patrocinador: inv.sponsorStands || 'N/A',
+          Estado_Registro: 'PENDIENTE DE REGISTRO',
+          Fecha_Y_Hora_Registro: 'Pendiente (Aún no registrado)',
+          Telefono_WhatsApp: inv.telefono || 'N/A',
+          Correo_Electronico: inv.email || 'N/A',
+          Correo_Despachado: hasEmailSent ? 'ENVIADO' : (isValidEmailAddress(inv.email) ? 'PENDIENTE DE ENVIO' : 'SIN CORREO VALIDO'),
+          WhatsApp_Despachado: hasWatiSent ? 'ENVIADO' : (inv.telefono ? 'PENDIENTE DE ENVIO' : 'SIN CELULAR'),
+          Enlace_Unico_Invitacion: getInviteUrl(inv.id)
+        };
+      });
+
+      // 3. Hoja 3: Consolidado General (Todos los 401 Invitados)
+      const allSortedList = [...invites].sort((a, b) => {
+        if (a.status === 'used' && b.status !== 'used') return -1;
+        if (a.status !== 'used' && b.status === 'used') return 1;
+        const spA = (a.sponsorName || 'Invitación General').toLowerCase();
+        const spB = (b.sponsorName || 'Invitación General').toLowerCase();
+        return spA.localeCompare(spB);
+      });
+
+      const consolidatedRows = allSortedList.map((inv, idx) => {
+        const isUsed = inv.status === 'used';
+        return {
+          No: idx + 1,
+          Estado_Registro: isUsed ? 'REGISTRADO' : 'PENDIENTE',
+          Nombre_Persona: isUsed ? (inv.registeredName || inv.nombre || 'N/A') : (inv.nombre || 'Pendiente'),
+          Fecha_Registro: isUsed ? (formatCustomDate(inv.usedAt) || 'Registrado') : 'Pendiente',
+          Hora_Registro: isUsed ? (formatCustomTime(inv.usedAt) || 'N/A') : 'Pendiente',
+          Fecha_Y_Hora_Registro: isUsed ? (formatCustomDateTime(inv.usedAt) || 'Registrado') : 'Pendiente (Aún no registrado)',
+          Empresa: isUsed ? (inv.registeredCompany || inv.empresa || 'N/A') : (inv.empresa || 'N/A'),
+          Patrocinador_Que_Invito: inv.sponsorName || 'Invitación General (ExpoFerre)',
+          Stands_Patrocinador: inv.sponsorStands || 'N/A',
+          Telefono_Contacto: isUsed ? (inv.registeredPhone || inv.telefono || 'N/A') : (inv.telefono || 'N/A'),
+          Correo_Electronico: isUsed ? (inv.registeredEmail || inv.email || 'N/A') : (inv.email || 'N/A'),
+          Enlace_Unico_Pase: getInviteUrl(inv.id)
+        };
+      });
+
+      // 4. Hoja 4: Resumen Ejecutivo por Patrocinador y Totales Globales
       const summaryRows = [];
 
       // Fila: General
@@ -1971,13 +2084,13 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         Patrocinador: 'Invitación General (Comité EXPO FERRE 2026)',
         Stands: 'Evento General',
         Total_Invitados: genInv.length,
+        Registrados_Gafetes_Emitidos: genUsed,
+        Pendientes_Completar_Registro: genPending,
+        Tasa_Efectividad_Registro_Pct: `${genConversionPct}%`,
         Correos_Enviados: genSent,
         Correos_Pendientes_Envio: genUnsent,
         Sin_Correo_Valido_WhatsApp_Only: genNoEmail,
         Cobertura_Envios_Pct: `${genCoveragePct}%`,
-        Registrados_Gafetes_Emitidos: genUsed,
-        Pendientes_Completar_Registro: genPending,
-        Tasa_Efectividad_Registro_Pct: `${genConversionPct}%`,
         Header_Personalizado: genArt.hasCustomHeader ? 'SÍ' : 'NO (Default)',
         Footer_Personalizado: genArt.hasCustomFooter ? 'SÍ' : 'NO (Default)',
         Speech_Personalizado: (sponsorSettings['general']?.customSpeech || '').trim() ? 'SÍ' : 'NO (Default)'
@@ -2002,13 +2115,13 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
           Patrocinador: sp,
           Stands: cleanStands ? `Stand ${cleanStands}` : 'N/A',
           Total_Invitados: spInvites.length,
+          Registrados_Gafetes_Emitidos: spUsed,
+          Pendientes_Completar_Registro: spPending,
+          Tasa_Efectividad_Registro_Pct: `${spConversionPct}%`,
           Correos_Enviados: spSent,
           Correos_Pendientes_Envio: spUnsent,
           Sin_Correo_Valido_WhatsApp_Only: spNoEmail,
           Cobertura_Envios_Pct: `${spCoveragePct}%`,
-          Registrados_Gafetes_Emitidos: spUsed,
-          Pendientes_Completar_Registro: spPending,
-          Tasa_Efectividad_Registro_Pct: `${spConversionPct}%`,
           Header_Personalizado: art.hasCustomHeader ? 'SÍ' : 'NO (Default)',
           Footer_Personalizado: art.hasCustomFooter ? 'SÍ' : 'NO (Default)',
           Speech_Personalizado: (sponsorSettings[getSponsorKey(sp)]?.customSpeech || '').trim() ? 'SÍ' : 'NO (Default)'
@@ -2021,65 +2134,82 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         Patrocinador: '=== TOTALES GLOBALES ===',
         Stands: '35 Stands Reservados',
         Total_Invitados: totalInvitesCount,
+        Registrados_Gafetes_Emitidos: totalUsedCount,
+        Pendientes_Completar_Registro: totalPendingCount,
+        Tasa_Efectividad_Registro_Pct: `${globalEffectiveRate}%`,
         Correos_Enviados: totalEmailsSent,
         Correos_Pendientes_Envio: totalEmailsPending,
         Sin_Correo_Valido_WhatsApp_Only: totalWithoutValidEmail,
         Cobertura_Envios_Pct: `${emailCoveragePercent}%`,
-        Registrados_Gafetes_Emitidos: totalUsedCount,
-        Pendientes_Completar_Registro: totalPendingCount,
-        Tasa_Efectividad_Registro_Pct: `${globalEffectiveRate}%`,
         Header_Personalizado: '-',
         Footer_Personalizado: '-',
         Speech_Personalizado: '-'
       });
 
-      // 2. Hoja 2: Detalle Individual Completo de todos los Invitados
-      const detailRows = invites.map((inv, idx) => {
-        const hasSent = inv.emailSent || inv.emailSentAt;
-        const isUsed = inv.status === 'used';
-        return {
-          No: idx + 1,
-          Token_ID: inv.id,
-          Patrocinador_Asignado: inv.sponsorName || 'Invitación General',
-          Stands_Patrocinador: inv.sponsorStands || 'N/A',
-          Nombre_Destinatario: inv.nombre || 'N/A',
-          Empresa_Destinataria: inv.empresa || 'N/A',
-          Correo_Electronico: inv.email || 'N/A',
-          Telefono_WhatsApp: inv.telefono || 'N/A',
-          Estado_Invitacion: isUsed ? 'REGISTRADO (GAFETE EMITIDO)' : 'PENDIENTE DE REGISTRO',
-          Correo_Despachado: hasSent ? 'ENVIADO' : (isValidEmailAddress(inv.email) ? 'PENDIENTE DE ENVIO' : 'SIN CORREO VALIDO'),
-          Cantidad_Envios_Correo: inv.emailSentCount || (hasSent ? 1 : 0),
-          Fecha_Ultimo_Envio: inv.emailSentAt ? (typeof inv.emailSentAt.toDate === 'function' ? inv.emailSentAt.toDate().toLocaleString('es-NI') : new Date(inv.emailSentAt).toLocaleString('es-NI')) : 'No enviado',
-          Nombre_Registrado_Gafete: inv.registeredName || '',
-          Empresa_Registrada_Gafete: inv.registeredCompany || '',
-          Email_Registrado_Gafete: inv.registeredEmail || '',
-          Telefono_Registrado_Gafete: inv.registeredPhone || '',
-          Fecha_Registro_Gafete: inv.usedAt ? (typeof inv.usedAt.toLocaleDateString === 'function' ? inv.usedAt.toLocaleDateString('es-NI') + ' ' + inv.usedAt.toLocaleTimeString('es-NI') : new Date(inv.usedAt).toLocaleString('es-NI')) : '',
-          Enlace_Unico_QR: getInviteUrl(inv.id)
-        };
-      });
-
       const wb = XLSX.utils.book_new();
-      
-      const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
-      const wsDetail = XLSX.utils.json_to_sheet(detailRows);
 
-      // Auto-ajustar anchos aproximados de columnas
+      const wsRegistered = XLSX.utils.json_to_sheet(registeredRows);
+      const wsPending = XLSX.utils.json_to_sheet(pendingRows);
+      const wsConsolidated = XLSX.utils.json_to_sheet(consolidatedRows);
+      const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
+
+      // Anchos de columna optimizados
+      wsRegistered['!cols'] = [
+        { wch: 6 },  // No
+        { wch: 32 }, // Nombre
+        { wch: 15 }, // Fecha
+        { wch: 14 }, // Hora
+        { wch: 24 }, // Fecha y Hora
+        { wch: 32 }, // Empresa
+        { wch: 32 }, // Patrocinador
+        { wch: 18 }, // Stands
+        { wch: 18 }, // Telefono
+        { wch: 32 }, // Email
+        { wch: 28 }, // Estado
+        { wch: 25 }, // Token
+        { wch: 45 }  // Enlace
+      ];
+
+      wsPending['!cols'] = [
+        { wch: 6 },  // No
+        { wch: 30 }, // Nombre
+        { wch: 32 }, // Empresa
+        { wch: 32 }, // Patrocinador
+        { wch: 18 }, // Stands
+        { wch: 26 }, // Estado
+        { wch: 28 }, // Fecha Registro
+        { wch: 18 }, // Telefono
+        { wch: 32 }, // Email
+        { wch: 22 }, // Correo
+        { wch: 22 }, // WhatsApp
+        { wch: 45 }  // Enlace
+      ];
+
+      wsConsolidated['!cols'] = [
+        { wch: 6 },  // No
+        { wch: 16 }, // Estado
+        { wch: 32 }, // Nombre
+        { wch: 15 }, // Fecha
+        { wch: 14 }, // Hora
+        { wch: 24 }, // Fecha y Hora
+        { wch: 32 }, // Empresa
+        { wch: 32 }, // Patrocinador
+        { wch: 18 }, // Stands
+        { wch: 18 }, // Telefono
+        { wch: 32 }, // Email
+        { wch: 45 }  // Enlace
+      ];
+
       wsSummary['!cols'] = [
-        { wch: 35 }, { wch: 20 }, { wch: 16 }, { wch: 18 }, { wch: 24 },
-        { wch: 30 }, { wch: 22 }, { wch: 28 }, { wch: 28 }, { wch: 28 },
+        { wch: 35 }, { wch: 20 }, { wch: 16 }, { wch: 28 }, { wch: 28 },
+        { wch: 28 }, { wch: 18 }, { wch: 24 }, { wch: 30 }, { wch: 22 },
         { wch: 22 }, { wch: 22 }, { wch: 22 }
       ];
 
-      wsDetail['!cols'] = [
-        { wch: 6 }, { wch: 24 }, { wch: 30 }, { wch: 20 }, { wch: 28 },
-        { wch: 28 }, { wch: 30 }, { wch: 18 }, { wch: 28 }, { wch: 22 },
-        { wch: 22 }, { wch: 24 }, { wch: 28 }, { wch: 28 }, { wch: 30 },
-        { wch: 20 }, { wch: 24 }, { wch: 45 }
-      ];
-
-      XLSX.utils.book_append_sheet(wb, wsSummary, "Resumen_Por_Patrocinador");
-      XLSX.utils.book_append_sheet(wb, wsDetail, "Detalle_General_Invitados");
+      XLSX.utils.book_append_sheet(wb, wsRegistered, "1. Registrados (Confirmados)");
+      XLSX.utils.book_append_sheet(wb, wsPending, "2. Pendientes de Registro");
+      XLSX.utils.book_append_sheet(wb, wsConsolidated, "3. Consolidado General");
+      XLSX.utils.book_append_sheet(wb, wsSummary, "4. Resumen por Patrocinador");
 
       const nowStr = new Date().toISOString().slice(0, 10);
       XLSX.writeFile(wb, `Informe_Ejecutivo_Invitaciones_ExpoFerre_${nowStr}.xlsx`);
