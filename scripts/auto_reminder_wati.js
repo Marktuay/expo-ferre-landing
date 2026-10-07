@@ -108,22 +108,41 @@ async function runAutoReminder() {
   console.log(`Total registros en base de datos: ${snap.size}`);
 
   const now = Date.now();
-  const candidates = [];
+  const newCandidates = [];
+  const reminderCandidates = [];
 
   snap.forEach(d => {
     const inv = { id: d.id, ...d.data() };
 
-    // Filtro 1: Debe estar en estado pendiente
+    // Filtro 1: Debe estar en estado pendiente (quienes tienen gafete quedan 100% excluidos)
     if (inv.status !== 'pending') return;
 
     // Filtro 2: Debe tener teléfono válido
     const phoneInfo = cleanPhoneNumber(inv.telefono || inv.phone);
     if (!phoneInfo.isValid) return;
 
-    // Filtro 3: Debe haber recibido al menos un mensaje previo
-    if (!inv.whatsappSent && !inv.whatsappSentAt) return;
+    const baseData = {
+      id: inv.id,
+      nombre: (inv.nombre || 'Estimado(a) Invitado(a)').trim(),
+      empresa: inv.empresa || '',
+      sponsorName: inv.sponsorName || 'El Comité Organizador de EXPO FERRE',
+      phone: phoneInfo.phone
+    };
 
-    // Filtro 4: Cooldown de al menos 48 horas
+    // Caso A: Contacto Nuevo (Nunca ha recibido invitación por WhatsApp)
+    const hasReceived = inv.whatsappSent || inv.whatsappSentAt;
+    if (!hasReceived) {
+      newCandidates.push({
+        ...baseData,
+        type: 'NUEVO',
+        sendCount: 0,
+        hoursPassed: 0
+      });
+      return;
+    }
+
+    // Caso B: Recordatorio (Ya recibió mensaje inicial)
+    // Cooldown de al menos 48 horas desde su último mensaje
     const lastSentMillis = inv.whatsappSentAt?.toMillis 
       ? inv.whatsappSentAt.toMillis() 
       : (inv.whatsappSentAt ? new Date(inv.whatsappSentAt).getTime() : 0);
@@ -131,35 +150,38 @@ async function runAutoReminder() {
     const hoursPassed = (now - lastSentMillis) / (1000 * 60 * 60);
     if (hoursPassed < 48) return;
 
-    // Filtro 5: Máximo 2 recordatorios (sendCount < 3)
+    // Máximo 2 recordatorios (whatsappSendCount < 3)
     const sendCount = inv.whatsappSendCount || 1;
     if (sendCount >= 3) return;
 
-    candidates.push({
-      id: inv.id,
-      nombre: (inv.nombre || 'Estimado(a) Invitado(a)').trim(),
-      empresa: inv.empresa || '',
-      sponsorName: inv.sponsorName || 'El Comité Organizador de EXPO FERRE',
-      phone: phoneInfo.phone,
+    reminderCandidates.push({
+      ...baseData,
+      type: 'RECORDATORIO',
       sendCount,
       hoursPassed: Math.round(hoursPassed)
     });
   });
 
-  console.log(`\n2. Candidatos que califican para recordatorio hoy: ${candidates.length}`);
+  console.log(`\n2. Evaluación de candidatos:`);
+  console.log(`   - Nuevos contactos (Primera Invitación): ${newCandidates.length}`);
+  console.log(`   - Pendientes > 48h (Recordatorio): ${reminderCandidates.length}`);
 
-  if (candidates.length === 0) {
-    console.log('✨ No hay invitados que requieran recordatorio en este momento (todos están al día o en cooldown de 48h).');
+  if (newCandidates.length === 0 && reminderCandidates.length === 0) {
+    console.log('✨ No hay contactos nuevos ni recordatorios que cumplan el ciclo de 48h en este horario. Todo está al día.');
     process.exit(0);
   }
 
-  // Ordenar por quienes llevan más tiempo esperando (mayor hoursPassed)
-  candidates.sort((a, b) => b.hoursPassed - a.hoursPassed);
+  // Ordenar recordatorios por quienes llevan más tiempo esperando
+  reminderCandidates.sort((a, b) => b.hoursPassed - a.hoursPassed);
 
-  const targets = candidates.slice(0, DAILY_LIMIT);
-  console.log(`🎯 Lote a procesar hoy: ${targets.length} invitados.\n`);
+  // Combinar: Primero despachar contactos nuevos, luego recordatorios hasta el límite de seguridad
+  const combined = [...newCandidates, ...reminderCandidates];
+  const targets = combined.slice(0, DAILY_LIMIT);
 
-  let sentOk = 0;
+  console.log(`🎯 Lote a procesar en esta ventana: ${targets.length} mensajes (Nuevos: ${targets.filter(t => t.type === 'NUEVO').length}, Recordatorios: ${targets.filter(t => t.type === 'RECORDATORIO').length})\n`);
+
+  let sentNewOk = 0;
+  let sentReminderOk = 0;
   let sentFailed = 0;
 
   for (let i = 0; i < targets.length; i++) {
@@ -168,11 +190,13 @@ async function runAutoReminder() {
     const guestLabel = t.nombre;
     const sponsorLabel = t.sponsorName;
 
-    console.log(`[${i + 1}/${targets.length}] ${guestLabel} (${t.empresa || 'Invitado'}) -> ${t.phone} (Último envío hace ${t.hoursPassed}h)`);
+    const prefix = t.type === 'NUEVO' ? '📩 NUEVO' : `🔔 RECORDATORIO (${t.hoursPassed}h)`;
+    console.log(`[${i + 1}/${targets.length}] ${prefix}: ${guestLabel} (${t.empresa || 'Invitado'}) -> ${t.phone}`);
 
     if (isDryRun) {
       console.log(`   [DRY-RUN] Simulado envío exitoso.`);
-      sentOk++;
+      if (t.type === 'NUEVO') sentNewOk++;
+      else sentReminderOk++;
       continue;
     }
 
@@ -181,17 +205,25 @@ async function runAutoReminder() {
 
       if (res.success) {
         // Registrar en Firestore
-        await updateDoc(doc(db, 'events/2026/directInvites', t.id), {
+        const updateData = {
           whatsappSent: true,
           whatsappSentAt: serverTimestamp(),
           whatsappSentVia: 'wati_auto_cron',
           whatsappPhone: t.phone,
-          whatsappSendCount: t.sendCount + 1,
-          lastReminderAt: serverTimestamp()
-        });
+          whatsappSendCount: t.sendCount + 1
+        };
+
+        if (t.type === 'NUEVO') {
+          updateData.firstInviteAt = serverTimestamp();
+          sentNewOk++;
+        } else {
+          updateData.lastReminderAt = serverTimestamp();
+          sentReminderOk++;
+        }
+
+        await updateDoc(doc(db, 'events/2026/directInvites', t.id), updateData);
 
         console.log(`   ✅ Entregado exitosamente por WATI`);
-        sentOk++;
       } else {
         console.log(`   ❌ Error WATI: ${res.error}`);
         sentFailed++;
@@ -207,12 +239,14 @@ async function runAutoReminder() {
     }
   }
 
+  const totalOk = sentNewOk + sentReminderOk;
   console.log(`\n=======================================================`);
-  console.log(`📊 RESUMEN FINAL DEL DÍA:`);
+  console.log(`📊 RESUMEN FINAL DE LA VENTANA:`);
   console.log(`Total procesados: ${targets.length}`);
-  console.log(`Exitosos: ${sentOk}`);
+  console.log(`Nuevos entregados: ${sentNewOk}`);
+  console.log(`Recordatorios entregados: ${sentReminderOk}`);
   console.log(`Fallidos: ${sentFailed}`);
-  console.log(`Pendientes restantes para siguientes días: ${candidates.length - targets.length}`);
+  console.log(`Pendientes restantes para siguientes ventanas: ${combined.length - targets.length}`);
   console.log(`=======================================================`);
 
   if (!isDryRun) {
@@ -220,10 +254,12 @@ async function runAutoReminder() {
       await setDoc(doc(db, 'events/2026/systemStatus', 'watiReminders'), {
         lastRunAt: serverTimestamp(),
         lastRunDate: new Date().toISOString().slice(0, 10),
+        lastRunHour: new Date().getHours(),
         processedCount: targets.length,
-        successCount: sentOk,
+        newCount: sentNewOk,
+        reminderCount: sentReminderOk,
         failedCount: sentFailed,
-        pendingRemaining: candidates.length - targets.length,
+        pendingRemaining: combined.length - targets.length,
         status: 'completed'
       }, { merge: true });
       console.log('📌 Estado de ejecución registrado en Firestore (systemStatus/watiReminders).');

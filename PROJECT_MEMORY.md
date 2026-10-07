@@ -1132,8 +1132,13 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
      - **Cooldown de 48 horas:** Solo personas cuyo último mensaje fue hace más de 48 horas.
      - **Tope de frecuencia:** Máximo 2 recordatorios por invitado para prevenir reportes de spam.
 3. **Script Desatendido Programable (`scripts/auto_reminder_wati.js`):**
-   - Ejecutable manual, vía npm (`npm run auto-reminder`) o vía Cron/PM2 (`pm2 start scripts/auto_reminder_wati.js --name "reminder-wati" --cron "0 10 * * *" --no-autorestart && pm2 save`).
-   - Respeta el límite diario de seguridad (50 mensajes/día por defecto) y cadencia segura de 1.5s entre mensajes.
+   - **Doble Ventana Diaria (10:00 AM y 3:00 PM):**
+     Configurado con PM2 Cron: `pm2 start scripts/auto_reminder_wati.js --name "reminder-wati" --cron "0 10,15 * * *" --no-autorestart && pm2 save`
+   - **Lógica en cada ventana:**
+     1. Detecta **contactos nuevos** a los que nunca se les ha enviado nada (`!whatsappSent`) y les envía su **primera invitación**.
+     2. Detecta **contactos que cumplieron sus 48 horas** desde su último mensaje y les envía su **recordatorio** (máx. 2 recordatorios).
+     3. Si no hay nuevos ni recordatorios que califiquen en ese horario, sale limpiamente sin enviar nada y sin consumir recursos.
+   - Pacing seguro de 1.5s entre mensajes y límite de seguridad por lote.
    - Registra el estatus y métricas de cada corrida en `events/2026/systemStatus/watiReminders`.
 4. **Primera Ejecución en Vivo (06/Oct/2026 - 9:54 PM):**
    - Se procesó el primer lote de candidatos que ya cumplían más de 84h de espera:
@@ -1146,7 +1151,8 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
      - María Luisa (Ferreteria y Lubricanta Luisa) -> 50589056482
      - Christopher (NIMAC) -> 50576568586
    - **Resultado:** 8 de 8 mensajes entregados con éxito (100% efectividad). Documentos en Firestore actualizados con `whatsappSendCount: 2` y `lastReminderAt`.
-   - Cero pendientes restantes para hoy (los demás siguen en periodo de enfriamiento de 48h).
+   - Cero pendientes restantes para esa hora.
+
 
 
 
