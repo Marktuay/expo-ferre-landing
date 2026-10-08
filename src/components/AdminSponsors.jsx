@@ -49,6 +49,7 @@ const OFFICIAL_SPONSORS = [
   { company: 'Tigo', category: 'Oro', logo: '/oro/tigo.png' },
   { company: 'Zaratoga', category: 'Oro', logo: '/oro/zaratoga.jpeg' },
   { company: 'JP Technology', category: 'Oro', logo: '/oro/logo-jp-technology.png' },
+  { company: 'Stanley', category: 'Oro', logo: '/oro/stanley.png' },
   { company: 'Casco', category: 'Plata', logo: '/plata/casco.png' },
   { company: 'Fernández Sera', category: 'Plata', logo: '/plata/ferdandezsera.png' },
   { company: 'Midesa', category: 'Plata', logo: '/plata/midesa.png' },
