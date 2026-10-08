@@ -52,7 +52,20 @@
 
 ---
 
-## 5. 🛠️ Despliegue en Producción (Google Cloud VM)
+---
+
+## 5. 📥 Importaciones Masivas Aditivas de Contactos (Sin Sustituir)
+- **Política de Inserción:** 100% aditiva. No se sobreescriben ni alteran pases o tokens preexistentes.
+- **Lote de Patrocinadores (8 de Octubre, 2026):**
+  - **Extel (Stand 11):** +24 invitaciones nuevas.
+  - **INCASA / GRUPO IPSM (Stand 34):** +13 invitaciones nuevas.
+  - **SherwinWilliams (Stand 12):** +14 invitaciones nuevas.
+  - **SINSA (Stands 1, 2, 3, 4):** +35 invitaciones nuevas con stands Diamante y enlaces individuales únicos generados.
+- **Total acumulado en base de datos (`directInvites`):** **507 invitaciones**.
+
+---
+
+## 6. 🛠️ Despliegue en Producción (Google Cloud VM)
 - Rama activa: `main` en `https://github.com/Marktuay/expo-ferre-landing.git`
 - Comando para sincronizar en servidor:
   ```bash
@@ -60,3 +73,4 @@
   npm run build
   pm2 reload all
   ```
+
