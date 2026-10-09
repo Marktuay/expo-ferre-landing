@@ -65,7 +65,20 @@
 
 ---
 
-## 6. 🛠️ Despliegue en Producción (Google Cloud VM)
+---
+
+## 6. 🐛 Corrección Crítica: Modal de Envío Masivo de Correos
+- **Causa del Error Reportado:**
+  - Al presionar el botón `[✉ Correos]` en cualquiera de las filas de patrocinadores o general, se disparaba un `ReferenceError: setBulkEmailResult is not defined` debido a que el estado `bulkEmailResult` no estaba declarado en los hooks del componente.
+  - Esto provocaba que el `<ErrorBoundary>` raíz capturara el error y reemplazara la vista con *"No se pudo cargar este módulo en este momento"*.
+- **Solución Aplicada:**
+  - Se declaró el hook reactivo: `const [bulkEmailResult, setBulkEmailResult] = useState(null);` en `src/components/AdminDirectInvites.jsx`.
+  - Se blindó adicionalmente la carga asíncrona de `InteractiveMap` con `<Suspense>` en `src/App.jsx`.
+  - Build compilado con éxito (`npm run build`) y sincronizado en commit `d947b80`.
+
+---
+
+## 7. 🛠️ Despliegue en Producción (Google Cloud VM)
 - Rama activa: `main` en `https://github.com/Marktuay/expo-ferre-landing.git`
 - Comando para sincronizar en servidor:
   ```bash
@@ -73,4 +86,5 @@
   npm run build
   pm2 reload all
   ```
+
 
