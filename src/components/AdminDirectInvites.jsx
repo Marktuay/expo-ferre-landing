@@ -143,7 +143,8 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     paceSpeed: 'safe' // 'safe' (250ms) | 'normal' (120ms) | 'fast' (40ms)
   });
   const [isBulkSendingEmail, setIsBulkSendingEmail] = useState(false);
-  const [bulkEmailProgress, setBulkEmailProgress] = useState({ current: 0, total: 0, failed: 0 });
+  const [bulkEmailProgress, setBulkEmailProgress] = useState({ current: 0, total: 0, failed: 0, stopped: false });
+  const [bulkEmailResult, setBulkEmailResult] = useState(null);
   const cancelBulkEmailRef = useRef(false);
 
   // Estados para WATI WhatsApp API (Individual y Masivo por Patrocinador)

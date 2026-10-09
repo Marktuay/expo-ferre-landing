@@ -883,7 +883,13 @@ export default function App() {
               {/* Plano de Stands Interactivo fuera de animación para estabilidad de zoom */}
               <div id="plano-stands" className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden flex flex-col items-center justify-center p-0 md:p-2 min-h-[550px] md:min-h-[700px]">
                 <ErrorBoundary>
-                  <InteractiveMap showHeader={false} />
+                  <Suspense fallback={
+                    <div className="w-full h-full min-h-[550px] flex items-center justify-center">
+                      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  }>
+                    <InteractiveMap showHeader={false} />
+                  </Suspense>
                 </ErrorBoundary>
               </div>
 
