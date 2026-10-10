@@ -1302,6 +1302,26 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 ### 💼 4. Documentación de Alcance y Propuesta de Valoración Económica
 - Se generó el informe ejecutivo formal en [`docs/VALORACION_ECONOMICA_Y_ALCANCE.md`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/docs/VALORACION_ECONOMICA_Y_ALCANCE.md) con la comparativa detallada entre el alcance web original ($1,400 USD) y el sistema operativo ERP/SaaS integral entregado ($5,900 USD valor de mercado), estableciendo las 3 estrategias comerciales de cobro sugeridas ($3,000 – $4,200 USD).
 
+---
+
+## 📅 Resumen de Avances y Cambios de la Sesión (10 de Octubre de 2026)
+
+### 📥 Carga Masiva Aditiva de Invitaciones para FUTEC (`Stand 7` - Plata)
+- **Política de Inserción:** 100% aditiva sin sustituciones. Los 506 contactos previos y gafetes emitidos permanecen completamente intactos.
+- **Detalle del Lote:** Se dieron de alta **10 invitaciones nuevas** para la marca patrocinadora **FUTEC** con tokens criptográficos únicos (`inv_...`), vinculación automática al Stand 7 y estado `pending`:
+  1. **Marco** (*Ferreteria Marco Sánchez*) - +50589030170
+  2. **Omar** (*Ferretería Construye*) - construyeferreteriaymas@gmail.com - +50587963380
+  3. **Jose** (*Ferreteria Audias*) - joseaudiasb@gmail.com - +50558154026
+  4. **Yahoska** (*Ferretería El Norteño*) - +50586909151
+  5. **Jessy** (*Ferretería Masis*) - anajhosselyngarcia@gmail.com - +50582185913
+  6. **Dora** (*Ferretería Bendaña*) - dorahaydee1@icloud.com - +50578331589
+  7. **Rafael** (*Rafael Alfaro*) - jezzennia13@gmail.com - +50585391299
+  8. **Julissa** (*Materiales de Construcción July*) - aracellylopezcana1982@gmail.com - +50587862891
+  9. **Owen** (*Comercial Suárez*) - suarezowen12@gmail.com - +50586933528
+  10. **Isidro** (*Ferreteria Reyes*) - +50581002200
+- **Total Acumulado en Base de Datos (`directInvites`):** Aumentó de **506 a 516 invitaciones activas**.
+
+
 
 
 
