@@ -1325,16 +1325,35 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - Se integró el logotipo oficial de **Kazul** (`/diamante/kazul.png`) en la categoría **Diamante** en el reel de la Landing Page y en el directorio de patrocinadores oficiales.
 - **Posición:** Ubicado estratégicamente inmediatamente después del logotipo de **BAC Credomatic** (`/diamante/logo-bac.jpeg`).
 
-
-
-
-
-
-
-
-
-
-
-
-
+### 📥 Carga Masiva Aditiva de Invitaciones para CEMEX (`Stands 22, 23` - Diamante)
+- **Política de Inserción:** 100% aditiva sin sobrescribir ningún dato previo. Se ejecutó mediante el script dedicado [`scripts/import_cemex_invites.js`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/scripts/import_cemex_invites.js).
+- **Detalle del Lote:** Se dieron de alta **20 invitaciones oficiales** para la marca patrocinadora **CEMEX** con tokens criptográficos únicos (`inv_...`), vinculación automática a `Stands 22, 23`, estado `pending` y banners correspondientes:
+  1. **Uriel Agustín** (*Ferretería Diana*) - urielpg83@hotmail.com - +50584691311
+  2. **Martha Lorena** (*Ferretería Diana*) - urielpg83@hotmail.com - +50584577742
+  3. **Patricia Mercedes** (*Ferretería Valle*) - blandonpatricia@hotmail.com - +50589532752
+  4. **Francisco José** (*Ferretería Valle*) - fcorivera70@hotmail.com - +50578720351
+  5. **Francisco Javier** (*MC Pinos del Norte*) - fcoleon1970@gmail.com - Sin teléfono
+  6. **Carmen Irene** (*MC Pinos del Norte*) - fcoleon1970@gmail.com - Sin teléfono
+  7. **Marvin Antonio** (*Pinturas Meneses*) - xavarbell85@hotmail.com - +50584913575
+  8. **Javiera María** (*Pinturas Meneses*) - xavarbell85@hotmail.com - +50587083498
+  9. **Luis Carlos** (*Ferretería Ubeda*) - lcua13@gmail.com - +50585335454
+  10. **Gabriela José** (*Ferretería Ubeda*) - lcua13@gmail.com - +50585335454
+  11. **Jacqueline** (*Materiales de Construcción Martínez*) - josemart8805@gmail.com - +50584782985
+  12. **José Dolores** (*Materiales de Construcción Martínez*) - josemart8805@gmail.com - +50588059421
+  13. **Francisco Xavier** (*Ferretería Sacasa*) - 123sacasa@gmail.com - +50558338979
+  14. **Andru Dehymon** (*Ferretería Sacasa*) - 123sacasa@gmail.com - +50558338979
+  15. **Julio** (*Ferretería Digna*) - ferreteriadigna@gmail.com - +50583381432
+  16. **Digna María** (*Ferretería Digna*) - ferreteriadigna@gmail.com - +50583381432
+  17. **Carlos Arturo** (*Comercial Cruz*) - casc41@yahoo.es - +50582387867
+  18. **Isayana Valeria** (*Comercial Cruz*) - casc41@yahoo.es - +50582387867
+  19. **Andrea Mercedes** (*Ferretería Briohogar*) - andreabriones69@gmail.com - +50586887094
+  20. **Julia Magdalena** (*Ferretería Briohogar*) - andreabriones69@gmail.com - +50588071916
+- **Auditoría de Cruces Inter-Patrocinador Detectadas:**
+  - *MC Pinos del Norte* (`fcoleon1970@gmail.com`): También invitada por **Plycem**.
+  - *Ferretería Digna* (`ferreteriadigna@gmail.com` / `+50583381432`): También invitada por **Importaciones Balladares**.
+  - *Comercial Cruz* (`+50582387867`): También figura en **Importaciones Balladares**.
+  - *Ferretería Briohogar* (`andreabriones69@gmail.com` / `+50586887094`): También invitada por **Importaciones Balladares** (registrada allí como "Ferretería Hermanos Briones").
+- **Métricas Actualizadas en Base de Datos (`directInvites`):**
+  - Total global aumentó de **516 a 536 invitaciones registradas**.
+  - Total para **CEMEX**: **20 invitaciones activas**.
 
