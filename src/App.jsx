@@ -165,6 +165,7 @@ export default function App() {
     { url: '/diamante/extelpng.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/nitrotel.png?v=1', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/logo-bac.jpeg', category: 'Diamante', order: 1, bgWhite: true },
+    { url: '/diamante/kazul.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/balladares.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/emtop.png', category: 'Diamante', order: 1, bgWhite: true },
     { url: '/diamante/sylvania.jpg', category: 'Diamante', order: 1, bgWhite: true },

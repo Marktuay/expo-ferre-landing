@@ -1321,6 +1321,11 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   10. **Isidro** (*Ferreteria Reyes*) - +50581002200
 - **Total Acumulado en Base de Datos (`directInvites`):** Aumentó de **506 a 516 invitaciones activas**.
 
+### 🏷️ Incorporación de Logo Kazul en Categoría Diamante (`App.jsx` & `AdminSponsors.jsx`)
+- Se integró el logotipo oficial de **Kazul** (`/diamante/kazul.png`) en la categoría **Diamante** en el reel de la Landing Page y en el directorio de patrocinadores oficiales.
+- **Posición:** Ubicado estratégicamente inmediatamente después del logotipo de **BAC Credomatic** (`/diamante/logo-bac.jpeg`).
+
+
 
 
 

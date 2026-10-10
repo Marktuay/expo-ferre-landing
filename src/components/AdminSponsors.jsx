@@ -24,6 +24,7 @@ const OFFICIAL_SPONSORS = [
   { company: 'Extel', category: 'Diamante', logo: '/diamante/extelpng.png' },
   { company: 'Nitrotel', category: 'Diamante', logo: '/diamante/nitrotel.png?v=1' },
   { company: 'BAC Credomatic', category: 'Diamante', logo: '/diamante/logo-bac.jpeg' },
+  { company: 'Kazul', category: 'Diamante', logo: '/diamante/kazul.png' },
   { company: 'Importaciones Balladares', category: 'Diamante', logo: '/diamante/balladares.png' },
   { company: 'EMTOP', category: 'Diamante', logo: '/diamante/emtop.png' },
   { company: 'Sylvania', category: 'Diamante', logo: '/diamante/sylvania.jpg' },
