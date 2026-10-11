@@ -431,18 +431,20 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[1300px]">
+            <table className="w-full text-left border-collapse min-w-[1140px]">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-600 font-bold">
-                  <th className="py-3.5 px-4 min-w-[210px]">Nombre</th>
-                  <th className="py-3.5 px-4 min-w-[190px]">Empresa</th>
-                  <th className="py-3.5 px-4 min-w-[240px]">Email</th>
-                  <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Teléfono</th>
-                  <th className="py-3.5 px-4 min-w-[110px] whitespace-nowrap text-center">Empleados</th>
-                  <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Puesto</th>
-                  <th className="py-3.5 px-4 min-w-[120px] whitespace-nowrap text-center">Estado</th>
-                  <th className="py-3.5 px-4 min-w-[110px] whitespace-nowrap text-center">Fecha</th>
-                  <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap text-center">Acciones</th>
+                <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-600 font-bold">
+                  <th className="py-3 px-3.5 min-w-[170px]">Nombre</th>
+                  <th className="py-3 px-3 min-w-[130px] max-w-[160px]">Empresa</th>
+                  <th className="py-3 px-3 min-w-[180px] max-w-[210px]">Email</th>
+                  <th className="py-3 px-3 min-w-[115px] whitespace-nowrap">Teléfono</th>
+                  <th className="py-3 px-2 min-w-[85px] whitespace-nowrap text-center">Empleados</th>
+                  <th className="py-3 px-3 min-w-[110px] max-w-[130px] whitespace-nowrap">Puesto</th>
+                  <th className="py-3 px-2 min-w-[100px] whitespace-nowrap text-center">Estado</th>
+                  <th className="py-3 px-2 min-w-[90px] whitespace-nowrap text-center">Fecha</th>
+                  <th className="py-3 px-3 min-w-[160px] whitespace-nowrap text-center sticky right-0 bg-slate-100/95 backdrop-blur z-20 shadow-[-6px_0_12px_-2px_rgba(0,0,0,0.08)]">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
@@ -460,32 +462,32 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                   </tr>
                 ) : (
                   filteredRegistrations.map((reg) => (
-                    <tr key={reg.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-slate-900">{reg.name || 'Sin Nombre'}</div>
+                    <tr key={reg.id} className="hover:bg-slate-50/90 transition-colors group">
+                      <td className="py-3 px-3.5">
+                        <div className="font-bold text-slate-900 text-xs leading-snug">{reg.name || 'Sin Nombre'}</div>
                         {reg.isDirectInvite && (
-                          <span className="inline-block mt-0.5 px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-full border border-blue-200">
+                          <span className="inline-block mt-0.5 px-2 py-0.2 bg-blue-50 text-blue-700 text-[9px] font-bold rounded-full border border-blue-200">
                             Pase Directo
                           </span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-700 font-medium">
-                        {reg.company || <span className="text-slate-400 italic text-xs">N/D</span>}
+                      <td className="py-3 px-3 text-slate-700 font-medium text-xs truncate max-w-[160px]" title={reg.company}>
+                        {reg.company || <span className="text-slate-400 italic">N/D</span>}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-600 font-mono text-xs whitespace-nowrap">
+                      <td className="py-3 px-3 text-slate-600 font-mono text-xs truncate max-w-[210px]" title={reg.email}>
                         {reg.email || <span className="text-slate-400 italic">N/D</span>}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-700 whitespace-nowrap font-mono text-xs font-semibold">
+                      <td className="py-3 px-3 text-slate-700 whitespace-nowrap font-mono text-xs font-semibold">
                         {reg.phone || <span className="text-slate-400 italic font-sans font-normal">N/D</span>}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap text-center text-xs">
+                      <td className="py-3 px-2 text-slate-600 whitespace-nowrap text-center text-xs">
                         {reg.employees || <span className="text-slate-400">N/D</span>}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-600 text-xs">
+                      <td className="py-3 px-3 text-slate-600 text-xs truncate max-w-[130px]" title={reg.position}>
                         {reg.position || <span className="text-slate-400">N/D</span>}
                       </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap text-center">
-                        <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-black tracking-wider ${
+                      <td className="py-3 px-2 whitespace-nowrap text-center">
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider ${
                           reg.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 
                           reg.status === 'no_show' ? 'bg-slate-100 text-slate-700 border border-slate-300' :
                           reg.status === 'migrated' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
@@ -496,36 +498,36 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                            reg.status === 'migrated' ? 'MIGRADO' : 'PENDIENTE'}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-500 whitespace-nowrap text-center text-xs">
+                      <td className="py-3 px-2 text-slate-500 whitespace-nowrap text-center text-xs">
                         {reg.createdAt.toLocaleDateString('es-ES', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric'
                         })}
                         {reg.needsFollowUp && (
-                          <div className="mt-1 flex items-center justify-center gap-1 text-[#f39200] text-[10px] font-bold">
-                            <span className="material-symbols-outlined text-[13px]">notification_important</span>
+                          <div className="mt-0.5 flex items-center justify-center gap-0.5 text-[#f39200] text-[9px] font-bold">
+                            <span className="material-symbols-outlined text-[12px]">notification_important</span>
                             Seguimiento
                           </div>
                         )}
                         {reg.followUps && reg.followUps.length > 0 && (
-                          <div className="mt-0.5 text-[10px] text-slate-400">
+                          <div className="text-[9px] text-slate-400">
                             {reg.followUps.length} nota(s)
                           </div>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                        <div className="flex items-center justify-center gap-1.5">
+                      <td className="py-3 px-3 text-center whitespace-nowrap sticky right-0 bg-white/95 backdrop-blur z-10 shadow-[-6px_0_12px_-2px_rgba(0,0,0,0.08)] group-hover:bg-slate-50/95 transition-colors">
+                        <div className="flex items-center justify-center gap-1">
                           {/* Ver Código QR */}
                           <button 
                             onClick={() => {
                               setSelectedPersonForQR(reg);
                               setQrModalOpen(true);
                             }} 
-                            className="text-[#0d47a1] hover:bg-blue-50 p-2 rounded-xl transition-colors" 
+                            className="text-[#0d47a1] hover:bg-blue-50 p-1.5 rounded-lg transition-colors" 
                             title="Visualizar y Descargar Código QR"
                           >
-                            <span className="material-symbols-outlined text-[20px]">qr_code_2</span>
+                            <span className="material-symbols-outlined text-[18px]">qr_code_2</span>
                           </button>
 
                           <button 
@@ -533,12 +535,12 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                               setSelectedPersonForFollowUp(reg);
                               setFollowUpModalOpen(true);
                             }} 
-                            className="text-[#f39200] hover:bg-amber-50 p-2 rounded-xl transition-colors relative" 
+                            className="text-[#f39200] hover:bg-amber-50 p-1.5 rounded-lg transition-colors relative" 
                             title="Añadir Seguimiento (CRM)"
                           >
-                            <span className="material-symbols-outlined text-[20px]">support_agent</span>
+                            <span className="material-symbols-outlined text-[18px]">support_agent</span>
                             {reg.followUps && reg.followUps.length > 0 && (
-                              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
+                              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-3.5 h-3.5 flex items-center justify-center rounded-full font-bold">
                                 {reg.followUps.length}
                               </span>
                             )}
@@ -550,29 +552,29 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                                 setMigrationPassword('');
                                 setMigrationModalOpen(true);
                               }} 
-                              className="text-[#9c27b0] hover:bg-purple-50 p-2 rounded-xl transition-colors" 
+                              className="text-[#9c27b0] hover:bg-purple-50 p-1.5 rounded-lg transition-colors" 
                               title="Migrar a Patrocinador"
                             >
-                              <span className="material-symbols-outlined text-[20px]">business_center</span>
+                              <span className="material-symbols-outlined text-[18px]">business_center</span>
                             </button>
                           )}
                           {reg.status !== 'approved' && reg.status !== 'no_show' && reg.status !== 'migrated' && (
-                            <button onClick={() => handleApprove(reg)} className="text-[#16a34a] hover:bg-emerald-50 p-2 rounded-xl transition-colors" title="Aprobar">
-                              <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                            <button onClick={() => handleApprove(reg)} className="text-[#16a34a] hover:bg-emerald-50 p-1.5 rounded-lg transition-colors" title="Aprobar">
+                              <span className="material-symbols-outlined text-[18px]">check_circle</span>
                             </button>
                           )}
                           {reg.status === 'approved' && (
                             <>
-                              <button onClick={() => handleResendQR(reg)} className="text-[#0d47a1] hover:bg-blue-50 p-2 rounded-xl transition-colors" title="Reenviar Código QR">
-                                <span className="material-symbols-outlined text-[20px]">mail</span>
+                              <button onClick={() => handleResendQR(reg)} className="text-[#0d47a1] hover:bg-blue-50 p-1.5 rounded-lg transition-colors" title="Reenviar Código QR">
+                                <span className="material-symbols-outlined text-[18px]">mail</span>
                               </button>
-                              <button onClick={() => handleNoShow(reg)} className="text-[#4b5563] hover:bg-slate-100 p-2 rounded-xl transition-colors" title="Marcar como No Asistió">
-                                <span className="material-symbols-outlined text-[20px]">person_off</span>
+                              <button onClick={() => handleNoShow(reg)} className="text-[#4b5563] hover:bg-slate-100 p-1.5 rounded-lg transition-colors" title="Marcar como No Asistió">
+                                <span className="material-symbols-outlined text-[18px]">person_off</span>
                               </button>
                             </>
                           )}
-                          <button onClick={() => handleDelete(reg)} className="text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors" title="Eliminar">
-                            <span className="material-symbols-outlined text-[20px]">delete</span>
+                          <button onClick={() => handleDelete(reg)} className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Eliminar">
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
                           </button>
                         </div>
                       </td>
