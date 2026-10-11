@@ -47,9 +47,11 @@ import {
   Bell,
   MessageSquare,
   QrCode,
-  Loader2
+  Loader2,
+  Printer
 } from 'lucide-react';
 import AdminQRViewModal from './AdminQRViewModal';
+import PrintableBadgeList from './PrintableBadgeList';
 import { 
   checkTemplateStatus, 
   sendDirectInviteViaWati, 
@@ -64,6 +66,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [sponsorsMap, setSponsorsMap] = useState({});
   const [sponsorSettings, setSponsorSettings] = useState({});
   const [loading, setLoading] = useState(true);
+  const [printItems, setPrintItems] = useState(null);
 
   // QR Modal
   const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -2448,6 +2451,16 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   const emailCoveragePercent = totalWithValidEmail > 0 ? Math.round((totalEmailsSent / totalWithValidEmail) * 100) : 0;
   const emailConversionPercent = totalEmailsSent > 0 ? Math.round((totalRegisteredFromEmail / (totalEmailsSent || 1)) * 100) : 0;
 
+  if (printItems) {
+    return (
+      <PrintableBadgeList
+        items={printItems}
+        roleLabel="Invitado Especial"
+        onClose={() => setPrintItems(null)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -3670,6 +3683,24 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   <QrCode size={14} />
                                   <span className="hidden xl:inline">QR</span>
                                 </button>
+
+                                {/* Imprimir Gafete Térmico Brother si ya completó su registro */}
+                                {isUsed && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setPrintItems([{
+                                      id: inv.registeredAttendeeId || inv.id,
+                                      nombre: inv.registeredName || inv.nombre,
+                                      empresa: inv.registeredCompany || inv.empresa || inv.sponsorName || '',
+                                      roleLabel: 'Invitado Especial'
+                                    }])}
+                                    title="Imprimir Gafete Térmico Brother (62 mm × 100 mm)"
+                                    className="p-2 rounded-lg bg-slate-800 hover:bg-slate-900 text-white transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer"
+                                  >
+                                    <Printer size={14} />
+                                    <span className="hidden xl:inline">Imprimir</span>
+                                  </button>
+                                )}
 
                                 {/* Editar Invitado */}
                                 <button
@@ -6109,7 +6140,13 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
             setSelectedPersonForQR(null);
           }}
           person={selectedPersonForQR}
-          roleLabel="Invitado Registrado"
+          roleLabel="Invitado Especial"
+          onPrintBadge={(p) => setPrintItems([{
+            id: p.registeredAttendeeId || p.id,
+            nombre: p.nombre || p.name,
+            empresa: p.empresa || p.company || p.sponsorName || '',
+            roleLabel: 'Invitado Especial'
+          }])}
         />
       )}
 

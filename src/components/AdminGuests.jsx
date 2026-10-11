@@ -61,9 +61,15 @@ export default function AdminGuests({ onBack }) {
   }, []);
 
   if (printItems) {
+    const formattedPrintItems = printItems.map(g => ({
+      ...g,
+      company: g.empresa || sponsorsMap[g.sponsorId] || '',
+      sponsorName: sponsorsMap[g.sponsorId] || ''
+    }));
+
     return (
       <PrintableBadgeList 
-        items={printItems} 
+        items={formattedPrintItems} 
         roleLabel="Invitado VIP"
         colorClass="border-blue-500 text-blue-500"
         onClose={() => setPrintItems(null)} 

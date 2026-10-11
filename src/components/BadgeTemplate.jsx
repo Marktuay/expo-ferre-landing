@@ -41,8 +41,8 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF' }) {
         </div>
       )}
 
-      {/* 5. Cargo o Stand (si está disponible) */}
-      {position && (
+      {/* 5. Cargo o Stand (si está disponible y no repite el rol) */}
+      {position && position.toUpperCase() !== displayRole && (
         <div className="w-full text-center px-1 -mt-0.5 mb-1">
           <p className="text-[9.5px] font-bold text-black/90 uppercase tracking-tight line-clamp-1 truncate">
             {position}
