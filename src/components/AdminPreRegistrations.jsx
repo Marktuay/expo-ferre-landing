@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, deleteDoc, setDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, deleteDoc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth, firebaseConfig } from '../firebase';
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
@@ -13,6 +13,20 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'approved' | 'pending' | 'no_show' | 'migrated'
   const [loading, setLoading] = useState(true);
   
+  // On-Site / Door Registration States
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newAttendee, setNewAttendee] = useState({
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+    position: 'Propietario',
+    employees: '1 a 10 colaboradores',
+    ciudad: 'Managua',
+    checkedInNow: true
+  });
+
   // CRM States
   const [followUpModalOpen, setFollowUpModalOpen] = useState(false);
   const [selectedPersonForFollowUp, setSelectedPersonForFollowUp] = useState(null);
@@ -63,6 +77,131 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
 
     return () => unsubscribe();
   }, []);
+
+  const handleCreateAttendee = async (e) => {
+    e.preventDefault();
+    const cleanName = (newAttendee.name || '').trim();
+    const cleanPhone = (newAttendee.phone || '').trim();
+    const cleanCompany = (newAttendee.company || '').trim() || 'Particular';
+    const cleanEmail = (newAttendee.email || '').trim().toLowerCase();
+    const cleanPosition = newAttendee.position || 'Propietario';
+    const cleanEmployees = newAttendee.employees || '1 a 10 colaboradores';
+    const cleanCity = (newAttendee.ciudad || '').trim() || 'Managua';
+    const checkInNow = !!newAttendee.checkedInNow;
+
+    if (!cleanName) {
+      alert('Por favor ingresa el nombre del asistente.');
+      return;
+    }
+    if (!cleanPhone) {
+      alert('Por favor ingresa un número de teléfono o celular.');
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const newDocData = {
+        name: cleanName,
+        nombre: cleanName,
+        company: cleanCompany,
+        empresa: cleanCompany,
+        email: cleanEmail,
+        correo: cleanEmail,
+        phone: cleanPhone,
+        telefono: cleanPhone,
+        celular: cleanPhone,
+        position: cleanPosition,
+        cargo: cleanPosition,
+        puesto: cleanPosition,
+        employees: cleanEmployees,
+        personalEmpresa: cleanEmployees,
+        ciudad: cleanCity,
+        status: 'approved',
+        source: 'Registro en Puerta (Admin)',
+        type: 'on_site',
+        isDirectInvite: false,
+        checkedIn: checkInNow,
+        checkInTime: checkInNow ? new Date() : null,
+        createdAt: new Date(),
+        approvedAt: new Date()
+      };
+
+      let attendeeId = '';
+      if (cleanEmail) {
+        const docRef = doc(db, `${getEventBasePath()}/preregistrations`, cleanEmail);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const overwrite = window.confirm(`El correo ${cleanEmail} ya existe en el sistema. ¿Deseas actualizar sus datos y asignarle acceso aprobado?`);
+          if (!overwrite) {
+            setIsCreating(false);
+            return;
+          }
+        }
+        await setDoc(docRef, newDocData, { merge: true });
+        attendeeId = cleanEmail;
+      } else {
+        const docRef = await addDoc(collection(db, `${getEventBasePath()}/preregistrations`), newDocData);
+        attendeeId = docRef.id;
+      }
+
+      // Si proporcionó correo, enviar confirmación con QR por correo
+      if (cleanEmail) {
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(attendeeId)}&margin=10`;
+        try {
+          await addDoc(collection(db, 'mail'), {
+            to: cleanEmail,
+            message: {
+              subject: '¡Registro Confirmado! Tu Acceso a EXPO FERRE 2026',
+              html: `
+                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+                  <img src="https://expoferrenicaragua.com/email-header.png" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+                  <div style="padding: 30px;">
+                    <h2 style="color: #16a34a; margin-top: 0;">¡Bienvenido(a), ${cleanName}!</h2>
+                    <p>Tu registro en recepción para <strong>EXPO FERRE Nicaragua 2026</strong> ha sido completado con éxito.</p>
+                    <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                      <p style="margin-top: 0; margin-bottom: 15px; font-weight: bold; color: #0d47a1;">Tu Código de Acceso QR</p>
+                      <img src="${qrUrl}" alt="Código QR de Acceso" style="display: block; margin: 0 auto; width: 250px; height: 250px; border: 1px solid #e5e7eb; border-radius: 8px;"/>
+                      <p style="margin-top: 15px; font-size: 14px; color: #6b7280; margin-bottom: 0;">Código: ${attendeeId}</p>
+                    </div>
+                  </div>
+                  <img src="https://expoferrenicaragua.com/email-footer.png" alt="Contacto ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+                </div>
+              `
+            }
+          });
+        } catch (mailErr) {
+          console.warn('Error enviando correo de confirmación:', mailErr);
+        }
+      }
+
+      const createdAttendee = {
+        id: attendeeId,
+        ...newDocData
+      };
+
+      setCreateModalOpen(false);
+      setNewAttendee({
+        name: '',
+        company: '',
+        email: '',
+        phone: '',
+        position: 'Propietario',
+        employees: '1 a 10 colaboradores',
+        ciudad: 'Managua',
+        checkedInNow: true
+      });
+
+      // Abrir modal con QR para visualización / descarga inmediata
+      setSelectedPersonForQR(createdAttendee);
+      setQrModalOpen(true);
+      alert('¡Asistente registrado exitosamente! Su código QR ha sido generado.');
+    } catch (err) {
+      console.error('Error registrando nuevo asistente:', err);
+      alert('Error al registrar asistente: ' + err.message);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const handleMigrateConfirm = async () => {
     if (!migrationPassword || migrationPassword.length < 6) {
@@ -397,7 +536,17 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
             </label>
           </div>
 
-          <div className="flex flex-shrink-0 gap-3">
+          <div className="flex flex-wrap items-center flex-shrink-0 gap-2.5">
+            <button
+              type="button"
+              onClick={() => setCreateModalOpen(true)}
+              className="px-4 py-2.5 bg-[#0d47a1] hover:bg-[#0a3880] text-white rounded-xl transition-all font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm shadow-blue-900/20 active:scale-95 cursor-pointer"
+              title="Registrar asistente directamente en puerta"
+            >
+              <span className="material-symbols-outlined text-[18px]">person_add</span>
+              <span>+ Nuevo Registro (Puerta)</span>
+            </button>
+
             <button onClick={() => {
               import('xlsx').then(XLSX => {
                 const dataToExport = filteredRegistrations.map(reg => ({
@@ -465,11 +614,24 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                     <tr key={reg.id} className="hover:bg-slate-50/90 transition-colors group">
                       <td className="py-3 px-3.5">
                         <div className="font-bold text-slate-900 text-xs leading-snug">{reg.name || 'Sin Nombre'}</div>
-                        {reg.isDirectInvite && (
-                          <span className="inline-block mt-0.5 px-2 py-0.2 bg-blue-50 text-blue-700 text-[9px] font-bold rounded-full border border-blue-200">
-                            Pase Directo
-                          </span>
-                        )}
+                        <div className="flex flex-wrap items-center gap-1 mt-0.5">
+                          {reg.isDirectInvite && (
+                            <span className="inline-block px-1.5 py-0.2 bg-blue-50 text-blue-700 text-[9px] font-bold rounded-full border border-blue-200">
+                              Pase Directo
+                            </span>
+                          )}
+                          {reg.type === 'on_site' && (
+                            <span className="inline-block px-1.5 py-0.2 bg-purple-50 text-purple-700 text-[9px] font-bold rounded-full border border-purple-200">
+                              En Puerta
+                            </span>
+                          )}
+                          {reg.checkedIn && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 bg-emerald-50 text-emerald-700 text-[9px] font-bold rounded-full border border-emerald-200">
+                              <span className="material-symbols-outlined text-[10px]">check</span>
+                              Ingresó
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-3 text-slate-700 font-medium text-xs truncate max-w-[160px]" title={reg.company}>
                         {reg.company || <span className="text-slate-400 italic">N/D</span>}
@@ -673,6 +835,215 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {createModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+            {/* Modal Header */}
+            <div className="bg-[#0d47a1] p-5 md:p-6 text-white relative flex-shrink-0">
+              <button 
+                type="button"
+                onClick={() => setCreateModalOpen(false)}
+                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+                disabled={isCreating}
+              >
+                <span className="material-symbols-outlined text-[22px]">close</span>
+              </button>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-bold uppercase tracking-wider mb-1.5">
+                <span className="material-symbols-outlined text-[14px]">how_to_reg</span>
+                Recepción • Día del Evento
+              </div>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <span className="material-symbols-outlined text-[24px]">person_add</span>
+                Nuevo Registro en Puerta
+              </h2>
+              <p className="text-blue-100 text-xs mt-1">
+                Registra y acredita a personas que se presentan al evento sin preregistro previo.
+              </p>
+            </div>
+            
+            {/* Form Body */}
+            <form onSubmit={handleCreateAttendee} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-5 md:p-6 overflow-y-auto space-y-4 flex-1">
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Nombre Completo <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ej. Carlos Mendoza"
+                      value={newAttendee.name}
+                      onChange={(e) => setNewAttendee({ ...newAttendee, name: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#0d47a1] focus:bg-white focus:ring-1 focus:ring-[#0d47a1] outline-none text-xs text-slate-900 transition-all font-medium"
+                      disabled={isCreating}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Empresa / Ferretería <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ej. Ferretería El Progreso"
+                      value={newAttendee.company}
+                      onChange={(e) => setNewAttendee({ ...newAttendee, company: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#0d47a1] focus:bg-white focus:ring-1 focus:ring-[#0d47a1] outline-none text-xs text-slate-900 transition-all font-medium"
+                      disabled={isCreating}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Número de Celular <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="Ej. +505 8888-8888"
+                      value={newAttendee.phone}
+                      onChange={(e) => setNewAttendee({ ...newAttendee, phone: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#0d47a1] focus:bg-white focus:ring-1 focus:ring-[#0d47a1] outline-none text-xs text-slate-900 font-mono transition-all font-medium"
+                      disabled={isCreating}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+                      <span>Correo Electrónico</span>
+                      <span className="text-slate-400 font-normal text-[10px] normal-case">(Opcional)</span>
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="cliente@correo.com (opcional)"
+                      value={newAttendee.email}
+                      onChange={(e) => setNewAttendee({ ...newAttendee, email: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#0d47a1] focus:bg-white focus:ring-1 focus:ring-[#0d47a1] outline-none text-xs text-slate-900 transition-all font-medium"
+                      disabled={isCreating}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Puesto / Cargo
+                    </label>
+                    <select
+                      value={newAttendee.position}
+                      onChange={(e) => setNewAttendee({ ...newAttendee, position: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#0d47a1] focus:bg-white focus:ring-1 focus:ring-[#0d47a1] outline-none text-xs text-slate-900 transition-all font-medium"
+                      disabled={isCreating}
+                    >
+                      <option value="Propietario">Propietario</option>
+                      <option value="Gerente General">Gerente General</option>
+                      <option value="Administración y Finanzas">Administración y Finanzas</option>
+                      <option value="Compras">Compras</option>
+                      <option value="Ventas">Ventas</option>
+                      <option value="Bodega e Inventario">Bodega e Inventario</option>
+                      <option value="Logística">Logística</option>
+                      <option value="Otro">Otro</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Colaboradores
+                    </label>
+                    <select
+                      value={newAttendee.employees}
+                      onChange={(e) => setNewAttendee({ ...newAttendee, employees: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#0d47a1] focus:bg-white focus:ring-1 focus:ring-[#0d47a1] outline-none text-xs text-slate-900 transition-all font-medium"
+                      disabled={isCreating}
+                    >
+                      <option value="1 a 10 colaboradores">1 a 10 colaboradores</option>
+                      <option value="11 a 50 colaboradores">11 a 50 colaboradores</option>
+                      <option value="51 a 100 colaboradores">51 a 100 colaboradores</option>
+                      <option value="101 a 500 colaboradores">101 a 500 colaboradores</option>
+                      <option value="Más de 500 colaboradores">Más de 500 colaboradores</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Ciudad / Municipio
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej. Managua"
+                    value={newAttendee.ciudad}
+                    onChange={(e) => setNewAttendee({ ...newAttendee, ciudad: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#0d47a1] focus:bg-white focus:ring-1 focus:ring-[#0d47a1] outline-none text-xs text-slate-900 transition-all font-medium"
+                    disabled={isCreating}
+                  />
+                </div>
+
+                {/* Switch de Check-in Inmediato */}
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 flex items-center justify-between gap-3">
+                  <div className="flex items-start gap-2.5">
+                    <span className="material-symbols-outlined text-emerald-600 text-[22px] mt-0.5">check_circle</span>
+                    <div>
+                      <p className="text-xs font-bold text-emerald-950">
+                        Marcar Asistencia (Check-in) Inmediato
+                      </p>
+                      <p className="text-[11px] text-emerald-800 leading-tight">
+                        La persona ingresa directamente al salón sin necesidad de volver a escanear su QR.
+                      </p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={newAttendee.checkedInNow}
+                      onChange={(e) => setNewAttendee({ ...newAttendee, checkedInNow: e.target.checked })}
+                      className="sr-only peer"
+                      disabled={isCreating}
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                  </label>
+                </div>
+
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 md:p-5 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setCreateModalOpen(false)}
+                  className="px-4 py-2.5 text-slate-600 hover:bg-slate-200 rounded-xl font-bold text-xs transition-colors"
+                  disabled={isCreating}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreating}
+                  className="px-6 py-2.5 bg-[#0d47a1] hover:bg-blue-800 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-900/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isCreating ? (
+                    <>
+                      <span className="material-symbols-outlined animate-spin text-[16px]">sync</span>
+                      <span>Registrando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[16px]">check</span>
+                      <span>Registrar y Emitir Pase</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

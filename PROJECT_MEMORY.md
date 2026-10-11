@@ -1379,4 +1379,14 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - **Selector de Filtro Rápido por Estado:** Botones métricos interactivos para alternar al instante entre **Todos (288)**, **Aprobados (203)** y **Pendientes (85)**.
   - **Buscador y Excel Actualizados:** Búsqueda y exportación compatibles con los campos normalizados en español e inglés.
 
-
+### 🚪 Módulo de Registro en Puerta / Recepción (`AdminPreRegistrations.jsx`)
+- **Objetivo:** Permitir registrar de manera ágil a visitantes que se presentan el día del evento sin haberse preregistrado previamente (*walk-ins*).
+- **Implementación:**
+  - Botón principal **`+ Nuevo Registro (Puerta)`** en la barra superior junto al exportador de Excel.
+  - Modal optimizado con campos esenciales: Nombre completo, Empresa/Ferretería, Celular/Teléfono, Correo (opcional), Puesto, Rango de colaboradores y Ciudad.
+  - Switch de **"Marcar Asistencia (Check-in) Inmediato"** activado por defecto para dar ingreso en un solo paso.
+  - Al guardar:
+    - Se registra con `status: 'approved'`, `type: 'on_site'`, `source: 'Registro en Puerta (Admin)'`.
+    - Si proporcionó correo, se dispara automáticamente el correo oficial de bienvenida con su Código QR.
+    - Abre de inmediato el modal con el Código QR generado para que el recepcionista pueda mostrárselo al asistente o imprimir su credencial.
+    - En la tabla se identifica visualmente con el badge morado **"En Puerta"** y el badge verde **"Ingresó"**.
