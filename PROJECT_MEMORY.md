@@ -1395,14 +1395,19 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Configuración de Hardware & Papel:**
   - Impresora: **Brother QL-810Wc** (Térmica directa de alta velocidad con cortador automático).
   - Rollo de etiquetas: **DK-2205 Continuo** (Ancho fijo de 62 mm).
-  - Medida de corte configurada: **62 mm de ancho × 40 mm de alto** (`@page { size: 62mm 40mm; margin: 0; }`).
-- **Diseño Térmico Monocromático de Alto Contraste:**
-  - Layout horizontal / apaisado de 2 columnas:
-    - **Izquierda:** Logo compacto EXPO FERRE 2026, pastilla negra invertida con rol (`STAFF`, `ASISTENTE`, `INVITADO ESPECIAL`, etc.), Nombre en letras grandes (`text-[12.5px] font-black`), Empresa en negrita, Puesto/Cargo y fecha.
-    - **Derecha:** Código QR nítido en negro puro `#000000` (`size={84}`, nivel M) sobre fondo blanco con el ID alfanumérico debajo.
-  - El cortador automático de la Brother corta exactamente cada 40 mm tras imprimir.
-  - Integrado en:
-    - **Staff** (`AdminStaff.jsx`): Impresión individual por fila y botón "Imprimir Todos".
-    - **Preregistros / Puerta** (`AdminPreRegistrations.jsx`): Botón directo de impresora por fila para asistentes aprobados y botón "Imprimir Gafete" en el modal de QR.
-    - **Invitados Especiales**, **Conferencistas**, **Patrocinadores** y **Escáner de Check-in**.
+  - Medida de corte seleccionada: **Opción A Vertical: 62 mm de ancho × 100 mm de largo** (`@page { size: 62mm 100mm; margin: 0; }`).
+- **Diseño Térmico Monocromático de Alto Contraste (Opción A):**
+  - Layout vertical estándar para porta-gafete / credencial:
+    - **Cabecera:** `EXPO FERRE 2026`.
+    - **Franja de Rol:** Cintillo negro invertido con letras blancas (`[ STAFF ]`, `[ ASISTENTE ]`, `[ INVITADO ESPECIAL ]`, etc.).
+    - **Nombre del Asistente:** `text-[14.5px] font-black uppercase`.
+    - **Patrocinador / Empresa (DESTACADO Y AUMENTADO):** Caja con fondo gris claro y bordes negros dobles con el nombre de la marca en `text-[13.5px] font-black uppercase`.
+    - **Puesto / Función / Stand:** Tipografía mediana `text-[9.5px] font-bold`.
+    - **Código QR:** Centrado de alta nitidez en negro puro `#000000` (`size={105}`, nivel M) con el código ID debajo.
+    - **Pie Oficial:** `17 OCTUBRE 2026 • HOTEL CROWNE PLAZA`.
+  - El cortador automático de la Brother corta exactamente a los 10 cm tras imprimir cada credencial.
+  - Integrado globalmente en:
+    - **Staff** (`AdminStaff.jsx`): Impresión individual y masiva.
+    - **Preregistros / Puerta** (`AdminPreRegistrations.jsx`): Impresión de credenciales para nuevos registros en puerta y existentes.
+    - **Invitados Especiales**, **Conferencistas**, **Patrocinadores** y **Modal de QR**.
 

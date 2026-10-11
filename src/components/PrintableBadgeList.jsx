@@ -23,7 +23,7 @@ export default function PrintableBadgeList({ items, roleLabel = 'Staff', colorCl
             </h2>
           </div>
           <p className="text-slate-500 text-xs mt-0.5">
-            Rollo <strong>DK-2205 Continuo (62 mm × 40 mm)</strong> • {items.length} etiqueta(s) lista(s) para corte automático.
+            Rollo <strong>DK-2205 Continuo (62 mm × 100 mm)</strong> • {items.length} gafete(s) listo(s) para corte automático.
           </p>
         </div>
 
@@ -61,14 +61,14 @@ export default function PrintableBadgeList({ items, roleLabel = 'Staff', colorCl
       {/* Reglas CSS para la impresora térmica Brother QL-810Wc */}
       <style dangerouslySetInnerHTML={{__html: `
         @page {
-          size: 62mm 40mm;
+          size: 62mm 100mm;
           margin: 0mm;
         }
 
         @media print {
           html, body {
             width: 62mm !important;
-            height: 40mm !important;
+            height: 100mm !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
@@ -96,15 +96,15 @@ export default function PrintableBadgeList({ items, roleLabel = 'Staff', colorCl
 
           .brother-thermal-badge {
             width: 62mm !important;
-            height: 40mm !important;
+            height: 100mm !important;
             max-width: 62mm !important;
-            max-height: 40mm !important;
+            max-height: 100mm !important;
             page-break-after: always !important;
             break-after: page !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             margin: 0 !important;
-            padding: 2mm 2.5mm !important;
+            padding: 2.5mm 3mm !important;
             border: none !important;
             border-radius: 0 !important;
             box-shadow: none !important;

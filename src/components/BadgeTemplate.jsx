@@ -1,8 +1,8 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 
-// Plantilla térmica compacta optimizada para Brother QL-810Wc (Rollo DK-2205 continuo de 62 mm)
-// Tamaño de etiqueta: 62 mm de ancho x 40 mm de alto
+// Plantilla térmica vertical para Brother QL-810Wc (Rollo DK-2205 continuo de 62 mm)
+// Formato Opción A: 62 mm de ancho x 100 mm de largo (corte automático a 10 cm)
 export default function BadgeTemplate({ data, roleLabel = 'STAFF' }) {
   const fullName = data.name || `${data.nombre || ''} ${data.apellido || ''}`.trim() || 'Participante';
   const company = data.company || data.empresa || data.sponsorName || '';
@@ -11,63 +11,71 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF' }) {
   const displayRole = (data.roleLabel || roleLabel || 'STAFF').toUpperCase();
 
   return (
-    <div className="brother-thermal-badge w-[62mm] h-[40mm] max-w-[62mm] max-h-[40mm] bg-white text-black p-[2.5mm] flex flex-row items-center justify-between border border-black/30 print:border-0 rounded-md print:rounded-none shrink-0 m-2 print:m-0 overflow-hidden box-border font-sans select-none shadow-sm print:shadow-none">
-      {/* Columna Izquierda: Identificación del participante */}
-      <div className="flex-1 pr-2 flex flex-col justify-between h-full min-w-0">
-        
-        {/* Cabecera: Marca del evento y pastilla de rol */}
-        <div>
-          <div className="flex items-center justify-between gap-1 mb-1">
-            <span className="text-[8.5px] font-black tracking-tight uppercase leading-none text-black">
-              EXPO FERRE 2026
-            </span>
-            <span className="bg-black text-white text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider leading-none">
-              {displayRole}
-            </span>
-          </div>
-
-          {/* Nombre Completo */}
-          <h2 className="text-[12.5px] font-black uppercase text-black leading-[1.15] tracking-tight line-clamp-2 break-words mt-0.5">
-            {fullName}
-          </h2>
-        </div>
-
-        {/* Empresa y Cargo */}
-        <div className="my-auto pt-0.5">
-          {company && company.toLowerCase() !== 'particular' && company.toLowerCase() !== 'n/a' && (
-            <p className="text-[10px] font-black text-black uppercase leading-tight line-clamp-1 truncate">
-              {company}
-            </p>
-          )}
-          {position && (
-            <p className="text-[8.5px] font-medium text-black leading-tight line-clamp-1 truncate mt-0.5">
-              {position}
-            </p>
-          )}
-        </div>
-
-        {/* Pie de etiqueta */}
-        <div className="text-[7px] font-bold text-black/80 uppercase tracking-wider">
-          17 OCT 2026 • CROWNE PLAZA
-        </div>
+    <div className="brother-thermal-badge w-[62mm] h-[100mm] max-w-[62mm] max-h-[100mm] bg-white text-black p-[3mm] flex flex-col items-center justify-between border-2 border-black/30 print:border-0 rounded-md print:rounded-none shrink-0 m-2 print:m-0 overflow-hidden box-border font-sans select-none shadow-md print:shadow-none">
+      
+      {/* 1. Cabecera del Evento */}
+      <div className="w-full text-center pt-0.5">
+        <h3 className="text-[11px] font-black tracking-[0.2em] uppercase text-black leading-none">
+          EXPO FERRE 2026
+        </h3>
       </div>
 
-      {/* Columna Derecha: Código QR Térmico de Alta Nitidez */}
-      <div className="w-[24mm] flex flex-col items-center justify-center shrink-0 h-full border-l border-black/20 pl-1.5">
-        <div className="bg-white p-0.5 flex items-center justify-center">
+      {/* 2. Franja de Rol Distintiva */}
+      <div className="w-full bg-black text-white text-center font-black text-[11px] py-1 px-1 tracking-[0.18em] uppercase my-1 rounded-xs">
+        {displayRole}
+      </div>
+
+      {/* 3. Nombre del Asistente */}
+      <div className="w-full text-center px-1 my-0.5">
+        <h2 className="text-[14.5px] font-black uppercase text-black leading-tight line-clamp-2 break-words">
+          {fullName}
+        </h2>
+      </div>
+
+      {/* 4. Nombre del Patrocinador / Empresa (AUMENTADO Y DESTACADO) */}
+      <div className="w-full bg-slate-100 border-y-2 border-black/80 py-1.5 px-1 text-center my-1 rounded-xs">
+        <p className="text-[8.5px] font-bold uppercase tracking-wider text-black/70 leading-none mb-0.5">
+          PATROCINADOR / EMPRESA
+        </p>
+        <p className="text-[13.5px] font-black uppercase tracking-tight text-black leading-tight line-clamp-2 break-words">
+          {company || 'PARTICIPANTE'}
+        </p>
+      </div>
+
+      {/* 5. Cargo o Stand (si está disponible) */}
+      {position && (
+        <div className="w-full text-center px-1 -mt-0.5 mb-1">
+          <p className="text-[9.5px] font-bold text-black/90 uppercase tracking-tight line-clamp-1 truncate">
+            {position}
+          </p>
+        </div>
+      )}
+
+      {/* 6. Código QR de Acceso en Alta Nitidez Térmica */}
+      <div className="flex flex-col items-center justify-center my-auto">
+        <div className="bg-white p-1 border border-black/30 rounded-xs flex items-center justify-center">
           <QRCodeSVG 
             value={id} 
-            size={84} 
+            size={105} 
             level="M" 
             bgColor="#ffffff"
             fgColor="#000000"
           />
         </div>
-        <span className="text-[7.5px] font-mono font-bold text-black mt-1 leading-none text-center truncate max-w-full">
+        <span className="text-[8.5px] font-mono font-bold text-black mt-1 leading-none text-center tracking-wider">
           {id}
         </span>
       </div>
+
+      {/* 7. Pie de Gafete Oficial */}
+      <div className="w-full border-t border-black/30 pt-1 text-center mt-auto">
+        <p className="text-[7.5px] font-black text-black/80 uppercase tracking-widest leading-none">
+          17 OCTUBRE 2026 • HOTEL CROWNE PLAZA
+        </p>
+      </div>
+
     </div>
   );
 }
+
 
