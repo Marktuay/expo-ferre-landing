@@ -1357,3 +1357,12 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - Total global aumentó de **516 a 536 invitaciones registradas**.
   - Total para **CEMEX**: **20 invitaciones activas**.
 
+---
+
+## 📅 Resumen de Avances y Cambios de la Sesión (11 de Octubre de 2026)
+
+### 🏷️ Incorporación de Logo Orion en Categoría Plata (`App.jsx` & `AdminSponsors.jsx`)
+- Se integró el logotipo oficial de **Orion** (`/plata/orion.png`) posicionado al final (último lugar) de la categoría **Plata** en el reel de la Landing Page (`App.jsx`) y en el directorio de patrocinadores (`AdminSponsors.jsx`).
+- Configurado con tarjeta blanca estilizada (`bgWhite: true`) para coherencia visual con el resto de marcas Plata.
+- Compilación verificada exitosamente (`npm run build`) en 3.02s.
+

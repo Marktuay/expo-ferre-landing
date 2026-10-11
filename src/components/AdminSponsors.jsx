@@ -70,7 +70,8 @@ const OFFICIAL_SPONSORS = [
   { company: 'La Casa del Perno', category: 'Plata', logo: '/plata/lacasadelperno.jpeg' },
   { company: 'PBS', category: 'Plata', logo: '/plata/pbs.png' },
   { company: 'Chevrolet', category: 'Plata', logo: '/plata/chevrolet.jpg' },
-  { company: 'Durman', category: 'Plata', logo: '/plata/durman.png' }
+  { company: 'Durman', category: 'Plata', logo: '/plata/durman.png' },
+  { company: 'Orion', category: 'Plata', logo: '/plata/orion.png' }
 ];
 
 export function normStr(str) {
