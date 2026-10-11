@@ -1366,3 +1366,14 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - Configurado con tarjeta blanca estilizada (`bgWhite: true`) para coherencia visual con el resto de marcas Plata.
 - Compilación verificada exitosamente (`npm run build`) en 3.02s.
 
+### 📋 Optimización Integral de Tabla de Preregistros (`AdminPreRegistrations.jsx`)
+- **Problema Corregido:**
+  - El correo se quebraba verticalmente letra por letra (`milan\nj438\n@gm\nail.com`) por falta de ancho mínimo y uso de `break-all`.
+  - Los contactos registrados a través de pases directos mostraban Nombre y Empresa vacíos porque en Firestore estaban guardados bajo `nombre`, `apellido` y `empresa` en lugar de `name` y `company`.
+- **Solución Implementada:**
+  - **Mapeo Robusto de Campos:** Normalización automática de `nombre`/`name`, `empresa`/`company`, `correo`/`email`, `celular`/`phone`, `personalEmpresa`/`employees` y `cargo`/`position`.
+  - **Ancho Mínimo de Tabla y Columnas:** Tabla con `min-w-[1300px]` en contenedor con scroll horizontal limpio, columnas con anchos proporcionales (`min-w-[210px]` Nombre, `min-w-[190px]` Empresa, `min-w-[240px]` Email, `min-w-[140px]` Teléfono).
+  - **Email en 1 Sola Línea:** `whitespace-nowrap font-mono text-xs text-slate-600` sin saltos forzados de línea.
+  - **Selector de Filtro Rápido por Estado:** Botones métricos interactivos para alternar al instante entre **Todos (288)**, **Aprobados (203)** y **Pendientes (85)**.
+  - **Buscador y Excel Actualizados:** Búsqueda y exportación compatibles con los campos normalizados en español e inglés.
+

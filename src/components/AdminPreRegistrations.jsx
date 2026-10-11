@@ -10,6 +10,7 @@ import AdminQRViewModal from './AdminQRViewModal';
 export default function AdminPreRegistrations({ onBack, adminUser }) {
   const [registrations, setRegistrations] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'approved' | 'pending' | 'no_show' | 'migrated'
   const [loading, setLoading] = useState(true);
   
   // CRM States
@@ -33,10 +34,24 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const results = [];
       snapshot.forEach((doc) => {
+        const d = doc.data();
+        const fullName = d.name || (d.nombre ? `${d.nombre} ${d.apellido || ''}`.trim() : '') || '';
+        const companyName = d.company || d.empresa || '';
+        const emailAddr = d.email || d.correo || '';
+        const phoneNum = d.phone || d.telefono || d.celular || '';
+        const employeesVal = d.employees || d.empleados || (d.personalEmpresa ? `${d.personalEmpresa} pers.` : '');
+        const positionVal = d.position || d.cargo || d.puesto || (d.isDirectInvite ? 'Invitado Especial' : '');
+
         results.push({
           id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate() || new Date()
+          ...d,
+          name: fullName,
+          company: companyName,
+          email: emailAddr,
+          phone: phoneNum,
+          employees: employeesVal,
+          position: positionVal,
+          createdAt: d.createdAt?.toDate ? d.createdAt.toDate() : (d.createdAt ? new Date(d.createdAt) : new Date())
         });
       });
       setRegistrations(results);
@@ -267,59 +282,108 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
 
   const filteredRegistrations = registrations.filter(reg => {
     const term = searchTerm.toLowerCase();
-    const nameMatch = reg.name?.toLowerCase().includes(term);
-    const emailMatch = reg.email?.toLowerCase().includes(term);
-    const phoneMatch = reg.phone?.toLowerCase().includes(term);
-    const companyMatch = reg.company?.toLowerCase().includes(term);
-    const matchesSearch = nameMatch || emailMatch || phoneMatch || companyMatch;
+    const nameMatch = (reg.name || '').toLowerCase().includes(term);
+    const emailMatch = (reg.email || '').toLowerCase().includes(term);
+    const phoneMatch = (reg.phone || '').toLowerCase().includes(term);
+    const companyMatch = (reg.company || '').toLowerCase().includes(term);
+    const matchesSearch = !term || nameMatch || emailMatch || phoneMatch || companyMatch;
     
-    if (needsFollowUpOnly) {
-      return matchesSearch && reg.needsFollowUp === true;
+    if (needsFollowUpOnly && !reg.needsFollowUp) {
+      return false;
     }
+
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'pending') {
+        const isPending = reg.status !== 'approved' && reg.status !== 'no_show' && reg.status !== 'migrated';
+        if (!isPending) return false;
+      } else if (reg.status !== statusFilter) {
+        return false;
+      }
+    }
+
     return matchesSearch;
   });
 
+  const totalCount = registrations.length;
+  const approvedCount = registrations.filter(reg => reg.status === 'approved').length;
+  const pendingCount = registrations.filter(reg => reg.status !== 'approved' && reg.status !== 'no_show' && reg.status !== 'migrated').length;
+
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
-      <div className="w-full max-w-[1400px] mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <div className="w-full max-w-[1450px] mx-auto">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
           <div className="flex-shrink-0">
-            <h1 className="text-headline-md font-bold text-on-surface">Preregistros</h1>
-            <p className="text-body-lg text-secondary">Personas que han completado el formulario de preregistro.</p>
+            <h1 className="text-2xl md:text-3xl font-black text-slate-900">Preregistros</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Personas que han completado el formulario de preregistro y pases directos.</p>
             
             {!loading && (
-              <div className="flex flex-wrap gap-4 mt-6">
-                <div className="bg-white px-4 py-3 rounded-lg border border-outline-variant shadow-sm flex items-center gap-3">
-                  <div className="bg-primary/10 p-2 rounded-full text-primary flex items-center justify-center">
-                    <span className="material-symbols-outlined">group</span>
-                  </div>
+              <div className="flex flex-wrap gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('all')}
+                  className={`px-4 py-2.5 rounded-xl border transition-all text-left flex items-center gap-3 cursor-pointer ${
+                    statusFilter === 'all'
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className={`p-1.5 rounded-lg flex items-center justify-center ${statusFilter === 'all' ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-600'}`}>
+                    <span className="material-symbols-outlined text-[18px]">group</span>
+                  </span>
                   <div>
-                    <p className="text-xs text-secondary font-medium uppercase tracking-wider">Total Preregistros</p>
-                    <p className="text-2xl font-bold text-on-surface leading-tight">{registrations.length}</p>
+                    <p className={`text-[10px] font-bold uppercase tracking-wider ${statusFilter === 'all' ? 'text-white/80' : 'text-slate-400'}`}>Todos</p>
+                    <p className="text-xl font-black leading-tight">{totalCount}</p>
                   </div>
-                </div>
-                <div className="bg-white px-4 py-3 rounded-lg border border-outline-variant shadow-sm flex items-center gap-3">
-                  <div className="bg-[#16a34a]/10 p-2 rounded-full text-[#16a34a] flex items-center justify-center">
-                    <span className="material-symbols-outlined">how_to_reg</span>
-                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('approved')}
+                  className={`px-4 py-2.5 rounded-xl border transition-all text-left flex items-center gap-3 cursor-pointer ${
+                    statusFilter === 'approved'
+                      ? 'bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-500/20'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className={`p-1.5 rounded-lg flex items-center justify-center ${statusFilter === 'approved' ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-600'}`}>
+                    <span className="material-symbols-outlined text-[18px]">how_to_reg</span>
+                  </span>
                   <div>
-                    <p className="text-xs text-secondary font-medium uppercase tracking-wider">Aprobados</p>
-                    <p className="text-2xl font-bold text-on-surface leading-tight">{registrations.filter(reg => reg.status === 'approved').length}</p>
+                    <p className={`text-[10px] font-bold uppercase tracking-wider ${statusFilter === 'approved' ? 'text-white/80' : 'text-slate-400'}`}>Aprobados</p>
+                    <p className="text-xl font-black leading-tight">{approvedCount}</p>
                   </div>
-                </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('pending')}
+                  className={`px-4 py-2.5 rounded-xl border transition-all text-left flex items-center gap-3 cursor-pointer ${
+                    statusFilter === 'pending'
+                      ? 'bg-amber-500 border-amber-500 text-white shadow-md shadow-amber-500/20'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className={`p-1.5 rounded-lg flex items-center justify-center ${statusFilter === 'pending' ? 'bg-white/20 text-white' : 'bg-amber-50 text-amber-600'}`}>
+                    <span className="material-symbols-outlined text-[18px]">pending_actions</span>
+                  </span>
+                  <div>
+                    <p className={`text-[10px] font-bold uppercase tracking-wider ${statusFilter === 'pending' ? 'text-white/80' : 'text-slate-400'}`}>Pendientes</p>
+                    <p className="text-xl font-black leading-tight">{pendingCount}</p>
+                  </div>
+                </button>
               </div>
             )}
           </div>
           
-          <div className="w-full md:flex-1 md:max-w-md flex flex-col gap-3">
+          <div className="w-full lg:max-w-md flex flex-col gap-2.5">
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary">search</span>
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
               <input 
                 type="text" 
                 placeholder="Buscar por nombre, correo, teléfono o empresa..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-white rounded-full border border-outline-variant focus:border-[#0d47a1] focus:ring-1 focus:ring-[#0d47a1] outline-none transition-shadow shadow-sm"
+                className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-slate-200 focus:border-[#0d47a1] focus:ring-2 focus:ring-[#0d47a1]/20 outline-none text-sm text-slate-800 transition-all shadow-sm"
               />
             </div>
             <label className="flex items-center gap-2 cursor-pointer ml-1 w-fit">
@@ -327,13 +391,13 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                 type="checkbox"
                 checked={needsFollowUpOnly}
                 onChange={(e) => setNeedsFollowUpOnly(e.target.checked)}
-                className="w-4 h-4 text-primary rounded focus:ring-primary focus:ring-2 border-outline-variant"
+                className="w-4 h-4 text-[#0d47a1] rounded border-slate-300 focus:ring-[#0d47a1]"
               />
-              <span className="text-sm text-on-surface font-medium">Mostrar solo "Requiere Seguimiento"</span>
+              <span className="text-xs text-slate-700 font-semibold">Mostrar solo "Requiere Seguimiento"</span>
             </label>
           </div>
 
-          <div className="flex flex-shrink-0 gap-4">
+          <div className="flex flex-shrink-0 gap-3">
             <button onClick={() => {
               import('xlsx').then(XLSX => {
                 const dataToExport = filteredRegistrations.map(reg => ({
@@ -354,97 +418,114 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Preregistros");
                 XLSX.writeFile(workbook, "Preregistros_Asistentes.xlsx");
               });
-            }} className="px-5 py-2 bg-[#217346] text-white border border-[#217346] rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2">
-              <span className="material-symbols-outlined">download</span>
+            }} className="px-4 py-2.5 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-xl transition-all font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm">
+              <span className="material-symbols-outlined text-[18px]">download</span>
               Exportar Excel
             </button>
-            <button onClick={onBack} className="px-5 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2">
-              <span className="material-symbols-outlined">arrow_back</span>
-              Volver al Menú
+            <button onClick={onBack} className="px-4 py-2.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl transition-all font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm">
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+              Volver
             </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md border border-outline-variant overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[1300px]">
               <thead>
-                <tr className="bg-surface-variant/30 border-b border-outline-variant">
-                  <th className="p-4 font-bold text-on-surface">Nombre</th>
-                  <th className="p-4 font-bold text-on-surface">Empresa</th>
-                  <th className="p-4 font-bold text-on-surface">Email</th>
-                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Teléfono</th>
-                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Empleados</th>
-                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Puesto</th>
-                  <th className="p-4 font-bold text-on-surface whitespace-nowrap text-center">Estado</th>
-                  <th className="p-4 font-bold text-on-surface whitespace-nowrap">Fecha</th>
-                  <th className="p-4 font-bold text-on-surface whitespace-nowrap text-center">Acciones</th>
+                <tr className="bg-slate-50/80 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-600 font-bold">
+                  <th className="py-3.5 px-4 min-w-[210px]">Nombre</th>
+                  <th className="py-3.5 px-4 min-w-[190px]">Empresa</th>
+                  <th className="py-3.5 px-4 min-w-[240px]">Email</th>
+                  <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Teléfono</th>
+                  <th className="py-3.5 px-4 min-w-[110px] whitespace-nowrap text-center">Empleados</th>
+                  <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Puesto</th>
+                  <th className="py-3.5 px-4 min-w-[120px] whitespace-nowrap text-center">Estado</th>
+                  <th className="py-3.5 px-4 min-w-[110px] whitespace-nowrap text-center">Fecha</th>
+                  <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap text-center">Acciones</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100 text-sm">
                 {loading ? (
                   <tr>
-                    <td colSpan="9" className="p-8 text-center text-secondary">
+                    <td colSpan="9" className="p-12 text-center text-slate-400">
                       Cargando datos...
                     </td>
                   </tr>
                 ) : filteredRegistrations.length === 0 ? (
                   <tr>
-                    <td colSpan="9" className="p-8 text-center text-secondary">
-                      No se encontraron resultados para "{searchTerm}".
+                    <td colSpan="9" className="p-12 text-center text-slate-400">
+                      No se encontraron resultados para los filtros seleccionados.
                     </td>
                   </tr>
                 ) : (
                   filteredRegistrations.map((reg) => (
-                    <tr key={reg.id} className="border-b border-outline-variant hover:bg-surface-variant/10 transition-colors">
-                      <td className="p-4 text-on-surface font-medium">{reg.name}</td>
-                      <td className="p-4 text-secondary">{reg.company}</td>
-                      <td className="p-4 text-secondary break-all">{reg.email}</td>
-                      <td className="p-4 text-secondary whitespace-nowrap">{reg.phone}</td>
-                      <td className="p-4 text-secondary whitespace-nowrap">{reg.employees || 'N/A'}</td>
-                      <td className="p-4 text-secondary whitespace-nowrap">{reg.position || 'N/A'}</td>
-                      <td className="p-4 whitespace-nowrap text-center">
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                          reg.status === 'approved' ? 'bg-[#16a34a]/10 text-[#16a34a]' : 
-                          reg.status === 'no_show' ? 'bg-[#4b5563]/10 text-[#4b5563]' :
-                          reg.status === 'migrated' ? 'bg-[#0d47a1]/10 text-[#0d47a1]' :
-                          'bg-[#f39200]/10 text-[#f39200]'
+                    <tr key={reg.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-slate-900">{reg.name || 'Sin Nombre'}</div>
+                        {reg.isDirectInvite && (
+                          <span className="inline-block mt-0.5 px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-full border border-blue-200">
+                            Pase Directo
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-700 font-medium">
+                        {reg.company || <span className="text-slate-400 italic text-xs">N/D</span>}
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-600 font-mono text-xs whitespace-nowrap">
+                        {reg.email || <span className="text-slate-400 italic">N/D</span>}
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-700 whitespace-nowrap font-mono text-xs font-semibold">
+                        {reg.phone || <span className="text-slate-400 italic font-sans font-normal">N/D</span>}
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap text-center text-xs">
+                        {reg.employees || <span className="text-slate-400">N/D</span>}
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-600 text-xs">
+                        {reg.position || <span className="text-slate-400">N/D</span>}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap text-center">
+                        <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-black tracking-wider ${
+                          reg.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 
+                          reg.status === 'no_show' ? 'bg-slate-100 text-slate-700 border border-slate-300' :
+                          reg.status === 'migrated' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+                          'bg-amber-100 text-amber-800 border border-amber-200'
                         }`}>
                           {reg.status === 'approved' ? 'APROBADO' : 
                            reg.status === 'no_show' ? 'NO ASISTIÓ' : 
                            reg.status === 'migrated' ? 'MIGRADO' : 'PENDIENTE'}
                         </span>
                       </td>
-                      <td className="p-4 text-secondary whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-slate-500 whitespace-nowrap text-center text-xs">
                         {reg.createdAt.toLocaleDateString('es-ES', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric'
                         })}
                         {reg.needsFollowUp && (
-                          <div className="mt-1 flex items-center gap-1 text-[#f39200] text-xs font-bold">
-                            <span className="material-symbols-outlined text-[14px]">notification_important</span>
-                            Requiere seguimiento
+                          <div className="mt-1 flex items-center justify-center gap-1 text-[#f39200] text-[10px] font-bold">
+                            <span className="material-symbols-outlined text-[13px]">notification_important</span>
+                            Seguimiento
                           </div>
                         )}
                         {reg.followUps && reg.followUps.length > 0 && (
-                          <div className="mt-1 text-xs text-secondary">
-                            {reg.followUps.length} seguimiento(s)
+                          <div className="mt-0.5 text-[10px] text-slate-400">
+                            {reg.followUps.length} nota(s)
                           </div>
                         )}
                       </td>
-                      <td className="p-4 text-center whitespace-nowrap">
-                        <div className="flex items-center justify-center gap-2">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-1.5">
                           {/* Ver Código QR */}
                           <button 
                             onClick={() => {
                               setSelectedPersonForQR(reg);
                               setQrModalOpen(true);
                             }} 
-                            className="text-[#0d47a1] hover:bg-[#0d47a1]/10 p-2 rounded-full transition-colors" 
+                            className="text-[#0d47a1] hover:bg-blue-50 p-2 rounded-xl transition-colors" 
                             title="Visualizar y Descargar Código QR"
                           >
-                            <span className="material-symbols-outlined">qr_code_2</span>
+                            <span className="material-symbols-outlined text-[20px]">qr_code_2</span>
                           </button>
 
                           <button 
@@ -452,12 +533,12 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                               setSelectedPersonForFollowUp(reg);
                               setFollowUpModalOpen(true);
                             }} 
-                            className="text-[#f39200] hover:bg-[#f39200]/10 p-2 rounded-full transition-colors relative" 
+                            className="text-[#f39200] hover:bg-amber-50 p-2 rounded-xl transition-colors relative" 
                             title="Añadir Seguimiento (CRM)"
                           >
-                            <span className="material-symbols-outlined">support_agent</span>
+                            <span className="material-symbols-outlined text-[20px]">support_agent</span>
                             {reg.followUps && reg.followUps.length > 0 && (
-                              <span className="absolute -top-1 -right-1 bg-error text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
+                              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
                                 {reg.followUps.length}
                               </span>
                             )}
@@ -469,29 +550,29 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                                 setMigrationPassword('');
                                 setMigrationModalOpen(true);
                               }} 
-                              className="text-[#9c27b0] hover:bg-[#9c27b0]/10 p-2 rounded-full transition-colors" 
+                              className="text-[#9c27b0] hover:bg-purple-50 p-2 rounded-xl transition-colors" 
                               title="Migrar a Patrocinador"
                             >
-                              <span className="material-symbols-outlined">business_center</span>
+                              <span className="material-symbols-outlined text-[20px]">business_center</span>
                             </button>
                           )}
                           {reg.status !== 'approved' && reg.status !== 'no_show' && reg.status !== 'migrated' && (
-                            <button onClick={() => handleApprove(reg)} className="text-[#16a34a] hover:bg-[#16a34a]/10 p-2 rounded-full transition-colors" title="Aprobar">
-                              <span className="material-symbols-outlined">check_circle</span>
+                            <button onClick={() => handleApprove(reg)} className="text-[#16a34a] hover:bg-emerald-50 p-2 rounded-xl transition-colors" title="Aprobar">
+                              <span className="material-symbols-outlined text-[20px]">check_circle</span>
                             </button>
                           )}
                           {reg.status === 'approved' && (
                             <>
-                              <button onClick={() => handleResendQR(reg)} className="text-[#0d47a1] hover:bg-[#0d47a1]/10 p-2 rounded-full transition-colors" title="Reenviar Código QR">
-                                <span className="material-symbols-outlined">mail</span>
+                              <button onClick={() => handleResendQR(reg)} className="text-[#0d47a1] hover:bg-blue-50 p-2 rounded-xl transition-colors" title="Reenviar Código QR">
+                                <span className="material-symbols-outlined text-[20px]">mail</span>
                               </button>
-                              <button onClick={() => handleNoShow(reg)} className="text-[#4b5563] hover:bg-[#4b5563]/10 p-2 rounded-full transition-colors" title="Marcar como No Asistió">
-                                <span className="material-symbols-outlined">person_off</span>
+                              <button onClick={() => handleNoShow(reg)} className="text-[#4b5563] hover:bg-slate-100 p-2 rounded-xl transition-colors" title="Marcar como No Asistió">
+                                <span className="material-symbols-outlined text-[20px]">person_off</span>
                               </button>
                             </>
                           )}
-                          <button onClick={() => handleDelete(reg)} className="text-[#ef4444] hover:bg-[#ef4444]/10 p-2 rounded-full transition-colors" title="Eliminar">
-                            <span className="material-symbols-outlined">delete</span>
+                          <button onClick={() => handleDelete(reg)} className="text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors" title="Eliminar">
+                            <span className="material-symbols-outlined text-[20px]">delete</span>
                           </button>
                         </div>
                       </td>
