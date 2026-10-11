@@ -32,15 +32,14 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF' }) {
         </h2>
       </div>
 
-      {/* 4. Nombre del Patrocinador / Empresa (AUMENTADO Y DESTACADO) */}
-      <div className="w-full bg-slate-100 border-y-2 border-black/80 py-1.5 px-1 text-center my-1 rounded-xs">
-        <p className="text-[8.5px] font-bold uppercase tracking-wider text-black/70 leading-none mb-0.5">
-          PATROCINADOR / EMPRESA
-        </p>
-        <p className="text-[13.5px] font-black uppercase tracking-tight text-black leading-tight line-clamp-2 break-words">
-          {company || 'PARTICIPANTE'}
-        </p>
-      </div>
+      {/* 4. Nombre de la Empresa / Patrocinador (DESTACADO EN GRANDE) */}
+      {company && company.toLowerCase() !== 'particular' && company.toLowerCase() !== 'n/a' && (
+        <div className="w-full bg-slate-100 border-y-2 border-black/80 py-1.5 px-1 text-center my-1 rounded-xs">
+          <p className="text-[14px] font-black uppercase tracking-tight text-black leading-tight line-clamp-2 break-words">
+            {company}
+          </p>
+        </div>
+      )}
 
       {/* 5. Cargo o Stand (si está disponible) */}
       {position && (
