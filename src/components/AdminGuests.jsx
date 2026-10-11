@@ -266,7 +266,7 @@ export default function AdminGuests({ onBack }) {
             setSelectedPersonForQR(null);
           }}
           person={selectedPersonForQR}
-          roleLabel="Invitado Especial"
+          roleLabel="Invitado VIP"
           onPrintBadge={(g) => setPrintItems([g])}
         />
       )}

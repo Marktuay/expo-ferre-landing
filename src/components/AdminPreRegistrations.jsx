@@ -451,7 +451,7 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
 
   if (printItems) {
     const target = printItems[0] || {};
-    const role = target.position === 'Invitado Especial' || target.isDirectInvite ? 'Invitado Especial' : 'Asistente';
+    const role = target.position === 'Invitado Especial' || target.isDirectInvite ? 'Invitado VIP' : 'Asistente';
     return (
       <PrintableBadgeList
         items={printItems}
@@ -1073,7 +1073,7 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
             setSelectedPersonForQR(null);
           }}
           person={selectedPersonForQR}
-          roleLabel={selectedPersonForQR.position === 'Invitado Especial' || selectedPersonForQR.isDirectInvite ? 'Invitado Especial' : 'Asistente'}
+          roleLabel={selectedPersonForQR.position === 'Invitado Especial' || selectedPersonForQR.isDirectInvite ? 'Invitado VIP' : 'Asistente'}
           onPrintBadge={(p) => setPrintItems([p])}
         />
       )}

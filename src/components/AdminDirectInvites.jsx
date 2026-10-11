@@ -2455,7 +2455,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     return (
       <PrintableBadgeList
         items={printItems}
-        roleLabel="Invitado Especial"
+        roleLabel="Invitado VIP"
         onClose={() => setPrintItems(null)}
       />
     );
@@ -3692,7 +3692,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                       id: inv.registeredAttendeeId || inv.id,
                                       nombre: inv.registeredName || inv.nombre,
                                       empresa: inv.registeredCompany || inv.empresa || inv.sponsorName || '',
-                                      roleLabel: 'Invitado Especial'
+                                      roleLabel: 'Invitado VIP'
                                     }])}
                                     title="Imprimir Gafete Térmico Brother (62 mm × 100 mm)"
                                     className="p-2 rounded-lg bg-slate-800 hover:bg-slate-900 text-white transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer"
@@ -6140,12 +6140,12 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
             setSelectedPersonForQR(null);
           }}
           person={selectedPersonForQR}
-          roleLabel="Invitado Especial"
+          roleLabel="Invitado VIP"
           onPrintBadge={(p) => setPrintItems([{
             id: p.registeredAttendeeId || p.id,
             nombre: p.nombre || p.name,
             empresa: p.empresa || p.company || p.sponsorName || '',
-            roleLabel: 'Invitado Especial'
+            roleLabel: 'Invitado VIP'
           }])}
         />
       )}

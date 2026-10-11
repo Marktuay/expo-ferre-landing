@@ -95,18 +95,23 @@ export default function ScannerModule({ onBack }) {
               users: 'bg-blue-600'
             };
             const typeLabels = {
-              guests: 'INVITADO',
+              guests: 'INVITADO VIP',
               staff: 'STAFF',
               speakers: 'CONFERENCISTA',
               preregistrations: 'VISITANTE',
               users: 'PATROCINADOR'
             };
 
+            const isVip = foundCollection === 'guests' || 
+                          foundData.isDirectInvite || 
+                          foundData.position === 'Invitado Especial' ||
+                          foundData.position === 'Invitado VIP';
+
             const itemToPrint = {
               id: foundData.id,
               nombre: foundData.nombre || foundData.name,
-              empresa: foundData.empresa || foundData.company || 'Expo Ferre',
-              roleLabel: typeLabels[foundCollection],
+              empresa: foundData.empresa || foundData.company || foundData.sponsorName || 'Expo Ferre',
+              roleLabel: isVip ? 'INVITADO VIP' : typeLabels[foundCollection],
               colorClass: typeColors[foundCollection]
             };
             
