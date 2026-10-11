@@ -6,12 +6,14 @@ import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getEventBasePath } from '../config/eventConfig';
 import AdminFollowUpModal from './AdminFollowUpModal';
 import AdminQRViewModal from './AdminQRViewModal';
+import PrintableBadgeList from './PrintableBadgeList';
 
 export default function AdminPreRegistrations({ onBack, adminUser }) {
   const [registrations, setRegistrations] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'approved' | 'pending' | 'no_show' | 'migrated'
   const [loading, setLoading] = useState(true);
+  const [printItems, setPrintItems] = useState(null);
   
   // On-Site / Door Registration States
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -447,6 +449,18 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
   const approvedCount = registrations.filter(reg => reg.status === 'approved').length;
   const pendingCount = registrations.filter(reg => reg.status !== 'approved' && reg.status !== 'no_show' && reg.status !== 'migrated').length;
 
+  if (printItems) {
+    const target = printItems[0] || {};
+    const role = target.position === 'Invitado Especial' || target.isDirectInvite ? 'Invitado Especial' : 'Asistente';
+    return (
+      <PrintableBadgeList
+        items={printItems}
+        roleLabel={role}
+        onClose={() => setPrintItems(null)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48">
       <div className="w-full max-w-[1450px] mx-auto">
@@ -727,6 +741,9 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                           )}
                           {reg.status === 'approved' && (
                             <>
+                              <button onClick={() => setPrintItems([reg])} className="text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition-colors" title="Imprimir Etiqueta Térmica (Brother QL)">
+                                <span className="material-symbols-outlined text-[18px]">print</span>
+                              </button>
                               <button onClick={() => handleResendQR(reg)} className="text-[#0d47a1] hover:bg-blue-50 p-1.5 rounded-lg transition-colors" title="Reenviar Código QR">
                                 <span className="material-symbols-outlined text-[18px]">mail</span>
                               </button>
@@ -1056,7 +1073,8 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
             setSelectedPersonForQR(null);
           }}
           person={selectedPersonForQR}
-          roleLabel="Asistente Registrado"
+          roleLabel={selectedPersonForQR.position === 'Invitado Especial' || selectedPersonForQR.isDirectInvite ? 'Invitado Especial' : 'Asistente'}
+          onPrintBadge={(p) => setPrintItems([p])}
         />
       )}
     </div>

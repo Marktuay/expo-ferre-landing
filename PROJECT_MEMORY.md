@@ -1390,3 +1390,19 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     - Si proporcionó correo, se dispara automáticamente el correo oficial de bienvenida con su Código QR.
     - Abre de inmediato el modal con el Código QR generado para que el recepcionista pueda mostrárselo al asistente o imprimir su credencial.
     - En la tabla se identifica visualmente con el badge morado **"En Puerta"** y el badge verde **"Ingresó"**.
+
+### 🏷️ Integración de Impresora Térmica Brother QL-810Wc (`BadgeTemplate.jsx` & `PrintableBadgeList.jsx`)
+- **Configuración de Hardware & Papel:**
+  - Impresora: **Brother QL-810Wc** (Térmica directa de alta velocidad con cortador automático).
+  - Rollo de etiquetas: **DK-2205 Continuo** (Ancho fijo de 62 mm).
+  - Medida de corte configurada: **62 mm de ancho × 40 mm de alto** (`@page { size: 62mm 40mm; margin: 0; }`).
+- **Diseño Térmico Monocromático de Alto Contraste:**
+  - Layout horizontal / apaisado de 2 columnas:
+    - **Izquierda:** Logo compacto EXPO FERRE 2026, pastilla negra invertida con rol (`STAFF`, `ASISTENTE`, `INVITADO ESPECIAL`, etc.), Nombre en letras grandes (`text-[12.5px] font-black`), Empresa en negrita, Puesto/Cargo y fecha.
+    - **Derecha:** Código QR nítido en negro puro `#000000` (`size={84}`, nivel M) sobre fondo blanco con el ID alfanumérico debajo.
+  - El cortador automático de la Brother corta exactamente cada 40 mm tras imprimir.
+  - Integrado en:
+    - **Staff** (`AdminStaff.jsx`): Impresión individual por fila y botón "Imprimir Todos".
+    - **Preregistros / Puerta** (`AdminPreRegistrations.jsx`): Botón directo de impresora por fila para asistentes aprobados y botón "Imprimir Gafete" en el modal de QR.
+    - **Invitados Especiales**, **Conferencistas**, **Patrocinadores** y **Escáner de Check-in**.
+
