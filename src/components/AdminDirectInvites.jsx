@@ -114,6 +114,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [isUploadingWhatsapp, setIsUploadingWhatsapp] = useState(false);
   const [isUploadingWhatsappReminder, setIsUploadingWhatsappReminder] = useState(false);
   const [isSavingArt, setIsSavingArt] = useState(false);
+  const [artSaveError, setArtSaveError] = useState('');
   const [artTab, setArtTab] = useState('banners'); // 'banners' | 'whatsapp' | 'speech' | 'preview'
   const [artPreviewChannel, setArtPreviewChannel] = useState('email'); // 'email' | 'whatsapp_invite' | 'whatsapp_reminder'
 
@@ -805,6 +806,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     setIsUploadingWhatsapp(false);
     setIsUploadingWhatsappReminder(false);
     setIsSavingArt(false);
+    setArtSaveError('');
 
     const key = getSponsorKey(sponsorName);
     const existing = sponsorSettings[key] || {};
@@ -836,10 +838,11 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     setIsUploadingWhatsapp(false);
     setIsUploadingWhatsappReminder(false);
     setIsSavingArt(false);
+    setArtSaveError('');
     setArtModal({ open: false, sponsorKey: '', sponsorName: '', stands: '' });
   };
 
-  // Subir imagen de banner a Firebase Storage con fallback a Base64 comprimido
+  // Subir imagen de banner con compresión inmediata y sin bloqueos de red
   const handleUploadBannerImage = async (e, type) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -848,37 +851,18 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     if (type === 'footer') setIsUploadingFooter(true);
     if (type === 'whatsapp') setIsUploadingWhatsapp(true);
     if (type === 'whatsapp_reminder') setIsUploadingWhatsappReminder(true);
+    setArtSaveError('');
 
     try {
-      // 1. Optimizar imagen localmente y colocar en vista previa de inmediato
-      const compressedDataUrl = await compressBannerImage(file, type.startsWith('whatsapp') ? 1080 : 1200, 0.88);
+      // Optimizar imagen localmente y colocar en vista previa de inmediato (calidad 0.82)
+      const compressedDataUrl = await compressBannerImage(file, type.startsWith('whatsapp') ? 1080 : 1200, 0.82);
       if (type === 'header') setArtHeaderUrl(compressedDataUrl);
       if (type === 'footer') setArtFooterUrl(compressedDataUrl);
       if (type === 'whatsapp') setArtWhatsappBannerUrl(compressedDataUrl);
       if (type === 'whatsapp_reminder') setArtWhatsappReminderBannerUrl(compressedDataUrl);
-
-      // 2. Intentar subir a Firebase Storage si está disponible con tiempo límite
-      try {
-        const fileExt = file.name.split('.').pop() || 'jpg';
-        const fileName = `events/2026/sponsorBanners/${artModal.sponsorKey}_${type}_${Date.now()}.${fileExt}`;
-        const imgRef = storageRef(storage, fileName);
-
-        const uploadPromise = uploadBytes(imgRef, file).then(() => getDownloadURL(imgRef));
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Storage timeout')), 10000));
-        const downloadUrl = await Promise.race([uploadPromise, timeoutPromise]);
-
-        if (downloadUrl) {
-          if (type === 'header') setArtHeaderUrl(downloadUrl);
-          if (type === 'footer') setArtFooterUrl(downloadUrl);
-          if (type === 'whatsapp') setArtWhatsappBannerUrl(downloadUrl);
-          if (type === 'whatsapp_reminder') setArtWhatsappReminderBannerUrl(downloadUrl);
-        }
-      } catch (storageErr) {
-        console.warn('Almacenamiento en la nube omitido o falló, se mantendrá versión optimizada:', storageErr);
-      }
     } catch (err) {
       console.error('Error al procesar imagen:', err);
-      alert('Error al procesar imagen: ' + err.message);
+      setArtSaveError('Error al procesar la imagen: ' + err.message);
     } finally {
       if (type === 'header') setIsUploadingHeader(false);
       if (type === 'footer') setIsUploadingFooter(false);
@@ -888,9 +872,10 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     }
   };
 
-  // Guardar configuración de artes
+  // Guardar configuración de artes con timeout protegido
   const handleSaveSponsorArt = async () => {
     setIsSavingArt(true);
+    setArtSaveError('');
     try {
       const key = artModal.sponsorKey || getSponsorKey(artModal.sponsorName);
       const cleanHeader = artHeaderUrl.trim() || null;
@@ -902,19 +887,24 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       const cleanSubject = artCustomSubject.trim() || null;
 
       const settingRef = doc(db, `${getEventBasePath()}/sponsorSettings`, key);
-      await setDoc(settingRef, {
-        sponsorId: key,
-        sponsorName: artModal.sponsorName,
-        headerBannerUrl: cleanHeader,
-        footerBannerUrl: cleanFooter,
-        whatsappBannerUrl: cleanWhatsapp,
-        whatsappReminderBannerUrl: cleanWhatsappReminder,
-        stands: cleanStands,
-        customSpeech: cleanSpeech,
-        customEmailSubject: cleanSubject,
-        updatedAt: serverTimestamp(),
-        updatedBy: adminUser?.email || auth.currentUser?.email || 'admin'
-      }, { merge: true });
+      
+      await withTimeout(
+        setDoc(settingRef, {
+          sponsorId: key,
+          sponsorName: artModal.sponsorName,
+          headerBannerUrl: cleanHeader,
+          footerBannerUrl: cleanFooter,
+          whatsappBannerUrl: cleanWhatsapp,
+          whatsappReminderBannerUrl: cleanWhatsappReminder,
+          stands: cleanStands,
+          customSpeech: cleanSpeech,
+          customEmailSubject: cleanSubject,
+          updatedAt: serverTimestamp(),
+          updatedBy: adminUser?.email || auth.currentUser?.email || 'admin'
+        }, { merge: true }),
+        12000,
+        'Tiempo de espera agotado al conectar con el servidor. Verifica tu conexión a internet.'
+      );
 
       // Inmediata actualización reactiva local
       setSponsorSettings(prev => ({
@@ -935,10 +925,9 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       }));
 
       handleCloseArtModal();
-      alert(`¡Artes de correo, WhatsApp y configuración de "${artModal.sponsorName}" guardados exitosamente!`);
     } catch (err) {
       console.error('Error al guardar artes de patrocinador:', err);
-      alert('Error al guardar: ' + err.message);
+      setArtSaveError(err.message || 'Error al guardar los cambios.');
     } finally {
       setIsSavingArt(false);
     }
@@ -4160,6 +4149,16 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
             {/* Modal Content */}
             <div className="p-6 space-y-5 overflow-y-auto flex-1">
               
+              {artSaveError && (
+                <div className="bg-red-50 border border-red-200 text-red-800 p-3.5 rounded-xl text-xs flex items-start gap-2">
+                  <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <strong className="block font-semibold">Error al guardar:</strong>
+                    <span>{artSaveError}</span>
+                  </div>
+                </div>
+              )}
+
               {artTab === 'banners' && (
                 <div className="space-y-6">
                   
