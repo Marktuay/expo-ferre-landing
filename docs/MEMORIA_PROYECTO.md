@@ -1,6 +1,6 @@
 # 🧠 Memoria del Proyecto - EXPO FERRE 2026
 **Directorio de Patrocinadores, Invitaciones Directas & Pases Digitales**
-*Fecha de actualización: 8 de Octubre, 2026*
+*Fecha de actualización: 12 de Octubre, 2026*
 
 ---
 
@@ -78,13 +78,35 @@
 
 ---
 
-## 7. 🛠️ Despliegue en Producción (Google Cloud VM)
+## 8. 🖼️ Banners de Patrocinadores & CDN Pública (11-12 Octubre, 2026)
+- **Centralización de Banners Co-Brandeados:**
+  - Los 39 patrocinadores cuentan con enlaces públicos en CDN/Cloudinary configurados en `sponsorSettings` dentro de `src/components/AdminDirectInvites.jsx`.
+  - Se resolvió el problema de actualización de banners (ej. SICSA y marcas con cambios de arte gráfico).
+- **Corrección de Modal de Carga de Banners:**
+  - Se corrigió el bloqueo/congelamiento al subir nuevos banners y logos desde el panel administrativo, asegurando el flujo asíncrono y feedback de carga.
+
+---
+
+## 9. ✉️ Correcciones en Envío Directo de Correo (11-12 Octubre, 2026)
+- **Cierre del Modal de Envío Individual:**
+  - Se solucionó el congelamiento del modal al enviar pruebas o invitaciones directas a contactos individuales (ej. contactos de SICSA).
+- **Resolución de Enlace Roto de Header en Correos:**
+  - Se corrigió la URL del banner superior (`headerBannerUrl`) para garantizar que todos los clientes de correo (Gmail, Outlook, Webmail) rendericen tanto la cabecera como el pie de página sin enlaces rotos.
+
+---
+
+## 10. 🛠️ Despliegue en Producción (Google Cloud VM)
 - Rama activa: `main` en `https://github.com/Marktuay/expo-ferre-landing.git`
+- Últimos commits desplegados / sincronizados:
+  - `524fa9a`: Corrección de modal de banner y mapeo de patrocinadores.
+  - `d8fa35b`: Actualización de URLs de banners en correos directos.
+  - `1e46ad9` & `b43d125`: Corrección de cierre de modal individual de correo y enlaces de cabecera.
 - Comando para sincronizar en servidor:
   ```bash
   git pull origin main
   npm run build
   pm2 reload all
   ```
+
 
 
