@@ -301,6 +301,16 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     if (clean.includes('parque') || clean.includes('zaratoga') || clean.includes('baratogo') || clean.includes('tucasa')) return 'parques_industriales';
     if (clean.includes('romax') || clean.includes('maximiza')) return 'romax';
     if (clean.includes('jp') || clean.includes('studio') || clean.includes('technology')) return 'jp_technology_studio';
+    if (clean.includes('artik') || clean.includes('cargo')) return 'artik_cargo';
+    if (clean.includes('perno')) return 'la_casa_del_perno';
+    if (clean.includes('mobius')) return 'mobius';
+    if (clean.includes('pbs')) return 'pbs';
+    if (clean.includes('kouture')) return 'kouture';
+    if (clean.includes('chevrolet')) return 'chevrolet';
+    if (clean.includes('durman')) return 'durman';
+    if (clean.includes('orion')) return 'orion';
+    if (clean.includes('flor') || clean.includes('cana')) return 'flor_de_cana';
+    if (clean.includes('cafe') || clean.includes('flores')) return 'cafe_las_flores';
     return clean.replace(/[^a-z0-9]/g, '_');
   };
 
@@ -614,8 +624,14 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   const getSponsorArt = (sponsorName) => {
     const isGen = !sponsorName || sponsorName === 'general';
     const key = getSponsorKey(sponsorName);
-    const setting = sponsorSettings[key] || (key === 'monolit' ? sponsorSettings['precom_monolit'] : {}) || {};
-    const official = OFFICIAL_SPONSOR_CONFIGS[key] || (key === 'monolit' ? OFFICIAL_SPONSOR_CONFIGS['precom_monolit'] : {}) || {};
+    const setting = sponsorSettings[key] || 
+      (key === 'monolit' ? sponsorSettings['precom_monolit'] : null) || 
+      (key === 'mobius' ? sponsorSettings['mobius_engineering'] : null) || 
+      (key === 'parques_industriales' ? sponsorSettings['saratoga'] : null) || 
+      {};
+    const official = OFFICIAL_SPONSOR_CONFIGS[key] || 
+      (key === 'monolit' ? OFFICIAL_SPONSOR_CONFIGS['precom_monolit'] : null) || 
+      {};
     const calculatedStands = setting.stands || official.stands || (sponsorsMap[sponsorName]?.stands?.join(', ') || '');
 
     const defaultSpeech = isGen ? '' : generateDefaultSponsorSpeech(sponsorName, calculatedStands);
