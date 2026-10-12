@@ -135,6 +135,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [emailModal, setEmailModal] = useState({ open: false, invite: null });
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailSuccess, setEmailSuccess] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   // Modal para Envío Masivo de Correos por Patrocinador / General
   const [bulkEmailModal, setBulkEmailModal] = useState({
@@ -621,11 +622,18 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       ? 'Invitación Exclusiva: Acceso Oficial a EXPO FERRE Nicaragua 2026'
       : `¡Sé parte de EXPO FERRE Nicaragua 2026 con ${sponsorName}!`;
 
-    const defaultHeader = '/email-header.png';
-    const defaultFooter = '/email-footer.png';
+    const defaultHeader = 'https://expoferrenicaragua.com/email-header.png';
+    const defaultFooter = 'https://expoferrenicaragua.com/email-footer.png';
 
-    const header = setting.headerBannerUrl || official.headerBannerUrl || defaultHeader;
-    const footer = setting.footerBannerUrl || official.footerBannerUrl || defaultFooter;
+    let header = setting.headerBannerUrl || official.headerBannerUrl || defaultHeader;
+    let footer = setting.footerBannerUrl || official.footerBannerUrl || defaultFooter;
+
+    if (header && typeof header === 'string' && header.startsWith('/')) {
+      header = `https://expoferrenicaragua.com${header}`;
+    }
+    if (footer && typeof footer === 'string' && footer.startsWith('/')) {
+      footer = `https://expoferrenicaragua.com${footer}`;
+    }
     const whatsapp = setting.whatsappBannerUrl || official.whatsappBannerUrl || '';
     const whatsappReminder = setting.whatsappReminderBannerUrl || official.whatsappReminderBannerUrl || whatsapp;
 
@@ -1557,42 +1565,71 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     return { subject, html, recipientEmail: customRecipientEmail || invite.email };
   };
 
+  // Helper para evitar bloqueos por conexión en promesas de Firestore
+  const withTimeout = (promise, ms = 12000, errorMsg = 'Tiempo de espera agotado al conectar con el servidor') => {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error(errorMsg)), ms))
+    ]);
+  };
+
   // Enviar correo individual
   const handleSendEmailDirect = async (e) => {
     e.preventDefault();
     const invite = emailModal.invite;
-    if (!invite || !invite.targetEmail?.trim()) return;
+    const targetEmail = invite?.targetEmail?.trim();
+    if (!invite || !targetEmail) return;
+
+    if (!isValidEmailAddress(targetEmail)) {
+      setEmailError('El correo electrónico ingresado no tiene un formato válido.');
+      return;
+    }
 
     setIsSendingEmail(true);
     setEmailSuccess('');
+    setEmailError('');
 
     try {
-      const { subject, html } = buildInviteEmail(invite, invite.targetEmail.trim());
+      const { subject, html } = buildInviteEmail(invite, targetEmail);
 
-      await addDoc(collection(db, 'mail'), {
-        to: invite.targetEmail.trim(),
-        message: {
-          subject: subject,
-          html: html
-        }
-      });
+      // 1. Encolar correo en la colección 'mail' de Firestore con timeout
+      await withTimeout(
+        addDoc(collection(db, 'mail'), {
+          to: targetEmail,
+          message: {
+            subject: subject,
+            html: html
+          }
+        }),
+        12000,
+        'Tiempo de espera agotado al conectar con el servidor de correos. Revisa tu conexión.'
+      );
 
-      // Actualizar documento de invitación
-      await updateDoc(doc(db, `${getEventBasePath()}/directInvites`, invite.id), {
-        emailSent: true,
-        emailSentAt: serverTimestamp(),
-        lastEmailTo: invite.targetEmail.trim(),
-        emailSendCount: (invite.emailSendCount || 0) + 1
-      });
+      // 2. Actualizar documento de invitación
+      try {
+        await withTimeout(
+          updateDoc(doc(db, `${getEventBasePath()}/directInvites`, invite.id), {
+            emailSent: true,
+            emailSentAt: serverTimestamp(),
+            lastEmailTo: targetEmail,
+            emailSendCount: (invite.emailSendCount || 0) + 1
+          }),
+          8000,
+          'Tiempo de espera agotado al registrar el estado del correo.'
+        );
+      } catch (updateErr) {
+        console.warn('El correo fue despachado pero hubo retraso al actualizar la invitación:', updateErr);
+      }
 
-      setEmailSuccess(`¡Invitación enviada con éxito a ${invite.targetEmail}!`);
+      setEmailSuccess(`¡Invitación enviada con éxito a ${targetEmail}!`);
       setTimeout(() => {
         setEmailModal({ open: false, invite: null });
         setEmailSuccess('');
-      }, 2000);
+        setEmailError('');
+      }, 2200);
     } catch (err) {
       console.error('Error al enviar correo:', err);
-      alert('Hubo un error al enviar el correo: ' + err.message);
+      setEmailError(err.message || 'Hubo un error al enviar el correo.');
     } finally {
       setIsSendingEmail(false);
     }
@@ -1697,22 +1734,34 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         try {
           const { subject, html } = buildInviteEmail(inv, null, isReminderMode);
 
-          // 1. Encolar correo en la colección 'mail' de Firestore
-          await addDoc(collection(db, 'mail'), {
-            to: targetEmail,
-            message: {
-              subject,
-              html
-            }
-          });
+          // 1. Encolar correo en la colección 'mail' de Firestore con timeout
+          await withTimeout(
+            addDoc(collection(db, 'mail'), {
+              to: targetEmail,
+              message: {
+                subject,
+                html
+              }
+            }),
+            12000,
+            'Tiempo de espera agotado al despachar correo'
+          );
 
           // 2. Actualizar documento de invitación
-          await updateDoc(doc(db, `${getEventBasePath()}/directInvites`, inv.id), {
-            emailSent: true,
-            emailSentAt: serverTimestamp(),
-            lastEmailTo: targetEmail,
-            emailSendCount: (inv.emailSendCount || 0) + 1
-          });
+          try {
+            await withTimeout(
+              updateDoc(doc(db, `${getEventBasePath()}/directInvites`, inv.id), {
+                emailSent: true,
+                emailSentAt: serverTimestamp(),
+                lastEmailTo: targetEmail,
+                emailSendCount: (inv.emailSendCount || 0) + 1
+              }),
+              8000,
+              'Tiempo de espera agotado al registrar invitación'
+            );
+          } catch (updErr) {
+            console.warn('Actualización de documento tardía:', updErr);
+          }
 
           sentCount++;
         } catch (err) {
@@ -3785,7 +3834,11 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
                                 {/* Enviar Correo */}
                                 <button
-                                  onClick={() => setEmailModal({ open: true, invite: { ...inv, targetEmail: inv.email || '' } })}
+                                  onClick={() => {
+                                    setEmailError('');
+                                    setEmailSuccess('');
+                                    setEmailModal({ open: true, invite: { ...inv, targetEmail: inv.email || '' } });
+                                  }}
                                   title={inv.emailSentAt ? `Reenviar correo oficial (ya enviado ${inv.emailSendCount || 1} vez)` : "Enviar correo de invitación con banner y enlace"}
                                   className={`p-2 rounded-lg transition-colors cursor-pointer border ${
                                     inv.emailSentAt 
@@ -5275,7 +5328,14 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                 <Mail size={20} />
                 <h3 className="font-bold text-base">Enviar Invitación por Correo</h3>
               </div>
-              <button onClick={() => setEmailModal({ open: false, invite: null })} className="p-1 hover:bg-white/20 rounded-full text-white cursor-pointer">
+              <button 
+                onClick={() => {
+                  setEmailModal({ open: false, invite: null });
+                  setEmailError('');
+                  setEmailSuccess('');
+                }} 
+                className="p-1 hover:bg-white/20 rounded-full text-white cursor-pointer"
+              >
                 <X size={18} />
               </button>
             </div>
@@ -5293,6 +5353,16 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                     <strong>{emailModal.invite?.sponsorName || 'Expo Ferre 2026'}</strong>.
                   </p>
 
+                  {emailError && (
+                    <div className="bg-red-50 border border-red-200 text-red-800 p-3.5 rounded-xl text-xs flex items-start gap-2">
+                      <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <strong className="block font-semibold">Error al enviar:</strong>
+                        <span>{emailError}</span>
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-xs font-bold text-on-surface uppercase tracking-wider mb-1">
                       Correo Electrónico del Destinatario <span className="text-red-500">*</span>
@@ -5302,10 +5372,13 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                       required
                       placeholder="invitado@empresa.com"
                       value={emailModal.invite?.targetEmail || ''}
-                      onChange={(e) => setEmailModal(prev => ({
-                        ...prev,
-                        invite: { ...prev.invite, targetEmail: e.target.value }
-                      }))}
+                      onChange={(e) => {
+                        setEmailError('');
+                        setEmailModal(prev => ({
+                          ...prev,
+                          invite: { ...prev.invite, targetEmail: e.target.value }
+                        }));
+                      }}
                       className="w-full px-4 py-2.5 bg-surface border border-outline-variant rounded-xl text-sm outline-none focus:border-primary"
                     />
                   </div>
@@ -5313,7 +5386,11 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                   <div className="pt-2 flex gap-3">
                     <button
                       type="button"
-                      onClick={() => setEmailModal({ open: false, invite: null })}
+                      onClick={() => {
+                        setEmailModal({ open: false, invite: null });
+                        setEmailError('');
+                        setEmailSuccess('');
+                      }}
                       className="flex-1 py-2.5 px-4 bg-surface hover:bg-surface-variant text-on-surface font-bold rounded-xl text-xs transition-colors cursor-pointer"
                     >
                       Cancelar
