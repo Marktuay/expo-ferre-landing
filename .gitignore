@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 public/tallerexpoferre.mp4
 backups/
+public/diamante/*.pdf
