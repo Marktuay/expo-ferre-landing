@@ -51,12 +51,20 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
       const results = [];
       snapshot.forEach((doc) => {
         const d = doc.data();
+
+        // Excluir invitaciones especiales y directas para no confundir al personal de registro
+        // (se controlan exclusivamente en el módulo de Invitaciones Directas)
+        const isSpecialInvite = d.isDirectInvite || d.type === 'direct_invite' || d.source === 'Invitación Directa' || Boolean(d.inviteToken);
+        if (isSpecialInvite) {
+          return;
+        }
+
         const fullName = d.name || (d.nombre ? `${d.nombre} ${d.apellido || ''}`.trim() : '') || '';
         const companyName = d.company || d.empresa || '';
         const emailAddr = d.email || d.correo || '';
         const phoneNum = d.phone || d.telefono || d.celular || '';
         const employeesVal = d.employees || d.empleados || (d.personalEmpresa ? `${d.personalEmpresa} pers.` : '');
-        const positionVal = d.position || d.cargo || d.puesto || (d.isDirectInvite ? 'Invitado Especial' : '');
+        const positionVal = d.position || d.cargo || d.puesto || '';
 
         results.push({
           id: doc.id,
@@ -467,7 +475,7 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
           <div className="flex-shrink-0">
             <h1 className="text-2xl md:text-3xl font-black text-slate-900">Preregistros</h1>
-            <p className="text-sm text-slate-500 mt-0.5">Personas que han completado el formulario de preregistro y pases directos.</p>
+            <p className="text-sm text-slate-500 mt-0.5">Listado de personas registradas a través del formulario general.</p>
             
             {!loading && (
               <div className="flex flex-wrap gap-3 mt-4">

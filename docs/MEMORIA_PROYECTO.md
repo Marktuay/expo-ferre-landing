@@ -95,12 +95,16 @@
 
 ---
 
-## 10. 🛠️ Despliegue en Producción (Google Cloud VM)
+## 11. 🛡️ Separación de Preregistros e Invitaciones Especiales (12 Octubre, 2026)
+- **Aislamiento en Módulo de Preregistros:**
+  - Se excluyeron los registros originados por invitaciones directas/especiales (`isDirectInvite`, `type: 'direct_invite'`, `source: 'Invitación Directa'`, `inviteToken`) de la vista del módulo `AdminPreRegistrations`.
+  - **Objetivo:** Evitar que el personal de registro en recepción confunda o mezcle a los visitantes generales con los invitados VIP de los patrocinadores.
+  - El control, estadísticas y seguimiento de los invitados de patrocinadores se mantiene de forma 100% independiente en el módulo de **Invitaciones Directas**.
+
+---
+
+## 12. 🛠️ Despliegue en Producción (Google Cloud VM)
 - Rama activa: `main` en `https://github.com/Marktuay/expo-ferre-landing.git`
-- Últimos commits desplegados / sincronizados:
-  - `524fa9a`: Corrección de modal de banner y mapeo de patrocinadores.
-  - `d8fa35b`: Actualización de URLs de banners en correos directos.
-  - `1e46ad9` & `b43d125`: Corrección de cierre de modal individual de correo y enlaces de cabecera.
 - Comando para sincronizar en servidor:
   ```bash
   git pull origin main
