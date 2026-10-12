@@ -1411,3 +1411,47 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     - **Preregistros / Puerta** (`AdminPreRegistrations.jsx`): Impresión de credenciales para nuevos registros en puerta y existentes.
     - **Invitados Especiales**, **Conferencistas**, **Patrocinadores** y **Modal de QR**.
 
+---
+
+## 📅 Resumen de Avances y Cambios de la Sesión (12 de Octubre de 2026)
+
+### 🛡️ Aislamiento de Preregistros e Invitaciones Especiales (`AdminPreRegistrations.jsx`)
+- Se excluyeron los registros originados por enlaces directos/especiales (`isDirectInvite`, `type: 'direct_invite'`, `source: 'Invitación Directa'`, `inviteToken`) de la tabla de preregistros generales.
+- **Objetivo:** Evitar mezclar a los asistentes generales de la web con los invitados VIP de los patrocinadores en el puesto de recepción, garantizando que el personal de puerta trabaje con claridad y orden.
+- El módulo de **Invitaciones Directas** gestiona el ciclo completo de los patrocinadores de manera independiente.
+
+### 🧹 Auditoría Integral y Depuración de Cruces Inter-Patrocinadores (`directInvites`)
+- Se realizó una auditoría minuciosa sobre los 20 cruces inter-patrocinadores detectados en la base de datos de invitaciones directas.
+- **Criterio de Resolución Aplicado:**
+  1. **Prioridad Absoluta a Registrados (`status: 'used'`):** Todo contacto que ya completó su registro se conservó intacto en el patrocinador donde se acreditó (ej. Hilda Murillo en SINSA, Andrea Briones en CEMEX, Julio y Digna María en Balladares).
+  2. **Resolución de Pendientes por Lote Original:** Para invitados pendientes duplicados, se conservó en la marca que los cargó en el lote inicial/más antiguo y se depuró el registro duplicado posterior.
+- **Casos Depurados:**
+  - *Balladares vs CEMEX:* Eliminados duplicados pendientes de Andrea Briones y Carlos Arturo en Balladares; eliminados duplicados pendientes de Julio y Digna María en CEMEX.
+  - *Noelito vs Balladares:* Denis conservado en Balladares; duplicado en Noelito eliminado.
+  - *Plycem vs Balladares:* José Adán conservado en Balladares; duplicado en Plycem eliminado.
+  - *Fernández Sera vs Balladares (Caso 19):* José David conservado en Fernández Sera (`inv_muj0zb7e_zedktwq4`); duplicado en Balladares eliminado.
+  - *Indenicsa vs COMASA (Caso 20):* Víctor Hugo conservado en Indenicsa (`inv_mux8nyeh_xdcf8frv`); duplicado en COMASA eliminado.
+  - *SICSA:* Eliminación de pase duplicado pendiente interno (Clayton Ortiz).
+
+### 🏢 Unificación Oficial de COMASA en SINSA (`scripts/unify_comasa_into_sinsa.mjs`)
+- **Antecedente:** COMASA (Compañía Mayorista, S.A.) es la división de distribución mayorista de SINSA y no posee stands propios en el plano, mientras que SINSA cuenta con los Stands Diamante 1, 2, 3 y 4.
+- **Migración Exitosa:**
+  - Las 22 invitaciones restantes de COMASA fueron migradas formalmente a SINSA (`sponsorId: 'sinsa'`, `sponsorName: 'SINSA'`, asignación de Stands Diamante 1, 2, 3, 4 y banner co-brandeado).
+  - Se conservó la trazabilidad interna: `division: 'COMASA (Mayorista)'`.
+  - **Estado Final:** COMASA = 0 invitaciones; SINSA = **36 invitaciones totales consolidadas**.
+
+### 🛡️ Filtro Inteligente Anti-Duplicados en Carga de Listas (`AdminDirectInvites.jsx`)
+- **Problema Abordado:** Al subir listas independientes de patrocinadores vía Excel, existía riesgo de cargar contactos ya registrados previamente o repetidos en el archivo.
+- **Solución Implementada:**
+  - **Validación Cruzada Multicapa (`findDuplicateMatch`):**
+    1. **Contra Invitaciones Existentes (`directInvites`):** Cruza contra las 500+ invitaciones de todas las marcas y general.
+    2. **Contra Asistentes Registrados (`guests`):** Cruza contra la base de asistentes ya registrados con credencial oficial en ExpoFerre 2026.
+    3. **Intra-lote (Mismo Archivo):** Detecta y filtra filas repetidas dentro del mismo archivo Excel que se está importando.
+  - **Normalización Exhaustiva:** Teléfonos normalizados a los últimos 8 dígitos (Nicaragua `+505`), correos electrónicos en minúsculas y nombres + razones sociales normalizadas sin tildes ni palabras de relleno (`Ferretería`, `Distribuidora`, `Comercial`, `Materiales de Construcción`, `S.A.`).
+  - **Diagnóstico y Modal de Carga:**
+    - Diagnóstico visual en tiempo real: badge `+ Nuevo` vs `🛡️ Omitido` mostrando con quién y por qué choca (*En: SINSA*, *En: Balladares*, o *Repetido en archivo*).
+    - Checkbox de protección activo por defecto para garantizar que la base de datos nunca se sobrecargue con duplicados.
+    - Prevención preventiva agregada también en la creación manual de invitaciones individuales.
+- Compilación verificada exitosamente (`npm run build`) en 2.44s con 0 errores.
+
+

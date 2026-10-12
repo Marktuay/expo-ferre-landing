@@ -103,7 +103,54 @@
 
 ---
 
-## 12. 🛠️ Despliegue en Producción (Google Cloud VM)
+## 12. 🧹 Auditoría Integral de Cruces Inter-Patrocinadores y Depuración (12 Octubre, 2026)
+- **Auditoría de Cruces en `directInvites`:**
+  - Se identificaron y auditaron 20 casos de duplicados cruzados entre diferentes marcas patrocinadoras.
+  - **Regla Operativa Aplicada:**
+    1. **Respeto a Registrados (`status: 'used'`):** El contacto se mantiene de forma inalterable en el patrocinador donde ya completó su acreditación y tiene su gafete emitido.
+    2. **Depuración de Pendientes (`status: 'pending'`):** En cruces donde el contacto aún no se ha registrado, se conservó en la marca que lo cargó primero y se eliminó el pase duplicado posterior para evitar confusión y pases duplicados.
+  - **Casos Resueltos:**
+    - *Balladares vs CEMEX:* Andrea Briones conservada en CEMEX (registrada); Julio y Digna María conservados en Balladares (registrados); Carlos Arturo conservado en CEMEX.
+    - *Noelito vs Balladares:* Denis conservado en Balladares; duplicado en Noelito eliminado.
+    - *Plycem vs Balladares:* José Adán conservado en Balladares; duplicado en Plycem eliminado.
+    - *Fernández Sera vs Balladares (Caso 19):* José David conservado en Fernández Sera (Ferretería González Sevilla); duplicado en Balladares eliminado.
+    - *Indenicsa vs COMASA (Caso 20):* Víctor Hugo conservado en Indenicsa (Ferretería La Grapa); duplicado en COMASA eliminado.
+    - *SICSA:* Eliminación de pase duplicado pendiente interno (Clayton Ortiz).
+
+---
+
+## 13. 🏢 Unificación Oficial de COMASA en SINSA (12 Octubre, 2026)
+- **Contexto Operativo:**
+  - COMASA (Compañía Mayorista, S.A.) es la división mayorista de distribución perteneciente a **SINSA**.
+  - No cuenta con stands físicos individuales separados, mientras que SINSA cuenta con los Stands Diamante 1, 2, 3 y 4.
+- **Migración Ejecutada en Base de Datos:**
+  - Todas las 22 invitaciones restantes de COMASA se unificaron dentro de SINSA (`sponsorId: 'sinsa'`, `sponsorName: 'SINSA'`, asignación de Stands Diamante 1, 2, 3, 4 y banner oficial).
+  - Se preservó el atributo de trazabilidad: `division: 'COMASA (Mayorista)'`.
+  - **Conteo Final:**
+    - **COMASA:** 0 invitaciones.
+    - **SINSA:** **36 invitaciones totales** consolidadas.
+
+---
+
+## 14. 🛡️ Filtro Inteligente Anti-Duplicados en Carga de Listas (12 Octubre, 2026)
+- **Motor de Deduplicación y Validación en `AdminDirectInvites.jsx`:**
+  - Implementación de un motor proactivo que previene cargar contactos duplicados a Firestore al subir archivos Excel independientes.
+  - **Detección Cruzada Multicapa:**
+    1. **Contra Invitaciones Existentes (`directInvites`):** Cruza contra las 500+ invitaciones de todas las marcas y la lista general.
+    2. **Contra Asistentes Registrados (`guests`):** Cruza contra la base de asistentes que ya tienen gafete oficial emitido en ExpoFerre 2026.
+    3. **Intra-lote (Mismo Archivo Excel):** Si el mismo archivo Excel repite una persona en diferentes filas, detecta y omite las repeticiones posteriores.
+  - **Normalización Robusta:**
+    - Teléfonos: normalizados a los últimos 8 dígitos (formato estándar de Nicaragua y prefijo `+505`).
+    - Correos electrónicos: normalizados en minúsculas y sin espacios.
+    - Nombres y Empresas: normalizados eliminando tildes, símbolos y palabras comunes de relleno (`Ferretería`, `Distribuidora`, `Comercial`, `Materiales de Construcción`, `S.A.`).
+  - **Diagnóstico Visual en Modal de Carga:**
+    - Identificación inmediata: badge `+ Nuevo` vs `🛡️ Omitido / ⚠️ Ya existe` indicando el motivo exacto y la lista con la que choca.
+    - Checkbox de protección activado por defecto para garantizar la integridad de la base de datos.
+    - Alerta de seguridad preventiva agregada también en la creación manual de invitaciones individuales.
+
+---
+
+## 15. 🛠️ Despliegue en Producción (Google Cloud VM)
 - Rama activa: `main` en `https://github.com/Marktuay/expo-ferre-landing.git`
 - Comando para sincronizar en servidor:
   ```bash

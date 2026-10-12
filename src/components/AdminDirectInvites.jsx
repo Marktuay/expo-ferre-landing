@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { collection, query, onSnapshot, doc, setDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, auth, storage } from '../firebase';
@@ -62,6 +62,8 @@ import {
 
 export default function AdminDirectInvites({ onBack, adminUser }) {
   const [invites, setInvites] = useState([]);
+  const [registeredGuests, setRegisteredGuests] = useState([]);
+  const [approvedPreregistrations, setApprovedPreregistrations] = useState([]);
   const [standsData, setStandsData] = useState([]);
   const [sponsorsMap, setSponsorsMap] = useState({});
   const [sponsorSettings, setSponsorSettings] = useState({});
@@ -171,6 +173,31 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [bulkWatiResult, setBulkWatiResult] = useState(null);
   const cancelBulkWatiRef = useRef(false);
 
+  // Modal de Recordatorios por Correo para TODOS LOS REGISTRADOS (Jueves, Viernes y Día del Evento)
+  const [regReminderModal, setRegReminderModal] = useState({
+    open: false,
+    dayCampaign: 'jueves', // 'jueves' | 'viernes' | 'sabado'
+    audienceType: 'all_registered', // 'all_registered' | 'direct_invites_only' | 'preregistrations_only'
+    skipAlreadySentToday: true,
+    showPreview: false,
+    testEmail: ''
+  });
+  const [isSendingRegReminder, setIsSendingRegReminder] = useState(false);
+  const [isSendingTestReminder, setIsSendingTestReminder] = useState(false);
+  const [testReminderFeedback, setTestReminderFeedback] = useState('');
+  const [regReminderProgress, setRegReminderProgress] = useState({ current: 0, total: 0, failed: 0, stopped: false });
+  const [regReminderResult, setRegReminderResult] = useState(null);
+  const cancelRegReminderRef = useRef(false);
+
+  // Configuración de Programación Automática (Jueves 15, Viernes 16 y Sábado 17 Oct)
+  const [reminderScheduleConfig, setReminderScheduleConfig] = useState({
+    enabled: true,
+    jueves: { date: '2026-10-15', time: '09:00', completed: false },
+    viernes: { date: '2026-10-16', time: '09:00', completed: false },
+    sabado: { date: '2026-10-17', time: '06:30', completed: false }
+  });
+  const [savingScheduleConfig, setSavingScheduleConfig] = useState(false);
+
   // Consultar estado de plantilla de Wati al montar
   useEffect(() => {
     checkTemplateStatus().then(info => {
@@ -218,6 +245,92 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
 
     return () => unsubscribe();
   }, []);
+
+  // 1.1 Escuchar asistentes generales ya registrados (guests) para validación cruzada y deduplicación
+  useEffect(() => {
+    const qGuests = query(collection(db, `${getEventBasePath()}/guests`));
+    const unsubscribe = onSnapshot(qGuests, (snapshot) => {
+      const results = [];
+      snapshot.forEach((doc) => {
+        results.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      setRegisteredGuests(results);
+    }, (err) => {
+      console.warn("Error al cargar lista de asistentes generales para deduplicación:", err);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // 1.2 Escuchar preregistros generales aprobados (preregistrations) para recordatorios consolidados a registrados
+  useEffect(() => {
+    const qPre = query(collection(db, `${getEventBasePath()}/preregistrations`));
+    const unsubscribe = onSnapshot(qPre, (snapshot) => {
+      const results = [];
+      snapshot.forEach((doc) => {
+        const d = doc.data();
+        if (d.status === 'approved') {
+          results.push({
+            id: doc.id,
+            ...d
+          });
+        }
+      });
+      setApprovedPreregistrations(results);
+    }, (err) => {
+      console.warn("Error al cargar preregistros aprobados:", err);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // 1.3 Escuchar y auto-inicializar programación automática de los 3 recordatorios en Firestore
+  useEffect(() => {
+    const schedRef = doc(db, `${getEventBasePath()}/settings`, 'emailRemindersSchedule');
+    const unsubscribe = onSnapshot(schedRef, async (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setReminderScheduleConfig({
+          enabled: data.enabled !== false,
+          jueves: data.jueves || { date: '2026-10-15', time: '09:00', completed: false },
+          viernes: data.viernes || { date: '2026-10-16', time: '09:00', completed: false },
+          sabado: data.sabado || { date: '2026-10-17', time: '06:30', completed: false }
+        });
+      } else {
+        const defaultSchedule = {
+          enabled: true,
+          jueves: { date: '2026-10-15', time: '09:00', completed: false },
+          viernes: { date: '2026-10-16', time: '09:00', completed: false },
+          sabado: { date: '2026-10-17', time: '06:30', completed: false },
+          updatedAt: serverTimestamp()
+        };
+        try {
+          await setDoc(schedRef, defaultSchedule, { merge: true });
+        } catch (err) {
+          console.warn('No se pudo inicializar programación automática:', err);
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleUpdateScheduleConfig = async (newConfig) => {
+    setSavingScheduleConfig(true);
+    try {
+      const schedRef = doc(db, `${getEventBasePath()}/settings`, 'emailRemindersSchedule');
+      await setDoc(schedRef, {
+        ...newConfig,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (err) {
+      console.error('Error guardando horario programado:', err);
+    } finally {
+      setSavingScheduleConfig(false);
+    }
+  };
 
   // 2. Escuchar stands para extraer patrocinadores oficiales
   useEffect(() => {
@@ -327,33 +440,171 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
 
   const cleanPhoneDigits = (str) => String(str || '').replace(/\D/g, '');
 
-  const isExistingInvite = (candidate, existingInvites) => {
-    if (!existingInvites || existingInvites.length === 0 || !candidate) return null;
+  const normalizeText = (str) => {
+    if (!str) return '';
+    return String(str)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const cleanCompanyNoise = (str) => {
+    const norm = normalizeText(str);
+    return norm
+      .replace(/\b(ferreteria|ferreterias|comercial|distribuidora|materiales|construccion|tienda|taller|servicios|inversiones|sa|s\.a|de|cv|c\.v|la|el|los|las|y)\b/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const matchPhones = (p1, p2) => {
+    const d1 = cleanPhoneDigits(p1);
+    const d2 = cleanPhoneDigits(p2);
+    if (!d1 || !d2) return false;
+    // En Nicaragua los números son de 8 dígitos. Si tienen >= 8 dígitos, comparar los últimos 8 dígitos
+    if (d1.length >= 8 && d2.length >= 8) {
+      return d1.slice(-8) === d2.slice(-8);
+    }
+    if (d1.length >= 7 && d2.length >= 7) {
+      return d1 === d2 || d1.endsWith(d2) || d2.endsWith(d1);
+    }
+    return false;
+  };
+
+  const findDuplicateMatch = (candidate, existingInvites = [], registeredGsts = [], precedingCandidates = []) => {
+    if (!candidate) return null;
+
     const candEmail = candidate.email ? candidate.email.trim().toLowerCase() : '';
     const candPhoneDigits = candidate.telefono ? cleanPhoneDigits(candidate.telefono) : '';
-    const candName = candidate.nombre ? candidate.nombre.trim().toLowerCase() : '';
-    const candCompany = candidate.empresa ? candidate.empresa.trim().toLowerCase() : '';
+    const candNormName = normalizeText(candidate.nombre);
+    const candCleanCompany = cleanCompanyNoise(candidate.empresa);
 
-    return existingInvites.find(inv => {
-      // 1. Coincidencia por correo válido
-      if (candEmail && inv.email && inv.email.trim().toLowerCase() === candEmail) {
-        return true;
+    // 1. Validar contra filas previas del MISMO archivo Excel (Intra-batch duplicate)
+    if (precedingCandidates && precedingCandidates.length > 0) {
+      const intraMatch = precedingCandidates.find(prev => {
+        if (candEmail && prev.email && prev.email.trim().toLowerCase() === candEmail) return true;
+        if (candPhoneDigits.length >= 7 && prev.telefono && matchPhones(candidate.telefono, prev.telefono)) return true;
+        if (candNormName && candCleanCompany && prev.nombre && prev.empresa) {
+          const prevNormName = normalizeText(prev.nombre);
+          const prevCleanCompany = cleanCompanyNoise(prev.empresa);
+          if (candNormName === prevNormName && (candCleanCompany === prevCleanCompany || candCleanCompany.includes(prevCleanCompany) || prevCleanCompany.includes(candCleanCompany))) {
+            return true;
+          }
+        }
+        return false;
+      });
+
+      if (intraMatch) {
+        return {
+          type: 'intra_batch',
+          reason: 'Repetido en este archivo Excel',
+          matchedValue: intraMatch.nombre || intraMatch.email || intraMatch.telefono,
+          sponsorName: 'Mismo Archivo',
+          status: 'Duplicado en Excel'
+        };
       }
-      // 2. Coincidencia por teléfono (si tiene al menos 7 dígitos)
-      if (candPhoneDigits.length >= 7 && inv.telefono) {
-        const invPhoneDigits = cleanPhoneDigits(inv.telefono);
-        if (invPhoneDigits.length >= 7 && (invPhoneDigits === candPhoneDigits || invPhoneDigits.endsWith(candPhoneDigits) || candPhoneDigits.endsWith(invPhoneDigits))) {
-          return true;
+    }
+
+    // 2. Validar contra base de datos de invitaciones directas (directInvites de todos los patrocinadores)
+    if (existingInvites && existingInvites.length > 0) {
+      for (const inv of existingInvites) {
+        // Coincidencia de correo electrónico
+        if (candEmail && inv.email && inv.email.trim().toLowerCase() === candEmail) {
+          return {
+            type: 'sponsor_invite',
+            reason: 'Mismo correo',
+            matchedValue: inv.email,
+            sponsorName: inv.sponsorName || 'Invitación General',
+            status: inv.status === 'used' ? 'Ya Registrado' : 'Invitación Pendiente',
+            targetName: inv.nombre,
+            targetCompany: inv.empresa
+          };
+        }
+
+        // Coincidencia de teléfono (8 dígitos Nicaragua o internacional)
+        if (candPhoneDigits.length >= 7 && inv.telefono && matchPhones(candidate.telefono, inv.telefono)) {
+          return {
+            type: 'sponsor_invite',
+            reason: 'Mismo teléfono',
+            matchedValue: inv.telefono,
+            sponsorName: inv.sponsorName || 'Invitación General',
+            status: inv.status === 'used' ? 'Ya Registrado' : 'Invitación Pendiente',
+            targetName: inv.nombre,
+            targetCompany: inv.empresa
+          };
+        }
+
+        // Coincidencia por Nombre + Empresa (normalizado sin tildes ni palabras de ruido)
+        if (candNormName && candCleanCompany && inv.nombre && inv.empresa) {
+          const invNormName = normalizeText(inv.nombre);
+          const invCleanCompany = cleanCompanyNoise(inv.empresa);
+          if (candNormName === invNormName && (candCleanCompany === invCleanCompany || candCleanCompany.includes(invCleanCompany) || invCleanCompany.includes(candCleanCompany))) {
+            return {
+              type: 'sponsor_invite',
+              reason: 'Mismo nombre y empresa',
+              matchedValue: `${inv.nombre} (${inv.empresa})`,
+              sponsorName: inv.sponsorName || 'Invitación General',
+              status: inv.status === 'used' ? 'Ya Registrado' : 'Invitación Pendiente',
+              targetName: inv.nombre,
+              targetCompany: inv.empresa
+            };
+          }
         }
       }
-      // 3. Coincidencia por Nombre + Empresa exactos
-      if (candName && candCompany && inv.nombre && inv.empresa) {
-        if (inv.nombre.trim().toLowerCase() === candName && inv.empresa.trim().toLowerCase() === candCompany) {
-          return true;
+    }
+
+    // 3. Validar contra base de asistentes registrados en el evento (guests oficiales con gafete)
+    if (registeredGsts && registeredGsts.length > 0) {
+      for (const gst of registeredGsts) {
+        if (candEmail && gst.email && gst.email.trim().toLowerCase() === candEmail) {
+          return {
+            type: 'registered_guest',
+            reason: 'Correo ya registrado en el evento',
+            matchedValue: gst.email,
+            sponsorName: gst.sponsorId ? (sponsorsMap[gst.sponsorId] || gst.sponsorId) : 'Registro General',
+            status: 'Asistente Registrado (Gafete Oficial)',
+            targetName: gst.nombre,
+            targetCompany: gst.empresa
+          };
+        }
+
+        if (candPhoneDigits.length >= 7 && gst.telefono && matchPhones(candidate.telefono, gst.telefono)) {
+          return {
+            type: 'registered_guest',
+            reason: 'Teléfono ya registrado en el evento',
+            matchedValue: gst.telefono,
+            sponsorName: gst.sponsorId ? (sponsorsMap[gst.sponsorId] || gst.sponsorId) : 'Registro General',
+            status: 'Asistente Registrado (Gafete Oficial)',
+            targetName: gst.nombre,
+            targetCompany: gst.empresa
+          };
+        }
+
+        if (candNormName && candCleanCompany && gst.nombre && gst.empresa) {
+          const gstNormName = normalizeText(gst.nombre);
+          const gstCleanCompany = cleanCompanyNoise(gst.empresa);
+          if (candNormName === gstNormName && (candCleanCompany === gstCleanCompany || candCleanCompany.includes(gstCleanCompany) || gstCleanCompany.includes(candCleanCompany))) {
+            return {
+              type: 'registered_guest',
+              reason: 'Persona y empresa ya registradas',
+              matchedValue: `${gst.nombre} (${gst.empresa})`,
+              sponsorName: gst.sponsorId ? (sponsorsMap[gst.sponsorId] || gst.sponsorId) : 'Registro General',
+              status: 'Asistente Registrado (Gafete Oficial)',
+              targetName: gst.nombre,
+              targetCompany: gst.empresa
+            };
+          }
         }
       }
-      return false;
-    }) || null;
+    }
+
+    return null;
+  };
+
+  const isExistingInvite = (candidate, existingInvites, registeredGsts = registeredGuests, precedingCandidates = []) => {
+    return findDuplicateMatch(candidate, existingInvites, registeredGsts, precedingCandidates);
   };
 
   const buildCorporateSpeech = (sponsorName, stands) => {
@@ -684,6 +935,26 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     setIsCreating(true);
 
     try {
+      // Validación previa contra duplicados
+      const candidateCheck = {
+        nombre: guestName.trim(),
+        empresa: guestCompany.trim(),
+        email: guestEmail.trim().toLowerCase(),
+        telefono: guestPhone.trim()
+      };
+      const existingMatch = findDuplicateMatch(candidateCheck, invites, registeredGuests);
+      if (existingMatch) {
+        const confirmMsg = `⚠️ Este contacto ya existe en el sistema:\n\n` +
+          `• Coincidencia: ${existingMatch.reason} (${existingMatch.matchedValue || ''})\n` +
+          `• Lista / Patrocinador actual: ${existingMatch.sponsorName}\n` +
+          `• Estado: ${existingMatch.status}\n\n` +
+          `¿Deseas cancelar la creación para no duplicar contactos? Presiona Cancelar para cancelar, o Aceptar para forzar la creación.`;
+        if (!window.confirm(confirmMsg)) {
+          setIsCreating(false);
+          return;
+        }
+      }
+
       const tokenId = generateUniqueToken();
       const inviteRef = doc(db, `${getEventBasePath()}/directInvites`, tokenId);
       const isGen = !guestSponsor || guestSponsor === 'general';
@@ -1193,19 +1464,38 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     setTargetedUploadSponsor(null);
   };
 
+  // Evaluación proactiva de duplicados para el lote cargado:
+  // 1) Contra directInvites (todos los patrocinadores)
+  // 2) Contra guests (asistentes ya registrados con gafete en ExpoFerre)
+  // 3) Intra-batch (contactos repetidos dentro del mismo archivo Excel)
+  const evaluatedBulkData = useMemo(() => {
+    if (!bulkData || bulkData.length === 0) return [];
+    const preceding = [];
+    return bulkData.map(item => {
+      const match = findDuplicateMatch(item, invites, registeredGuests, preceding);
+      if (!match) {
+        preceding.push(item);
+      }
+      return {
+        ...item,
+        duplicateInfo: match
+      };
+    });
+  }, [bulkData, invites, registeredGuests, sponsorsMap]);
+
   // Guardar Lote de Invitaciones Directas en Firestore con protección inteligente contra duplicados
   const handleConfirmBulkUpload = async () => {
-    if (!bulkData || bulkData.length === 0) return;
+    if (!evaluatedBulkData || evaluatedBulkData.length === 0) return;
 
     const filteredToInsert = skipBulkDuplicates
-      ? bulkData.filter(item => !isExistingInvite(item, invites))
-      : bulkData;
+      ? evaluatedBulkData.filter(item => !item.duplicateInfo)
+      : evaluatedBulkData.filter(item => item.duplicateInfo?.type !== 'intra_batch');
 
     const totalToInsert = filteredToInsert.length;
-    const totalSkipped = bulkData.length - totalToInsert;
+    const totalSkipped = evaluatedBulkData.length - totalToInsert;
 
     if (totalToInsert === 0) {
-      alert(`Todos los ${bulkData.length} contactos del archivo ya están registrados previamente en el sistema. No se realizaron cambios ni duplicaciones.`);
+      alert(`Todos los ${evaluatedBulkData.length} contactos del archivo ya están registrados previamente o repetidos en el archivo. No se realizaron cambios ni duplicaciones.`);
       setShowBulkModal(false);
       setBulkData([]);
       return;
@@ -1803,6 +2093,401 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       setIsBulkSendingEmail(false);
     }
   };
+
+  // -------------------------------------------------------------
+  // RECORDATORIOS POR CORREO PARA REGISTRADOS (JUEVES / VIERNES / DÍA DEL EVENTO)
+  // -------------------------------------------------------------
+
+  const consolidatedRegisteredTargets = useMemo(() => {
+    const emailMap = new Map();
+
+    // 1. Invitados Directos ya Registrados (status === 'used')
+    invites.forEach(inv => {
+      if (inv.status !== 'used') return;
+      const rawEmail = (inv.registeredEmail || inv.email || '').trim().toLowerCase();
+      if (!isValidEmailAddress(rawEmail)) return;
+      if (emailMap.has(rawEmail)) return;
+
+      emailMap.set(rawEmail, {
+        email: rawEmail,
+        nombre: inv.registeredName || inv.nombre || 'Estimado(a) Participante',
+        empresa: inv.registeredCompany || inv.empresa || '',
+        qrId: inv.registeredAttendeeId || inv.id,
+        inviteToken: inv.token || inv.id,
+        sponsorName: inv.sponsorName || null,
+        sponsorStands: inv.sponsorStands || null,
+        sourceType: 'direct_invite',
+        sourceLabel: inv.sponsorName ? `Invitado ${inv.sponsorName}` : 'Invitación General',
+        collectionName: 'directInvites',
+        docId: inv.id,
+        reminderJuevesSent: !!inv.reminderJuevesSent,
+        reminderViernesSent: !!inv.reminderViernesSent,
+        reminderSabadoSent: !!inv.reminderSabadoSent
+      });
+    });
+
+    // 2. Preregistros Generales Aprobados (status === 'approved')
+    approvedPreregistrations.forEach(reg => {
+      const rawEmail = (reg.email || reg.correo || '').trim().toLowerCase();
+      if (!isValidEmailAddress(rawEmail)) return;
+      if (emailMap.has(rawEmail)) return;
+
+      const fullName = reg.name || [reg.nombre, reg.apellido].filter(Boolean).join(' ') || 'Estimado(a) Participante';
+      emailMap.set(rawEmail, {
+        email: rawEmail,
+        nombre: fullName,
+        empresa: reg.company || reg.empresa || '',
+        qrId: reg.id,
+        inviteToken: reg.inviteToken || null,
+        sponsorName: reg.sponsorName || null,
+        sponsorStands: reg.sponsorStands || null,
+        sourceType: 'preregistration',
+        sourceLabel: 'Preregistro General',
+        collectionName: 'preregistrations',
+        docId: reg.id,
+        reminderJuevesSent: !!reg.reminderJuevesSent,
+        reminderViernesSent: !!reg.reminderViernesSent,
+        reminderSabadoSent: !!reg.reminderSabadoSent
+      });
+    });
+
+    // 3. Invitados VIP de Patrocinadores (guests)
+    registeredGuests.forEach(g => {
+      const rawEmail = (g.email || g.correo || '').trim().toLowerCase();
+      if (!isValidEmailAddress(rawEmail)) return;
+      if (emailMap.has(rawEmail)) return;
+
+      const spName = g.sponsorId ? (sponsorsMap[g.sponsorId] || g.sponsorId) : null;
+      emailMap.set(rawEmail, {
+        email: rawEmail,
+        nombre: g.nombre || g.name || 'Invitado VIP',
+        empresa: g.empresa || g.company || '',
+        qrId: g.id,
+        inviteToken: null,
+        sponsorName: spName,
+        sponsorStands: null,
+        sourceType: 'vip_guest',
+        sourceLabel: spName ? `VIP ${spName}` : 'Invitado VIP',
+        collectionName: 'guests',
+        docId: g.id,
+        reminderJuevesSent: !!g.reminderJuevesSent,
+        reminderViernesSent: !!g.reminderViernesSent,
+        reminderSabadoSent: !!g.reminderSabadoSent
+      });
+    });
+
+    return Array.from(emailMap.values());
+  }, [invites, approvedPreregistrations, registeredGuests, sponsorsMap]);
+
+  const buildRegisteredEventReminderEmail = (person, dayCampaign = 'jueves') => {
+    const guestName = person?.nombre ? person.nombre.trim() : 'Estimado(a) Participante';
+
+    const art = getSponsorArt(person?.sponsorName || 'general');
+    const headerImg = art.headerBannerUrl?.startsWith('http')
+      ? art.headerBannerUrl
+      : `https://expoferrenicaragua.com${art.headerBannerUrl || '/email-header.png'}`;
+    const footerImg = art.footerBannerUrl?.startsWith('http')
+      ? art.footerBannerUrl
+      : `https://expoferrenicaragua.com${art.footerBannerUrl || '/email-footer.png'}`;
+
+    let subject = '';
+    let innerBodyHtml = '';
+
+    if (dayCampaign === 'jueves') {
+      subject = '¡FALTAN SOLO 2 DÍAS PARA EXPO FERRE!';
+      innerBodyHtml = `
+        <h2 style="color: #0d47a1; margin-top: 0; font-size: 21px; font-weight: 900;">
+          ¡FALTAN SOLO 2 DÍAS PARA EXPO FERRE!
+        </h2>
+        <p style="font-size: 16px; font-weight: bold; color: #1e293b; margin-bottom: 14px;">
+          ¡Hola, ${guestName}!
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
+          ¡Gran punto de encuentro de la industria ferretera! Te esperan capacitaciones, contenido de valor para impulsar tu negocio, descuentos especiales, rifas y reconocimientos a quienes construyen historia en nuestro sector.
+        </p>
+
+        <div style="background-color: #eff6ff; border-left: 4px solid #0d47a1; padding: 16px; border-radius: 6px; margin: 20px 0; text-align: left;">
+          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">📅 Sábado 17 de octubre</p>
+          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">📍 Centro de Convenciones Crowne Plaza, Managua</p>
+          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">🕗 Inicio de actividades: 7:30am a 6:00pm</p>
+        </div>
+
+        <p style="font-size: 15px; line-height: 1.6; color: #1f2937; font-weight: bold;">
+          Tu registro ya está confirmado. ¡Prepará tus ganas de aprender, conectar y aprovechar cada oportunidad!
+        </p>
+
+        <p style="font-size: 16px; font-weight: bold; color: #0d47a1; margin-top: 24px;">
+          ¡Nos vemos muy pronto en EXPO FERRE 🚀...
+        </p>
+      `;
+    } else if (dayCampaign === 'viernes') {
+      subject = '🚨 ¡MAÑANA ES EL GRAN ENCUENTRO DE LA INDUSTRIA FERRETERA!';
+      innerBodyHtml = `
+        <h2 style="color: #dc2626; margin-top: 0; font-size: 20px; font-weight: 900;">
+          🚨 ¡MAÑANA ES EL GRAN ENCUENTRO DE LA INDUSTRIA FERRETERA!
+        </h2>
+        <p style="font-size: 16px; font-weight: bold; color: #1e293b; margin-bottom: 14px;">
+          ¡Hola, ${guestName}!
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
+          ¡Ya casi llega el día de EXPO FERRE! Estamos preparando una jornada especial para vos, llena de aprendizaje, conexiones y oportunidades para hacer crecer tu negocio.
+        </p>
+
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; margin: 18px 0; text-align: left;">
+          <p style="margin: 6px 0; font-size: 14px; color: #334155;">Capacitaciones y contenido de valor.</p>
+          <p style="margin: 6px 0; font-size: 14px; color: #334155;">Networking y nuevas oportunidades comerciales.</p>
+          <p style="margin: 6px 0; font-size: 14px; color: #334155;">Descuentos especiales.</p>
+          <p style="margin: 6px 0; font-size: 14px; color: #334155;">Rifas y sorpresas.</p>
+          <p style="margin: 6px 0; font-size: 14px; color: #334155;">Alimentación incluida.</p>
+          <p style="margin: 8px 0 4px 0; font-size: 14px; color: #b45309; font-weight: bold;">🏆 Reconocimientos a ferreterías que inspiran por su historia, trayectoria y visión de futuro.</p>
+        </div>
+
+        <div style="background-color: #eff6ff; border-left: 4px solid #0d47a1; padding: 16px; border-radius: 6px; margin: 20px 0; text-align: left;">
+          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">📅 Mañana, sábado 17 de octubre</p>
+          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">📍 Centro de Convenciones Crowne Plaza, Managua</p>
+          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">🕗 Inicio de actividades: 7:30 aM A 6:00PM</p>
+        </div>
+
+        <p style="font-size: 15px; line-height: 1.6; color: #1f2937; font-weight: bold;">
+          Tu registro ya está confirmado. Tené listo tu pase con código QR para agilizar tu ingreso.
+        </p>
+
+        <p style="font-size: 15px; font-weight: bold; color: #0d47a1; margin-top: 24px;">
+          ¡Preparáte para aprender, conectar y vivir una experiencia que impulsa tu negocio! ¡Mañana nos vemos en EXPO FERRE! 🎉
+        </p>
+      `;
+    } else {
+      subject = '¡Hoy es el gran día! ¡Hoy es EXPO FERRE Nicaragua 2026!';
+      innerBodyHtml = `
+        <h2 style="color: #0d47a1; margin-top: 0; font-size: 21px; font-weight: 900;">
+          ¡Hoy es el gran día! ¡Hoy es EXPO FERRE Nicaragua 2026!
+        </h2>
+        <p style="font-size: 16px; font-weight: bold; color: #1e293b; margin-bottom: 14px;">
+          ¡Hola, ${guestName}!
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #4b5563;">
+          ¡Llegó el momento! Hoy abrimos las puertas de la 1era edición de EXPO FERRE Nicaragua 2026, un encuentro creado para impulsar la industria ferretera de nuestro país.
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #1e293b; font-weight: bold;">
+          Te esperamos para vivir una jornada llena de:
+        </p>
+
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; margin: 18px 0; text-align: left;">
+          <p style="margin: 7px 0; font-size: 14px; color: #334155;">🎓 Capacitaciones y contenido de valor para fortalecer tus conocimientos.</p>
+          <p style="margin: 7px 0; font-size: 14px; color: #334155;">🤝 Conexiones comerciales con marcas, fabricantes y distribuidores.</p>
+          <p style="margin: 7px 0; font-size: 14px; color: #334155;">🏷️ Descuentos especiales para aprovechar nuevas oportunidades.</p>
+          <p style="margin: 7px 0; font-size: 14px; color: #334155;">🎁 Rifas y sorpresas durante el evento.</p>
+          <p style="margin: 7px 0; font-size: 14px; color: #334155;">🍽️ Alimentación incluida para que disfrutés de la jornada.</p>
+          <p style="margin: 8px 0 4px 0; font-size: 14px; color: #b45309; font-weight: bold;">🏆 Reconocimientos especiales a ferreterías que han dejado huella en nuestro sector.</p>
+        </div>
+
+        <div style="background-color: #eff6ff; border-left: 4px solid #0d47a1; padding: 16px; border-radius: 6px; margin: 20px 0; text-align: left;">
+          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">📅 HOY, sábado 17 de octubre</p>
+          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">📍 Centro de Convenciones Crowne Plaza, Managua</p>
+          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">🕗 Inicio de actividades: 7:30 a. m.</p>
+        </div>
+
+        <p style="font-size: 15px; line-height: 1.6; color: #1f2937; font-weight: bold;">
+          Tu registro ya está confirmado. Tené listo tu pase con código QR para ingresar.
+        </p>
+
+        <p style="font-size: 14px; line-height: 1.6; color: #4b5563; margin-top: 18px;">
+          Gracias por ser parte de este primer capítulo de EXPO FERRE. Hoy no solo nos reunimos: construimos relaciones, compartimos conocimientos y abrimos puertas a nuevas oportunidades de negocio.
+        </p>
+
+        <p style="font-size: 16px; font-weight: bold; color: #0d47a1; margin-top: 18px;">
+          ¡Te esperamos! 🚀
+        </p>
+        <p style="font-size: 18px; font-weight: 900; color: #f39200; margin-top: 8px;">
+          ¡BIENVENIDO/A A EXPO FERRE 2026!
+        </p>
+      `;
+    }
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
+        <img src="${headerImg}" alt="ExpoFerre 2026" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+        <div style="padding: 32px 24px;">
+          ${innerBodyHtml}
+        </div>
+        <img src="${footerImg}" alt="Marcas ExpoFerre" style="display: block; width: 100%; max-width: 600px; height: auto;"/>
+      </div>
+    `;
+
+    return { subject, html };
+  };
+
+  // Enviar correo de prueba de la campaña de recordatorio seleccionada
+  const handleSendTestRegReminder = async () => {
+    const targetEmail = (regReminderModal.testEmail || '').trim().toLowerCase();
+    if (!isValidEmailAddress(targetEmail)) {
+      setTestReminderFeedback({ type: 'error', message: '⚠️ Ingresa un correo electrónico válido para la prueba.' });
+      return;
+    }
+
+    setIsSendingTestReminder(true);
+    setTestReminderFeedback(null);
+    try {
+      const samplePerson = consolidatedRegisteredTargets[0] || {
+        nombre: 'Juan Pérez',
+        empresa: 'Ferretería Ejemplo',
+        sponsorName: null
+      };
+      const { subject, html } = buildRegisteredEventReminderEmail(samplePerson, regReminderModal.dayCampaign);
+
+      await withTimeout(
+        addDoc(collection(db, 'mail'), {
+          to: targetEmail,
+          message: {
+            subject: `[PRUEBA] ${subject}`,
+            html
+          }
+        }),
+        12000,
+        'Tiempo de espera agotado al enviar correo de prueba.'
+      );
+      setTestReminderFeedback({ type: 'success', message: `✅ ¡Correo de prueba (${regReminderModal.dayCampaign.toUpperCase()}) enviado a ${targetEmail}!` });
+    } catch (err) {
+      setTestReminderFeedback({ type: 'error', message: `❌ Error: ${err.message}` });
+    } finally {
+      setIsSendingTestReminder(false);
+    }
+  };
+
+  // Ejecutar despacho masivo de recordatorio a todos los registrados
+  const handleSendBulkRegReminder = async (targets) => {
+    if (!targets || targets.length === 0) return;
+
+    const dayKey = regReminderModal.dayCampaign;
+    const dayField = dayKey === 'jueves' ? 'reminderJuevesSent' : dayKey === 'viernes' ? 'reminderViernesSent' : 'reminderSabadoSent';
+    const dayTimestampField = `${dayField}At`;
+
+    setIsSendingRegReminder(true);
+    cancelRegReminderRef.current = false;
+    setRegReminderResult(null);
+    setRegReminderProgress({ current: 0, total: targets.length, failed: 0, stopped: false });
+
+    let sentCount = 0;
+    let failCount = 0;
+    let wasStopped = false;
+    const failedList = [];
+
+    try {
+      for (let i = 0; i < targets.length; i++) {
+        if (cancelRegReminderRef.current) {
+          wasStopped = true;
+          break;
+        }
+
+        const person = targets[i];
+        try {
+          const { subject, html } = buildRegisteredEventReminderEmail(person, dayKey);
+
+          await withTimeout(
+            addDoc(collection(db, 'mail'), {
+              to: person.email,
+              message: { subject, html }
+            }),
+            12000,
+            'Timeout al encolar correo'
+          );
+
+          if (person.collectionName && person.docId) {
+            try {
+              await withTimeout(
+                updateDoc(doc(db, `${getEventBasePath()}/${person.collectionName}`, person.docId), {
+                  [dayField]: true,
+                  [dayTimestampField]: serverTimestamp()
+                }),
+                8000,
+                'Timeout al actualizar flag'
+              );
+            } catch (uErr) {
+              console.warn('No se pudo marcar flag de recordatorio:', uErr);
+            }
+          }
+
+          sentCount++;
+        } catch (err) {
+          console.error(`Error enviando recordatorio a ${person.email}:`, err);
+          failCount++;
+          failedList.push({
+            name: person.nombre,
+            email: person.email,
+            company: person.empresa,
+            error: err.message
+          });
+        }
+
+        setRegReminderProgress({ current: i + 1, total: targets.length, failed: failCount, stopped: wasStopped });
+
+        if (i < targets.length - 1 && !cancelRegReminderRef.current) {
+          await sleep(180);
+        }
+      }
+
+      setRegReminderResult({
+        success: true,
+        dayCampaign: dayKey,
+        total: targets.length,
+        sent: sentCount,
+        failed: failCount,
+        failedList,
+        wasStopped
+      });
+    } catch (err) {
+      alert('Error en envío masivo de recordatorios: ' + err.message);
+    } finally {
+      setIsSendingRegReminder(false);
+    }
+  };
+
+  // Reloj verificador automático para disparar los recordatorios programados (Jueves 9:00 AM, Viernes 9:00 AM, Sábado 6:30 AM)
+  useEffect(() => {
+    if (!reminderScheduleConfig?.enabled || isSendingRegReminder || consolidatedRegisteredTargets.length === 0) return;
+
+    const checkAndTriggerScheduledReminder = async () => {
+      try {
+        const nowManagua = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Managua' }));
+        const yyyy = nowManagua.getFullYear();
+        const mm = String(nowManagua.getMonth() + 1).padStart(2, '0');
+        const dd = String(nowManagua.getDate()).padStart(2, '0');
+        const currentDateStr = `${yyyy}-${mm}-${dd}`;
+        const currentMinutes = nowManagua.getHours() * 60 + nowManagua.getMinutes();
+
+        for (const dayKey of ['jueves', 'viernes', 'sabado']) {
+          const cfg = reminderScheduleConfig[dayKey];
+          if (!cfg || cfg.completed) continue;
+          if (cfg.date === currentDateStr) {
+            const [targetH, targetM] = (cfg.time || '09:00').split(':').map(Number);
+            const targetMinutes = targetH * 60 + targetM;
+            if (currentMinutes >= targetMinutes) {
+              const dayField = dayKey === 'jueves' ? 'reminderJuevesSent' : dayKey === 'viernes' ? 'reminderViernesSent' : 'reminderSabadoSent';
+              const pendingForDay = consolidatedRegisteredTargets.filter(p => !p[dayField]);
+
+              // Marcar inmediatamente como completado en Firestore para evitar doble disparo
+              const schedRef = doc(db, `${getEventBasePath()}/settings`, 'emailRemindersSchedule');
+              await setDoc(schedRef, {
+                ...reminderScheduleConfig,
+                [dayKey]: { ...cfg, completed: true, executedAt: serverTimestamp() }
+              }, { merge: true });
+
+              if (pendingForDay.length > 0) {
+                setRegReminderModal(prev => ({ ...prev, dayCampaign: dayKey }));
+                await handleSendBulkRegReminder(pendingForDay);
+              }
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Error verificando reloj de recordatorios automáticos:', e);
+      }
+    };
+
+    const intervalId = setInterval(checkAndTriggerScheduledReminder, 60000);
+    return () => clearInterval(intervalId);
+  }, [reminderScheduleConfig, isSendingRegReminder, consolidatedRegisteredTargets]);
 
   // -------------------------------------------------------------
   // CONTROLADORES DE WATI WHATSAPP API (INDIVIDUAL & MASIVO)
@@ -5142,9 +5827,9 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
 
             {/* Contenido / Tabla de Vista Previa */}
             {(() => {
-              const newRows = bulkData.filter(item => !isExistingInvite(item, invites));
-              const duplicateRows = bulkData.filter(item => !!isExistingInvite(item, invites));
-              const targetCount = skipBulkDuplicates ? newRows.length : bulkData.length;
+              const newRows = evaluatedBulkData.filter(item => !item.duplicateInfo);
+              const duplicateRows = evaluatedBulkData.filter(item => !!item.duplicateInfo);
+              const targetCount = skipBulkDuplicates ? newRows.length : evaluatedBulkData.length;
 
               return (
                 <div className="p-6 space-y-4 overflow-y-auto flex-1">
@@ -5153,14 +5838,14 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl text-center">
                       <span className="text-secondary block text-[10px] uppercase font-bold">Total en Archivo</span>
-                      <span className="text-xl font-black text-slate-800">{bulkData.length}</span>
+                      <span className="text-xl font-black text-slate-800">{evaluatedBulkData.length}</span>
                     </div>
                     <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-center">
                       <span className="text-emerald-700 block text-[10px] uppercase font-bold">Nuevos Contactos</span>
                       <span className="text-xl font-black text-emerald-900">{newRows.length}</span>
                     </div>
                     <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl text-center">
-                      <span className="text-amber-800 block text-[10px] uppercase font-bold">Ya Registrados</span>
+                      <span className="text-amber-800 block text-[10px] uppercase font-bold">Duplicados Filtrados</span>
                       <span className="text-xl font-black text-amber-900">{duplicateRows.length}</span>
                     </div>
                   </div>
@@ -5200,7 +5885,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                             onChange={(e) => setSkipBulkDuplicates(e.target.checked)}
                             className="rounded text-blue-600 focus:ring-0"
                           />
-                          <span>🛡️ Omitir los {duplicateRows.length} contactos ya existentes (Recomendado para no sobreescribir ni duplicar tokens)</span>
+                          <span>🛡️ Filtro inteligente activo: Omitir los {duplicateRows.length} contactos ya existentes o repetidos (Protección contra duplicados)</span>
                         </label>
                       </div>
                     )}
@@ -5208,12 +5893,12 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                     {/* Desglose por Patrocinador / Pestañas */}
                     {bulkTargetSponsor === 'auto' && (() => {
                       const sponsorCounts = {};
-                      bulkData.forEach(d => {
+                      evaluatedBulkData.forEach(d => {
                         const sp = d.patrocinador || 'General';
                         sponsorCounts[sp] = (sponsorCounts[sp] || 0) + 1;
                       });
                       const entries = Object.entries(sponsorCounts);
-                      if (entries.length <= 1 && !bulkData[0]?.sheetName) return null;
+                      if (entries.length <= 1 && !evaluatedBulkData[0]?.sheetName) return null;
 
                       return (
                         <div className="pt-2 border-t border-blue-200/60">
@@ -5237,7 +5922,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                         <thead className="bg-surface-variant/70 sticky top-0 border-b border-outline-variant text-secondary">
                           <tr>
                             <th className="p-3 font-bold text-center w-10">#</th>
-                            <th className="p-3 font-bold">Estado</th>
+                            <th className="p-3 font-bold">Estado / Diagnóstico</th>
                             <th className="p-3 font-bold">Nombre</th>
                             <th className="p-3 font-bold">Empresa</th>
                             <th className="p-3 font-bold">Correo</th>
@@ -5246,16 +5931,26 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-outline-variant/60">
-                          {bulkData.map((item, idx) => {
-                            const isDup = isExistingInvite(item, invites);
+                          {evaluatedBulkData.map((item, idx) => {
+                            const isDup = !!item.duplicateInfo;
                             return (
-                              <tr key={idx} className={`transition-colors ${isDup ? (skipBulkDuplicates ? 'bg-amber-50/40 text-slate-400 opacity-75' : 'bg-amber-50/60') : 'hover:bg-surface-variant/20'}`}>
+                              <tr key={idx} className={`transition-colors ${isDup ? (skipBulkDuplicates ? 'bg-amber-50/50 text-slate-500' : 'bg-amber-50/70') : 'hover:bg-surface-variant/20'}`}>
                                 <td className="p-2.5 text-center font-mono text-secondary">{idx + 1}</td>
                                 <td className="p-2.5 whitespace-nowrap">
                                   {isDup ? (
-                                    <span className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-amber-100 text-amber-900 border border-amber-200" title="Este contacto ya tiene una invitación en el sistema">
-                                      {skipBulkDuplicates ? 'Omitido (Ya existe)' : 'Ya existe'}
-                                    </span>
+                                    <div className="space-y-0.5">
+                                      <span 
+                                        className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-amber-100 text-amber-900 border border-amber-200 inline-block" 
+                                        title={item.duplicateInfo?.matchedValue ? `Coincidencia por ${item.duplicateInfo.reason}: ${item.duplicateInfo.matchedValue}` : item.duplicateInfo?.reason}
+                                      >
+                                        {skipBulkDuplicates ? '🛡️ Omitido' : '⚠️ Ya existe'}
+                                      </span>
+                                      <div className="text-[10px] text-amber-900 font-semibold truncate max-w-[170px]" title={`${item.duplicateInfo.reason} | ${item.duplicateInfo.sponsorName} (${item.duplicateInfo.status})`}>
+                                        {item.duplicateInfo.type === 'intra_batch' 
+                                          ? 'Repetido en archivo' 
+                                          : `En: ${item.duplicateInfo.sponsorName}`}
+                                      </div>
+                                    </div>
                                   ) : (
                                     <span className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-200">
                                       + Nuevo
@@ -5299,8 +5994,8 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
 
             {/* Footer */}
             {(() => {
-              const newRows = bulkData.filter(item => !isExistingInvite(item, invites));
-              const targetCount = skipBulkDuplicates ? newRows.length : bulkData.length;
+              const newRows = evaluatedBulkData.filter(item => !item.duplicateInfo);
+              const targetCount = skipBulkDuplicates ? newRows.length : evaluatedBulkData.length;
 
               return (
                 <div className="p-4 bg-surface-variant/30 border-t border-outline-variant flex items-center justify-end gap-3 shrink-0">
@@ -6223,6 +6918,482 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
           <span className="text-xs font-bold">{watiNotification.message}</span>
         </div>
       )}
+
+      {/* Modal Recordatorio 3 Días para TODOS LOS REGISTRADOS (Jueves / Viernes / Sábado) */}
+      {regReminderModal.open && (() => {
+        const dayKey = regReminderModal.dayCampaign === 'jueves'
+          ? 'reminderJuevesSent'
+          : regReminderModal.dayCampaign === 'viernes'
+          ? 'reminderViernesSent'
+          : 'reminderSabadoSent';
+
+        // Filtrar según origen seleccionado
+        const filteredBySource = consolidatedRegisteredTargets.filter(p => {
+          if (regReminderModal.filterSource === 'direct_invites_only') return p.sourceType === 'direct_invite';
+          if (regReminderModal.filterSource === 'preregistrations_only') return p.sourceType !== 'direct_invite';
+          return true;
+        });
+
+        const alreadySentCount = filteredBySource.filter(p => p[dayKey]).length;
+        const effectiveTargets = regReminderModal.skipAlreadySentToday
+          ? filteredBySource.filter(p => !p[dayKey])
+          : filteredBySource;
+
+        const samplePerson = effectiveTargets[0] || consolidatedRegisteredTargets[0] || {
+          id: 'sample_01',
+          nombre: 'Carlos Mendoza',
+          empresa: 'Ferretería El Constructor',
+          email: 'carlos@ejemplo.com',
+          qrData: 'INV-VIP-2026-DEMO',
+          token: 'demo_token_2026',
+          sponsorId: 'general',
+          sponsorName: 'ExpoFerre (General)',
+          sponsorStands: '',
+        };
+        const previewEmailData = buildRegisteredEventReminderEmail(samplePerson, regReminderModal.dayCampaign);
+
+        const countDirectInvites = consolidatedRegisteredTargets.filter(p => p.sourceType === 'direct_invite').length;
+        const countOtherReg = consolidatedRegisteredTargets.filter(p => p.sourceType !== 'direct_invite').length;
+
+        return (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border border-outline-variant overflow-hidden flex flex-col max-h-[92vh]">
+              
+              {/* Header */}
+              <div className="bg-gradient-to-r from-[#0B2265] to-[#1D4ED8] text-white p-5 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center">
+                    <Bell size={22} className="text-amber-300" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-black text-base leading-tight">
+                        Recordatorio Oficial para Registrados
+                      </h3>
+                      <span className="bg-amber-400 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                        Jue • Vie • Sáb
+                      </span>
+                    </div>
+                    <p className="text-xs text-blue-100 mt-0.5">
+                      Envía los 3 speeches oficiales de recordatorio tal cual a todos los participantes registrados.
+                    </p>
+                  </div>
+                </div>
+                {!isSendingRegReminder && (
+                  <button
+                    onClick={() => setRegReminderModal(prev => ({ ...prev, open: false }))}
+                    className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <X size={20} />
+                  </button>
+                )}
+              </div>
+
+              {/* Body */}
+              <div className="p-6 overflow-y-auto space-y-5 flex-1">
+                {regReminderResult ? (
+                  <div className="text-center py-6 space-y-4">
+                    <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center bg-emerald-100 text-emerald-700">
+                      <CheckCircle2 size={34} />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-lg text-on-surface">
+                        {regReminderResult.cancelled ? 'Envío Detenido por el Usuario' : '¡Recordatorios Enviados con Éxito!'}
+                      </h4>
+                      <p className="text-xs text-secondary mt-1">
+                        Campaña: <strong className="uppercase">{regReminderResult.dayCampaign}</strong>
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto pt-2">
+                      <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl">
+                        <span className="block text-2xl font-black text-emerald-700">{regReminderResult.sent}</span>
+                        <span className="text-[11px] font-bold text-emerald-800 uppercase">Correos Enviados</span>
+                      </div>
+                      <div className="bg-red-50 border border-red-200 p-3 rounded-xl">
+                        <span className="block text-2xl font-black text-red-600">{regReminderResult.failed}</span>
+                        <span className="text-[11px] font-bold text-red-700 uppercase">Fallidos</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {/* Panel de Programación Automática (Jueves 15, Viernes 16 y Sábado 17 Oct) */}
+                    <div className="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <Clock size={16} className="text-emerald-700" />
+                          <span className="text-xs font-black uppercase tracking-wider text-emerald-950">
+                            Programación Automática Activa (Hora Nicaragua)
+                          </span>
+                          {savingScheduleConfig && (
+                            <span className="text-[10px] font-bold text-emerald-700 animate-pulse">Guardando...</span>
+                          )}
+                        </div>
+                        <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={reminderScheduleConfig.enabled !== false}
+                            onChange={(e) => {
+                              const updated = { ...reminderScheduleConfig, enabled: e.target.checked };
+                              setReminderScheduleConfig(updated);
+                              handleUpdateScheduleConfig(updated);
+                            }}
+                            className="w-4 h-4 accent-emerald-600 rounded"
+                          />
+                          <span className="text-xs font-bold text-emerald-900">
+                            {reminderScheduleConfig.enabled !== false ? 'Envíos Automáticos Activados' : 'Pausado'}
+                          </span>
+                        </label>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        {/* Horario Jueves */}
+                        <div className="bg-white border border-emerald-200/80 rounded-xl p-2.5 flex items-center justify-between">
+                          <div>
+                            <span className="block text-[10px] font-black uppercase text-slate-500">Jueves 15 Oct</span>
+                            <span className="text-xs font-bold text-slate-800">Faltan 2 días</span>
+                          </div>
+                          <input
+                            type="time"
+                            value={reminderScheduleConfig.jueves?.time || '09:00'}
+                            onChange={(e) => {
+                              const updated = {
+                                ...reminderScheduleConfig,
+                                jueves: { ...(reminderScheduleConfig.jueves || { date: '2026-10-15' }), time: e.target.value }
+                              };
+                              setReminderScheduleConfig(updated);
+                              handleUpdateScheduleConfig(updated);
+                            }}
+                            className="px-2 py-1 bg-slate-50 border border-slate-300 rounded-lg text-xs font-black text-[#0B2265]"
+                          />
+                        </div>
+
+                        {/* Horario Viernes */}
+                        <div className="bg-white border border-emerald-200/80 rounded-xl p-2.5 flex items-center justify-between">
+                          <div>
+                            <span className="block text-[10px] font-black uppercase text-slate-500">Viernes 16 Oct</span>
+                            <span className="text-xs font-bold text-slate-800">Mañana es el día</span>
+                          </div>
+                          <input
+                            type="time"
+                            value={reminderScheduleConfig.viernes?.time || '09:00'}
+                            onChange={(e) => {
+                              const updated = {
+                                ...reminderScheduleConfig,
+                                viernes: { ...(reminderScheduleConfig.viernes || { date: '2026-10-16' }), time: e.target.value }
+                              };
+                              setReminderScheduleConfig(updated);
+                              handleUpdateScheduleConfig(updated);
+                            }}
+                            className="px-2 py-1 bg-slate-50 border border-slate-300 rounded-lg text-xs font-black text-amber-700"
+                          />
+                        </div>
+
+                        {/* Horario Sábado */}
+                        <div className="bg-white border border-emerald-200/80 rounded-xl p-2.5 flex items-center justify-between">
+                          <div>
+                            <span className="block text-[10px] font-black uppercase text-slate-500">Sábado 17 Oct</span>
+                            <span className="text-xs font-bold text-slate-800">Día del Evento</span>
+                          </div>
+                          <input
+                            type="time"
+                            value={reminderScheduleConfig.sabado?.time || '06:30'}
+                            onChange={(e) => {
+                              const updated = {
+                                ...reminderScheduleConfig,
+                                sabado: { ...(reminderScheduleConfig.sabado || { date: '2026-10-17' }), time: e.target.value }
+                              };
+                              setReminderScheduleConfig(updated);
+                              handleUpdateScheduleConfig(updated);
+                            }}
+                            className="px-2 py-1 bg-slate-50 border border-slate-300 rounded-lg text-xs font-black text-emerald-700"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Selector de Día / Speech */}
+                    <div>
+                      <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-2">
+                        1. Selecciona el Día / Speech del Recordatorio:
+                      </label>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {/* JUEVES */}
+                        <button
+                          type="button"
+                          disabled={isSendingRegReminder}
+                          onClick={() => setRegReminderModal(prev => ({ ...prev, dayCampaign: 'jueves' }))}
+                          className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer ${
+                            regReminderModal.dayCampaign === 'jueves'
+                              ? 'border-[#0B2265] bg-blue-50/70 shadow-sm'
+                              : 'border-slate-200 hover:border-slate-300 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#0B2265] text-white">
+                              Speech 1 • Jueves 15 Oct
+                            </span>
+                            {regReminderModal.dayCampaign === 'jueves' && <CheckCircle2 size={16} className="text-[#0B2265]" />}
+                          </div>
+                          <p className="font-black text-xs text-slate-900 mt-1.5">
+                            ¡FALTAN SOLO 2 DÍAS PARA EXPO FERRE!
+                          </p>
+                          <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                            ¡Gran punto de encuentro de la industria ferretera! Sábado 17 de octubre, 7:30am a 6:00pm.
+                          </p>
+                        </button>
+
+                        {/* VIERNES */}
+                        <button
+                          type="button"
+                          disabled={isSendingRegReminder}
+                          onClick={() => setRegReminderModal(prev => ({ ...prev, dayCampaign: 'viernes' }))}
+                          className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer ${
+                            regReminderModal.dayCampaign === 'viernes'
+                              ? 'border-amber-600 bg-amber-50/70 shadow-sm'
+                              : 'border-slate-200 hover:border-slate-300 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-600 text-white">
+                              Speech 2 • Viernes 16 Oct
+                            </span>
+                            {regReminderModal.dayCampaign === 'viernes' && <CheckCircle2 size={16} className="text-amber-600" />}
+                          </div>
+                          <p className="font-black text-xs text-slate-900 mt-1.5">
+                            🚨 ¡MAÑANA ES EL GRAN ENCUENTRO!
+                          </p>
+                          <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                            Capacitaciones, networking, descuentos, rifas, alimentación y reconocimientos.
+                          </p>
+                        </button>
+
+                        {/* SÁBADO (DÍA DEL EVENTO) */}
+                        <button
+                          type="button"
+                          disabled={isSendingRegReminder}
+                          onClick={() => setRegReminderModal(prev => ({ ...prev, dayCampaign: 'sabado' }))}
+                          className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer ${
+                            regReminderModal.dayCampaign === 'sabado'
+                              ? 'border-emerald-600 bg-emerald-50/70 shadow-sm'
+                              : 'border-slate-200 hover:border-slate-300 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-600 text-white">
+                              Speech 3 • Sábado 17 Oct
+                            </span>
+                            {regReminderModal.dayCampaign === 'sabado' && <CheckCircle2 size={16} className="text-emerald-600" />}
+                          </div>
+                          <p className="font-black text-xs text-slate-900 mt-1.5">
+                            ¡Hoy es el gran día! ¡Hoy es EXPO FERRE!
+                          </p>
+                          <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                            Hoy abrimos las puertas de la 1era edición de EXPO FERRE Nicaragua 2026 a las 7:30 a. m.
+                          </p>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Resumen de Audiencia Registrada y Filtros */}
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <h4 className="text-xs font-black uppercase tracking-wider text-slate-700">
+                            2. Destinatarios Confirmados / Registrados (Con Email Válido)
+                          </h4>
+                          <p className="text-[11px] text-slate-500">
+                            Unifica automáticamente invitaciones directas registradas ({countDirectInvites}) + pre-registros e invitados aprobados ({countOtherReg}) sin duplicar correos.
+                          </p>
+                        </div>
+                        <div className="bg-white px-3 py-1.5 rounded-xl border border-slate-200 text-right">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase block">A Enviar Ahora</span>
+                          <span className="text-lg font-black text-[#0B2265]">{effectiveTargets.length}</span>
+                          <span className="text-[11px] text-slate-500 font-semibold"> / {filteredBySource.length}</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-600 mb-1">Filtrar grupo de registrados:</label>
+                          <select
+                            disabled={isSendingRegReminder}
+                            value={regReminderModal.filterSource}
+                            onChange={(e) => setRegReminderModal(prev => ({ ...prev, filterSource: e.target.value }))}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-800"
+                          >
+                            <option value="all_registered">Todos los Registrados Consolidados ({consolidatedRegisteredTargets.length})</option>
+                            <option value="direct_invites_only">Solo Invitaciones Directas Registradas ({countDirectInvites})</option>
+                            <option value="preregistrations_only">Solo Pre-registros Web / Invitados Generales ({countOtherReg})</option>
+                          </select>
+                        </div>
+
+                        <div className="flex items-center">
+                          <label className="flex items-center gap-2.5 cursor-pointer select-none bg-white px-3.5 py-2.5 rounded-xl border border-slate-200 w-full">
+                            <input
+                              type="checkbox"
+                              disabled={isSendingRegReminder}
+                              checked={regReminderModal.skipAlreadySentToday}
+                              onChange={(e) => setRegReminderModal(prev => ({ ...prev, skipAlreadySentToday: e.target.checked }))}
+                              className="w-4 h-4 accent-[#0B2265] rounded"
+                            />
+                            <div className="text-xs">
+                              <span className="font-bold text-slate-800 block">Omitir quienes ya recibieron este día</span>
+                              <span className="text-[10px] text-slate-500">
+                                Ya enviados en esta campaña ({regReminderModal.dayCampaign.toUpperCase()}): <strong>{alreadySentCount}</strong>
+                              </span>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Envío de Correo de Prueba + Botón Vista Previa */}
+                    <div className="bg-blue-50/60 border border-blue-200/80 p-4 rounded-2xl space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                            <Mail size={15} className="text-[#0B2265]" />
+                            3. Enviar Correo de Prueba o Ver Vista Previa
+                          </h4>
+                          <p className="text-[11px] text-slate-600">
+                            Verifica cómo se ve el speech de <strong className="uppercase">{regReminderModal.dayCampaign}</strong> antes de lanzar el envío masivo.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setRegReminderModal(prev => ({ ...prev, previewOpen: !prev.previewOpen }))}
+                          className="px-3 py-1.5 bg-white hover:bg-slate-100 text-[#0B2265] border border-blue-200 rounded-xl text-xs font-bold flex items-center gap-1.5 self-start sm:self-auto cursor-pointer shrink-0"
+                        >
+                          <Eye size={14} />
+                          {regReminderModal.previewOpen ? 'Ocultar Vista Previa' : 'Ver Vista Previa HTML'}
+                        </button>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <input
+                          type="email"
+                          placeholder="Correo de prueba (ej. tu-correo@empresa.com)"
+                          value={regReminderModal.testEmail}
+                          onChange={(e) => setRegReminderModal(prev => ({ ...prev, testEmail: e.target.value }))}
+                          className="flex-1 px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:border-[#0B2265]"
+                        />
+                        <button
+                          type="button"
+                          disabled={isSendingTestReminder || !regReminderModal.testEmail.trim()}
+                          onClick={handleSendTestRegReminder}
+                          className="px-4 py-2 bg-[#0B2265] hover:bg-[#08194b] text-white font-bold rounded-xl text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                        >
+                          {isSendingTestReminder ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                          <span>Enviar Prueba ({regReminderModal.dayCampaign.toUpperCase()})</span>
+                        </button>
+                      </div>
+
+                      {testReminderFeedback && (
+                        <div className={`text-xs font-bold px-3 py-2 rounded-xl ${
+                          testReminderFeedback.type === 'success'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                            : 'bg-red-100 text-red-800 border border-red-200'
+                        }`}>
+                          {testReminderFeedback.message}
+                        </div>
+                      )}
+
+                      {/* Vista previa renderizada en vivo */}
+                      {regReminderModal.previewOpen && (
+                        <div className="mt-3 border border-slate-300 rounded-2xl overflow-hidden bg-white shadow-inner">
+                          <div className="bg-slate-800 text-white px-4 py-2 text-xs flex items-center justify-between">
+                            <span><strong>Asunto:</strong> {previewEmailData.subject}</span>
+                            <span className="text-[10px] text-slate-300">Ejemplo: {samplePerson.nombre}</span>
+                          </div>
+                          <div
+                            className="max-h-96 overflow-y-auto p-2 bg-slate-100"
+                            dangerouslySetInnerHTML={{ __html: previewEmailData.html }}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Barra de progreso cuando se está enviando */}
+                    {isSendingRegReminder && (
+                      <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl space-y-2.5">
+                        <div className="flex items-center justify-between text-xs font-bold text-blue-950">
+                          <span className="flex items-center gap-2">
+                            <Loader2 size={15} className="animate-spin text-blue-700" />
+                            Enviando recordatorios...
+                          </span>
+                          <span>{regReminderProgress.current} / {regReminderProgress.total}</span>
+                        </div>
+                        <div className="w-full h-2.5 bg-blue-200 rounded-full overflow-hidden">
+                          <div
+                            className="bg-blue-700 h-full transition-all duration-300"
+                            style={{ width: `${(regReminderProgress.current / (regReminderProgress.total || 1)) * 100}%` }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] text-blue-900 pt-1">
+                          <span>Fallidos: <strong>{regReminderProgress.failed}</strong></span>
+                          <button
+                            type="button"
+                            onClick={() => { cancelRegReminderRef.current = true; }}
+                            className="py-1 px-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-[11px] flex items-center gap-1 cursor-pointer"
+                          >
+                            <StopCircle size={13} />
+                            Detener Envío
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="p-4 bg-slate-100 border-t border-slate-200 flex items-center justify-between gap-3 shrink-0">
+                {regReminderResult ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRegReminderResult(null);
+                      setRegReminderModal(prev => ({ ...prev, open: false }));
+                    }}
+                    className="ml-auto py-2.5 px-6 bg-slate-900 text-white font-bold rounded-xl text-xs hover:bg-black transition-all cursor-pointer"
+                  >
+                    Cerrar
+                  </button>
+                ) : (
+                  <>
+                    <div className="text-[11px] text-slate-500 font-medium">
+                      Se envía únicamente el texto del recordatorio seleccionado personalizado con el nombre.
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        disabled={isSendingRegReminder}
+                        onClick={() => setRegReminderModal(prev => ({ ...prev, open: false }))}
+                        className="py-2.5 px-4 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-xs transition-colors disabled:opacity-50 cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSendingRegReminder || effectiveTargets.length === 0}
+                        onClick={() => handleSendBulkRegReminder(effectiveTargets)}
+                        className="py-2.5 px-5 bg-gradient-to-r from-[#0B2265] to-[#1D4ED8] hover:from-[#08194b] hover:to-[#1e40af] text-white font-bold rounded-xl text-xs transition-all shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                      >
+                        <Send size={15} />
+                        {isSendingRegReminder
+                          ? `Enviando (${regReminderProgress.current}/${regReminderProgress.total})...`
+                          : `Enviar Recordatorio ${regReminderModal.dayCampaign.toUpperCase()} (${effectiveTargets.length})`}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+            </div>
+          </div>
+        );
+      })()}
 
       {qrModalOpen && selectedPersonForQR && (
         <AdminQRViewModal
