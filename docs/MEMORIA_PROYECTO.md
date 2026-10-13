@@ -1,6 +1,6 @@
 # 🧠 Memoria del Proyecto - EXPO FERRE 2026
 **Directorio de Patrocinadores, Invitaciones Directas & Pases Digitales**
-*Fecha de actualización: 12 de Octubre, 2026*
+*Fecha de actualización: 13 de Octubre, 2026*
 
 ---
 
@@ -158,6 +158,18 @@
   npm run build
   pm2 reload all
   ```
+
+---
+
+## 16. 📅 Unificación de Fecha Oficial del Evento (13 de Octubre, 2026)
+- **Ajuste de Calendario:**
+  - Se eliminó la fecha del **16** de octubre, quedando oficialmente y de manera exclusiva el **17 de Octubre de 2026**.
+  - **Archivos y Vistas Actualizadas:**
+    1. `src/App.jsx`: Sección pública de *UBICACIÓN Y FECHA* (junto al formulario de preregistro / footer) ajustada a `17 de Octubre de 2026`.
+    2. `src/components/AdminPreRegistrations.jsx`: Plantilla HTML de correo para confirmación de preregistro con código QR.
+    3. `src/components/DirectInviteRegistration.jsx`: Correo de confirmación oficial para invitados registrados.
+    4. `src/components/AdminDirectInvites.jsx`: Plantilla sugerida para mensajes de WhatsApp en el gestor de artes.
+
 
 
 

@@ -5196,7 +5196,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
 Tenemos el agrado de extenderte una invitación especial y exclusiva para que nos acompañes y nos visites en nuestro ${artStands ? `Stand ${artStands}` : 'stand oficial'}.
 
-📅 Fecha: 16 y 17 de Octubre de 2026
+📅 Fecha: 17 de Octubre de 2026
 📍 Lugar: Centro de Convenciones Crowne Plaza, Managua
 
 Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir tu Gafete Oficial con Código QR, por favor completa tu registro en el siguiente enlace único:

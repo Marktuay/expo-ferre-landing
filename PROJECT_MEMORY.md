@@ -120,6 +120,19 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ---
 
+## 📅 Resumen de Cambios y Avances de la Sesión (13 de Octubre de 2026)
+
+### 🗓️ Unificación de Fecha Oficial del Evento a solo 17 de Octubre de 2026
+- **Ajuste de Calendario:**
+  - Se eliminó la mención de dos días ("16 y 17"), dejando formalmente el evento el **17 de Octubre de 2026**.
+- **Puntos Modificados:**
+  1. **Sección Pública de Ubicación y Fecha (`App.jsx`):** El bloque informativo ubicado en la parte inferior de la landing (junto al formulario de preregistro y sobre el footer) mostraba `16 y 17 de Octubre de 2026`; ahora muestra de forma unificada `17 de Octubre de 2026`, alineado con el badge superior del Hero (`17 de Octubre de 2026`).
+  2. **Notificación de Preregistro (`AdminPreRegistrations.jsx`):** La plantilla de confirmación por correo enviada con el código QR refleja `17 de Octubre de 2026`.
+  3. **Correo de Confirmación de Invitaciones Directas (`DirectInviteRegistration.jsx`):** El resumen de fecha de la invitación digital emitida se actualizó a `17 de Octubre, 2026`.
+  4. **Plantilla de WhatsApp en Gestor de Artes (`AdminDirectInvites.jsx`):** La plantilla por defecto para los mensajes de los patrocinadores se actualizó a `17 de Octubre de 2026`.
+
+---
+
 ## 📅 Resumen de Cambios y Avances de la Sesión (06 de Octubre de 2026)
 
 ### 📥 Carga Masiva Exitosa de 155 Nuevas Invitaciones Directas en Firestore (`events/2026/directInvites`)
