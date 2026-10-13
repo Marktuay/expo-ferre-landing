@@ -54,7 +54,6 @@ const OFFICIAL_SPONSORS = [
   { company: 'Kouture', category: 'Oro', logo: '/oro/kouture.jpeg' },
   { company: 'Flor de Caña', category: 'Oro', logo: '/oro/flordecana.jpg' },
   { company: 'Café Las Flores', category: 'Oro', logo: '/oro/cafelasflores.png' },
-  { company: 'Iniser', category: 'Oro', logo: '/oro/iniser.png' },
   { company: 'Casco', category: 'Plata', logo: '/plata/casco.png' },
   { company: 'Kraken', category: 'Plata', logo: '/plata/kraken.png' },
   { company: 'Supra', category: 'Plata', logo: '/plata/supra.png' },
@@ -72,7 +71,8 @@ const OFFICIAL_SPONSORS = [
   { company: 'PBS', category: 'Plata', logo: '/plata/pbs.png' },
   { company: 'Chevrolet', category: 'Plata', logo: '/plata/chevrolet.jpg' },
   { company: 'Durman', category: 'Plata', logo: '/plata/durman.png' },
-  { company: 'Orion', category: 'Plata', logo: '/plata/orion.png' }
+  { company: 'Orion', category: 'Plata', logo: '/plata/orion.png' },
+  { company: 'Iniser', category: 'Plata', logo: '/plata/iniser.png' }
 ];
 
 export function normStr(str) {

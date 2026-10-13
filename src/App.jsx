@@ -194,7 +194,6 @@ export default function App() {
     { url: '/oro/kouture.jpeg', category: 'Oro', order: 2, bgWhite: true },
     { url: '/oro/flordecana.jpg', category: 'Oro', order: 2, bgWhite: true },
     { url: '/oro/cafelasflores.png', category: 'Oro', order: 2, bgWhite: true },
-    { url: '/oro/iniser.png', category: 'Oro', order: 2, bgWhite: true },
     { url: '/plata/ferdandezsera.png', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/logo-sherwin-williams.jpg', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/casco.png', category: 'Plata', order: 3, bgWhite: true },
@@ -214,6 +213,7 @@ export default function App() {
     { url: '/plata/chevrolet.jpg', category: 'Plata', order: 3, scale: 1.1, bgWhite: true },
     { url: '/plata/durman.png', category: 'Plata', order: 3, bgWhite: true },
     { url: '/plata/orion.png', category: 'Plata', order: 3, bgWhite: true },
+    { url: '/plata/iniser.png', category: 'Plata', order: 3, bgWhite: true },
   ];
   
   const sponsorLogos = initialPlaceholders;

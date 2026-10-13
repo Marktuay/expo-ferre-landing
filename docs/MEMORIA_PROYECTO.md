@@ -172,12 +172,13 @@
 
 ---
 
-## 17. 🏷️ Inclusión de INISER en Reel de Logos y Patrocinadores Oro (13 de Octubre, 2026)
+## 17. 🏷️ Inclusión de INISER en Reel de Logos y Patrocinadores Plata (13 de Octubre, 2026)
 - **Patrocinador Añadido:**
-  - Se incorporó el logotipo oficial de **INISER** (`/oro/iniser.png`) en la categoría **Oro**.
+  - Se incorporó el logotipo oficial de **INISER** (`/plata/iniser.png`) en la categoría **Plata**.
   - **Archivos Actualizados:**
-    1. `src/App.jsx`: Añadido a `initialPlaceholders` dentro de la categoría `Oro` con tarjeta estilizada en blanco (`bgWhite: true`) para su visualización en el reel animado principal.
-    2. `src/components/AdminSponsors.jsx`: Añadido al listado oficial `OFFICIAL_SPONSORS` bajo la categoría `Oro`.
+    1. `public/plata/iniser.png`: Ubicación del asset gráfico oficial.
+    2. `src/App.jsx`: Añadido a `initialPlaceholders` dentro de la categoría `Plata` (`order: 3`) con tarjeta estilizada en blanco (`bgWhite: true`) para su visualización en el reel animado principal.
+    3. `src/components/AdminSponsors.jsx`: Añadido al listado oficial `OFFICIAL_SPONSORS` bajo la categoría `Plata`.
 
 
 
