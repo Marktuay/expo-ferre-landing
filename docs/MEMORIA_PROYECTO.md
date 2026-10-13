@@ -170,6 +170,16 @@
     3. `src/components/DirectInviteRegistration.jsx`: Correo de confirmación oficial para invitados registrados.
     4. `src/components/AdminDirectInvites.jsx`: Plantilla sugerida para mensajes de WhatsApp en el gestor de artes.
 
+---
+
+## 17. 🏷️ Inclusión de INISER en Reel de Logos y Patrocinadores Oro (13 de Octubre, 2026)
+- **Patrocinador Añadido:**
+  - Se incorporó el logotipo oficial de **INISER** (`/oro/iniser.png`) en la categoría **Oro**.
+  - **Archivos Actualizados:**
+    1. `src/App.jsx`: Añadido a `initialPlaceholders` dentro de la categoría `Oro` con tarjeta estilizada en blanco (`bgWhite: true`) para su visualización en el reel animado principal.
+    2. `src/components/AdminSponsors.jsx`: Añadido al listado oficial `OFFICIAL_SPONSORS` bajo la categoría `Oro`.
+
+
 
 
 

@@ -131,6 +131,11 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   3. **Correo de Confirmación de Invitaciones Directas (`DirectInviteRegistration.jsx`):** El resumen de fecha de la invitación digital emitida se actualizó a `17 de Octubre, 2026`.
   4. **Plantilla de WhatsApp en Gestor de Artes (`AdminDirectInvites.jsx`):** La plantilla por defecto para los mensajes de los patrocinadores se actualizó a `17 de Octubre de 2026`.
 
+### 🏷️ Inclusión de INISER en Categoría Oro (Reel de Logos y Directorio)
+- Se agregó el logotipo oficial de **INISER** (`/oro/iniser.png`) a la categoría **Oro** en:
+  1. `src/App.jsx`: Reel animado principal de patrocinadores (`initialPlaceholders`), con contenedor blanco adaptativo (`bgWhite: true`).
+  2. `src/components/AdminSponsors.jsx`: Directorio administrativo oficial (`OFFICIAL_SPONSORS`).
+
 ---
 
 ## 📅 Resumen de Cambios y Avances de la Sesión (06 de Octubre de 2026)

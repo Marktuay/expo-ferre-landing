@@ -54,6 +54,7 @@ const OFFICIAL_SPONSORS = [
   { company: 'Kouture', category: 'Oro', logo: '/oro/kouture.jpeg' },
   { company: 'Flor de Caña', category: 'Oro', logo: '/oro/flordecana.jpg' },
   { company: 'Café Las Flores', category: 'Oro', logo: '/oro/cafelasflores.png' },
+  { company: 'Iniser', category: 'Oro', logo: '/oro/iniser.png' },
   { company: 'Casco', category: 'Plata', logo: '/plata/casco.png' },
   { company: 'Kraken', category: 'Plata', logo: '/plata/kraken.png' },
   { company: 'Supra', category: 'Plata', logo: '/plata/supra.png' },
