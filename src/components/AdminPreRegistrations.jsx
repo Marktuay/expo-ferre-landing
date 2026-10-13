@@ -322,8 +322,6 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                 <h2 style="color: #16a34a; margin-top: 0;">¡Excelentes noticias, ${reg.name}!</h2>
                 <p>Su preregistro ha sido <strong>aprobado</strong> por el Comité Organizador de EXPO FERRE Nicaragua 2026.</p>
                 
-                <p>En los próximos días recibirá su invitación oficial para formar parte del encuentro más importante de la industria ferretera y de la construcción en Nicaragua.</p>
-                
                 <p>Prepárese para vivir una jornada de alto nivel, donde podrá descubrir las últimas tendencias del sector, conocer soluciones innovadoras, acceder a contenidos sobre ventas, financiamiento, transformación digital y estrategias de crecimiento, además de conectar con fabricantes, distribuidores, mayoristas y los principales tomadores de decisión del mercado.</p>
 
                 <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
