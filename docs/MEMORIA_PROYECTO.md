@@ -191,6 +191,21 @@
   3. **Cuadros de Honor Detallados:** Tablas estilizadas con los 5 primeros lugares por categoría, destacando medallas (🥇 1º, 🥈 2º, 🥉 3º, 4º, 5º), insignias de puntaje ponderado (`⭐ X pts`), conteo de nominaciones y desglose de jurados votantes.
   4. **Exportación a Excel Optimizada:** La primera hoja del reporte Excel generado (`handleExportExcel`) exporta directamente el consolidado del *Top 5 Ganadores*.
 
+---
+
+## 19. 🔍 Normalización Inteligente de Votaciones y Consolidación de Votos (14 de Octubre, 2026)
+- **Causa del Problema Reportado:**
+  - En la categoría *Ferretería Familiar*, diferentes jurados escribieron el nombre de **SINSA** con pequeñas variaciones: `"Silva internacional- SINSA"`, `"Sinsa"`, y `"Ferretería SINSA"`.
+  - El sistema anterior agrupaba los votos mediante `name.toLowerCase()`, por lo que cada variante se calculaba como una empresa independiente separada (repartiendo sus 18 puntos totales en bloques de 9, 5 y 4 pts).
+  - Esto provocaba que temporalmente figurara empatada con 9 puntos con otra ferretería en lugar de consolidar su puntuación real.
+- **Solución Implementada:**
+  - Se introdujo el motor `canonicalStoreName(rawName)` en `AdminJury.jsx`, que remueve tildes, signos de puntuación y términos genéricos de relleno, unificando variantes de un mismo negocio (`SINSA`, `El Halcón`, `Ferretería Romo`, `Ferretería Jenny`, `Ferretería Richardson`, `Innova`, `Ferretería Noelito`, etc.).
+  - **Resultado Oficial:**
+    - **Ferretería Familiar:** 🥇 **SINSA** se posiciona como el ganador #1 indiscutible con **18 puntos** (4 votos: Grethel Valle [4pts], Rodrigo Hernández [4pts], Yerev Sáenz [5pts], Miguel Guzmán [5pts]).
+    - **Ferretería Oro:** 🥇 **SINSA** con **20 puntos** (5 votos).
+    - **Ferretería Promesa:** 🥇 **Ferretería Noelito** con **14 puntos** (3 votos).
+
+
 
 
 

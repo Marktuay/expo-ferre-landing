@@ -57,38 +57,120 @@ export default function AdminJury({ onBack, adminUser }) {
     };
   }, []);
 
+  // Normalizador y unificador inteligente de nombres de ferreterías
+  const canonicalStoreName = (rawName) => {
+    if (!rawName) return '';
+    let str = String(rawName)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // quitar acentos
+      .toLowerCase()
+      .replace(/[-–—/.]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // 1. Detección de marcas y ferreterías clave con variaciones de escritura de jurados
+    if (str.includes('sinsa') || str.includes('silva internacional')) return 'SINSA';
+    if (str.includes('halcon')) return 'El Halcón';
+    if (str.includes('romo')) return 'Ferretería Romo';
+    if (str.includes('bendana')) return 'Ferretería Bendaña';
+    if (str.includes('jenny')) return 'Ferretería Jenny';
+    if (str.includes('richardson')) return 'Ferretería Richardson';
+    if (str.includes('pinos del norte')) return 'MC Pinos del Norte';
+    if (str.includes('duarte')) return 'Ferretería Duarte';
+    if (str.includes('casa del campesino')) return 'Agroferretería Casa del Campesino';
+    if (str.includes('flores') && (str.includes('siuna') || str.includes('ferreteria') || str.includes('ferretería'))) return 'Ferretería Flores';
+    if (str.includes('fernandez sera')) return 'Fernández Sera';
+    if (str.includes('jehova es mi pastor')) return 'Jehová es mi Pastor';
+    if (str.includes('guayo')) return 'Venta de Cementos Guayo';
+    if (str.includes('dimaco')) return 'DIMACO';
+    if (str.includes('bosque')) return 'Ferretería El Bosque';
+    if (str.includes('esperanza sequeira')) return 'Ferretería Esperanza Sequeira';
+    if (str.includes('grapa')) return 'Ferretería La Grapa';
+    if (str.includes('el padre')) return 'Ferretería El Padre';
+    if (str.includes('noelito')) return 'Ferretería Noelito';
+    if (str.includes('inblensa')) return 'Inblensa';
+    if (str.includes('codinsa') || str.includes('almacen torres') || str.includes('almacenes torres')) return 'Almacén Torres / CODINSA';
+    if (str.includes('la economica') || str.includes('la economica')) return 'Ferretería La Económica';
+    if (str.includes('el progreso')) return 'Ferretería El Progreso';
+    if (str.includes('roberto leiva')) return 'Ferretería Roberto Leiva';
+    if (str.includes('innova')) return 'Innova';
+    if (str.includes('sacasa')) return 'Ferretería Sacasa';
+    if (str.includes('fersa')) return 'FERSA';
+    if (str.includes('fermeci')) return 'Fermeci';
+    if (str.includes('estrella dorada')) return 'Ferretería La Estrella Dorada';
+    if (str.includes('construye')) return 'Ferretería Construye';
+    if (str.includes('perlin') || str.includes('la casa del perlin')) return 'La Casa del Perlín';
+    if (str.includes('negocios de oriente')) return 'Negocios de Oriente';
+    if (str.includes('paz') && (str.includes('rama') || str.includes('ferretria') || str.includes('ferreteria'))) return 'Ferretería Paz';
+    if (str.includes('meyrelin') || str.includes('ferrocon')) return 'Meyrelin / Ferrocon';
+    if (str.includes('conny davila')) return 'Materiales Conny Dávila';
+    if (str.includes('el amor')) return 'Ferretería El Amor';
+    if (str.includes('alcons')) return 'Alcons';
+
+    // 2. Regla general para otras ferreterías: remover términos genéricos de relleno
+    const cleaned = str
+      .replace(/\b(ferreteria|ferretria|almacenes de la construccion|materiales de construccion|distribuidora de materiales de construccion|distribuidora|materiales|almacen|almacenes|s a|sa|de|la|el|los|las)\b/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (cleaned.length >= 3) {
+      return cleaned
+        .split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+    }
+
+    return rawName.trim();
+  };
+
   // Calcular Rankings Consolidados por Categoría (Por valoración ponderada y cantidad de nominaciones)
   const calculateRanking = (catId) => {
-    const storesMap = {}; // { 'Nombre': { name, city, nominationsCount, totalScore, judges: [] } }
+    const storesMap = {}; // { 'canonicalKey': { name, city, nominationsCount, totalScore, judges: [], rawNames: Set } }
 
     evaluations.forEach(ev => {
+      // Limpiar nombre del jurado si contiene enlaces o parámetros técnicos
+      const rawJudgeName = ev.judgeName || 'Jurado';
+      const cleanJudgeName = rawJudgeName.split('<')[0].split('http')[0].trim();
+
       const catSlots = ev.evaluations?.[catId] || [];
       catSlots.forEach((slot, slotIdx) => {
-        const name = (slot.nombreFerreteria || '').trim();
-        if (!name) return;
+        const rawName = (slot.nombreFerreteria || '').trim();
+        if (!rawName) return;
 
-        const normKey = name.toLowerCase();
+        const canonical = canonicalStoreName(rawName);
+        const normKey = canonical.toLowerCase();
         const rankPos = slot.slot || (slotIdx + 1);
         // Puntos según ranking del 1 al 5: 1º lugar = 5 pts, 2º = 4 pts, 3º = 3 pts, 4º = 2 pts, 5º = 1 pto
         const points = Math.max(1, 6 - rankPos);
 
         if (!storesMap[normKey]) {
           storesMap[normKey] = {
-            name: name,
+            name: canonical,
             city: slot.ciudad || 'N/D',
             nominationsCount: 0,
             totalScore: 0,
-            judges: []
+            judges: [],
+            rawNames: new Set()
           };
+        }
+
+        // Si la ciudad estaba como N/D y este slot trae una válida, adoptarla
+        if ((storesMap[normKey].city === 'N/D' || !storesMap[normKey].city) && slot.ciudad?.trim()) {
+          storesMap[normKey].city = slot.ciudad.trim();
         }
 
         storesMap[normKey].nominationsCount += 1;
         storesMap[normKey].totalScore += points;
-        storesMap[normKey].judges.push(`${ev.judgeName} (${rankPos}º lugar · ${points} pts)`);
+        storesMap[normKey].rawNames.add(rawName);
+        storesMap[normKey].judges.push(`${cleanJudgeName} (${rankPos}º lugar · ${points} pts)`);
       });
     });
 
-    const list = Object.values(storesMap);
+    const list = Object.values(storesMap).map(item => ({
+      ...item,
+      rawNamesList: Array.from(item.rawNames)
+    }));
+
     // Ordenar de mayor a menor puntuación ponderada y luego por cantidad de nominaciones
     list.sort((a, b) => b.totalScore - a.totalScore || b.nominationsCount - a.nominationsCount);
     return list;

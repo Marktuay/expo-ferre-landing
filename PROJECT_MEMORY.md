@@ -1483,4 +1483,27 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     - Prevención preventiva agregada también en la creación manual de invitaciones individuales.
 - Compilación verificada exitosamente (`npm run build`) en 2.44s con 0 errores.
 
+---
+
+## 📅 Resumen de Avances y Cambios de la Sesión (14 de Octubre de 2026)
+
+### 🏆 Nueva Pestaña "Top 5 Ganadores por Categoría" en Panel de Jurados (`AdminJury.jsx`)
+- **Pestaña Ejecutiva:** Se implementó la 4ª pestaña `🏆 Top 5 Ganadores por Categoría` (`activeTab === 'winners'`), ubicada inmediatamente después de *"Enlaces / Jurados Invitados"*.
+- **Podio de 1º Lugar:** Tarjetas destacadas en el encabezado con los primeros lugares de las categorías *Ferretería Familiar*, *Ferretería Oro* y *Ferretería Promesa*.
+- **Tablas de Posiciones Top 5:** Detalle completo de los 5 primeros lugares con medallas (🥇 1º, 🥈 2º, 🥉 3º, 4º, 5º), insignia de puntos ponderados (`⭐ X pts`), cantidad de nominaciones y desglose de jurados votantes.
+- **Exportación a Excel:** La hoja 1 de la exportación a Excel (`handleExportExcel`) ahora genera automáticamente el consolidado del **Top 5 Ganadores por Categoría**.
+
+### 🔍 Corrección y Normalización Canónica de Ferreterías (`canonicalStoreName`)
+- **Problema Detectado con SINSA en Ferretería Familiar:**
+  - El sistema anterior agrupaba estrictamente por `name.toLowerCase()`.
+  - Los jurados ingresaron el nombre con ligeras variantes: `"Silva internacional- SINSA"` (4 pts), `"Sinsa"` (9 pts entre 2 jurados) y `"Ferretería SINSA"` (5 pts).
+  - Esto dividía los votos en 3 registros distintos, impidiendo que SINSA sumara sus 18 puntos reales y permitiendo un empate temporal en 9 puntos con otra ferretería.
+- **Solución Implementada:**
+  - Se creó la función `canonicalStoreName(rawName)` en `AdminJury.jsx`, que elimina acentos, prefijos genéricos (*Ferretería*, *Almacén*, *Materiales*) y aplica un mapeo canónico de marcas (SINSA, El Halcón, Ferretería Romo, Ferretería Jenny, Ferretería Richardson, Noelito, Innova, etc.).
+  - **Resultados Consolidados Oficiales:**
+    - **Ferretería Familiar:** 🥇 **SINSA** consolidado en 1º lugar con **18 puntos** (4 votos: Grethel Valle [4], Rodrigo Hernández [4], Yerev Sáenz [5], Miguel Guzmán [5]).
+    - **Ferretería Oro:** 🥇 **SINSA** consolidado en 1º lugar con **20 puntos** (5 votos).
+    - **Ferretería Promesa:** 🥇 **Ferretería Noelito** consolidado en 1º lugar con **14 puntos** (3 votos).
+- Compilación verificada con `npm run build` exitosa.
+
 
