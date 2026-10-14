@@ -1521,4 +1521,27 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   3. **Botón de Re-impresión Manual:** Si el asistente ya había ingresado previamente o si se desea imprimir nuevamente su credencial, la tarjeta de resultado muestra el botón `Re-imprimir Gafete` (o `Imprimir Gafete`).
   4. **Resolución Inteligente de Tokens y Direct Invites:** Admite escaneo directo tanto del `attendeeId` como del `token` de invitación (`inv_...`), sincronizando `checkedIn: true` tanto en `preregistrations` como en `directInvites`.
 
+### 📱 Compilación de APK Móvil Especial para Registro (`expo-ferre-flutter`)
+- **Antecedente:** Se requería una versión móvil nativa en Android especial para los teléfonos del personal de recepción que hiciera el escaneo en puerta, soportara búsqueda de todas las colecciones y enviara a imprimir a las 2 impresoras térmicas Brother QL-810Wc.
+- **Mejoras Implementadas en Código Flutter:**
+  1. **Lógica de Búsqueda Robusta (`FirestoreService.processCheckIn`):**
+     - Búsqueda en 5 colecciones (`preregistrations`, `users`, `staff`, `speakers`, `guests`).
+     - Búsqueda inversa de tokens en `directInvites` (`where('token', isEqualTo: code)`) para extraer el `registeredAttendeeId`.
+     - Búsqueda por `inviteToken` y fallback a `qrCode`.
+     - Sincronización atómica de `checkedIn: true`, `checkInTime` y `attended: true` en las colecciones maestras y de invitaciones directas.
+  2. **Servicio Nativo de Impresión de Gafetes (`BadgePrintService.dart`):**
+     - Incorporación de dependencias `printing: ^5.12.0` y `pdf: ^3.11.3`.
+     - Formato continuo 62 mm x 100 mm (DK-2205) idéntico a la versión web con cabecera, franja de rol (`STAFF`, `CONFERENCISTA`, `PATROCINADOR`, `INVITADO VIP`, `ASISTENTE`), nombre, empresa destacada, cargo, QR nítido y pie de evento.
+  3. **Escáner con Auto-impresión (`AdminCheckInScreen.dart`):**
+     - Interruptor en la barra superior (icono 🖨️ verde/gris) para pausar o activar la auto-impresión al escanear.
+     - Botón `[IMPRIMIR GAFETE]` y `[RE-IMPRIMIR GAFETE]` en el modal emergente de resultado.
+     - Botón directo `[Gafete]` en cada participante de la lista de preregistros aprobados (`AdminPreRegistrationsScreen.dart`).
+- **Compilación Exitosa:**
+  - Compilado en modo Release (`flutter build apk --release`).
+  - Archivo generado: `app-release.apk` (31.6 MB).
+  - Publicado y versionado para descarga directa en:
+    - Ruta web pública: `public/apk/expoferre-registro-2026.apk`
+    - URL de descarga directa para teléfonos del staff: `https://expoferrenicaragua.com/apk/expoferre-registro-2026.apk`
+    - Commit `71d041d` sincronizado en GitHub `main`.
+
 
