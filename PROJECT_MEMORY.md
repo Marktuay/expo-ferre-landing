@@ -1513,9 +1513,12 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Acciones Realizadas:**
   1. Se eliminó de raíz el documento duplicado `fhYRN2DplaUd0sNFTCKp` (*Karla Elsania Téllez Ruiz · CEMEX NICARAGUA S.A · 1/10/2026, 11:02:58 a. m.*) tanto de `juryEvaluations` como de `juryEvaluations_backup`.
   2. Se conserva intacta su evaluación definitiva oficial `WQJ7S4M05MA52a7MF0wV` (*Karla Téllez · 12/10/2026, 6:28:48 p. m.*).
-### 📥 Carga y Validación de Invitaciones Directas (ExpoFerre Taller y DURMAN)
-- **ExpoFerre Taller:** 4 contactos validados y agregados a `sponsorId: 'general'` (*Raquel Eugenia, Moíses Andrés, Christian, Alberto*). Se omitió preventivamente a *Oscar Danilo* ya que fue registrado y acreditado por *Fernández Sera*.
-- **DURMAN:** 7 contactos 100% nuevos validados y agregados con arte oficial co-brandeado (`sponsorId: 'durman'`, *Darling, Eddy, Angie, Javier, Hazel, Denis Miguel, Enma*).
-- Todos los documentos sincronizados en tiempo real con `directInvites_backup`.
+### 🏷️ Impresión Térmica de Credenciales en Control de Asistencia (`AdminCheckIn.jsx`)
+- **Problema Abordado:** En el módulo de *Control de Asistencia*, al escanear el QR o verificar con pistola USB se confirmaba el ingreso, pero no detonaba la impresión del gafete ni permitía reimprimir si el participante ya había ingresado.
+- **Solución Implementada:**
+  1. **Integración con Brother QL-810Wc (`PrintableBadgeList.jsx` & `BadgeTemplate.jsx`):** Formato vertical estándar en rollo DK-2205 continuo de 62 mm x 100 mm con corte automático.
+  2. **Casilla de Auto-impresión:** Checkbox activo por defecto `🖨️ Auto-imprimir credencial en check-in`. Al confirmar el acceso por primera vez, detona de forma inmediata la ventana de impresión para corte automático.
+  3. **Botón de Re-impresión Manual:** Si el asistente ya había ingresado previamente o si se desea imprimir nuevamente su credencial, la tarjeta de resultado muestra el botón `Re-imprimir Gafete` (o `Imprimir Gafete`).
+  4. **Resolución Inteligente de Tokens y Direct Invites:** Admite escaneo directo tanto del `attendeeId` como del `token` de invitación (`inv_...`), sincronizando `checkedIn: true` tanto en `preregistrations` como en `directInvites`.
 
 

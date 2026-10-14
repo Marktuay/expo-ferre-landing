@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { collection, doc, getDoc, updateDoc, serverTimestamp, onSnapshot, query } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, updateDoc, serverTimestamp, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
+import PrintableBadgeList from './PrintableBadgeList';
 
 const playBeep = (type = 'success') => {
   try {
@@ -133,64 +134,153 @@ export default function AdminCheckIn({ onBack }) {
     };
   }, [basePath]);
 
+  const [printBadgeItems, setPrintBadgeItems] = useState(null);
+  const [autoPrintEnabled, setAutoPrintEnabled] = useState(true);
+
   const collectionsToCheck = [
-    { name: 'Preregistro (General)', path: `${basePath}/preregistrations` },
-    { name: 'Patrocinador', path: `users` },
-    { name: 'Staff', path: `${basePath}/staff` },
-    { name: 'Conferencista', path: `${basePath}/speakers` },
-    { name: 'Invitado Especial', path: `${basePath}/guests` }
+    { key: 'preregistrations', name: 'Preregistro (General)', path: `${basePath}/preregistrations` },
+    { key: 'users', name: 'Patrocinador', path: `users` },
+    { key: 'staff', name: 'Staff Técnico', path: `${basePath}/staff` },
+    { key: 'speakers', name: 'Conferencista', path: `${basePath}/speakers` },
+    { key: 'guests', name: 'Invitado Especial', path: `${basePath}/guests` }
   ];
 
+  const determineBadgeRole = (colKey, data) => {
+    if (colKey === 'staff') return 'STAFF';
+    if (colKey === 'speakers') return 'CONFERENCISTA';
+    if (colKey === 'users' || data.role === 'sponsor') return 'PATROCINADOR';
+    if (data.isDirectInvite || data.type === 'direct_invite' || data.position === 'Invitado Especial' || data.position === 'Invitado VIP') {
+      return 'INVITADO VIP';
+    }
+    return 'ASISTENTE';
+  };
+
   const processQRCode = async (code) => {
-    if (!code || isProcessing) return;
+    const rawCode = (code || '').trim();
+    if (!rawCode || isProcessing) return;
     setIsProcessing(true);
     setLastScanResult(null);
 
     let foundRef = null;
     let foundData = null;
     let foundCollectionName = '';
+    let foundColKey = '';
 
     try {
+      // 1. Búsqueda directa por ID en las colecciones oficiales
       for (const col of collectionsToCheck) {
-        const docRef = doc(db, col.path, code);
+        const docRef = doc(db, col.path, rawCode);
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
           foundRef = docRef;
-          foundData = docSnap.data();
+          foundData = { id: docSnap.id, ...docSnap.data() };
           foundCollectionName = col.name;
+          foundColKey = col.key;
           break;
+        }
+      }
+
+      // 2. Si no se encontró por ID directo, buscar si el código escaneado es un token de invitación
+      if (!foundRef) {
+        // Buscar en directInvites
+        const qInv = query(collection(db, `${basePath}/directInvites`), where('token', '==', rawCode));
+        const snapInv = await getDocs(qInv);
+        if (!snapInv.empty) {
+          const invData = snapInv.docs[0].data();
+          const attendeeId = invData.registeredAttendeeId;
+          if (attendeeId) {
+            const attRef = doc(db, `${basePath}/preregistrations`, attendeeId);
+            const attSnap = await getDoc(attRef);
+            if (attSnap.exists()) {
+              foundRef = attRef;
+              foundData = { id: attSnap.id, ...attSnap.data() };
+              foundCollectionName = 'Invitado Directo (Patrocinador)';
+              foundColKey = 'preregistrations';
+            }
+          }
+        }
+      }
+
+      // 3. Si aún no se encontró, buscar en preregistrations por inviteToken
+      if (!foundRef) {
+        const qPre = query(collection(db, `${basePath}/preregistrations`), where('inviteToken', '==', rawCode));
+        const snapPre = await getDocs(qPre);
+        if (!snapPre.empty) {
+          const preDoc = snapPre.docs[0];
+          foundRef = preDoc.ref;
+          foundData = { id: preDoc.id, ...preDoc.data() };
+          foundCollectionName = 'Invitado Directo (Patrocinador)';
+          foundColKey = 'preregistrations';
         }
       }
 
       if (!foundRef) {
         playBeep('error');
-        setLastScanResult({ type: 'error', message: `Código QR inválido o no encontrado: ${code}` });
+        setLastScanResult({ type: 'error', message: `Código QR inválido o no encontrado: ${rawCode}` });
         setIsProcessing(false);
         return;
       }
+
+      const roleLabel = determineBadgeRole(foundColKey, foundData);
+      const attendeeName = foundData.name || `${foundData.nombre || ''} ${foundData.apellido || ''}`.trim() || 'Participante';
+      const attendeeCompany = foundData.company || foundData.empresa || foundData.sponsorName || '';
+      const attendeePosition = foundData.position || foundData.cargo || foundData.puesto || '';
+
+      const badgeItem = {
+        id: foundData.id || rawCode,
+        name: attendeeName,
+        company: attendeeCompany,
+        position: attendeePosition,
+        roleLabel: roleLabel
+      };
 
       if (foundData.checkedIn) {
         playBeep('error');
         setLastScanResult({ 
           type: 'warning', 
           message: `El participante ya había ingresado previamente.`,
-          name: foundData.name || foundData.nombre || 'Participante',
+          name: attendeeName,
+          company: attendeeCompany,
+          roleLabel: roleLabel,
           collection: foundCollectionName,
-          time: foundData.checkInTime?.toDate().toLocaleString('es-ES') || 'Desconocido'
+          time: foundData.checkInTime?.toDate ? foundData.checkInTime.toDate().toLocaleString('es-NI', { timeZone: 'America/Managua' }) : 'Desconocido',
+          badgeData: badgeItem
         });
       } else {
         await updateDoc(foundRef, {
           checkedIn: true,
           checkInTime: serverTimestamp()
         });
+
+        // Sincronizar en directInvites si fue invitación directa
+        if (foundData.inviteToken) {
+          try {
+            const invRef = doc(db, `${basePath}/directInvites`, foundData.inviteToken);
+            await updateDoc(invRef, {
+              checkedIn: true,
+              checkInTime: serverTimestamp()
+            });
+          } catch (syncErr) {
+            console.warn("Nota: No se requirió actualizar directInvites:", syncErr);
+          }
+        }
+
         playBeep('success');
         setLastScanResult({
           type: 'success',
-          message: `Check-in exitoso.`,
-          name: foundData.name || foundData.nombre || 'Participante',
-          collection: foundCollectionName
+          message: `Check-in exitoso. Gafete enviado a impresión.`,
+          name: attendeeName,
+          company: attendeeCompany,
+          roleLabel: roleLabel,
+          collection: foundCollectionName,
+          badgeData: badgeItem
         });
+
+        // Detonar impresión automática si está activa la casilla
+        if (autoPrintEnabled) {
+          setPrintBadgeItems([badgeItem]);
+        }
       }
 
     } catch (error) {
@@ -269,6 +359,19 @@ export default function AdminCheckIn({ onBack }) {
                   Verificar
                 </button>
               </form>
+              {/* Selector de Impresión Térmica Automática */}
+              <div className="mt-4 pt-4 border-t border-outline-variant flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer select-none text-sm font-bold text-slate-800">
+                  <input 
+                    type="checkbox" 
+                    checked={autoPrintEnabled} 
+                    onChange={(e) => setAutoPrintEnabled(e.target.checked)}
+                    className="w-4 h-4 text-[#0d47a1] rounded border-gray-300 focus:ring-[#0d47a1]"
+                  />
+                  <span>🖨️ Auto-imprimir credencial en check-in (Brother QL-810Wc)</span>
+                </label>
+                <span className="text-xs text-slate-500 font-medium hidden sm:inline">Rollo DK-2205 (62 mm)</span>
+              </div>
             </div>
 
             {lastScanResult && (
@@ -278,7 +381,7 @@ export default function AdminCheckIn({ onBack }) {
                 'bg-red-50 border-red-500'
               }`}>
                 <div className="flex items-start gap-4">
-                  <span className={`material-symbols-outlined text-4xl ${
+                  <span className={`material-symbols-outlined text-4xl shrink-0 ${
                     lastScanResult.type === 'success' ? 'text-[#16a34a]' : 
                     lastScanResult.type === 'warning' ? 'text-[#f39200]' : 
                     'text-red-500'
@@ -286,7 +389,7 @@ export default function AdminCheckIn({ onBack }) {
                     {lastScanResult.type === 'success' ? 'check_circle' : 
                      lastScanResult.type === 'warning' ? 'warning' : 'error'}
                   </span>
-                  <div>
+                  <div className="flex-1">
                     <h3 className={`text-xl font-bold mb-1 ${
                       lastScanResult.type === 'success' ? 'text-[#16a34a]' : 
                       lastScanResult.type === 'warning' ? 'text-[#b45309]' : 
@@ -295,20 +398,56 @@ export default function AdminCheckIn({ onBack }) {
                       {lastScanResult.type === 'success' ? '¡ACCESO CONCEDIDO!' : 
                        lastScanResult.type === 'warning' ? 'ACCESO DENEGADO (YA INGRESÓ)' : 'CÓDIGO INVÁLIDO'}
                     </h3>
-                    <p className="text-on-surface-variant text-lg mb-2">{lastScanResult.message}</p>
+                    <p className="text-on-surface-variant text-base mb-2">{lastScanResult.message}</p>
                     
                     {lastScanResult.name && (
-                      <div className="mt-4 bg-white/50 p-4 rounded-md">
-                        <p className="font-bold text-on-surface text-xl">{lastScanResult.name}</p>
-                        <p className="text-secondary">{lastScanResult.collection}</p>
-                        {lastScanResult.time && (
-                          <p className="text-sm text-on-surface-variant mt-2 font-medium">Hora del primer check-in: {lastScanResult.time}</p>
+                      <div className="mt-4 bg-white/70 border border-slate-200/80 p-4 rounded-xl flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-black text-white">
+                              {lastScanResult.roleLabel || 'ASISTENTE'}
+                            </span>
+                            <span className="text-xs text-secondary font-medium">{lastScanResult.collection}</span>
+                          </div>
+                          <p className="font-black text-on-surface text-xl leading-tight">{lastScanResult.name}</p>
+                          {lastScanResult.company && (
+                            <p className="text-sm font-bold text-slate-700 uppercase mt-0.5">{lastScanResult.company}</p>
+                          )}
+                          {lastScanResult.time && (
+                            <p className="text-xs text-amber-900 mt-2 font-medium bg-amber-50 px-2.5 py-1 rounded border border-amber-200 inline-block">
+                              🕒 Hora del primer check-in: {lastScanResult.time}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Botón de Impresión / Re-impresión Manual */}
+                        {lastScanResult.badgeData && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setPrintBadgeItems([lastScanResult.badgeData])}
+                              className="px-4 py-2.5 bg-[#0d47a1] hover:bg-blue-800 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-900/20 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                              title="Imprimir credencial en impresora Brother QL-810Wc"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">print</span>
+                              <span>{lastScanResult.type === 'warning' ? 'Re-imprimir Gafete' : 'Imprimir Gafete'}</span>
+                            </button>
+                          </div>
                         )}
                       </div>
                     )}
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Modal / Render de Impresión Térmica */}
+            {printBadgeItems && (
+              <PrintableBadgeList
+                items={printBadgeItems}
+                roleLabel={printBadgeItems[0]?.roleLabel || 'ASISTENTE'}
+                onClose={() => setPrintBadgeItems(null)}
+              />
             )}
           </div>
 
