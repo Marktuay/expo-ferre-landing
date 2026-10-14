@@ -231,10 +231,10 @@ export default function AdminJury({ onBack, adminUser }) {
     });
   };
 
-  // Eliminar una evaluación (Exclusivo Super Administrador: marktuay@gmail.com)
+  // Eliminar una evaluación (Exclusivo Super Administrador: marktuay@gmail.com o rol admin)
   const handleDeleteEvaluation = async (ev) => {
-    if (!isSuperAdmin) {
-      alert("Acceso denegado: Solo el Super Administrador (marktuay@gmail.com) tiene permiso para eliminar evaluaciones.");
+    if (!isSuperAdmin && adminUser?.role !== 'admin') {
+      alert("Acceso denegado: Solo el Administrador tiene permiso para eliminar evaluaciones.");
       return;
     }
     const confirmDelete = window.confirm(
@@ -243,17 +243,26 @@ export default function AdminJury({ onBack, adminUser }) {
     if (!confirmDelete) return;
 
     try {
-      await deleteDoc(doc(db, `${getEventBasePath()}/juryEvaluations`, ev.id));
+      const basePath = getEventBasePath();
+      // Eliminar de la colección activa
+      await deleteDoc(doc(db, `${basePath}/juryEvaluations`, ev.id));
+      // Eliminar también de la copia de respaldo para evitar que una restauración automática lo reingrese
+      try {
+        await deleteDoc(doc(db, `${basePath}/juryEvaluations_backup`, ev.id));
+      } catch (backupErr) {
+        console.warn('Nota: No se requirió eliminar de backup:', backupErr);
+      }
+      alert(`La evaluación de "${ev.judgeName}" fue eliminada correctamente.`);
     } catch (err) {
       console.error('Error al eliminar evaluación:', err);
       alert('Error al eliminar la evaluación: ' + err.message);
     }
   };
 
-  // Eliminar un jurado invitado / enlace de prueba (Exclusivo Super Administrador: marktuay@gmail.com)
+  // Eliminar un jurado invitado / enlace de prueba (Exclusivo Administrador)
   const handleDeleteInvitedJudge = async (judge) => {
-    if (!isSuperAdmin) {
-      alert("Acceso denegado: Solo el Super Administrador (marktuay@gmail.com) tiene permiso para eliminar invitaciones.");
+    if (!isSuperAdmin && adminUser?.role !== 'admin') {
+      alert("Acceso denegado: Solo el Administrador tiene permiso para eliminar invitaciones.");
       return;
     }
     const confirmDelete = window.confirm(
@@ -262,7 +271,13 @@ export default function AdminJury({ onBack, adminUser }) {
     if (!confirmDelete) return;
 
     try {
-      await deleteDoc(doc(db, `${getEventBasePath()}/invitedJudges`, judge.id));
+      const basePath = getEventBasePath();
+      await deleteDoc(doc(db, `${basePath}/invitedJudges`, judge.id));
+      try {
+        await deleteDoc(doc(db, `${basePath}/invitedJudges_backup`, judge.id));
+      } catch (backupErr) {
+        console.warn('Nota: No se requirió eliminar de backup:', backupErr);
+      }
     } catch (err) {
       console.error('Error al eliminar invitación:', err);
       alert('Error al eliminar la invitación: ' + err.message);
@@ -782,12 +797,12 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                       </span>
                     </button>
 
-                    {isSuperAdmin && (
+                    {(isSuperAdmin || adminUser?.role === 'admin') && (
                       <button
                         type="button"
                         onClick={() => handleDeleteEvaluation(ev)}
                         className="px-2.5 py-1.5 text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 hover:border-rose-600 rounded-lg text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
-                        title="Eliminar esta evaluación (Super Administrador)"
+                        title="Eliminar esta evaluación (Administrador)"
                       >
                         <Trash2 size={13} />
                         <span>Eliminar</span>
@@ -1101,12 +1116,12 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                                 <span>{copiedId === j.id ? '¡Copiado!' : 'Copiar'}</span>
                               </button>
 
-                              {/* Botón Eliminar Jurado Invitado (Exclusivo Super Administrador) */}
-                              {isSuperAdmin && (
+                              {/* Botón Eliminar Jurado Invitado (Exclusivo Administrador) */}
+                              {(isSuperAdmin || adminUser?.role === 'admin') && (
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteInvitedJudge(j)}
-                                  title="Eliminar invitación (Super Administrador)"
+                                  title="Eliminar invitación (Administrador)"
                                   className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-lg transition-colors cursor-pointer"
                                 >
                                   <Trash2 size={14} />

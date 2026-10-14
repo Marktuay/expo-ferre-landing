@@ -1506,4 +1506,13 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     - **Ferretería Promesa:** 🥇 **Ferretería Noelito** consolidado en 1º lugar con **14 puntos** (3 votos).
 - Compilación verificada con `npm run build` exitosa.
 
+### 🗑️ Depuración de Voto Duplicado de Jurado (Karla Elsania Téllez Ruiz) y Sincronización con Backup
+- **Causa del Regreso de Datos Eliminados:**
+  - Al borrar la evaluación duplicada desde la interfaz solo se eliminaba de `events/2026/juryEvaluations`, pero permanecía en la colección de espejo inmutable `events/2026/juryEvaluations_backup` creada por el servicio de auto-respaldo (`createFullFirestoreBackup` / `restoreFullFirestoreBackup`).
+  - Si ocurría una restauración o sincronización, los datos volvían a insertarse.
+- **Acciones Realizadas:**
+  1. Se eliminó de raíz el documento duplicado `fhYRN2DplaUd0sNFTCKp` (*Karla Elsania Téllez Ruiz · CEMEX NICARAGUA S.A · 1/10/2026, 11:02:58 a. m.*) tanto de `juryEvaluations` como de `juryEvaluations_backup`.
+  2. Se conserva intacta su evaluación definitiva oficial `WQJ7S4M05MA52a7MF0wV` (*Karla Téllez · 12/10/2026, 6:28:48 p. m.*).
+  3. Se actualizó `AdminJury.jsx` para que las funciones `handleDeleteEvaluation` y `handleDeleteInvitedJudge` eliminen simultáneamente de la colección activa y de su respectivo `_backup`, además de permitir la acción tanto al Super Admin como a usuarios con rol `admin`.
+
 

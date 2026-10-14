@@ -205,6 +205,17 @@
     - **Ferretería Oro:** 🥇 **SINSA** con **20 puntos** (5 votos).
     - **Ferretería Promesa:** 🥇 **Ferretería Noelito** con **14 puntos** (3 votos).
 
+---
+
+## 20. 🗑️ Depuración de Voto Duplicado de Jurado (Karla Elsania Téllez Ruiz) (14 de Octubre, 2026)
+- **Motivo del Reingreso de Datos:**
+  - Cuando se eliminaba una evaluación desde la vista del administrador, solo se borraba del nodo activo `juryEvaluations`, pero permanecía en la colección de respaldo espejo `juryEvaluations_backup` creada por los respaldos automáticos de Firestore.
+  - Al realizarse una restauración o sincronización de base de datos, el documento era reingresado automáticamente.
+- **Acciones y Corrección:**
+  1. Se eliminó de raíz el documento duplicado `fhYRN2DplaUd0sNFTCKp` (*Karla Elsania Téllez Ruiz · CEMEX NICARAGUA S.A · 1/10/2026, 11:02:58 a. m.*) tanto de `juryEvaluations` como de `juryEvaluations_backup`.
+  2. Su evaluación definitiva oficial `WQJ7S4M05MA52a7MF0wV` (*Karla Téllez · 12/10/2026, 6:28:48 p. m.*) se mantiene activa.
+  3. En `AdminJury.jsx`, se actualizaron `handleDeleteEvaluation` y `handleDeleteInvitedJudge` para eliminar en simultáneo del `_backup` correspondiente y otorgar permisos a roles `admin` para evitar bloqueos.
+
 
 
 
