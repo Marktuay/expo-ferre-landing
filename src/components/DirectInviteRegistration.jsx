@@ -398,6 +398,7 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
         try {
           await addDoc(collection(db, 'mail'), {
             to: cleanEmail,
+            bcc: 'gerenciaeventoskt@outlook.com',
             message: {
               subject: '¡Registro Confirmado! Tu Pase Oficial y Código QR para EXPO FERRE 2026',
               html: `

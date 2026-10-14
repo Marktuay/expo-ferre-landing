@@ -1536,12 +1536,14 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
      - Interruptor en la barra superior (icono 🖨️ verde/gris) para pausar o activar la auto-impresión al escanear.
      - Botón `[IMPRIMIR GAFETE]` y `[RE-IMPRIMIR GAFETE]` en el modal emergente de resultado.
      - Botón directo `[Gafete]` en cada participante de la lista de preregistros aprobados (`AdminPreRegistrationsScreen.dart`).
-- **Compilación Exitosa:**
-  - Compilado en modo Release (`flutter build apk --release`).
-  - Archivo generado: `app-release.apk` (31.6 MB).
-  - Publicado y versionado para descarga directa en:
-    - Ruta web pública: `public/apk/expoferre-registro-2026.apk`
-    - URL de descarga directa para teléfonos del staff: `https://expoferrenicaragua.com/apk/expoferre-registro-2026.apk`
-    - Commit `71d041d` sincronizado en GitHub `main`.
+### 📧 Copia de Seguridad Oculta (BCC) en Envíos Directos y Confirmaciones
+- **Requerimiento:** Al enviar correos de invitaciones directas, recordatorios masivos y confirmaciones de registro con código QR, se debe enviar una copia automática al correo oficial de gerencia: `gerenciaeventoskt@outlook.com`.
+- **Implementación Realizada:**
+  1. **Envíos Individuales de Invitación (`AdminDirectInvites.jsx`):** Se agregó `bcc: 'gerenciaeventoskt@outlook.com'` al encolar el correo en la colección `mail` de Firestore (`handleSendEmailDirect`).
+  2. **Envíos Masivos por Patrocinador (`AdminDirectInvites.jsx`):** Se integró `bcc: 'gerenciaeventoskt@outlook.com'` en el despachador masivo por lotes (`handleSendBulkEmail`).
+  3. **Recordatorios Masivos a Registrados (`AdminDirectInvites.jsx`):** Se integró copia oculta `bcc: 'gerenciaeventoskt@outlook.com'` en la campaña de recordatorios de jueves, viernes y sábado (`handleSendBulkRegReminder`).
+  4. **Confirmación de Registro Inmediato (`DirectInviteRegistration.jsx`):** Al completar el formulario de registro y emitir el gafete oficial con QR, el correo de confirmación enviado al participante ahora incluye copia oculta a `gerenciaeventoskt@outlook.com`.
+- Compilación verificada con `npm run build` en 2.07s y 0 errores.
+
 
 

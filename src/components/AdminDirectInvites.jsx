@@ -60,6 +60,9 @@ import {
   DEFAULT_WATI_CONFIG 
 } from '../services/watiService';
 
+// Correo de auditoría y respaldo al que se envía copia oculta (BCC) de todas las invitaciones directas
+const INVITE_COPY_NOTIFICATION_EMAIL = 'gerenciaeventoskt@outlook.com';
+
 export default function AdminDirectInvites({ onBack, adminUser }) {
   const [invites, setInvites] = useState([]);
   const [registeredGuests, setRegisteredGuests] = useState([]);
@@ -1888,9 +1891,11 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       const { subject, html } = buildInviteEmail(invite, targetEmail);
 
       // 1. Encolar correo en la colección 'mail' de Firestore con timeout
+      // Se envía con copia oculta (bcc) a gerenciaeventoskt@outlook.com para auditoría y respaldo
       await withTimeout(
         addDoc(collection(db, 'mail'), {
           to: targetEmail,
+          bcc: INVITE_COPY_NOTIFICATION_EMAIL,
           message: {
             subject: subject,
             html: html
@@ -2030,9 +2035,11 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
           const { subject, html } = buildInviteEmail(inv, null, isReminderMode);
 
           // 1. Encolar correo en la colección 'mail' de Firestore con timeout
+          // Se envía con copia oculta (bcc) a gerenciaeventoskt@outlook.com
           await withTimeout(
             addDoc(collection(db, 'mail'), {
               to: targetEmail,
+              bcc: INVITE_COPY_NOTIFICATION_EMAIL,
               message: {
                 subject,
                 html
@@ -2386,6 +2393,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
           await withTimeout(
             addDoc(collection(db, 'mail'), {
               to: person.email,
+              bcc: INVITE_COPY_NOTIFICATION_EMAIL,
               message: { subject, html }
             }),
             12000,
