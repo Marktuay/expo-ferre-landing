@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Award, Plus, FileSpreadsheet, ArrowLeft, Search, Building2, UserCheck, Sparkles, Copy, Check, MessageSquare, Phone, Mail, CheckCircle2, Clock, ExternalLink, X, Send, Trash2 } from 'lucide-react';
+import { Award, Plus, FileSpreadsheet, ArrowLeft, Search, Building2, UserCheck, Sparkles, Copy, Check, MessageSquare, Phone, Mail, CheckCircle2, Clock, ExternalLink, X, Send, Trash2, Trophy, MapPin } from 'lucide-react';
 import { db, auth } from '../firebase';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
@@ -325,7 +325,29 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
       const XLSX = await import('xlsx');
       const wb = XLSX.utils.book_new();
 
-      // Hoja 1: Resumen de Nominaciones Recibidas
+      // Hoja 1: Cuadro de Honor - Top 5 Ganadores por Categoría
+      const top5Data = [];
+      [
+        { name: '01. Ferretería Familiar', list: rankingFamiliar.slice(0, 5) },
+        { name: '02. Ferretería Oro', list: rankingOro.slice(0, 5) },
+        { name: '03. Ferretería Promesa', list: rankingPromesa.slice(0, 5) },
+      ].forEach(cat => {
+        cat.list.forEach((st, idx) => {
+          top5Data.push({
+            'Categoría': cat.name,
+            'Lugar': `${idx + 1}º Lugar`,
+            'Ferretería': st.name,
+            'Ciudad': st.city,
+            'Puntaje Total Ponderado': st.totalScore,
+            'Total Nominaciones': st.nominationsCount,
+            'Desglose de Votos': st.judges.join(' | ')
+          });
+        });
+      });
+      const wsTop5 = XLSX.utils.json_to_sheet(top5Data);
+      XLSX.utils.book_append_sheet(wb, wsTop5, "Top 5 Ganadores");
+
+      // Hoja 2: Resumen de Nominaciones Recibidas
       const evalsData = [];
       evaluations.forEach(ev => {
         ['familiar', 'oro', 'promesa'].forEach(cat => {
@@ -539,6 +561,17 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
           }`}
         >
           <MessageSquare size={18} /> Enlaces / Jurados Invitados ({invitedJudges.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab('winners')}
+          className={`pb-3 px-4 font-bold text-sm flex items-center gap-2 border-b-2 transition-all ${
+            activeTab === 'winners'
+              ? 'border-[#f39200] text-[#f39200]'
+              : 'border-transparent text-gray-500 hover:text-gray-900'
+          }`}
+        >
+          <Trophy size={18} /> 🏆 Top 5 Ganadores por Categoría
         </button>
       </div>
 
@@ -1009,6 +1042,260 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
           </div>
         );
       })()}
+
+      {/* 4. TOP 5 GANADORES POR CATEGORÍA */}
+      {activeTab === 'winners' && (
+        <div className="space-y-8">
+          {/* Banner de Cabecera Oficial */}
+          <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+            <div className="absolute right-0 top-0 translate-x-10 -translate-y-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <span className="bg-black/30 text-amber-200 text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full inline-flex items-center gap-1.5 mb-2">
+                  <Trophy size={13} className="text-amber-300" />
+                  Cuadro de Honor Oficial
+                </span>
+                <h3 className="text-2xl md:text-3xl font-black text-white">
+                  Top 5 Ganadores por Categoría
+                </h3>
+                <p className="text-amber-100 text-sm mt-1 max-w-2xl">
+                  Selección oficial de las 5 ferreterías con mayor puntuación ponderada acumulada según las evaluaciones y votos de los jurados (1º = 5 pts, 2º = 4 pts, 3º = 3 pts, 4º = 2 pts, 5º = 1 pto).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleExportExcel}
+                disabled={isExporting}
+                className="bg-white hover:bg-amber-50 text-slate-900 font-bold px-4 py-2.5 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2 text-xs md:text-sm shrink-0 cursor-pointer"
+              >
+                <FileSpreadsheet size={16} className="text-emerald-600" />
+                {isExporting ? 'Exportando...' : 'Descargar Top 5 en Excel'}
+              </button>
+            </div>
+          </div>
+
+          {/* Podio Ejecutivo: Campeones 1º Lugar */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[
+              { id: 'familiar', catNum: '01', title: 'Ferretería Familiar', winner: rankingFamiliar[0], border: 'border-amber-300', bg: 'bg-amber-50/60', badge: 'bg-amber-500 text-white' },
+              { id: 'oro', catNum: '02', title: 'Ferretería Oro', winner: rankingOro[0], border: 'border-yellow-400', bg: 'bg-yellow-50/60', badge: 'bg-yellow-600 text-white' },
+              { id: 'promesa', catNum: '03', title: 'Ferretería Promesa', winner: rankingPromesa[0], border: 'border-blue-300', bg: 'bg-blue-50/60', badge: 'bg-blue-600 text-white' }
+            ].map((p) => (
+              <div key={`podium-${p.id}`} className={`p-5 rounded-2xl border-2 ${p.border} ${p.bg} shadow-xs relative flex flex-col justify-between`}>
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md ${p.badge}`}>
+                      Categoría {p.catNum}
+                    </span>
+                    <span className="text-xs font-black text-amber-800 flex items-center gap-1">
+                      🥇 1º Lugar
+                    </span>
+                  </div>
+                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">{p.title}</h4>
+                  {p.winner ? (
+                    <div className="mt-2">
+                      <p className="text-lg md:text-xl font-black text-gray-900 leading-tight">
+                        {p.winner.name}
+                      </p>
+                      <p className="text-xs text-gray-600 flex items-center gap-1 mt-1">
+                        <MapPin size={12} className="text-gray-400" /> {p.winner.city || 'Nicaragua'}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400 italic mt-3">Sin evaluaciones registradas</p>
+                  )}
+                </div>
+                {p.winner && (
+                  <div className="mt-4 pt-3 border-t border-gray-200/60 flex items-center justify-between">
+                    <span className="text-xs text-gray-600 font-medium">Puntuación:</span>
+                    <span className="bg-amber-100 text-amber-900 font-black px-2.5 py-1 rounded-full text-xs">
+                      ⭐ {p.winner.totalScore} pts ({p.winner.nominationsCount} {p.winner.nominationsCount === 1 ? 'voto' : 'votos'})
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Listas Detalladas Top 5 por Categoría */}
+          {[
+            {
+              id: 'familiar',
+              num: '01',
+              title: '01. FERRETERÍA FAMILIAR',
+              subtitle: 'Reconoce a ferreterías donde la familia es parte fundamental de la identidad, historia y continuidad.',
+              list: rankingFamiliar.slice(0, 5),
+              color: 'from-amber-500/15 via-amber-500/5 to-transparent',
+              badge: 'bg-amber-100 text-amber-900 border-amber-300'
+            },
+            {
+              id: 'oro',
+              num: '02',
+              title: '02. FERRETERÍA ORO (25+ Años)',
+              subtitle: 'Reconoce a ferreterías con más de 25 años de trayectoria sólida, solvencia y reconocimiento en el sector.',
+              list: rankingOro.slice(0, 5),
+              color: 'from-yellow-500/15 via-yellow-500/5 to-transparent',
+              badge: 'bg-yellow-100 text-yellow-900 border-yellow-300'
+            },
+            {
+              id: 'promesa',
+              num: '03',
+              title: '03. FERRETERÍA PROMESA (<5 Años)',
+              subtitle: 'Reconoce a ferreterías jóvenes con menos de 5 años de presencia en Nicaragua con alto potencial y dinamismo.',
+              list: rankingPromesa.slice(0, 5),
+              color: 'from-blue-500/15 via-blue-500/5 to-transparent',
+              badge: 'bg-blue-100 text-blue-900 border-blue-300'
+            }
+          ].map(category => (
+            <div key={`top5-${category.id}`} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              {/* Header de Categoría */}
+              <div className={`p-5 bg-gradient-to-r ${category.color} border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2`}>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`px-2.5 py-0.5 rounded-md text-xs font-black uppercase border ${category.badge}`}>
+                      Categoría {category.num}
+                    </span>
+                    <span className="text-xs text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      🏆 5 Primeros Lugares
+                    </span>
+                  </div>
+                  <h3 className="font-black text-gray-900 text-lg md:text-xl">{category.title}</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">{category.subtitle}</p>
+                </div>
+                <div className="text-left sm:text-right shrink-0">
+                  <span className="text-xs text-gray-600 font-bold block">
+                    {category.list.length} de 5 posiciones
+                  </span>
+                </div>
+              </div>
+
+              {/* Contenido / Tabla Top 5 */}
+              {category.list.length === 0 ? (
+                <div className="p-8 text-center text-gray-400 text-sm">
+                  Aún no hay evaluaciones registradas en esta categoría para conformar el Top 5.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-gray-50 text-gray-500 font-bold text-xs uppercase border-b border-gray-100">
+                      <tr>
+                        <th className="py-3 px-4 w-32 text-center">Posición</th>
+                        <th className="py-3 px-4">Ferretería Ganadora</th>
+                        <th className="py-3 px-4">Ciudad / Ubicación</th>
+                        <th className="py-3 px-4 text-center">Puntaje Ponderado</th>
+                        <th className="py-3 px-4 text-center">Votos de Jurados</th>
+                        <th className="py-3 px-4 text-right">Detalle de Valoración</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {category.list.map((store, idx) => {
+                        const isFirst = idx === 0;
+                        const isSecond = idx === 1;
+                        const isThird = idx === 2;
+                        return (
+                          <tr
+                            key={`winner-${category.id}-${idx}`}
+                            className={`transition-colors ${
+                              isFirst
+                                ? 'bg-amber-50/70 font-semibold'
+                                : isSecond
+                                ? 'bg-slate-50/60'
+                                : isThird
+                                ? 'bg-orange-50/40'
+                                : 'hover:bg-gray-50/60'
+                            }`}
+                          >
+                            {/* Posición con medalla */}
+                            <td className="py-3.5 px-4 text-center">
+                              {isFirst && (
+                                <span className="inline-flex items-center gap-1 bg-amber-400/20 text-amber-900 border border-amber-300 px-3 py-1 rounded-full text-xs font-black">
+                                  🥇 1º Lugar
+                                </span>
+                              )}
+                              {isSecond && (
+                                <span className="inline-flex items-center gap-1 bg-slate-200 text-slate-800 border border-slate-300 px-2.5 py-1 rounded-full text-xs font-black">
+                                  🥈 2º Lugar
+                                </span>
+                              )}
+                              {isThird && (
+                                <span className="inline-flex items-center gap-1 bg-amber-200/60 text-amber-900 border border-amber-300 px-2.5 py-1 rounded-full text-xs font-black">
+                                  🥉 3º Lugar
+                                </span>
+                              )}
+                              {idx === 3 && (
+                                <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-xs font-bold">
+                                  4º Lugar
+                                </span>
+                              )}
+                              {idx === 4 && (
+                                <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-xs font-bold">
+                                  5º Lugar
+                                </span>
+                              )}
+                            </td>
+
+                            {/* Nombre Ferretería */}
+                            <td className="py-3.5 px-4">
+                              <div className="flex items-center gap-2">
+                                <Building2 size={16} className={isFirst ? 'text-amber-600' : 'text-gray-400'} />
+                                <div>
+                                  <span className={`block ${isFirst ? 'text-base font-black text-gray-900' : 'font-bold text-gray-800'}`}>
+                                    {store.name}
+                                  </span>
+                                  {isFirst && (
+                                    <span className="text-[10px] text-amber-700 font-black uppercase tracking-wider">
+                                      ⭐ Ganador Oficial de la Categoría
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Ciudad */}
+                            <td className="py-3.5 px-4 text-gray-600 text-xs">
+                              <div className="flex items-center gap-1">
+                                <MapPin size={12} className="text-gray-400" />
+                                <span>{store.city || 'N/D'}</span>
+                              </div>
+                            </td>
+
+                            {/* Puntaje Ponderado */}
+                            <td className="py-3.5 px-4 text-center">
+                              <span className={`inline-block px-3 py-1 rounded-full font-black text-xs shadow-2xs ${
+                                isFirst
+                                  ? 'bg-amber-500 text-white text-sm shadow-sm'
+                                  : isSecond
+                                  ? 'bg-slate-700 text-white'
+                                  : isThird
+                                  ? 'bg-amber-700 text-white'
+                                  : 'bg-amber-100 text-amber-900'
+                              }`}>
+                                ⭐ {store.totalScore} pts
+                              </span>
+                            </td>
+
+                            {/* Total de Votos */}
+                            <td className="py-3.5 px-4 text-center">
+                              <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-bold">
+                                {store.nominationsCount} {store.nominationsCount === 1 ? 'voto' : 'votos'}
+                              </span>
+                            </td>
+
+                            {/* Desglose de Jurados */}
+                            <td className="py-3.5 px-4 text-right text-xs text-gray-600 max-w-sm truncate" title={store.judges.join(' | ')}>
+                              {store.judges.join(', ')}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Modal de Invitación a Jurado */}
       <InviteJudgeModal

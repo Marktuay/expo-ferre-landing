@@ -1,6 +1,6 @@
 # 🧠 Memoria del Proyecto - EXPO FERRE 2026
 **Directorio de Patrocinadores, Invitaciones Directas & Pases Digitales**
-*Fecha de actualización: 13 de Octubre, 2026*
+*Fecha de actualización: 14 de Octubre, 2026*
 
 ---
 
@@ -179,6 +179,18 @@
     1. `public/plata/iniser.png`: Ubicación del asset gráfico oficial.
     2. `src/App.jsx`: Añadido a `initialPlaceholders` dentro de la categoría `Plata` (`order: 3`) con tarjeta estilizada en blanco (`bgWhite: true`) para su visualización en el reel animado principal.
     3. `src/components/AdminSponsors.jsx`: Añadido al listado oficial `OFFICIAL_SPONSORS` bajo la categoría `Plata`.
+
+---
+
+## 18. 🏆 Nueva Pestaña "Top 5 Ganadores por Categoría" en Panel de Jurados (14 de Octubre, 2026)
+- **Objetivo y Contexto:**
+  - Se requería una pestaña ejecutiva inmediatamente después de *"Enlaces / Jurados Invitados"* que visualizara de forma rápida y clara los 5 primeros lugares de cada una de las 3 categorías oficiales de los premios, junto con sus puntuaciones ponderadas acumuladas.
+- **Implementación en [`AdminJury.jsx`](src/components/AdminJury.jsx):**
+  1. **Navegación:** Pestaña `🏆 Top 5 Ganadores por Categoría` añadida en 4ª posición (`activeTab === 'winners'`).
+  2. **Podio Ejecutivo de 1º Lugar:** Tarjetas destacadas en el encabezado con los campeones de cada categoría (Familiar, Oro y Promesa) con corona/medalla, nombre, ciudad y puntaje total.
+  3. **Cuadros de Honor Detallados:** Tablas estilizadas con los 5 primeros lugares por categoría, destacando medallas (🥇 1º, 🥈 2º, 🥉 3º, 4º, 5º), insignias de puntaje ponderado (`⭐ X pts`), conteo de nominaciones y desglose de jurados votantes.
+  4. **Exportación a Excel Optimizada:** La primera hoja del reporte Excel generado (`handleExportExcel`) exporta directamente el consolidado del *Top 5 Ganadores*.
+
 
 
 

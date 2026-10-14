@@ -120,6 +120,17 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ---
 
+## 📅 Resumen de Cambios y Avances de la Sesión (14 de Octubre de 2026)
+
+### 🏆 Nueva Pestaña "Top 5 Ganadores por Categoría" en Panel de Jurados (`AdminJury.jsx`)
+- Se implementó una 4ª pestaña ejecutiva inmediatamente después de *"Enlaces / Jurados Invitados"*, denominada `🏆 Top 5 Ganadores por Categoría` (`activeTab === 'winners'`).
+- **Características de la Vista:**
+  1. **Podio Ejecutivo:** Tres tarjetas destacadas con el 🥇 1º Lugar de cada categoría (Familiar, Oro y Promesa) con su puntuación, ciudad y nombre visible.
+  2. **Cuadros de Honor por Categoría:** Tablas estilizadas con los 5 primeros lugares de cada categoría según puntuación ponderada (1º = 5 pts, 2º = 4 pts, ..., 5º = 1 pto) con medallas (🥇, 🥈, 🥉, 4º, 5º), badges de puntuación (`⭐ X pts`), votos de jurados y desglose de jurados votantes.
+  3. **Reporte Excel Integrado:** La exportación a Excel incluye una primera hoja ("Top 5 Ganadores") para entrega ejecutiva inmediata.
+
+---
+
 ## 📅 Resumen de Cambios y Avances de la Sesión (13 de Octubre de 2026)
 
 ### 🗓️ Unificación de Fecha Oficial del Evento a solo 17 de Octubre de 2026
