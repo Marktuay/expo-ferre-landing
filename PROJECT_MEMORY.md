@@ -1543,7 +1543,28 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   2. **Envíos Masivos por Patrocinador (`AdminDirectInvites.jsx`):** Se integró `bcc: 'gerenciaeventoskt@outlook.com'` en el despachador masivo por lotes (`handleSendBulkEmail`).
   3. **Recordatorios Masivos a Registrados (`AdminDirectInvites.jsx`):** Se integró copia oculta `bcc: 'gerenciaeventoskt@outlook.com'` en la campaña de recordatorios de jueves, viernes y sábado (`handleSendBulkRegReminder`).
   4. **Confirmación de Registro Inmediato (`DirectInviteRegistration.jsx`):** Al completar el formulario de registro y emitir el gafete oficial con QR, el correo de confirmación enviado al participante ahora incluye copia oculta a `gerenciaeventoskt@outlook.com`.
-- Compilación verificada con `npm run build` en 2.07s y 0 errores.
+### 🏢 Carga de Nuevos Contactos e Invitaciones: Balladares (14 de Octubre de 2026)
+- **Total Procesados:** 13 contactos recibidos.
+- **Auditoría Anti-Duplicados y Cruce de Listas:**
+  - 3 contactos detectados como ya existentes previamente en la misma lista de Balladares y omitidos para evitar duplicidad:
+    1. *Jackson (Venta de Materiales Enmanuelito):* Ya registrado (`jassarysvaleskajarquinzamora@gmail.com`) en doc `inv_muiz3rck_4uutfzzn`.
+    2. *Melissa (Ferretería Guapilux):* Ya registrada (`50587348627`) en doc `inv_muiz3rck_p8acf6kv`.
+    3. *Anabell (Ferreteria Valenzuela):* Ya registrada (`50587257959`) en doc `inv_mux8nyeh_r7au64ur`.
+  - Corrección de número telefónico: En *Claudia (Ferretería Flores)* se detectó un 8 extra por tipografía (`505888829128`), normalizándose al formato oficial de 8 dígitos `+50588829128`.
+- **10 Nuevas Invitaciones Generadas y Respaldadas:**
+  - Insertadas atómicamente en `events/2026/directInvites` y `events/2026/directInvites_backup`:
+    1. `inv_mv8qonyn_r2e5bbmy` - Xochilt (Comercializadora Castellon)
+    2. `inv_mv8qonyp_edkrm84u` - Nestor (Mini Ferretería Jireth)
+    3. `inv_mv8qonyp_4z58dwae` - Kelly (Ferreteria Copimatsa)
+    4. `inv_mv8qonyp_p87huc8r` - Urania (Ferreteria Zamora)
+    5. `inv_mv8qonyp_hwn3bzpm` - Tania (General / Particular)
+    6. `inv_mv8qonyq_b7wq3h8x` - Julio Andres (General / Particular)
+    7. `inv_mv8qonyq_8b4bmkvb` - Roberto (Ferreteria Linda)
+    8. `inv_mv8qonyq_2hdy8hqd` - Claudia (Ferretería Flores)
+    9. `inv_mv8qonyq_zpry4k2s` - Melba (Ferretería El buen amigo)
+    10. `inv_mv8qonyq_pxgnsdsf` - Lilliam (Ferreteria el Baratillo)
+- Total acumulado de Balladares: **94 invitaciones**.
+
 
 
 
