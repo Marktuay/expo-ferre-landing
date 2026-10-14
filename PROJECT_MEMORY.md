@@ -1513,6 +1513,9 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Acciones Realizadas:**
   1. Se eliminó de raíz el documento duplicado `fhYRN2DplaUd0sNFTCKp` (*Karla Elsania Téllez Ruiz · CEMEX NICARAGUA S.A · 1/10/2026, 11:02:58 a. m.*) tanto de `juryEvaluations` como de `juryEvaluations_backup`.
   2. Se conserva intacta su evaluación definitiva oficial `WQJ7S4M05MA52a7MF0wV` (*Karla Téllez · 12/10/2026, 6:28:48 p. m.*).
-  3. Se actualizó `AdminJury.jsx` para que las funciones `handleDeleteEvaluation` y `handleDeleteInvitedJudge` eliminen simultáneamente de la colección activa y de su respectivo `_backup`, además de permitir la acción tanto al Super Admin como a usuarios con rol `admin`.
+### 📥 Carga y Validación de Invitaciones Directas (ExpoFerre Taller y DURMAN)
+- **ExpoFerre Taller:** 4 contactos validados y agregados a `sponsorId: 'general'` (*Raquel Eugenia, Moíses Andrés, Christian, Alberto*). Se omitió preventivamente a *Oscar Danilo* ya que fue registrado y acreditado por *Fernández Sera*.
+- **DURMAN:** 7 contactos 100% nuevos validados y agregados con arte oficial co-brandeado (`sponsorId: 'durman'`, *Darling, Eddy, Angie, Javier, Hazel, Denis Miguel, Enma*).
+- Todos los documentos sincronizados en tiempo real con `directInvites_backup`.
 
 
