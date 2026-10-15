@@ -2190,9 +2190,12 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     const guestName = person?.nombre ? person.nombre.trim() : 'Estimado(a) Participante';
 
     const art = getSponsorArt(person?.sponsorName || 'general');
-    const headerImg = art.headerBannerUrl?.startsWith('http')
-      ? art.headerBannerUrl
-      : `https://expoferrenicaragua.com${art.headerBannerUrl || '/email-header.png'}`;
+    // Para la campaña especial de hoy jueves ("Faltan 2 días"), se utiliza el arte especial de 2 días
+    const headerImg = dayCampaign === 'jueves'
+      ? 'https://expoferrenicaragua.com/email-header-jueves.png'
+      : (art.headerBannerUrl?.startsWith('http')
+          ? art.headerBannerUrl
+          : `https://expoferrenicaragua.com${art.headerBannerUrl || '/email-header.png'}`);
     const footerImg = art.footerBannerUrl?.startsWith('http')
       ? art.footerBannerUrl
       : `https://expoferrenicaragua.com${art.footerBannerUrl || '/email-footer.png'}`;
