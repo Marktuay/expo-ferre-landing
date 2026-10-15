@@ -1563,7 +1563,16 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     8. `inv_mv8qonyq_2hdy8hqd` - Claudia (Ferretería Flores)
     9. `inv_mv8qonyq_zpry4k2s` - Melba (Ferretería El buen amigo)
     10. `inv_mv8qonyq_pxgnsdsf` - Lilliam (Ferreteria el Baratillo)
-- Total acumulado de Balladares: **94 invitaciones**.
+### 🖼️ Banner Especial de Recordatorio Jueves ("Faltan 2 Días")
+- **Fecha:** 15 de Octubre de 2026.
+- **Header Banner:** Se incorporó el arte gráfico especial `email-header-jueves.png` (975x375) destacando: *"FALTAN 2 DÍAS • 17 DE OCTUBRE • CROWNE PLAZA MANAGUA • JUSTOS HACEMOS UNA FERRETERÍA MÁS FUERTE"*.
+- **Aplicación Exclusiva para la Campaña de Hoy:**
+  - Configurado en `AdminDirectInvites.jsx` (`buildRegisteredEventReminderEmail`) para activarse cuando `dayCampaign === 'jueves'`.
+  - Configurado en `functions/index.js` para el cron programado a las 9:00 AM (`activeCampaign === 'jueves'`).
+  - Copia oculta (BCC) garantizada a `gerenciaeventoskt@outlook.com`.
+  - Correo de prueba enviado y verificado con estado `SUCCESS` a `marktuay@gmail.com`.
+- Commit `44f77de` sincronizado en GitHub `main`.
+
 
 
 
