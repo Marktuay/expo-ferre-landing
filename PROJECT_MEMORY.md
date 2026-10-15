@@ -1630,3 +1630,44 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     - Camión 1 (Izquierdo): `x: '42.68%', y: '79.74%'`
     - Camión 2 (Derecho): `x: '57.83%', y: '79.74%'`
   - Incluyen tooltip ampliado con el logo Chevrolet al hacer hover y despliegue del panel inferior con detalles de "Grupo Q (Chevrolet)" y "Área de Exhibición Exterior - Flota Chevrolet".
+
+### 🪪 Importación Masiva y Sincronización de Acreditaciones Staff (15 de Octubre de 2026)
+- **Total de Registros Procesados:** 248 registros brutos provistos por el cliente.
+- **Auditoría Anti-Duplicados y Normalización:**
+  - Se detectaron y descartaron **40 duplicados** (incluyendo envíos duplicados entre septiembre y octubre para empresas como Fernandez Sera, Megalineas, Midesa y Plycem, así como 10 de Balladares y 1 de Madinisa previamente registrados).
+  - Se insertaron de forma neta **208 nuevas acreditaciones de staff** con respaldo atómico en `events/2026/staff` y `events/2026/staff_backup`.
+  - El censo total de Staff en Firestore ascendió a **237 acreditados**.
+- **Sincronización de Patrocinadores Oficiales en `users`:**
+  - Se aseguraron los perfiles de 11 patrocinadores oficiales (`DURMAN`, `EATON`, `Mobius Engineering`, `Sherwin-Williams`, `TIGO`, `Monolit`, `PBS`, `INCASA`, `La Casa del Perno`, `Kouture S.A`, `FERCO`) con rol `sponsor` para que `AdminStaff.jsx` resuelva correctamente sus nombres en la columna "Patrocinador" y en el selector de filtros.
+- **Mejoras en `AdminStaff.jsx`:**
+  - Se integró `staff.sponsorName` como fallback dinámico para búsqueda en tiempo real, filtro desplegable por patrocinador, celda de tabla y exportación a Excel.
+- **Distribución Final de Staff Acreditado (Top Sponsors):**
+  - Importaciones Balladares: 44
+  - Indenicsa: 21
+  - Cemex: 15
+  - BAC: 14
+  - SINSA / Comasa: 11
+  - Megalineas: 10
+  - Grupo Sur / GSQ: 14 (10 GSQ + 4 Grupo Sur)
+  - Ferretería Noelito: 8
+  - Grupo Q (Chevrolet): 8
+  - PBS: 8
+  - EATON: 8
+  - FUTEC: 7
+  - TIGO: 7
+  - Casco Safety: 7
+  - Sherwin-Williams: 6
+  - La Casa del Perno: 6
+  - Fernandez Sera: 5
+  - DURMAN: 5
+  - Madinisa: 5
+  - Midesa: 5
+  - Plycem: 4
+  - Mobius Engineering: 4
+  - Sicsa Nicaragua: 3
+  - Kouture S.A: 3
+  - Parque Logístico Los Brasiles: 3
+  - Monolit: 3
+  - Artik Cargo: 1
+  - INCASA (STEELMAX): 1
+  - FERCO: 1

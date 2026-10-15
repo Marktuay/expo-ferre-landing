@@ -62,7 +62,7 @@ export default function AdminStaff({ onBack }) {
   const filteredStaff = useMemo(() => {
     return staffList.filter(s => {
       const fullName = `${s.nombre || ''} ${s.apellido || ''}`.toLowerCase();
-      const sponsorName = (sponsorsMap[s.sponsorId] || '').toLowerCase();
+      const sponsorName = (sponsorsMap[s.sponsorId] || s.sponsorName || '').toLowerCase();
       const email = (s.email || '').toLowerCase();
       const company = (s.empresa || '').toLowerCase();
       const phone = (s.telefono || '').toLowerCase();
@@ -87,7 +87,7 @@ export default function AdminStaff({ onBack }) {
     });
     return Array.from(ids).map(id => ({
       id,
-      name: sponsorsMap[id] || 'No asignado'
+      name: sponsorsMap[id] || staffList.find(s => s.sponsorId === id)?.sponsorName || 'No asignado'
     })).sort((a, b) => a.name.localeCompare(b.name));
   }, [staffList, sponsorsMap]);
 
@@ -142,7 +142,7 @@ export default function AdminStaff({ onBack }) {
                 import('xlsx').then(XLSX => {
                   const dataToExport = filteredStaff.map(s => ({
                     Fecha: s.createdAt.toLocaleDateString() + ' ' + s.createdAt.toLocaleTimeString(),
-                    Patrocinador: sponsorsMap[s.sponsorId] || 'No asignado',
+                    Patrocinador: sponsorsMap[s.sponsorId] || s.sponsorName || 'No asignado',
                     Nombre: `${s.nombre || ''} ${s.apellido || ''}`.trim(),
                     Email: s.email || '',
                     Teléfono: s.telefono || '',
@@ -240,7 +240,7 @@ export default function AdminStaff({ onBack }) {
                           {fullName}
                         </td>
                         <td className="py-3 px-3 text-secondary font-medium max-w-[140px] break-words">
-                          {sponsorsMap[staff.sponsorId] || 'No asignado'}
+                          {sponsorsMap[staff.sponsorId] || staff.sponsorName || 'No asignado'}
                         </td>
                         <td className="py-3 px-3 text-secondary max-w-[200px] break-all text-xs">
                           {staff.email || '—'}
