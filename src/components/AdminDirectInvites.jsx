@@ -339,33 +339,10 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   useEffect(() => {
     const unsubStands = onSnapshot(collection(db, `${getEventBasePath()}/stands`), (snapshot) => {
       const stands = [];
-      const sMap = {};
-
       snapshot.forEach((d) => {
-        const s = d.data();
-        stands.push({ id: d.id, ...s });
-        
-        let comp = (s.company || s.reservationDetails?.empresa || '').trim();
-        if (comp.toLowerCase().includes('monolit') || comp.toLowerCase().includes('precom')) {
-          comp = 'Monolit';
-        }
-        const isReserved = s.status !== 'available' && s.status !== 'free' && s.status !== 'libre' && (s.status === 'reserved' || s.status === 'reserved_official' || s.status === 'sold' || s.status === 'occupied' || s.reservationDetails || s.sponsorId || s.sponsorEmail || s.reservedBy);
-        if (comp && isReserved) {
-          if (!sMap[comp]) {
-            sMap[comp] = {
-              name: comp,
-              stands: [],
-              contactName: s.reservationDetails ? `${s.reservationDetails.nombre || ''} ${s.reservationDetails.apellido || ''}`.trim() : s.reservedBy || '',
-              email: s.reservationDetails?.correo || s.sponsorEmail || '',
-              phone: s.reservationDetails?.telefono || s.phone || ''
-            };
-          }
-          sMap[comp].stands.push(s.name || s.id);
-        }
+        stands.push({ id: d.id, ...d.data() });
       });
-
       setStandsData(stands);
-      setSponsorsMap(sMap);
     });
 
     return () => unsubStands();
@@ -422,7 +399,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     if (clean.includes('mobius')) return 'mobius';
     if (clean.includes('pbs')) return 'pbs';
     if (clean.includes('kouture')) return 'kouture';
-    if (clean.includes('chevrolet')) return 'chevrolet';
+    if (clean.includes('chevrolet') || clean.includes('grupo q') || clean.includes('grupo_q') || clean.includes('grupoq')) return 'grupo_q';
     if (clean.includes('durman')) return 'durman';
     if (clean.includes('orion')) return 'orion';
     if (clean.includes('flor') || clean.includes('cana')) return 'flor_de_cana';
@@ -868,8 +845,130 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       stands: 'Organizador',
       customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con JP Technology Studio!',
       customSpeech: buildCorporateSpeech('JP Technology Studio', '')
+    },
+    grupo_q: {
+      sponsorName: 'Grupo Q (Chevrolet)',
+      stands: 'Área de Exhibición Exterior - Flota Chevrolet',
+      headerBannerUrl: 'https://cdn.jsdelivr.net/gh/Marktuay/expo-ferre-landing@main/public/headers/CHEVROLET.png',
+      footerBannerUrl: 'https://expoferrenicaragua.com/email-footer.png',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Grupo Q y Chevrolet!',
+      customSpeech: buildCorporateSpeech('Grupo Q (Chevrolet)', 'Área de Exhibición Exterior - Flota Chevrolet')
+    },
+    chevrolet: {
+      sponsorName: 'Grupo Q (Chevrolet)',
+      stands: 'Área de Exhibición Exterior - Flota Chevrolet',
+      headerBannerUrl: 'https://cdn.jsdelivr.net/gh/Marktuay/expo-ferre-landing@main/public/headers/CHEVROLET.png',
+      footerBannerUrl: 'https://expoferrenicaragua.com/email-footer.png',
+      customEmailSubject: '¡Sé parte de EXPO FERRE Nicaragua 2026 con Grupo Q y Chevrolet!',
+      customSpeech: buildCorporateSpeech('Grupo Q (Chevrolet)', 'Área de Exhibición Exterior - Flota Chevrolet')
     }
   };
+
+  // Helper para formatear visualmente el texto de stands o áreas de exhibición
+  const formatStandsDisplay = (raw) => {
+    if (!raw || raw === 'N/A') return 'Sin stand asignado';
+    const clean = String(raw).trim();
+    const lower = clean.toLowerCase();
+    if (
+      lower.includes('área') || 
+      lower.includes('area') || 
+      lower.includes('exterior') || 
+      lower.includes('flota') || 
+      lower.includes('organizador') || 
+      lower.includes('patrocinador oficial')
+    ) {
+      return clean;
+    }
+    const cleanNumbers = clean.replace(/stands?\s*/gi, '').trim();
+    if (cleanNumbers.includes(',') || cleanNumbers.includes('&') || cleanNumbers.includes(' y ')) {
+      return `Stands ${cleanNumbers}`;
+    }
+    return `Stand ${cleanNumbers}`;
+  };
+
+  // Sincronizar directorio unificado de patrocinadores: stands + sponsorSettings + oficiales + invitaciones
+  useEffect(() => {
+    const sMap = {};
+
+    // 1. Patrocinadores de stands interiores reservados
+    standsData.forEach((s) => {
+      let comp = (s.company || s.reservationDetails?.empresa || '').trim();
+      if (comp.toLowerCase().includes('monolit') || comp.toLowerCase().includes('precom')) {
+        comp = 'Monolit';
+      }
+      const isReserved = s.status !== 'available' && s.status !== 'free' && s.status !== 'libre' && (s.status === 'reserved' || s.status === 'reserved_official' || s.status === 'sold' || s.status === 'occupied' || s.reservationDetails || s.sponsorId || s.sponsorEmail || s.reservedBy);
+      if (comp && isReserved) {
+        if (!sMap[comp]) {
+          sMap[comp] = {
+            name: comp,
+            stands: [],
+            contactName: s.reservationDetails ? `${s.reservationDetails.nombre || ''} ${s.reservationDetails.apellido || ''}`.trim() : s.reservedBy || '',
+            email: s.reservationDetails?.correo || s.sponsorEmail || '',
+            phone: s.reservationDetails?.telefono || s.phone || ''
+          };
+        }
+        sMap[comp].stands.push(s.name || s.id);
+      }
+    });
+
+    // 2. Patrocinadores de sponsorSettings (ej. Grupo Q, exhibiciones exteriores o patrocinadores sin stand físico tradicional)
+    Object.entries(sponsorSettings).forEach(([docId, setting]) => {
+      if (docId === 'general') return;
+      const spName = (setting.sponsorName || setting.name || '').trim();
+      if (!spName) return;
+
+      const existingKey = Object.keys(sMap).find(k => isMatchingSponsor(k, spName));
+      if (existingKey) {
+        if (!sMap[existingKey].stands || sMap[existingKey].stands.length === 0) {
+          sMap[existingKey].stands = setting.stands ? (Array.isArray(setting.stands) ? setting.stands : [setting.stands]) : ['Área Especial'];
+        }
+      } else {
+        sMap[spName] = {
+          name: spName,
+          stands: setting.stands ? (Array.isArray(setting.stands) ? setting.stands : [setting.stands]) : ['Área de Exhibición Exterior - Flota Chevrolet'],
+          contactName: setting.contactName || '',
+          email: setting.contactEmail || '',
+          phone: setting.contactPhone || ''
+        };
+      }
+    });
+
+    // 3. Patrocinadores oficiales preconfigurados (OFFICIAL_SPONSOR_CONFIGS)
+    Object.entries(OFFICIAL_SPONSOR_CONFIGS).forEach(([key, cfg]) => {
+      if (key === 'general') return;
+      const spName = (cfg.sponsorName || '').trim();
+      if (!spName) return;
+
+      const existingKey = Object.keys(sMap).find(k => isMatchingSponsor(k, spName));
+      if (!existingKey) {
+        sMap[spName] = {
+          name: spName,
+          stands: cfg.stands ? (Array.isArray(cfg.stands) ? cfg.stands : [cfg.stands]) : ['Patrocinador Oficial'],
+          contactName: '',
+          email: '',
+          phone: ''
+        };
+      }
+    });
+
+    // 4. Patrocinadores que ya tienen invitados cargados en directInvites
+    invites.forEach((inv) => {
+      const spName = (inv.sponsorName || '').trim();
+      if (!spName || spName.toLowerCase() === 'general') return;
+      const existingKey = Object.keys(sMap).find(k => isMatchingSponsor(k, spName));
+      if (!existingKey) {
+        sMap[spName] = {
+          name: spName,
+          stands: inv.sponsorStands ? [inv.sponsorStands] : ['Área Especial'],
+          contactName: '',
+          email: '',
+          phone: ''
+        };
+      }
+    });
+
+    setSponsorsMap(sMap);
+  }, [standsData, sponsorSettings, invites]);
 
   const generateDefaultSponsorSpeech = (sponsorName, stands) => {
     return buildCorporateSpeech(sponsorName, stands);
@@ -882,9 +981,13 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       (key === 'monolit' ? sponsorSettings['precom_monolit'] : null) || 
       (key === 'mobius' ? sponsorSettings['mobius_engineering'] : null) || 
       (key === 'parques_industriales' ? sponsorSettings['saratoga'] : null) || 
+      (key === 'grupo_q' ? sponsorSettings['chevrolet'] : null) || 
+      (key === 'chevrolet' ? sponsorSettings['grupo_q'] : null) || 
       {};
     const official = OFFICIAL_SPONSOR_CONFIGS[key] || 
       (key === 'monolit' ? OFFICIAL_SPONSOR_CONFIGS['precom_monolit'] : null) || 
+      (key === 'grupo_q' ? OFFICIAL_SPONSOR_CONFIGS['chevrolet'] : null) || 
+      (key === 'chevrolet' ? OFFICIAL_SPONSOR_CONFIGS['grupo_q'] : null) || 
       {};
     const calculatedStands = setting.stands || official.stands || (sponsorsMap[sponsorName]?.stands?.join(', ') || '');
 
@@ -1643,7 +1746,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
     const stands = art.stands || '';
     const greeting = guestLabel ? `Hola ${guestLabel},\n\n` : 'Hola,\n\n';
-    const standsClean = stands ? (stands.toLowerCase().startsWith('stand') ? stands : `Stand ${stands}`) : '';
+    const standsClean = formatStandsDisplay(stands);
 
     if (sponsorName && sponsorName !== 'general' && sponsorName.toLowerCase() !== 'invitacion general') {
       const cortesia = standsClean ? `por cortesia de *${sponsorName}* (${standsClean})` : `por cortesia de *${sponsorName}*`;
@@ -1731,7 +1834,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     const sponsorName = invite.sponsorName || '';
     const art = sponsorName ? getSponsorArt(sponsorName) : getSponsorArt('general');
     const rawStands = invite.sponsorStands || art.stands || '';
-    const standsClean = rawStands ? (rawStands.toLowerCase().startsWith('stand') ? rawStands : `Stand ${rawStands}`) : '';
+    const standsClean = formatStandsDisplay(rawStands);
 
     const defaultSubject = isReminder
       ? (sponsorName 
@@ -2966,7 +3069,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         const spConversionPct = spInvites.length > 0 ? Math.round((spUsed / spInvites.length) * 100) : 0;
         const art = getSponsorArt(sp);
         const rawStands = sponsorsMap[sp]?.stands?.join(', ') || art.stands || 'N/A';
-        const cleanStands = rawStands.replace(/stand\s*/gi, '').trim();
+        const standsDisplay = formatStandsDisplay(rawStands);
 
         const spUsedWa = spInvites.filter(i => i.status === 'used' && getContactChannel(i).includes('WhatsApp')).length;
         const spUsedEmail = spInvites.filter(i => i.status === 'used' && getContactChannel(i).includes('Correo')).length;
@@ -2974,7 +3077,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
         summaryRows.push({
           Patrocinador: sp,
-          Stands: cleanStands ? `Stand ${cleanStands}` : 'N/A',
+          Stands: standsDisplay,
           Total_Invitados: spInvites.length,
           Registrados_Gafetes_Emitidos: spUsed,
           Pendientes_Completar_Registro: spPending,
@@ -3913,8 +4016,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
                       const art = getSponsorArt(sp);
                       const rawStands = sponsorsMap[sp]?.stands?.join(', ') || art.stands || 'N/A';
-                      const cleanStands = rawStands.replace(/stand\s*/gi, '').trim();
-                      const standsText = cleanStands.includes(',') || cleanStands.includes('-') ? `Stands ${cleanStands}` : `Stand ${cleanStands}`;
+                      const standsText = formatStandsDisplay(rawStands);
 
                       return (
                         <tr key={sp} className="hover:bg-surface-variant/20 transition-colors">
@@ -4614,7 +4716,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                 >
                   <option value="general">⭐ Invitación General (ExpoFerre Oficial)</option>
                   {sponsorsList.map(sp => (
-                    <option key={sp} value={sp}>🏢 {sp} {sponsorsMap[sp]?.stands ? `(Stand ${sponsorsMap[sp].stands.join(', ')})` : ''}</option>
+                    <option key={sp} value={sp}>🏢 {sp} {sponsorsMap[sp]?.stands ? `(${formatStandsDisplay(sponsorsMap[sp].stands.join(', '))})` : ''}</option>
                   ))}
                 </select>
               </div>
@@ -4720,7 +4822,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                 >
                   <option value="general">⭐ Invitación General (ExpoFerre Oficial)</option>
                   {sponsorsList.map(sp => (
-                    <option key={sp} value={sp}>🏢 {sp} {sponsorsMap[sp]?.stands ? `(Stand ${sponsorsMap[sp].stands.join(', ')})` : ''}</option>
+                    <option key={sp} value={sp}>🏢 {sp} {sponsorsMap[sp]?.stands ? `(${formatStandsDisplay(sponsorsMap[sp].stands.join(', '))})` : ''}</option>
                   ))}
                 </select>
               </div>
