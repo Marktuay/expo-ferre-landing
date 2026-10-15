@@ -136,6 +136,9 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
   - Se implementó el helper `formatStandsDisplay` para presentar limpiamente `📍 Área de Exhibición Exterior - Flota Chevrolet` sin anteponer redundantemente la palabra "Stand(s)".
 - **Deduplicación de Invitación General en el Directorio:**
   - Se corrigió el paso 4 del motor de indexación de `sponsorsMap` y `sponsorsList` para excluir explícitamente cualquier variante de "Invitación General", asegurando que figure única y exclusivamente en su fila VIP fijada con estrella al tope de la tabla (`showGeneralRow`).
+- **Carga de Invitaciones Directas Grupo Q (Chevrolet):**
+  - Se cargaron 4 invitados exclusivos en `directInvites` y `directInvites_backup`: Steven (G&R TECNOLOGIA), Richard (FERRETERIA BLAN CASA), Edgardo (FERRETERIA VALLE) y Fenix (CONSTRUCCIONES DUARTE).
+  - Vinculados automáticamente a `Área de Exhibición Exterior - Flota Chevrolet`, cabecera `CHEVROLET.png` y tokens únicos.
 - **Contactos SINSA y Balladares:**
   - Se añadieron 10 nuevos contactos directos a Balladares (total 94) y 11 nuevos contactos a SINSA (total 47).
 - **Copia Oculta de Seguridad (BCC):**
