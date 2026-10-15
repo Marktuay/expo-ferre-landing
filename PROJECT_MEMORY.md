@@ -1671,3 +1671,35 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - Artik Cargo: 1
   - INCASA (STEELMAX): 1
   - FERCO: 1
+
+### 💳 Carga Masiva de Invitaciones Directas: BAC (15 de Octubre de 2026)
+- **Total Procesados:** 21 contactos de clientes ferreteros exclusivos recibidos para BAC (Stand 31 - Diamante).
+- **Configuración de Co-branding:**
+  - `sponsorId`: `bac`
+  - `sponsorName`: `BAC`
+  - `sponsorStands`: `Stand 31`
+  - `headerBannerUrl`: `https://cdn.jsdelivr.net/gh/Marktuay/expo-ferre-landing@main/public/headers/BAC.png`
+  - `footerBannerUrl`: `https://expoferrenicaragua.com/email-footer.png`
+- **21 Invitaciones Generadas y Respaldadas Atómicamente:**
+  - Insertadas en `events/2026/directInvites` y `events/2026/directInvites_backup`:
+    1. `inv_mva5bz5f_r7hvbn4t` - Leyla Vanessa (MATERIALES DE CONSTRUC.LA FE) - `leylalopezsevilla@gmail.com` - `+50586875839`
+    2. `inv_mva5bz5j_ensyjd8c` - Jason Antonio (FERRETERIA EL ESFUERZO) - `dayananov82@yahoo.com` - `+50588693877`
+    3. `inv_mva5bz5j_3d7aaqbf` - Ronaldo Alberto (FERRETER.HERMANOS GONZALEZ GARCIA) - `gonzalezmonterreyr918@gmail.com` - `+50558587310`
+    4. `inv_mva5bz5k_96wddtsy` - Christian (FERRETER.HERMANOS GONZALEZ GARCIA) - `christian@eco-risk.net` - `+50588550711`
+    5. `inv_mva5bz5k_cfsdkxfz` - Sarai Elizabeth (FERRETERÍA SÁNCHEZ #1) - `guevarasarai601@gmail.com` - `+50557029018`
+    6. `inv_mva5bz5k_a8v2qhd3` - Julio Antonio (FERRETERÍA SILVA) - `js93774@gmail.com` - `+50589164801`
+    7. `inv_mva5bz5k_hvskzjkd` - Ana (FERRETERIA M Y R) - `riveramolinarese@yahoo.es` - `+50586839640`
+    8. `inv_mva5bz5k_xaghbbvj` - Vielka Dayana (FERRETERIA LA GALO) - `vidamarcela1980@gmail.com` - `+50581508129`
+    9. `inv_mva5bz5k_2kcen82q` - Oscar Isaac (FERRETERIA JEHOVA JIREH) - `oscarbravo231083@gmail.com` - `+50583957356`
+    10. `inv_mva5bz5l_egvtzp7b` - Gilberto (JOEL BONILLA MAT.DE CONSTRUCCION) - `bonilla1047@hotmail.com` - `+50588401250`
+    11. `inv_mva5bz5l_vrebwxv4` - Alam Moises (MATERIALES DE CONSTRUC.SANCHEZ) - `alamoises@yahoo.es` - `+50583973833`
+    12. `inv_mva5bz5l_qehpe4t5` - Mirna (LA ALFORJA) - `samir170905@gmail.com` - `+50587716012`
+    13. `inv_mva5bz5l_fwf3mvt9` - Arlen Rebeca (FERRETERIA FLORES) - `rebecafld@yahoo.com` - `+50585070274`
+    14. `inv_mva5bz5l_whhk4yrh` - Andy Manuel (HERRAMIENTAS GYP) - `andygarcia1518@gmail.com` - `+50588605382`
+    15. `inv_mva5bz5m_hhay78gu` - Karen (FERRETERIA YAHOSCA) - `chevezkaren290@gmail.com` - `+50558636107`
+    16. `inv_mva5bz5m_q9mjhyzm` - Brayan (FERRETERIA SOTELO) - `+50584757507`
+    17. `inv_mva5bz5m_rrasd6ff` - Omar (ACABADOS&MATERIALES VARGAS) - `ocarrion01@hotmail.com` - `+50557346537`
+    18. `inv_mva5bz5m_t77z93dj` - Keyling (EL CHELE FERRETERÍA) - `keylingvargas10@gmail.com` - `+50588338524`
+    19. `inv_mva5bz5n_95fnm68g` - Daniel (IMPORTACIONES BALLADARES) - `dmartinex91@gmail.com` - `+50582572500`
+    20. `inv_mva5bz5n_e9faaan3` - Norman (FERRETERIA CARO) - `normanaranda958@gmail.com` - `+50587599017`
+    21. `inv_mva5bz5n_stz2mtaa` - Mariela (FERRETERIA SAN JUAN) - `alvesa072015@gmail.com` - `+50587757015`
