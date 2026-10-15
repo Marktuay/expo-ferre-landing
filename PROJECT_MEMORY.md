@@ -1611,8 +1611,22 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     11. `inv_mva1ff0h_k5tcg3xq` - Diana (Comasa / SINSA) - `diana.matamoros@sinsa.com.ni` *(division: COMASA Mayorista)*
 - Total acumulado de SINSA: **47 invitaciones** (36 previas + 11 nuevas).
 
-
-
-
-
-
+### 🚛 Nuevo Patrocinador: Grupo Q (Chevrolet) e Identidad en Plano (15 de Octubre de 2026)
+- **Modalidad de Patrocinio:** Patrocinador Oficial sin stand tradicional interior; presencia destacada con dos camiones de carga comercial en el área exterior / entrada al evento.
+- **Lista de Invitados Exclusivos (Grupo Q):**
+  - Se habilitó la lista de Grupo Q dentro del Directorio de Invitaciones Directas (`AdminDirectInvites.jsx`), resolviendo el bug de duplicación visual con la "Invitación General".
+  - Se importaron 4 contactos atómicamente a `directInvites` y `directInvites_backup`:
+    1. Steven (G&R TECNOLOGIA) - `steven.gaitan@gyr-tecnologia.com.ni`
+    2. Richard (FERRETERIA BLAN CASA) - `richardblandon96@gmail.com`
+    3. Edgardo (FERRETERIA VALLE) - `josevalle488.jrvp@gmail.com`
+    4. Fenix (CONSTRUCCIONES DUARTE) - `fenixduarte09@gmail.com`
+- **Branding en el Plano Vectorial SVG:**
+  - Se incrustó el logotipo dorado de corbatín de Chevrolet en formato PNG base64 directamente sobre las cajas blancas de los camiones en los 3 mapas SVG:
+    - `public/map-expo-ferre-140826.svg`
+    - `public/mapa-expo-ferre.svg`
+    - `public/Mapa-Expo-Ferre-Agosto.svg`
+- **Pines Interactivos Flotantes (`InteractiveMap.jsx`):**
+  - Se añadieron dos pines flotantes estilo globo de mapa sobre los dos camiones del exterior:
+    - Camión 1 (Izquierdo): `x: '42.68%', y: '79.74%'`
+    - Camión 2 (Derecho): `x: '57.83%', y: '79.74%'`
+  - Incluyen tooltip ampliado con el logo Chevrolet al hacer hover y despliegue del panel inferior con detalles de "Grupo Q (Chevrolet)" y "Área de Exhibición Exterior - Flota Chevrolet".

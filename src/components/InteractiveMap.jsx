@@ -272,6 +272,63 @@ export default function InteractiveMap({ onBack, isAdminMode = false, sponsorDat
                       </div>
                     );
                   })}
+
+                  {/* Marcadores Interactivos Flota Chevrolet / Grupo Q (Área Exterior) */}
+                  {[
+                    { id: 'camion-chevrolet-1', name: 'Flota Comercial Chevrolet (Unidad 1)', x: '42.68%', y: '79.74%' },
+                    { id: 'camion-chevrolet-2', name: 'Flota Comercial Chevrolet (Unidad 2)', x: '57.83%', y: '79.74%' }
+                  ].map((truck) => {
+                    const isSelected = selectedStand?.id === truck.id;
+                    return (
+                      <div
+                        key={truck.id}
+                        className="absolute group z-20 hover:z-40 pointer-events-auto"
+                        style={{
+                          left: truck.x,
+                          top: truck.y,
+                          transform: 'translate(-50%, -100%)',
+                        }}
+                      >
+                        <button
+                          onClick={() => {
+                            setSelectedStand({
+                              id: truck.id,
+                              name: truck.name,
+                              company: 'Grupo Q (Chevrolet)',
+                              size: 'Área de Exhibición Exterior',
+                              price: 'Patrocinador Oficial',
+                              status: 'reserved',
+                              logo: '/plata/Logo-Chevy-vertical.png'
+                            });
+                          }}
+                          className={`relative bg-white rounded-lg p-1 px-1.5 border-2 shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-125 cursor-pointer ${
+                            isSelected 
+                              ? 'border-red-500 ring-2 ring-red-400 z-30 scale-125 shadow-2xl' 
+                              : 'border-[#283474] hover:border-[#f39200] z-20'
+                          }`}
+                        >
+                          <img 
+                            src="/plata/Logo-Chevy-vertical.png" 
+                            alt="Grupo Q (Chevrolet)" 
+                            className="h-6 md:h-7 max-w-[55px] md:max-w-[70px] group-hover:scale-125 transition-transform duration-300 object-contain" 
+                          />
+                          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white border-b-2 border-r-2 border-[#283474] rotate-45"></div>
+                        </button>
+
+                        {/* Tooltip Ampliado al hacer Hover */}
+                        <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-white p-3 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none shadow-2xl border-2 border-[#283474]/20 flex flex-col items-center justify-center z-50 min-w-[180px] max-w-[280px]">
+                          <img 
+                            src="/plata/Logo-Chevy-vertical.png" 
+                            alt="Chevrolet" 
+                            className="max-h-[60px] max-w-[160px] object-contain mb-1 transition-transform duration-300 group-hover:scale-105" 
+                          />
+                          <span className="font-bold text-xs text-[#283474] text-center">Grupo Q (Chevrolet)</span>
+                          <span className="text-[10px] text-amber-700 font-semibold text-center">Área de Exhibición Exterior - Flota Chevrolet</span>
+                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-white border-b-2 border-r-2 border-[#283474]/20 rotate-45"></div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </TransformComponent>
             </>
