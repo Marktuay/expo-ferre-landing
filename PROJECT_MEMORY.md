@@ -1567,11 +1567,24 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Fecha:** 15 de Octubre de 2026.
 - **Header Banner:** Se incorporó el arte gráfico especial `email-header-jueves.png` (975x375) destacando: *"FALTAN 2 DÍAS • 17 DE OCTUBRE • CROWNE PLAZA MANAGUA • JUSTOS HACEMOS UNA FERRETERÍA MÁS FUERTE"*.
 - **Aplicación Exclusiva para la Campaña de Hoy:**
-  - Configurado en `AdminDirectInvites.jsx` (`buildRegisteredEventReminderEmail`) para activarse cuando `dayCampaign === 'jueves'`.
-  - Configurado en `functions/index.js` para el cron programado a las 9:00 AM (`activeCampaign === 'jueves'`).
-  - Copia oculta (BCC) garantizada a `gerenciaeventoskt@outlook.com`.
-  - Correo de prueba enviado y verificado con estado `SUCCESS` a `marktuay@gmail.com`.
-- Commit `44f77de` sincronizado en GitHub `main`.
+### 🏢 Carga de Nuevos Contactos e Invitaciones: SINSA (15 de Octubre de 2026)
+- **Total Procesados:** 11 contactos recibidos (9 SINSA + 2 COMASA).
+- **Auditoría Anti-Duplicados:** Los 11 contactos fueron auditados contra 582 invitaciones y 373 preregistros, resultando en 0 duplicados y 100% elegibles.
+- **11 Nuevas Invitaciones Generadas y Respaldadas:**
+  - Insertadas atómicamente en `events/2026/directInvites` y `events/2026/directInvites_backup` con el arte co-brandeado oficial de SINSA (`Stands 1, 2, 3, 4`):
+    1. `inv_mva1ff0f_ca65yxkb` - Ari (SINSA) - `ari.lopez@sinsa.com.ni`
+    2. `inv_mva1ff0g_838eash5` - Adolfo (SINSA) - `adolfo.lugo@sinsa.com.ni`
+    3. `inv_mva1ff0g_ftn2bm8y` - Mauricio (SINSA) - `mauricio.gutierrez@sinsa.com.ni`
+    4. `inv_mva1ff0h_2fwxhwwe` - Deborah (SINSA) - `deborah.agurto@sinsa.com.ni`
+    5. `inv_mva1ff0h_c5h98wr3` - Cynthia (SINSA) - `cynthia.fitoria@sinsa.com.ni`
+    6. `inv_mva1ff0h_emx9zckq` - Carlos (SINSA) - `carlos.gonzalez@sinsa.com.ni`
+    7. `inv_mva1ff0h_gp7q2mfj` - Hazel (SINSA) - `hazel.cruz@sinsa.com`
+    8. `inv_mva1ff0h_rt4uqdfs` - Octavio (SINSA) - `octavio.palacios@sinsa.com.ni`
+    9. `inv_mva1ff0h_x5cdfcx9` - Luis Rafael (SINSA) - `lrsilva@sinsa.com`
+    10. `inv_mva1ff0h_yppxs5j3` - Humberto (Comasa / SINSA) - `humberto.calderon@sinsa.com.ni` *(division: COMASA Mayorista)*
+    11. `inv_mva1ff0h_k5tcg3xq` - Diana (Comasa / SINSA) - `diana.matamoros@sinsa.com.ni` *(division: COMASA Mayorista)*
+- Total acumulado de SINSA: **47 invitaciones** (36 previas + 11 nuevas).
+
 
 
 
