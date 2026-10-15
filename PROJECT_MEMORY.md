@@ -120,6 +120,27 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
 
 ---
 
+## 📅 Resumen de Cambios y Avances de la Sesión (15 de Octubre de 2026)
+
+### 🚛 Integración Oficial de Grupo Q (Chevrolet) y Unificación del Directorio de Patrocinadores
+- **Nuevo Patrocinador Sin Stand Interior Tradicional:**
+  - Se configuró a **Grupo Q (Chevrolet)** con ubicación oficial: `Área de Exhibición Exterior - Flota Chevrolet`.
+  - **Artes y Co-Branding:** Vinculado el banner de cabecera `CHEVROLET.png` (`https://cdn.jsdelivr.net/gh/Marktuay/expo-ferre-landing@main/public/headers/CHEVROLET.png`), footer oficial y speech corporativo personalizado.
+- **Unificación de `sponsorsMap` en `AdminDirectInvites.jsx`:**
+  - Anteriormente, el Directorio de Patrocinadores solo indexaba empresas con stands físicos interiores asignados en `events/2026/stands`.
+  - Se actualizó el motor de sincronización de `sponsorsMap` para fusionar reactivamente:
+    1. Stands interiores reservados de la colección `stands`.
+    2. Patrocinadores especiales/exteriores configurados en `events/2026/sponsorSettings` (incluyendo `grupo_q` / `chevrolet`).
+    3. Patrocinadores preconfigurados en `OFFICIAL_SPONSOR_CONFIGS`.
+    4. Patrocinadores con invitados cargados en `directInvites`.
+  - Se implementó el helper `formatStandsDisplay` para presentar limpiamente `📍 Área de Exhibición Exterior - Flota Chevrolet` sin anteponer redundantemente la palabra "Stand(s)".
+- **Contactos SINSA y Balladares:**
+  - Se añadieron 10 nuevos contactos directos a Balladares (total 94) y 11 nuevos contactos a SINSA (total 47).
+- **Copia Oculta de Seguridad (BCC):**
+  - Todas las salidas de correo electrónico incluyen copia oculta a `gerenciaeventoskt@outlook.com`.
+
+---
+
 ## 📅 Resumen de Cambios y Avances de la Sesión (14 de Octubre de 2026)
 
 ### 🏆 Nueva Pestaña "Top 5 Ganadores por Categoría" en Panel de Jurados (`AdminJury.jsx`)
