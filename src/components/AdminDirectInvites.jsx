@@ -896,6 +896,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       if (comp.toLowerCase().includes('monolit') || comp.toLowerCase().includes('precom')) {
         comp = 'Monolit';
       }
+      if (!comp || getSponsorKey(comp) === 'general') return;
+
       const isReserved = s.status !== 'available' && s.status !== 'free' && s.status !== 'libre' && (s.status === 'reserved' || s.status === 'reserved_official' || s.status === 'sold' || s.status === 'occupied' || s.reservationDetails || s.sponsorId || s.sponsorEmail || s.reservedBy);
       if (comp && isReserved) {
         if (!sMap[comp]) {
@@ -915,7 +917,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     Object.entries(sponsorSettings).forEach(([docId, setting]) => {
       if (docId === 'general') return;
       const spName = (setting.sponsorName || setting.name || '').trim();
-      if (!spName) return;
+      if (!spName || getSponsorKey(spName) === 'general') return;
 
       const existingKey = Object.keys(sMap).find(k => isMatchingSponsor(k, spName));
       if (existingKey) {
@@ -937,7 +939,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     Object.entries(OFFICIAL_SPONSOR_CONFIGS).forEach(([key, cfg]) => {
       if (key === 'general') return;
       const spName = (cfg.sponsorName || '').trim();
-      if (!spName) return;
+      if (!spName || getSponsorKey(spName) === 'general') return;
 
       const existingKey = Object.keys(sMap).find(k => isMatchingSponsor(k, spName));
       if (!existingKey) {
@@ -954,7 +956,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     // 4. Patrocinadores que ya tienen invitados cargados en directInvites
     invites.forEach((inv) => {
       const spName = (inv.sponsorName || '').trim();
-      if (!spName || spName.toLowerCase() === 'general') return;
+      if (!spName || getSponsorKey(spName) === 'general') return;
       const existingKey = Object.keys(sMap).find(k => isMatchingSponsor(k, spName));
       if (!existingKey) {
         sMap[spName] = {
@@ -3222,7 +3224,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     return name.includes(term) || comp.includes(term) || mail.includes(term) || sp.includes(term) || regName.includes(term) || regComp.includes(term) || token.includes(term);
   });
 
-  const sponsorsList = Object.keys(sponsorsMap).sort();
+  const sponsorsList = Object.keys(sponsorsMap).filter(sp => getSponsorKey(sp) !== 'general').sort();
 
   // Conteo de patrocinadores según criterios para los chips de filtro
   const countSponsorsWithInvites = sponsorsList.filter(sp => {
