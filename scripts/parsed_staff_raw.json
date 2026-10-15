@@ -1,0 +1,2234 @@
+[
+  {
+    "sponsor": "Comasa",
+    "empresa": "Comasa",
+    "nombre": "Humberto",
+    "apellido": "Calderon",
+    "email": "humberto.calderon@sinsa.com.ni",
+    "telefono": "75530811",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Comasa",
+    "empresa": "Comasa",
+    "nombre": "Diana",
+    "apellido": "Matamoros",
+    "email": "diana.matamoros@sinsa.com.ni",
+    "telefono": "89664987",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "DURMAN",
+    "empresa": "DURMAN",
+    "nombre": "Darling",
+    "apellido": "Sevilla Moreno",
+    "email": "darling.sevilla@aliaxis-la.com",
+    "telefono": "50578727306",
+    "cargo": "CUENTAS CLAVES"
+  },
+  {
+    "sponsor": "DURMAN",
+    "empresa": "DURMAN",
+    "nombre": "Eddy",
+    "apellido": "Rojas Castro",
+    "email": "eddy.rojas@aliaxis-la.com",
+    "telefono": "50587866818",
+    "cargo": "ASESOR TECNICO"
+  },
+  {
+    "sponsor": "DURMAN",
+    "empresa": "DURMAN",
+    "nombre": "Angie",
+    "apellido": "Quezada",
+    "email": "angie.quezada@aliaxis-la.com",
+    "telefono": "50578273445",
+    "cargo": "ASISTENTE TECNICO"
+  },
+  {
+    "sponsor": "DURMAN",
+    "empresa": "DURMAN",
+    "nombre": "Javier",
+    "apellido": "Pinto",
+    "email": "javier.pinto@aliaxis-la.com",
+    "telefono": "50578864416",
+    "cargo": "GERENTE GENERAL"
+  },
+  {
+    "sponsor": "DURMAN",
+    "empresa": "DURMAN",
+    "nombre": "Hazel",
+    "apellido": "Peinado",
+    "email": "hazel.peinado@aliaxis-la.com",
+    "telefono": "",
+    "cargo": "Ejecutiva"
+  },
+  {
+    "sponsor": "EATON",
+    "empresa": "EATON",
+    "nombre": "Marcos",
+    "apellido": "Vargas Jimenez",
+    "email": "MarcosAVargas@Eaton.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "EATON",
+    "empresa": "EATON",
+    "nombre": "Héctor",
+    "apellido": "López Aguilar",
+    "email": "HectorJLopez@eaton.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "EATON",
+    "empresa": "EATON",
+    "nombre": "Oscar David",
+    "apellido": "Rivera",
+    "email": "oscar.rivera@sinsa.com.ni",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "EATON",
+    "empresa": "EATON",
+    "nombre": "Carmen",
+    "apellido": "Hernandez González",
+    "email": "oficinanicaragua@outlook.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "EATON",
+    "empresa": "EATON",
+    "nombre": "Rene",
+    "apellido": "Jarquin Carcamo",
+    "email": "rene.carcamo@sinsa.com.ni",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "EATON",
+    "empresa": "EATON",
+    "nombre": "Massiel",
+    "apellido": "Rivas",
+    "email": "massiel.rivas@sinsa.com.ni",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "EATON",
+    "empresa": "EATON",
+    "nombre": "David",
+    "apellido": "Rivas",
+    "email": "david.rivas@sinsa.com.ni",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "EATON",
+    "empresa": "EATON",
+    "nombre": "Elias",
+    "apellido": "Gaitan",
+    "email": "elias.gaitan@grupocubas.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Fernandez Sera",
+    "empresa": "Staff de Fernandez Sera",
+    "nombre": "Tania",
+    "apellido": "Cruz",
+    "email": "ventaspiso@fernandezsera.com",
+    "telefono": "50587403711",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Fernandez Sera",
+    "empresa": "Staff de Fernandez Sera",
+    "nombre": "Adriana",
+    "apellido": "Lopez",
+    "email": "servicioalcliente@fernandezsera.com",
+    "telefono": "50587403730",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Fernandez Sera",
+    "empresa": "Staff de Fernandez Sera",
+    "nombre": "Cesar",
+    "apellido": "Rivera",
+    "email": "cmercadeo@fernandezsera.com",
+    "telefono": "50588352323",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Fernandez Sera",
+    "empresa": "Staff de Fernandez Sera",
+    "nombre": "Allison",
+    "apellido": "Abea",
+    "email": "sac@fernandezsera.com",
+    "telefono": "50588413943",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Fernandez Sera",
+    "empresa": "Staff de Fernandez Sera",
+    "nombre": "María José",
+    "apellido": "Silva",
+    "email": "mercadeo@fernandezsera.com",
+    "telefono": "50587403761",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Fernandez Sera",
+    "empresa": "Fernandez Sera",
+    "nombre": "Tania",
+    "apellido": "Cruz",
+    "email": "ventaspiso@fernandezsera.com",
+    "telefono": "87403711",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Fernandez Sera",
+    "empresa": "Fernandez Sera",
+    "nombre": "Adriana",
+    "apellido": "Lopez",
+    "email": "servicioalcliente@fernandezsera.com",
+    "telefono": "87403730",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Fernandez Sera",
+    "empresa": "Fernandez Sera",
+    "nombre": "María José",
+    "apellido": "Silva",
+    "email": "mercadeo@fernandezsera.com",
+    "telefono": "87403761",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Fernandez Sera",
+    "empresa": "Fernandez Sera",
+    "nombre": "Cesar",
+    "apellido": "Rivera",
+    "email": "cmercadeo@fernandezsera.com",
+    "telefono": "88352323",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Fernandez Sera",
+    "empresa": "Fernandez Sera",
+    "nombre": "Allison",
+    "apellido": "Abea",
+    "email": "sac@fernandezsera.com",
+    "telefono": "88413943",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "FUTEC",
+    "empresa": "FUTEC",
+    "nombre": "FRANCISCO",
+    "apellido": "BRIONES",
+    "email": "gerencia@futecnet.com",
+    "telefono": "50577871754",
+    "cargo": "Gerencia General"
+  },
+  {
+    "sponsor": "FUTEC",
+    "empresa": "FUTEC",
+    "nombre": "LEANE",
+    "apellido": "MORALES",
+    "email": "leane@futecnet.com",
+    "telefono": "50583939874",
+    "cargo": "Gerencia de operaciones"
+  },
+  {
+    "sponsor": "FUTEC",
+    "empresa": "FUTEC",
+    "nombre": "GEMA",
+    "apellido": "CARRANZA",
+    "email": "gema.carranza@futecnet.com",
+    "telefono": "50586880303",
+    "cargo": "Finanzas"
+  },
+  {
+    "sponsor": "FUTEC",
+    "empresa": "FUTEC",
+    "nombre": "EYMI",
+    "apellido": "JARQUIN",
+    "email": "stephanie@futecnet.com",
+    "telefono": "50589886763",
+    "cargo": "Ejecutiva de ventas"
+  },
+  {
+    "sponsor": "FUTEC",
+    "empresa": "FUTEC",
+    "nombre": "SILVIA",
+    "apellido": "TALENO",
+    "email": "silvia.taleno@futecnet.com",
+    "telefono": "50578776242",
+    "cargo": "Ejecutiva de ventas"
+  },
+  {
+    "sponsor": "FUTEC",
+    "empresa": "FUTEC",
+    "nombre": "CARLOS",
+    "apellido": "MORALES",
+    "email": "Carlos.morales@futecnet.com",
+    "telefono": "50586889842",
+    "cargo": "Ejecutivo de ventas"
+  },
+  {
+    "sponsor": "FUTEC",
+    "empresa": "FUTEC",
+    "nombre": "CARLOS",
+    "apellido": "BRICEÑO",
+    "email": "comercializacion@futecnet.com",
+    "telefono": "50587964018",
+    "cargo": "Ejecutivo de ventas"
+  },
+  {
+    "sponsor": "Grupo Sur -Kermil",
+    "empresa": "Grupo Sur -Kermil",
+    "nombre": "Carlos Miguel",
+    "apellido": "Galeano López",
+    "email": "",
+    "telefono": "+50588436166",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Grupo Sur -Kermil",
+    "empresa": "Grupo Sur -Kermil",
+    "nombre": "Adriana",
+    "apellido": "Valle",
+    "email": "",
+    "telefono": "+50589539128",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Grupo Sur -Kermil",
+    "empresa": "Grupo Sur -Kermil",
+    "nombre": "Angela María",
+    "apellido": "Canales Contreras",
+    "email": "",
+    "telefono": "+50585390058",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Grupo Sur -Kermil",
+    "empresa": "Grupo Sur -Kermil",
+    "nombre": "Grupo Sur -Kermil",
+    "apellido": "Katherine",
+    "email": "",
+    "telefono": "+50589157962",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Anna Yansy",
+    "apellido": "Ulloa Darce",
+    "email": "aulloa@indenicsa.com",
+    "telefono": "85993147 / 87965014",
+    "cargo": "Cordinadora de Mercadeo"
+  },
+  {
+    "sponsor": "INDENICSA",
+    "empresa": "INDENICSA",
+    "nombre": "Bismarck",
+    "apellido": "Montoya",
+    "email": "",
+    "telefono": "50584328110",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Carlos",
+    "apellido": "Rivas",
+    "email": "crivas@indenicsa.com",
+    "telefono": "",
+    "cargo": "ViceGerente"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Francela Valentina",
+    "apellido": "Zamora Tellez.",
+    "email": "fzamora@indenicsa.com",
+    "telefono": "50588409679",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Fuad",
+    "apellido": "El Azar Reithel",
+    "email": "felazar@indenicsa.com",
+    "telefono": "",
+    "cargo": "Gerente General"
+  },
+  {
+    "sponsor": "INDENICSA",
+    "empresa": "INDENICSA",
+    "nombre": "Guillermo",
+    "apellido": "López",
+    "email": "",
+    "telefono": "50583771281",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Hazell",
+    "apellido": "Rivera",
+    "email": "hrivera@indenicsa.com",
+    "telefono": "50585650583",
+    "cargo": "Responsable Planta Corte y Doblado"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Jaime",
+    "apellido": "Rodríguez",
+    "email": "",
+    "telefono": "50583966644",
+    "cargo": "jrodriguez@indenicsa,com"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "José",
+    "apellido": "Centeno",
+    "email": "jcenteno@indenicsa.com",
+    "telefono": "50589884247",
+    "cargo": "Cuentas Claves & Desarrollo de Negocios"
+  },
+  {
+    "sponsor": "INDENICSA",
+    "empresa": "INDENICSA",
+    "nombre": "Julio",
+    "apellido": "Maltez",
+    "email": "",
+    "telefono": "50588823831",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "INDENICSA",
+    "empresa": "INDENICSA",
+    "nombre": "Kenia",
+    "apellido": "Zamora",
+    "email": "kenizamora92@gmail.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Leopoldo",
+    "apellido": "Pérez",
+    "email": "",
+    "telefono": "50588852994",
+    "cargo": "lperez@indenicsa,com Gerente de comercializacion"
+  },
+  {
+    "sponsor": "INDENICSA",
+    "empresa": "INDENICSA",
+    "nombre": "Marietha",
+    "apellido": "Sánchez",
+    "email": "marietha@sanchezsa.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa ArcelorMittal",
+    "empresa": "ArcelorMittal",
+    "nombre": "Carlos",
+    "apellido": "Berrocal",
+    "email": "carlos.berrocal@arcelormittal.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa ArcelorMittal",
+    "empresa": "ArcelorMittal",
+    "nombre": "Daniela",
+    "apellido": "Piedra Leiva",
+    "email": "daniela.leiva@arcelormittal.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa ArcelorMittal",
+    "empresa": "ArcelorMittal",
+    "nombre": "Gerardo",
+    "apellido": "Vega",
+    "email": "gerardo.vega@arcelormittal.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa ArcelorMittal",
+    "empresa": "ArcelorMittal",
+    "nombre": "Sebastián",
+    "apellido": "Sánchez",
+    "email": "sebastian.h.sanchez@arcelormittal.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Madinisa",
+    "empresa": "Madinisa",
+    "nombre": "Lorena",
+    "apellido": "Obando",
+    "email": "Lorenaobandoxd@gmail.com",
+    "telefono": "50575567985",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Madinisa",
+    "empresa": "Madinisa",
+    "nombre": "Michelle",
+    "apellido": "Morales",
+    "email": "moralesramirezmichelledelsocor@gmail.com",
+    "telefono": "50589558432",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Madinisa",
+    "empresa": "Madinisa",
+    "nombre": "William",
+    "apellido": "Madrigal",
+    "email": "wmadrigal@madinisa.net",
+    "telefono": "50588732213",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Madinisa",
+    "empresa": "Madinisa",
+    "nombre": "Ervin",
+    "apellido": "Eugarrios",
+    "email": "ventas.automotriz3@madinisa.net",
+    "telefono": "50582525556",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Madinisa",
+    "empresa": "Madinisa",
+    "nombre": "Gabriela",
+    "apellido": "Muñoz",
+    "email": "gabriela.munoz@madinisa.net",
+    "telefono": "50584658919",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Staff de Megalineas",
+    "nombre": "Luisa",
+    "apellido": "Urbina",
+    "email": "victoriaurbina@megalineas.com",
+    "telefono": "50587898798",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Staff de Megalineas",
+    "nombre": "Rufino",
+    "apellido": "Valle",
+    "email": "rufinovalle1@gmail.com",
+    "telefono": "50575407312",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Staff de Megalineas",
+    "nombre": "Marvin",
+    "apellido": "Vargas",
+    "email": "olivasmarvin161196@gmail.com",
+    "telefono": "50581570192",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Staff de Megalineas",
+    "nombre": "Victor",
+    "apellido": "Roa",
+    "email": "vroa@megalineas.com",
+    "telefono": "50588690133",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Staff de Megalineas",
+    "nombre": "José",
+    "apellido": "Bermudez",
+    "email": "nbermudez699@gmail.com",
+    "telefono": "50587418441",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Staff de Megalineas",
+    "nombre": "Leyder",
+    "apellido": "Cabrera",
+    "email": "leyderjoel17@gmail.com",
+    "telefono": "50589275081",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Staff de Megalineas",
+    "nombre": "José",
+    "apellido": "Valerio",
+    "email": "josevalerio130579@gmail.com",
+    "telefono": "50586535027",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Staff de Megalineas",
+    "nombre": "Diego",
+    "apellido": "Naranjo",
+    "email": "dinaranjo@megalineas.com",
+    "telefono": "50660519045",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Staff de Megalineas",
+    "nombre": "German",
+    "apellido": "Bolaños",
+    "email": "gbolanos@megalineas.com",
+    "telefono": "50687480688",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Staff de Megalineas",
+    "nombre": "Jonathan",
+    "apellido": "Naranjo",
+    "email": "jnaranjo@megalineas.com",
+    "telefono": "50670885041",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Megalineas Nicaragua S.A.",
+    "nombre": "Luisa",
+    "apellido": "Urbina",
+    "email": "victoriaurbina@megalineas.com",
+    "telefono": "8789-8798",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Megalineas Nicaragua S.A.",
+    "nombre": "Rufino",
+    "apellido": "Valle",
+    "email": "rufinovalle1@gmail.com",
+    "telefono": "7540-7312",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Megalineas Nicaragua S.A.",
+    "nombre": "Marvin",
+    "apellido": "Vargas",
+    "email": "olivasmarvin161196@gmail.com",
+    "telefono": "8157-0192",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Megalineas Nicaragua S.A.",
+    "nombre": "Victor",
+    "apellido": "Roa",
+    "email": "vroa@megalineas.com",
+    "telefono": "8869-0133",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Megalineas Nicaragua S.A.",
+    "nombre": "José",
+    "apellido": "Bermudez",
+    "email": "nbermudez699@gmail.com",
+    "telefono": "8741-8441",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Megalineas Nicaragua S.A.",
+    "nombre": "Leyder",
+    "apellido": "Cabrera",
+    "email": "leyderjoel17@gmail.com",
+    "telefono": "8927-5081",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Megalineas Nicaragua S.A.",
+    "nombre": "José",
+    "apellido": "Valerio",
+    "email": "josevalerio130579@gmail.com",
+    "telefono": "8653-5027",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Megalineas Nicaragua S.A.",
+    "nombre": "Diego",
+    "apellido": "Naranjo",
+    "email": "dinaranjo@megalineas.com",
+    "telefono": "506 - 6051-9045",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Megalineas Nicaragua S.A.",
+    "nombre": "German",
+    "apellido": "Bolaños",
+    "email": "gbolanos@megalineas.com",
+    "telefono": "506 - 8748-0688",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Megalineas Nicaragua S.A.",
+    "empresa": "Megalineas Nicaragua S.A.",
+    "nombre": "Jonathan",
+    "apellido": "Naranjo",
+    "email": "jnaranjo@megalineas.com",
+    "telefono": "506 - 7088-5041",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "MIDESA",
+    "empresa": "Personal de MIDESA",
+    "nombre": "Raquel",
+    "apellido": "Caldera Corea",
+    "email": "rcaldera@findenicaragua.com",
+    "telefono": "+50589889305",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "MIDESA",
+    "empresa": "Personal de MIDESA",
+    "nombre": "Arelys",
+    "apellido": "Morales",
+    "email": "amorales@findenicaragua.com",
+    "telefono": "+50587938649",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "MIDESA",
+    "empresa": "Personal de MIDESA",
+    "nombre": "Jesús",
+    "apellido": "García",
+    "email": "jgarcia@findenicaragua.com",
+    "telefono": "+50589889335",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "MIDESA",
+    "empresa": "Personal de MIDESA",
+    "nombre": "Rodrigo",
+    "apellido": "Hernández",
+    "email": "rihk83@gmail.com",
+    "telefono": "+50588510505",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "MIDESA",
+    "empresa": "Personal de MIDESA",
+    "nombre": "Donaldo",
+    "apellido": "Vanegas",
+    "email": "dvanegas@findenicaragua.com",
+    "telefono": "+50588104020",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "MIDESA",
+    "empresa": "MIDESA",
+    "nombre": "Raquel",
+    "apellido": "Caldera Corea",
+    "email": "rcaldera@findenicaragua.com",
+    "telefono": "8988-9305",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "MIDESA",
+    "empresa": "MIDESA",
+    "nombre": "Arelys",
+    "apellido": "Morales",
+    "email": "amorales@findenicaragua.com",
+    "telefono": "8793-8649",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "MIDESA",
+    "empresa": "MIDESA",
+    "nombre": "Jesús",
+    "apellido": "García",
+    "email": "jgarcia@findenicaragua.com",
+    "telefono": "8988-9335",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "MIDESA",
+    "empresa": "MIDESA",
+    "nombre": "Rodrigo",
+    "apellido": "Hernández",
+    "email": "rihk83@gmail.com",
+    "telefono": "8851-0505",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "MIDESA",
+    "empresa": "MIDESA",
+    "nombre": "Donaldo",
+    "apellido": "Vanegas",
+    "email": "dvanegas@findenicaragua.com",
+    "telefono": "8810-4020",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Mobius Engineering S.A",
+    "empresa": "Mobius Engineering S.A",
+    "nombre": "Mariana",
+    "apellido": "Arostegui",
+    "email": "ventas1@mobius-engineering.com",
+    "telefono": "78339450",
+    "cargo": "Líder de Cuentas Centro"
+  },
+  {
+    "sponsor": "Mobius Engineering S.A",
+    "empresa": "Mobius Engineering S.A",
+    "nombre": "Bryan",
+    "apellido": "Munguía",
+    "email": "ventas2@mobius-engineering.com",
+    "telefono": "81096266",
+    "cargo": "Líder de Cuentas Occidente"
+  },
+  {
+    "sponsor": "Mobius Engineering S.A",
+    "empresa": "Mobius Engineering S.A",
+    "nombre": "Enrique",
+    "apellido": "Montoya",
+    "email": "ventas5@mobius-engineering.com",
+    "telefono": "58021012",
+    "cargo": "Jefe de taller"
+  },
+  {
+    "sponsor": "Mobius Engineering S.A",
+    "empresa": "Mobius Engineering S.A",
+    "nombre": "Bryan",
+    "apellido": "Zúniga",
+    "email": "mercadeo@mobius-engineering.com",
+    "telefono": "82388540",
+    "cargo": "Coordinador de mercadeo"
+  },
+  {
+    "sponsor": "parque industrial",
+    "empresa": "Parque Industrial Los Brasile",
+    "nombre": "Kevin",
+    "apellido": "Rodriguez",
+    "email": "krodriguez@zfsaratoga.com.ni",
+    "telefono": "77350836",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "parque industrial",
+    "empresa": "ZONA FRANCA SARATOGA",
+    "nombre": "Meyling",
+    "apellido": "Lazo",
+    "email": "mlazo@zfsaratoga.com.ni",
+    "telefono": "86040832",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "parque industrial",
+    "empresa": "ZONA FRANCA SARATOGA",
+    "nombre": "Yosahara",
+    "apellido": "Gonzalez",
+    "email": "ygonzalez@zfsaratoga.com.ni",
+    "telefono": "7673 6350",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Plycem",
+    "empresa": "Plycem",
+    "nombre": "Dulce",
+    "apellido": "López",
+    "email": "dlopezm@externo-elementia.com",
+    "telefono": "50558536290",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Plycem",
+    "empresa": "Plycem",
+    "nombre": "Mildred",
+    "apellido": "Munguía",
+    "email": "mmunguiae@externo-elementia.com",
+    "telefono": "50558536285",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Plycem",
+    "empresa": "Plycem",
+    "nombre": "Gerlim Rodriguez",
+    "apellido": "Gomez",
+    "email": "gmrodriguezs@externo-elementia.com",
+    "telefono": "50558536289",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Plycem",
+    "empresa": "Plycem",
+    "nombre": "Gerlim Rodriguez",
+    "apellido": "Valle",
+    "email": "gvalleb@externo-elementia.com",
+    "telefono": "+50558536288",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Plycem",
+    "empresa": "Plycem",
+    "nombre": "Dulce",
+    "apellido": "López",
+    "email": "dlopezm@externo-elementia.com",
+    "telefono": "5853-6290",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Plycem",
+    "empresa": "Plycem",
+    "nombre": "Mildred",
+    "apellido": "Munguía",
+    "email": "mmunguiae@externo-elementia.com",
+    "telefono": "5853-6285",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Plycem",
+    "empresa": "Plycem",
+    "nombre": "Gerlim Rodriguez",
+    "apellido": "Gomez",
+    "email": "gmrodriguezs@externo-elementia.com",
+    "telefono": "5853-6289",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Plycem",
+    "empresa": "Plycem",
+    "nombre": "Grethel",
+    "apellido": "Valle",
+    "email": "gvalleb@externo-elementia.com",
+    "telefono": "5853-6288",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Sherwin-Williams",
+    "empresa": "Sherwin-Williams",
+    "nombre": "Hilce",
+    "apellido": "Peralta",
+    "email": "hperalta@swdeca.com",
+    "telefono": "50589206087",
+    "cargo": "Representante tecnico de ventas"
+  },
+  {
+    "sponsor": "Sherwin-Williams",
+    "empresa": "Sherwin-Williams",
+    "nombre": "Jose",
+    "apellido": "Sampson",
+    "email": "jsampson@swdeca.com",
+    "telefono": "50557200642",
+    "cargo": "Representante tecnico de ventas"
+  },
+  {
+    "sponsor": "Sherwin-Williams",
+    "empresa": "Sherwin-Williams",
+    "nombre": "Rene",
+    "apellido": "Chamorro",
+    "email": "rchamorro@swdeca.com",
+    "telefono": "50588547214",
+    "cargo": "Representante tecnico de ventas"
+  },
+  {
+    "sponsor": "Sherwin-Williams",
+    "empresa": "Sherwin-Williams",
+    "nombre": "Miguel",
+    "apellido": "Figueroa",
+    "email": "mfigueroa@swdeca.com",
+    "telefono": "50588513754",
+    "cargo": "Gerente de Ventas"
+  },
+  {
+    "sponsor": "Sherwin-Williams",
+    "empresa": "Sherwin-Williams",
+    "nombre": "Riden",
+    "apellido": "Gonzalez",
+    "email": "rigonzalez@swdeca.com",
+    "telefono": "50588206359",
+    "cargo": "Representante tecnico de ventas"
+  },
+  {
+    "sponsor": "Sherwin-Williams",
+    "empresa": "Sherwin-Williams",
+    "nombre": "Karla",
+    "apellido": "Hernandez",
+    "email": "kahernandez@swdeca.com",
+    "telefono": "50558437575",
+    "cargo": "Gerente de Mercadeo"
+  },
+  {
+    "sponsor": "Sicsa",
+    "empresa": "Sicsa",
+    "nombre": "Vladimir",
+    "apellido": "Garcia",
+    "email": "vgarcia@sicsa.com.ni",
+    "telefono": "50586525475",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Sicsa",
+    "empresa": "Sicsa",
+    "nombre": "María Auxiliadora",
+    "apellido": "Miranda",
+    "email": "amiranda@sicsa.com.ni",
+    "telefono": "84643140",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Sicsa",
+    "empresa": "Sicsa",
+    "nombre": "Jenner",
+    "apellido": "Moncada",
+    "email": "contabilidad@sicsa.com.ni",
+    "telefono": "77636853",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "SINSA",
+    "empresa": "SINSA",
+    "nombre": "Ari",
+    "apellido": "Lopez",
+    "email": "ari.lopez@sinsa.com.ni",
+    "telefono": "88625732",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "SINSA",
+    "empresa": "SINSA",
+    "nombre": "Adolfo",
+    "apellido": "Lugo",
+    "email": "adolfo.lugo@sinsa.com.ni",
+    "telefono": "75503721",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "SINSA",
+    "empresa": "SINSA",
+    "nombre": "Mauricio",
+    "apellido": "Gutierrez",
+    "email": "mauricio.gutierrez@sinsa.com.ni",
+    "telefono": "75305698",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "SINSA",
+    "empresa": "SINSA",
+    "nombre": "Deborah",
+    "apellido": "Agurto",
+    "email": "deborah.agurto@sinsa.com.ni",
+    "telefono": "75165418",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "SINSA",
+    "empresa": "SINSA",
+    "nombre": "Cynthia",
+    "apellido": "Fitoria",
+    "email": "cynthia.fitoria@sinsa.com.ni",
+    "telefono": "78263570",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "SINSA",
+    "empresa": "SINSA",
+    "nombre": "Carlos",
+    "apellido": "Gonzalez",
+    "email": "carlos.gonzalez@sinsa.com.ni",
+    "telefono": "82525690",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "SINSA",
+    "empresa": "SINSA",
+    "nombre": "Hazel",
+    "apellido": "Cruz",
+    "email": "hazel.cruz@sinsa.com",
+    "telefono": "83937837",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "SINSA",
+    "empresa": "SINSA",
+    "nombre": "Octavio",
+    "apellido": "Palacios",
+    "email": "octavio.palacios@sinsa.com.ni",
+    "telefono": "76526327",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "SINSA",
+    "empresa": "SINSA",
+    "nombre": "Luis Rafael",
+    "apellido": "Silva",
+    "email": "lrsilva@sinsa.com",
+    "telefono": "84353253",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "STAFF CASCO SAFETY",
+    "empresa": "STAFF CASCO SAFETY",
+    "nombre": "Néstor José",
+    "apellido": "Abaunza Galarza",
+    "email": "",
+    "telefono": "",
+    "cargo": "Gerente Pais"
+  },
+  {
+    "sponsor": "STAFF CASCO SAFETY",
+    "empresa": "STAFF CASCO SAFETY",
+    "nombre": "Raquel del Carmen",
+    "apellido": "Gago",
+    "email": "",
+    "telefono": "",
+    "cargo": "Asesor de Ventas"
+  },
+  {
+    "sponsor": "STAFF CASCO SAFETY",
+    "empresa": "STAFF CASCO SAFETY",
+    "nombre": "Tatiana",
+    "apellido": "Zamora L.",
+    "email": "",
+    "telefono": "",
+    "cargo": "Asesor de Ventas"
+  },
+  {
+    "sponsor": "STAFF CASCO SAFETY",
+    "empresa": "STAFF CASCO SAFETY",
+    "nombre": "Jovanska",
+    "apellido": "Maltéz",
+    "email": "",
+    "telefono": "",
+    "cargo": "Asesor de Ventas"
+  },
+  {
+    "sponsor": "STAFF CASCO SAFETY",
+    "empresa": "STAFF CASCO SAFETY",
+    "nombre": "Marvin",
+    "apellido": "Castrillo B.",
+    "email": "",
+    "telefono": "",
+    "cargo": "Asesor de Ventas"
+  },
+  {
+    "sponsor": "STAFF CASCO SAFETY",
+    "empresa": "STAFF CASCO SAFETY",
+    "nombre": "Miguel Angel",
+    "apellido": "Castillo",
+    "email": "",
+    "telefono": "",
+    "cargo": "Asesor de Ventas"
+  },
+  {
+    "sponsor": "STAFF CASCO SAFETY",
+    "empresa": "STAFF CASCO SAFETY",
+    "nombre": "Gian Marco",
+    "apellido": "Palazio",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "TIGO",
+    "empresa": "TIGO",
+    "nombre": "Sergio Jose",
+    "apellido": "Olivas Chavarria",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "TIGO",
+    "empresa": "TIGO",
+    "nombre": "Denis Rodrigo",
+    "apellido": "Diaz Mena",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "TIGO",
+    "empresa": "TIGO",
+    "nombre": "Carlos Aurelio",
+    "apellido": "Gaitan",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "TIGO",
+    "empresa": "TIGO",
+    "nombre": "Maria Jose",
+    "apellido": "Urbina",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "TIGO",
+    "empresa": "TIGO",
+    "nombre": "Lorgia Rubenia",
+    "apellido": "Calero Vázquez",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "TIGO",
+    "empresa": "TIGO",
+    "nombre": "Abraham",
+    "apellido": "Zapata Guzmán",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "TIGO",
+    "empresa": "TIGO",
+    "nombre": "Max",
+    "apellido": "Sandino",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Fuad Hijo",
+    "apellido": "El Azar Romero",
+    "email": "fromero@indenicsa.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Fuad",
+    "apellido": "El Azar Romero",
+    "email": "fromero@indenicsa.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Isaac",
+    "apellido": "El Azar Romero",
+    "email": "ielazar@indenicsa.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Mario",
+    "apellido": "",
+    "email": "melazar@indenicsa.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Nihad",
+    "apellido": "El Azar Romero",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Mario",
+    "apellido": "El Azar Romero",
+    "email": "melazar@indenicsa.com",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Indenicsa",
+    "empresa": "Indenicsa",
+    "nombre": "Nihad",
+    "apellido": "El Azar Romero",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Ferco",
+    "empresa": "Ferco",
+    "nombre": "Silvio Roberto",
+    "apellido": "Silvio Aguilera",
+    "email": "silvio@ferco.com.ni",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Monolit",
+    "empresa": "Monolit",
+    "nombre": "Juan Carlos",
+    "apellido": "Erazo Salinas",
+    "email": "juancarlos.erazo@grupomonolit.com",
+    "telefono": "50499188544",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Monolit",
+    "empresa": "Monolit",
+    "nombre": "Obed Othoniel",
+    "apellido": "Contreras Motta",
+    "email": "obed.contreras@grupomonolit.com",
+    "telefono": "50240799169",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Monolit",
+    "empresa": "Monolit",
+    "nombre": "Bayron",
+    "apellido": "Sanabria",
+    "email": "ferreteriaales041221@gmail.com",
+    "telefono": "50587409739",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "PBS",
+    "empresa": "PBS",
+    "nombre": "Denier",
+    "apellido": "Centeno",
+    "email": "denier.centeno@pbs.group",
+    "telefono": "50587326237",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "PBS",
+    "empresa": "PBS",
+    "nombre": "Jorge",
+    "apellido": "Morales",
+    "email": "jorge.morales@pbs.group",
+    "telefono": "50585408960",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "PBS",
+    "empresa": "PBS",
+    "nombre": "Alexander",
+    "apellido": "Guerrero",
+    "email": "alexander.guerrero@pbs.group",
+    "telefono": "50589302719",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "PBS",
+    "empresa": "PBS",
+    "nombre": "Adriana",
+    "apellido": "Tijerino",
+    "email": "adriana.tijerino@pbs.group",
+    "telefono": "50584944716",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "PBS",
+    "empresa": "PBS",
+    "nombre": "Wilfredo",
+    "apellido": "Duarte",
+    "email": "wilfredo.duarte@pbs.group",
+    "telefono": "50583306074",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "PBS",
+    "empresa": "PBS",
+    "nombre": "Gerald",
+    "apellido": "Vanegas",
+    "email": "Gerald.vanegas@pbs.group",
+    "telefono": "50585015199",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "PBS",
+    "empresa": "PBS",
+    "nombre": "Lucila",
+    "apellido": "Marquez",
+    "email": "lucila.marquez@pbs.group",
+    "telefono": "50589232322",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "PBS",
+    "empresa": "PBS",
+    "nombre": "Cristiana",
+    "apellido": "Gonzalez",
+    "email": "Cristiana.gonzalez@pbs.group",
+    "telefono": "50586439720",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "INCASA",
+    "empresa": "STEELMAX",
+    "nombre": "Maria Celia",
+    "apellido": "Medina Molina",
+    "email": "gerenciadenegocio@steelmax.com",
+    "telefono": "50588573357",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Hector",
+    "apellido": "Balladares",
+    "email": "hectorb@importacionesballadares.com",
+    "telefono": "50589040896",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Bayardo",
+    "apellido": "Ortega",
+    "email": "supervisorventas@importacionesballadares.com",
+    "telefono": "50589898452",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Miguel",
+    "apellido": "Rodriguez",
+    "email": "supventas2@importacionesballadares.com",
+    "telefono": "50582968368",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Axel",
+    "apellido": "Gonzalez",
+    "email": "ventas20@importacionesballadares.com",
+    "telefono": "50586265853",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Armando",
+    "apellido": "Carranza",
+    "email": "",
+    "telefono": "50558607330",
+    "cargo": "Pendiente"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Colbert",
+    "apellido": "Hurtado",
+    "email": "ventas01@importacionesballadares.com",
+    "telefono": "50581818813",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Manuel",
+    "apellido": "Collado",
+    "email": "ventas05@importacionesballadares.com",
+    "telefono": "50587454482",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Jorge",
+    "apellido": "Lozano",
+    "email": "ventas02@importacionesballadares.com",
+    "telefono": "50589548274",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Luis",
+    "apellido": "Santo",
+    "email": "ventas06@importacionesballadares.com",
+    "telefono": "50583238905",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Carlos",
+    "apellido": "Canales",
+    "email": "ventasrotado@importacionesballadares.com",
+    "telefono": "50587315706",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Bismarck",
+    "apellido": "Rodriguez",
+    "email": "ventas12@importacionesballadares.com",
+    "telefono": "50578804417",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Pablo",
+    "apellido": "Collado",
+    "email": "agroventas1@importacionesballadares.com",
+    "telefono": "50586687095",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Manuel",
+    "apellido": "Garcia",
+    "email": "ventas03@importacionesballadares.com",
+    "telefono": "50584671403",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Carlos",
+    "apellido": "Vallecillo",
+    "email": "ventas07@importacionesballadares.com",
+    "telefono": "50587591188",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Carlos",
+    "apellido": "Mendieta",
+    "email": "ventas08@importacionesballadares.com",
+    "telefono": "50586579360",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Alfredo",
+    "apellido": "Cardenas",
+    "email": "ventas10@importacionesballadares.com",
+    "telefono": "50586088082",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Marlon",
+    "apellido": "Urbina",
+    "email": "ventas13@importacionesballadares.com",
+    "telefono": "50588560263",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Alvaro",
+    "apellido": "Quiñones",
+    "email": "ventas17@importacionesballadares.com",
+    "telefono": "50587261036",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Yorlene",
+    "apellido": "Garcia",
+    "email": "ventas16@importacionesballadares.com",
+    "telefono": "50582398296",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Bryan",
+    "apellido": "Amador",
+    "email": "ventaspiso@importacionesballadares.com",
+    "telefono": "50577582534",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Joselyne",
+    "apellido": "Loewery",
+    "email": "v.piso3@importacionesballadares.com",
+    "telefono": "50585190355",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Rafael",
+    "apellido": "Ponce",
+    "email": "rafaelponce@importacionesballadares.com",
+    "telefono": "50581997075",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Mario",
+    "apellido": "Chavarria",
+    "email": "mariochavarria@importacionesballadares.com",
+    "telefono": "50557916160",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Osara",
+    "apellido": "Balladares",
+    "email": "osaraballadares@importacionesballadares.com",
+    "telefono": "50587384188",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Bismarck",
+    "apellido": "Rivera",
+    "email": "compras@importacionesballadares.com",
+    "telefono": "50558422093",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Kathya",
+    "apellido": "Poveda",
+    "email": "promotorgato@importacionesballadares.com",
+    "telefono": "50582362027",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Heiddy",
+    "apellido": "Ulloa",
+    "email": "promotor1@importacionesballadares.com",
+    "telefono": "50576282849",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Samantha",
+    "apellido": "Bustamante",
+    "email": "promotorasylvania@importacionesballadares.com",
+    "telefono": "50582399245",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Maria",
+    "apellido": "Beteta",
+    "email": "promotorwth@importacionesballadares.com",
+    "telefono": "50583551410",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Alvin",
+    "apellido": "Navarrete",
+    "email": "promotoremtop@importacionesballadares.com",
+    "telefono": "50582399244",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Cintia",
+    "apellido": "Larios",
+    "email": "tesoreria@importacionesballadares.com",
+    "telefono": "50586834486",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Perla",
+    "apellido": "Gutierrez",
+    "email": "auxtesoreria@importacionesballadares.com",
+    "telefono": "50557709049",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "José",
+    "apellido": "Hernández",
+    "email": "mercadeoib@importacionesballadares.com",
+    "telefono": "50576695734",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Frania",
+    "apellido": "Vanegas",
+    "email": "auxgrafica@importacionesballadares.com",
+    "telefono": "50588862777",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Importaciones Balladares",
+    "empresa": "Importaciones Balladares",
+    "nombre": "Liza",
+    "apellido": "Parra",
+    "email": "exportaciones1@ideace.com",
+    "telefono": "53 (312) 8955740",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Importaciones Balladares",
+    "empresa": "Importaciones Balladares",
+    "nombre": "Victor",
+    "apellido": "Zambon",
+    "email": "vitor.trevisan@atlas.com.br",
+    "telefono": "(+55) 51 996177775",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Importaciones Balladares",
+    "empresa": "Importaciones Balladares",
+    "nombre": "Aarón",
+    "apellido": "Quiel",
+    "email": "Aaron.quiel@atlas.com.br",
+    "telefono": "505569029241",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Jean",
+    "apellido": "Detrinidad",
+    "email": "",
+    "telefono": "50588888536",
+    "cargo": "pendiente"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Jorge",
+    "apellido": "Rodriguez",
+    "email": "",
+    "telefono": "50585744710",
+    "cargo": "pendiente"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Bosco",
+    "apellido": "Orozco",
+    "email": "",
+    "telefono": "50586724915",
+    "cargo": "pendiente"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Junior",
+    "apellido": "Reyes",
+    "email": "Juniorsebastian.reyes@akzonobel.com",
+    "telefono": "50589515086",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Jose Esteban",
+    "apellido": "RODRIGUEZ",
+    "email": "jerg_ni@hotmail.com",
+    "telefono": "50588835110",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Tatiana",
+    "apellido": "Moran",
+    "email": "ventas14@importacionesballadares.com",
+    "telefono": "50578496541",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "IMPORTACIONES BALLADARES",
+    "empresa": "IMPORTACIONES BALLADARES",
+    "nombre": "Jairo",
+    "apellido": "Ramirez",
+    "email": "",
+    "telefono": "50588863508",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Grupo Q",
+    "empresa": "CHEVROLET (GRUPO Q)",
+    "nombre": "Evert José",
+    "apellido": "Galo",
+    "email": "egalo@grupoQ.com",
+    "telefono": "50583544416",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Grupo Q",
+    "empresa": "CHEVROLET (GRUPO Q)",
+    "nombre": "Pedro Joaquin",
+    "apellido": "Rodriguez",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Grupo Q",
+    "empresa": "PIXEL PRODUCCIONES",
+    "nombre": "Erwin Cuarzma",
+    "apellido": "Bollina",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Grupo Q",
+    "empresa": "PIXEL PRODUCCIONES",
+    "nombre": "Byron",
+    "apellido": "Bollina",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Grupo Q",
+    "empresa": "PIXEL PRODUCCIONES",
+    "nombre": "Elias Josue",
+    "apellido": "Mendita",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Grupo Q",
+    "empresa": "PIXEL PRODUCCIONES",
+    "nombre": "Jose Manuel",
+    "apellido": "Lanza",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Grupo Q",
+    "empresa": "PIXEL PRODUCCIONES",
+    "nombre": "Yosmar",
+    "apellido": "Lopez",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "Grupo Q",
+    "empresa": "PIXEL PRODUCCIONES",
+    "nombre": "Manuel",
+    "apellido": "Gaitan",
+    "email": "",
+    "telefono": "",
+    "cargo": "Staff de Stand"
+  },
+  {
+    "sponsor": "La Casa del Perno",
+    "empresa": "La Casa del Perno",
+    "nombre": "Samir",
+    "apellido": "Acevedo",
+    "email": "",
+    "telefono": "",
+    "cargo": "Gerente de mercadeo"
+  },
+  {
+    "sponsor": "La Casa del Perno",
+    "empresa": "La Casa del Perno",
+    "nombre": "Eduardo",
+    "apellido": "Galo",
+    "email": "",
+    "telefono": "",
+    "cargo": "Gerente de operaciones"
+  },
+  {
+    "sponsor": "La Casa del Perno",
+    "empresa": "La Casa del Perno",
+    "nombre": "Leonardo",
+    "apellido": "Rivera",
+    "email": "",
+    "telefono": "",
+    "cargo": "Asesor de venta"
+  },
+  {
+    "sponsor": "La Casa del Perno",
+    "empresa": "La Casa del Perno",
+    "nombre": "Moises",
+    "apellido": "Ramirez",
+    "email": "",
+    "telefono": "",
+    "cargo": "Asesor de venta"
+  },
+  {
+    "sponsor": "La Casa del Perno",
+    "empresa": "El Mundo del concreto",
+    "nombre": "Karelia",
+    "apellido": "Cordobas",
+    "email": "",
+    "telefono": "",
+    "cargo": "Asesor de venta"
+  },
+  {
+    "sponsor": "La Casa del Perno",
+    "empresa": "El Mundo del concreto",
+    "nombre": "Moises",
+    "apellido": "Lovo",
+    "email": "",
+    "telefono": "",
+    "cargo": "Asesor de venta"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Maria Fernanda",
+    "apellido": "Perez Solis",
+    "email": "mariaf.perezs@cemex.com",
+    "telefono": "50588221074",
+    "cargo": "Coordinadora Control de Calidad"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Cristhian Oswaldo",
+    "apellido": "Perez Lopez",
+    "email": "cristhianoswaldo.perez@cemex.com",
+    "telefono": "50583334823",
+    "cargo": "Coordinador Comunicaciones y Asuntos Corporativos"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Daniel Antonio",
+    "apellido": "Vargas Solis",
+    "email": "danielantonio.Vargas@cemex.com",
+    "telefono": "50558550733",
+    "cargo": "Coordinado Desarrollo Comercial"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Fernanda Elizabeth",
+    "apellido": "Aldana Espinoza",
+    "email": "fernandaelizabeth.aldana@cemex.com",
+    "telefono": "50558550617",
+    "cargo": "Asesor de Oferta de Valor"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Fatima",
+    "apellido": "Ulloa Darce",
+    "email": "fatima.ulload@cemex.com",
+    "telefono": "50558550634",
+    "cargo": "Asesor de Multiproducto Centramerica"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Aura Eliett",
+    "apellido": "Lanuza Guillen",
+    "email": "AuraEliett.Lanuza@cemex.com",
+    "telefono": "50558550637",
+    "cargo": "Comercial Distribuidores 1"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Aura Lila",
+    "apellido": "Meza Espinoza",
+    "email": "auralila.meza@cemex.com",
+    "telefono": "50558550644",
+    "cargo": "Asesor de Ventas"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Eddy Del Socorro",
+    "apellido": "Rodriguez Garcia",
+    "email": "eddydelsocorro.rodriguez@cemex.com",
+    "telefono": "50558550645",
+    "cargo": "Asesor de Ventas"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Ivan Alejandro",
+    "apellido": "Aguilar Diaz",
+    "email": "ivan.aguilar@cemex.com",
+    "telefono": "50558550683",
+    "cargo": "Asesor de Ventas"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Javier Ernesto",
+    "apellido": "Guerrero Rodriguez",
+    "email": "JavierErnesto.GuerreroRodriguez@cemex.com",
+    "telefono": "50558550646",
+    "cargo": "Asesor de Ventas"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Pedro Antonio",
+    "apellido": "Castro Gonzalez",
+    "email": "pedroantonio.castrog@cemex.com",
+    "telefono": "50558550610",
+    "cargo": "Asesor de Ventas"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Erick Jose",
+    "apellido": "Flores Guzman",
+    "email": "erickjose.flores@cemex.com",
+    "telefono": "50558550651",
+    "cargo": "Asesor de Ventas"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Tania Lezama",
+    "apellido": "Sobalvarro",
+    "email": "tania.lezamas@cemex.com",
+    "telefono": "50558550636",
+    "cargo": "Asesor de Ventas"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Fernanda Valentina",
+    "apellido": "Romero Guadamuz",
+    "email": "fernanda.romero@ext.cemex.com",
+    "telefono": "50585010869",
+    "cargo": "Ofertas de Valor"
+  },
+  {
+    "sponsor": "Cemex",
+    "empresa": "Cemex",
+    "nombre": "Junieth de Los Angeles",
+    "apellido": "Diaz Baltodano",
+    "email": "junieth.diaz@ext.cemex.com",
+    "telefono": "50585584114",
+    "cargo": "Marketing"
+  },
+  {
+    "sponsor": "Kouture S.A",
+    "empresa": "Kouture S.A",
+    "nombre": "Carlos",
+    "apellido": "Ramirez",
+    "email": "gtventas@kouture.com.ni",
+    "telefono": "50584084464",
+    "cargo": "Gerente de Ventas"
+  },
+  {
+    "sponsor": "Kouture S.A",
+    "empresa": "Kouture S.A",
+    "nombre": "Carlos",
+    "apellido": "Brenes",
+    "email": "ventas1@kouture.com.ni",
+    "telefono": "50588265705",
+    "cargo": "Ejecutivo de Cuentas Claves"
+  },
+  {
+    "sponsor": "Kouture S.A",
+    "empresa": "Kouture S.A",
+    "nombre": "Mariangel",
+    "apellido": "Contreras",
+    "email": "ventas7@kouture.com.ni",
+    "telefono": "50589325594",
+    "cargo": "Ejecutivo de Cuentas Claves"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Gerardo Joaquin",
+    "apellido": "Zelaya Antúnez",
+    "email": "",
+    "telefono": "",
+    "cargo": "Coordinador General Afiliaciones"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Wendy Valeria",
+    "apellido": "González Valverde",
+    "email": "",
+    "telefono": "",
+    "cargo": "Ejecutiva de Venta de Tarjetas de Crédito"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Cesar Antonio",
+    "apellido": "Espinoza Zamora",
+    "email": "",
+    "telefono": "",
+    "cargo": "Ejecutivo de Afiliaciones Managua"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Jose Luis",
+    "apellido": "Medina Perez",
+    "email": "",
+    "telefono": "",
+    "cargo": "Ejecutivo de Afiliaciones Managua"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Marelys del Carmen",
+    "apellido": "Fonseca",
+    "email": "",
+    "telefono": "",
+    "cargo": "Ejecutivo de Afiliaciones Managua"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Roberto Carlos",
+    "apellido": "Vargas Mendez",
+    "email": "",
+    "telefono": "",
+    "cargo": "Ejecutivo de Afiliaciones Managua"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Moisés Antonio",
+    "apellido": "Urbina Rivera",
+    "email": "",
+    "telefono": "",
+    "cargo": "Ejecutivo de Comunicación"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Denisse Isayana",
+    "apellido": "Gadea Soza",
+    "email": "",
+    "telefono": "",
+    "cargo": "Ejecutivo de Transformación Digital"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "María José",
+    "apellido": "Amador Altamirano",
+    "email": "",
+    "telefono": "",
+    "cargo": "Jefa de Comunicación"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Carlos Andrés",
+    "apellido": "Caceres López",
+    "email": "",
+    "telefono": "",
+    "cargo": "Promotor Kash"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Eugenio Marcelo",
+    "apellido": "Midence Casco",
+    "email": "",
+    "telefono": "",
+    "cargo": "Promotor Kash"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Walter",
+    "apellido": "Cabrales Calero",
+    "email": "",
+    "telefono": "",
+    "cargo": "Promotor Kash"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Ana Cecilia",
+    "apellido": "Castro Sandino",
+    "email": "",
+    "telefono": "",
+    "cargo": "Supervisora de Transformación Digital"
+  },
+  {
+    "sponsor": "BAC",
+    "empresa": "BAC",
+    "nombre": "Xochilt",
+    "apellido": "Ferrey Ruiz",
+    "email": "",
+    "telefono": "",
+    "cargo": "Vice Gerente de Transformación Digital"
+  },
+  {
+    "sponsor": "ARTIK CARGO",
+    "empresa": "ARTIK CARGO",
+    "nombre": "Ana Mercedes",
+    "apellido": "Blanco Gutiérrez",
+    "email": "operaciones@artikcargo.com",
+    "telefono": "50584651937",
+    "cargo": "Gerente General"
+  },
+  {
+    "sponsor": "ARTIK CARGO",
+    "empresa": "ARTIK CARGO",
+    "nombre": "Harold Flavio",
+    "apellido": "Sánchez Blanco",
+    "email": "operaciones@artikcargo.com",
+    "telefono": "50588774505",
+    "cargo": "Gerente Administrativo"
+  },
+  {
+    "sponsor": "ARTIK CARGO",
+    "empresa": "ARTIK CARGO",
+    "nombre": "Roger Eduardo",
+    "apellido": "Pérez Montenegro",
+    "email": "operaciones@artikcargo.com",
+    "telefono": "50587355061",
+    "cargo": "Coordinador de Operaciones"
+  }
+]
