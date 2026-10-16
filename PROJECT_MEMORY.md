@@ -1787,5 +1787,11 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     - `f3cc2ea`: *feat(print): permitir imprimir gafetes térmicos sin QR con tipografía gigante y agregar toggle de QR*
     - `76e519e`: *docs(memory): registrar soporte para impresión térmica sin QR*
 
-
-
+### 🖼️ Banner Oficial de Recordatorio Sábado ("Hoy es el Día")
+- **Fecha:** 16 de Octubre de 2026 (Para envío el Sábado 17 de Octubre a las 06:00 AM).
+- **Header Banner:** Se incorporó el nuevo arte gráfico `email-header-sabado.png` (975x375) destacando: *"HOY ES EL DÍA • 17 DE OCTUBRE • CENTRO DE CONVENCIONES CROWNE PLAZA MANAGUA • JUNTOS HACEMOS UNA FERRETERÍA MÁS FUERTE"*.
+- **Aplicación para la Campaña:**
+  - Configurado en `AdminDirectInvites.jsx` (`buildRegisteredEventReminderEmail`).
+  - URL de distribución rápida CDN de GitHub / jsDelivr para evitar demoras por caché: `https://cdn.jsdelivr.net/gh/Marktuay/expo-ferre-landing@main/public/email-header-sabado.png`.
+  - Horario programado establecido a las **06:00 AM** para garantizar recepción temprana antes de las actividades (7:30 AM).
+  - Incluye speech especial con recordatorio de agenda completa, pase con código QR, acreditación, capacitaciones, alimentación y reconocimientos.
