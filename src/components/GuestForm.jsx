@@ -86,9 +86,6 @@ const GuestForm = ({ onBack }) => {
                 <p className="text-secondary mb-6">El código QR para el acceso de su invitado ha sido generado.</p>
                 
                 <div className="bg-surface-variant p-6 rounded-lg inline-block border border-outline mb-6">
-                  <div className="bg-black text-amber-300 font-black text-xs px-3 py-1 rounded-sm uppercase tracking-wider mb-3">
-                    ⭐ PASE INVITADO VIP • ALMUERZO INCLUIDO
-                  </div>
                   <QRCodeSVG value={`VIP-${registeredGuestId}`} size={180} level="M" />
                   <p className="mt-4 text-sm font-mono font-bold text-slate-800">VIP - {registeredGuestId}</p>
                 </div>

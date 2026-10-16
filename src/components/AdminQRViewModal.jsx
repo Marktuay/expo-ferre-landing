@@ -87,7 +87,7 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
     if (isPendingInvite) {
       msg = `¡Hola ${name}! 👋 Te compartimos tu enlace de registro exclusivo para *EXPO FERRE Nicaragua 2026*:\n\n${passUrl}\n\nCompleta tus datos para activar tu Pase Oficial con Código QR.`;
     } else {
-      msg = `¡Hola ${name}! 👋 Aquí tienes tu *Pase Oficial y Código QR* para *EXPO FERRE Nicaragua 2026*:\n\n👤 *Titular:* ${name}\n🏢 *Empresa:* ${company}\n🎟️ *Categoría:* ${isVip ? '⭐ INVITADO VIP (Almuerzo Incluido)' : 'Asistente General'}\n🔢 *Código de Registro:* ${displayId}\n📅 *Fecha:* 17 de Octubre, 2026 (8:00 AM - 5:00 PM)\n📍 *Lugar:* Centro de Convenciones Crowne Plaza Managua\n\n📲 *Accede a tu Gafete con Código QR aquí:*\n${passUrl}\n\nPresenta tu código QR en tu celular al llegar al evento. ¡Te esperamos!`;
+      msg = `¡Hola ${name}! 👋 Aquí tienes tu *Pase Oficial y Código QR* para *EXPO FERRE Nicaragua 2026*:\n\n👤 *Titular:* ${name}\n🏢 *Empresa:* ${company}\n🎟️ *Categoría:* ${isVip ? '⭐ INVITADO VIP' : 'Asistente General'}\n🔢 *Código de Registro:* ${displayId}\n📅 *Fecha:* 17 de Octubre, 2026 (8:00 AM - 5:00 PM)\n📍 *Lugar:* Centro de Convenciones Crowne Plaza Managua\n\n📲 *Accede a tu Gafete con Código QR aquí:*\n${passUrl}\n\nPresenta tu código QR en tu celular al llegar al evento. ¡Te esperamos!`;
     }
 
     const waLink = cleanPhone 

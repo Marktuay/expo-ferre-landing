@@ -71,15 +71,10 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF' }) {
 
       {/* 6. Código QR de Acceso en Alta Nitidez Térmica con Distinción VIP */}
       <div className="flex flex-col items-center justify-center my-auto">
-        {isVip && (
-          <div className="bg-black text-white px-2 py-0.5 rounded-xs text-[8px] font-black tracking-wider uppercase mb-1">
-            ⭐ PASE VIP • ALMUERZO INCLUIDO
-          </div>
-        )}
         <div className="bg-white p-1 border border-black/30 rounded-xs flex items-center justify-center">
           <QRCodeSVG 
             value={qrValue} 
-            size={isVip ? 95 : 105} 
+            size={105} 
             level="M" 
             bgColor="#ffffff"
             fgColor="#000000"

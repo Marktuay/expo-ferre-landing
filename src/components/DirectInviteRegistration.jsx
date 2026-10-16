@@ -133,8 +133,8 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
     ctx.fillText('EL ENCUENTRO OFICIAL DEL SECTOR FERRETERO', width / 2, 74);
 
     // Badge Dorado: "PASE OFICIAL DE ACCESO INVITADO VIP"
-    const pillText = '★ INVITADO VIP • ALMUERZO INCLUIDO ★';
-    ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    const pillText = '★ INVITADO VIP ★';
+    ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     const pillW = ctx.measureText(pillText).width + 24;
     const pillX = (width - pillW) / 2;
     const pillY = 96;
@@ -204,9 +204,9 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
     ctx.font = 'bold 16px "SF Mono", Monaco, Consolas, monospace';
     ctx.fillText(`CÓDIGO VIP: VIP - ${cleanId}`, width / 2, 695);
 
-    ctx.fillStyle = '#059669';
+    ctx.fillStyle = '#0284c7';
     ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText('🍽️ Pase VIP: Incluye Acceso a Alimentos y Conferencias', width / 2, 720);
+    ctx.fillText('⭐ Pase Oficial de Acceso VIP al Evento', width / 2, 720);
 
     // Pie de la Tarjeta
     ctx.fillStyle = '#f1f5f9';
@@ -618,10 +618,10 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
               </p>
             )}
 
-            {/* Distintivo VIP Oficial y Pase de Alimentos */}
+            {/* Distintivo VIP Oficial */}
             <div className="mb-3 inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs px-3.5 py-1.5 rounded-full shadow-sm border border-amber-300">
               <span className="text-sm">⭐</span>
-              <span>PASE INVITADO VIP • ALMUERZO INCLUIDO</span>
+              <span>PASE INVITADO VIP</span>
             </div>
 
             {/* Código QR Oficial */}
@@ -637,9 +637,6 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
 
             <p className="text-[12px] text-slate-900 font-mono font-black mt-1">
               Código de Acceso: <span className="bg-slate-100 text-amber-800 px-2.5 py-0.5 rounded border border-slate-300 tracking-wider">VIP - {registeredData.id ? String(registeredData.id).replace(/^VIP[-_:\s]+/i, '') : ''}</span>
-            </p>
-            <p className="text-[11px] text-emerald-800 font-bold mt-1.5 bg-emerald-50 border border-emerald-200 rounded-lg py-1 px-3 inline-block">
-              🍽️ Acceso Válido a Alimentos y Bebidas del Evento
             </p>
           </div>
 
