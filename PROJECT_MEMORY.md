@@ -1765,4 +1765,9 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     3. **Opciones de corte:** Activar "Cortar cada: 1 Etiquetas" y "Cortar al final".
     4. **Comprobación de soporte:** Desactivada en la pestaña "Otros" para evitar bloqueos por tolerancias mínimas de milímetros.
     5. **Cuadro de diálogo del navegador:** Márgenes en "Ninguno" y Gráficos de fondo "Activados". Impresión y corte automático 100% operativos.
+- **Modo Gafete Limpio Sin Código QR (`showQr: false` por defecto):**
+  - Se configuró la opción de imprimir etiquetas térmicas sin código QR. Al no llevar el recuadro del QR, el diseño aprovecha todo el alto de 100 mm para maximizar el tamaño del **Nombre del Asistente (22px black)** y el **Nombre de la Empresa (17px black con borde)**, siendo perfectamente legible a varios metros de distancia.
+  - Se implementó un toggle en la barra de control de impresión (`PrintableBadgeList.jsx`) que permite alternar con un clic entre `🔘 Sin QR (Texto Grande - Recomendado)` y `🔘 Con Código QR`.
+  - El servicio de impresión en Flutter (`badge_print_service.dart`) se actualizó en paralelo con soporte para `showQr = false`.
+
 
