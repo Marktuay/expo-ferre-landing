@@ -102,12 +102,15 @@ export default function AdminAttendanceReport({ onBack }) {
       const staffSnap = await getDocs(query(collection(db, `${basePath}/staff`)));
       staffSnap.forEach(doc => {
         const d = doc.data();
+        const staffName = d.name || (`${d.nombre || ''} ${d.apellido || ''}`).trim() || 'Staff';
+        const staffComp = d.company || d.empresa || d.sponsorCompany || d.sponsorName || 'ExpoFerre';
+        const staffContact = d.email || d.correo || d.phone || d.telefono || 'N/A';
         consolidated.push({
           id: doc.id,
-          name: d.name || 'Staff',
+          name: staffName,
           category: 'Staff Técnico',
-          contact: d.email || d.phone || 'N/A',
-          company: d.company || 'ExpoFerre',
+          contact: staffContact,
+          company: staffComp,
           checkedIn: !!d.checkedIn,
           checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
           collection: 'staff',
@@ -119,12 +122,15 @@ export default function AdminAttendanceReport({ onBack }) {
       const speakersSnap = await getDocs(query(collection(db, `${basePath}/speakers`)));
       speakersSnap.forEach(doc => {
         const d = doc.data();
+        const speakerName = d.name || (`${d.nombre || ''} ${d.apellido || ''}`).trim() || d.speaker || 'Conferencista';
+        const speakerComp = d.company || d.empresa || d.sponsorCompany || d.sponsorName || (d.titulo ? `Tema: ${d.titulo}` : 'N/A');
+        const speakerContact = d.email || d.correo || d.phone || d.telefono || 'N/A';
         consolidated.push({
           id: doc.id,
-          name: d.name || 'Conferencista',
+          name: speakerName,
           category: 'Conferencista',
-          contact: d.email || d.phone || 'N/A',
-          company: d.company || 'N/A',
+          contact: speakerContact,
+          company: speakerComp,
           checkedIn: !!d.checkedIn,
           checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
           collection: 'speakers',
@@ -136,12 +142,15 @@ export default function AdminAttendanceReport({ onBack }) {
       const guestsSnap = await getDocs(query(collection(db, `${basePath}/guests`)));
       guestsSnap.forEach(doc => {
         const d = doc.data();
+        const guestName = d.name || (`${d.nombre || ''} ${d.apellido || ''}`).trim() || 'Invitado Especial';
+        const guestComp = d.company || d.empresa || d.sponsorName || 'N/A';
+        const guestContact = d.email || d.correo || d.phone || d.telefono || 'N/A';
         consolidated.push({
           id: doc.id,
-          name: d.name || 'Invitado Especial',
+          name: guestName,
           category: 'Invitado VIP',
-          contact: d.email || d.phone || 'N/A',
-          company: d.company || 'N/A',
+          contact: guestContact,
+          company: guestComp,
           checkedIn: !!d.checkedIn,
           checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
           isVip: true,
