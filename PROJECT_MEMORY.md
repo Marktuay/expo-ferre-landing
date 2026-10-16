@@ -1703,3 +1703,22 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     19. `inv_mva5bz5n_95fnm68g` - Daniel (IMPORTACIONES BALLADARES) - `dmartinex91@gmail.com` - `+50582572500`
     20. `inv_mva5bz5n_e9faaan3` - Norman (FERRETERIA CARO) - `normanaranda958@gmail.com` - `+50587599017`
     21. `inv_mva5bz5n_stz2mtaa` - Mariela (FERRETERIA SAN JUAN) - `alvesa072015@gmail.com` - `+50587757015`
+
+### 🗺️ Recalibración Geométrica de Coordenadas de Stands 1 al 38 (`InteractiveMap.jsx` / `defaultStands.js`)
+- **Problema Reportado:** Los globos/marcadores flotantes de los patrocinadores en el plano interactivo se sobreponían unos encima de otros en la hilera de Stands Plata y Oro, dificultando la lectura y el clic.
+- **Causa Raíz Diagnosticada:**
+  - Los Stands 1 al 5 (SINSA / Armoconsa) estaban configurados erróneamente en `x: 67.71%`, desplazados más de 80px hacia el pasillo central en lugar de la pared oriental (`x: 74.65%`).
+  - Para no chocar con SINSA, los Stands 7 al 10 (FUTEC, Monolit, La Casa del Perno, Mobius) se habían desplazado a `x: 62.85%`, quedando a solo 3.5% de distancia de los Stands 12 al 15 (`x: 59.34%`), lo que provocaba colisiones directas entre los globos (ancho ~55px).
+- **Auditoría Vectorial y Solución Implementada:**
+  - Se auditaron las coordenadas exactas de las etiquetas de texto, rectángulos de cubículos y círculos de pines directamente sobre el SVG oficial (`map-expo-ferre-140826.svg`, `viewBox="0 0 792 612"`).
+  - Se actualizaron las coordenadas en `initialStandsList` de `src/config/defaultStands.js`:
+    - **Stands 1–5 (Pared Oriental):** Alineados en `x: '74.65%'`.
+    - **Stands 7–10 (Plata - Cara derecha):** Posicionados en `x: '67.00%'` (espacio de 7.65% hacia Stands 1-5).
+    - **Stands 12–15 (Plata - Cara izquierda):** Posicionados en `x: '61.00%'` (distancia de 6.00% respecto a Stands 7-10, eliminando completamente el solapamiento).
+    - **Stands 6 y 11 (Diamante Norte / Sur):** Centrados en `x: '64.27%'` y `x: '64.30%'`.
+    - **Stands 16 y 21 (Diamante Central Norte / Sur):** Centrados en `x: '51.81%'` y `x: '51.74%'`.
+    - **Stands 17–20 (Plata Central cara derecha):** Posicionados en `x: '54.40%'`.
+    - **Stands 22–25 (Plata Central cara izquierda):** Posicionados en `x: '48.40%'` (distancia de 6.00% con Stands 17-20).
+    - **Stands 26–30 (Pared Occidental):** Centrados en `x: '40.35%'`.
+    - **Stands 31–38 (Corredor inferior):** Calibrados con separación mínima de 5.90% entre stands contiguos.
+- **Compilación & Despliegue:** Verificado con `npm run build` y subido a GitHub en el commit `0a1c52a`.
