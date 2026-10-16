@@ -172,6 +172,8 @@ export default function AdminAttendanceReport({ onBack }) {
     fetchData();
   }, [fetchData]);
 
+  const [isResetting, setIsResetting] = useState(false);
+
   const handlePrintBadge = async (item) => {
     // 1. Optimistic update in table
     setData(prev => prev.map(d => d.id === item.id ? { ...d, checkedIn: true, checkInTime: d.checkInTime || new Date() } : d));
@@ -192,6 +194,120 @@ export default function AdminAttendanceReport({ onBack }) {
     };
 
     setPrintItems([badgeItem]);
+  };
+
+  const handleRevertCheckIn = async (item) => {
+    if (!window.confirm(`¿Deseas desmarcar la asistencia de "${item.name}" para que vuelva a estar Pendiente?`)) return;
+
+    try {
+      const colPath = item.collection === 'users' ? 'users' : `${basePath}/${item.collection}`;
+      const resetPayload = {
+        checkedIn: false,
+        checkInTime: null,
+        badgePrinted: false,
+        attended: false,
+        attendedAt: null
+      };
+
+      if (item.collection === 'directInvites') {
+        resetPayload.status = (item.raw?.registeredName || item.raw?.nombre) ? 'registered' : 'pending';
+      }
+
+      await updateDoc(doc(db, colPath, item.id), resetPayload);
+
+      if (item.registeredAttendeeId) {
+        try {
+          await updateDoc(doc(db, `${basePath}/preregistrations`, item.registeredAttendeeId), resetPayload);
+        } catch (_) {}
+      }
+
+      setData(prev => prev.map(d => d.id === item.id ? { ...d, checkedIn: false, checkInTime: null } : d));
+    } catch (err) {
+      console.error("Error al revertir checkin:", err);
+      alert("Hubo un error al revertir el check-in: " + err.message);
+    }
+  };
+
+  const handleResetAllAttendance = async () => {
+    const checkedInCount = data.filter(d => d.checkedIn).length;
+    if (checkedInCount === 0) {
+      alert("No hay ningún check-in registrado actualmente.");
+      return;
+    }
+
+    const confirmMsg = `⚠️ ATENCIÓN: Se van a limpiar las ${checkedInCount} asistencias registradas hoy durante las pruebas de impresión.\n\n¿Deseas reiniciar todas las asistencias a CERO para el inicio del evento mañana?\n\n(No te preocupes: NO se borrará ningún invitado ni registro, solo se regresa su estatus a Pendiente).`;
+    if (!window.confirm(confirmMsg)) return;
+
+    setIsResetting(true);
+    try {
+      const resetPayload = {
+        checkedIn: false,
+        checkInTime: null,
+        badgePrinted: false,
+        attended: false,
+        attendedAt: null
+      };
+
+      // 1. Reset preregistrations
+      const preregSnap = await getDocs(query(collection(db, `${basePath}/preregistrations`)));
+      for (const d of preregSnap.docs) {
+        if (d.data().checkedIn) {
+          await updateDoc(doc(db, `${basePath}/preregistrations`, d.id), resetPayload);
+        }
+      }
+
+      // 2. Reset directInvites
+      const directSnap = await getDocs(query(collection(db, `${basePath}/directInvites`)));
+      for (const d of directSnap.docs) {
+        const data = d.data();
+        if (data.checkedIn || data.status === 'used') {
+          await updateDoc(doc(db, `${basePath}/directInvites`, d.id), {
+            ...resetPayload,
+            status: (data.registeredName || data.nombre) ? 'registered' : 'pending'
+          });
+        }
+      }
+
+      // 3. Reset users (sponsors)
+      const usersSnap = await getDocs(query(collection(db, `users`)));
+      for (const d of usersSnap.docs) {
+        if (d.data().checkedIn) {
+          await updateDoc(doc(db, `users`, d.id), resetPayload);
+        }
+      }
+
+      // 4. Reset staff
+      const staffSnap = await getDocs(query(collection(db, `${basePath}/staff`)));
+      for (const d of staffSnap.docs) {
+        if (d.data().checkedIn) {
+          await updateDoc(doc(db, `${basePath}/staff`, d.id), resetPayload);
+        }
+      }
+
+      // 5. Reset speakers
+      const speakersSnap = await getDocs(query(collection(db, `${basePath}/speakers`)));
+      for (const d of speakersSnap.docs) {
+        if (d.data().checkedIn) {
+          await updateDoc(doc(db, `${basePath}/speakers`, d.id), resetPayload);
+        }
+      }
+
+      // 6. Reset guests
+      const guestsSnap = await getDocs(query(collection(db, `${basePath}/guests`)));
+      for (const d of guestsSnap.docs) {
+        if (d.data().checkedIn) {
+          await updateDoc(doc(db, `${basePath}/guests`, d.id), resetPayload);
+        }
+      }
+
+      await fetchData();
+      alert(`✅ ¡Asistencias reiniciadas exitosamente a 0! Las pruebas de hoy fueron limpiadas. Mañana iniciarán el evento con el conteo en blanco.`);
+    } catch (err) {
+      console.error("Error al reiniciar asistencias:", err);
+      alert("Hubo un error al reiniciar asistencias: " + err.message);
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   // Filtered data
@@ -293,6 +409,17 @@ export default function AdminAttendanceReport({ onBack }) {
             <p className="text-body-lg text-secondary">Vista consolidada en tiempo real. Imprimir gafete registra el Check-In automáticamente.</p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <button 
+              onClick={handleResetAllAttendance} 
+              disabled={isResetting || isLoading}
+              className="px-4 py-2 bg-rose-50 text-rose-700 border border-rose-300 rounded-md hover:bg-rose-100 transition-colors font-label-lg flex items-center gap-2 text-sm disabled:opacity-50 cursor-pointer shadow-2xs font-bold"
+              title="Limpiar pruebas de impresión y reiniciar la asistencia a cero para mañana"
+            >
+              <span className={`material-symbols-outlined text-[18px] ${isResetting ? 'animate-spin' : ''}`}>
+                {isResetting ? 'refresh' : 'restart_alt'}
+              </span>
+              {isResetting ? 'Reiniciando...' : 'Reiniciar a 0 (Limpiar Pruebas)'}
+            </button>
             <button 
               onClick={fetchData} 
               disabled={isLoading}
@@ -611,18 +738,29 @@ export default function AdminAttendanceReport({ onBack }) {
                         {item.checkInTime ? item.checkInTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '-'}
                       </td>
                       <td className="p-4 text-right">
-                        <button
-                          onClick={() => handlePrintBadge(item)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer ${
-                            item.checkedIn
-                              ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300'
-                              : 'bg-[#283474] text-white hover:bg-[#1e2759] border border-[#283474]'
-                          }`}
-                          title={item.checkedIn ? "Reimprimir Gafete Térmico" : "Imprimir Gafete Térmico y Registrar Check-In Inmediato"}
-                        >
-                          <span className="material-symbols-outlined text-[16px]">print</span>
-                          {item.checkedIn ? 'Reimprimir' : 'Imprimir'}
-                        </button>
+                        <div className="inline-flex items-center gap-1.5 justify-end">
+                          <button
+                            onClick={() => handlePrintBadge(item)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer ${
+                              item.checkedIn
+                                ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300'
+                                : 'bg-[#283474] text-white hover:bg-[#1e2759] border border-[#283474]'
+                            }`}
+                            title={item.checkedIn ? "Reimprimir Gafete Térmico" : "Imprimir Gafete Térmico y Registrar Check-In Inmediato"}
+                          >
+                            <span className="material-symbols-outlined text-[16px]">print</span>
+                            {item.checkedIn ? 'Reimprimir' : 'Imprimir'}
+                          </button>
+                          {item.checkedIn && (
+                            <button
+                              onClick={() => handleRevertCheckIn(item)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-rose-200"
+                              title="Desmarcar asistencia / Revertir prueba de impresión"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">undo</span>
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))
