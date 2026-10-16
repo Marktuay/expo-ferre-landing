@@ -76,6 +76,7 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
       - Muestra tarjetas KPI interactivas filtrables para las 5 categorías: ⭐ **Invitados VIP (Almuerzos)**, 🎟️ **Asistentes Generales**, 🏢 **Patrocinadores**, 👔 **Staff Técnico**, 🎤 **Conferencistas**.
       - Muestra el contador destacado en tiempo real: `🍽️ Platos de Almuerzo a Servir: X de 405 max`, permitiendo al equipo de logística conocer en cualquier momento del evento la cantidad exacta de comida a servir en cocina/buffet.
       - Botón de **"Imprimir & Check-In"** directo en cada fila de la tabla unificada de asistencia.
+      - **Limpieza de Pruebas de Impresión y Reseteo a Cero:** Se incorporó el botón **"Reiniciar a 0 (Limpiar Pruebas)"** en el encabezado de `AdminAttendanceReport.jsx` y un botón de revertir individual (`undo`) en cada fila. Esto permite realizar todas las pruebas de impresión deseadas el día previo (16/OCT) y, antes de abrir puertas el 17/OCT, limpiar todas las asistencias con 1 clic para arrancar el conteo limpio sin borrar ningún dato de los asistentes.
 - **Exportación:** Todas las tablas de administración tienen la capacidad de exportar sus datos a archivos Excel (`.xlsx`), incluyendo las últimas adiciones de campos (ej. Teléfono en Leads).
 
 ---
