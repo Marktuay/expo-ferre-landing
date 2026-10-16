@@ -1734,9 +1734,9 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   1. **QRs de Invitados Directos / Especiales / Patrocinadores:**
      - **Contenido del QR:** Codifica `VIP-${id}` (ej. `VIP-inv_mva5bz5f_r7hvbn4t`).
      - **Texto / Etiqueta Visible:** Muestra claramente `VIP - ${id}`.
-     - **Rol del Gafete Térmico (`BadgeTemplate.jsx`):** Muestra `★ INVITADO VIP ★` con franja negra destacada y etiqueta superior `⭐ PASE VIP • ALMUERZO INCLUIDO`.
-     - **Pase Digital (`DirectInviteRegistration.jsx`):** En móvil y descarga canvas PNG se resalta `⭐ PASE INVITADO VIP • ALMUERZO INCLUIDO` y `🍽️ Acceso Válido a Alimentos y Bebidas del Evento`.
-     - **Modal Administrativo (`AdminQRViewModal.jsx`):** Incluye distintivo `★ INVITADO VIP ★`, aviso `🍽️ ALMUERZO INCLUIDO • Pase VIP con acceso a alimentos` y formato de WhatsApp indicando categoría VIP.
+     - **Rol del Gafete Térmico (`BadgeTemplate.jsx`):** Muestra `★ INVITADO VIP ★` con franja negra destacada. Se retiró el cintillo de texto "PASE VIP • ALMUERZO INCLUIDO" a solicitud del organizador para mantener una estética limpia y sobria.
+     - **Pase Digital (`DirectInviteRegistration.jsx`):** Muestra el gafete digital con el código VIP y estado correspondiente.
+     - **Modal Administrativo (`AdminQRViewModal.jsx`):** Muestra `★ INVITADO VIP ★` y formato de WhatsApp indicando categoría VIP.
   2. **QRs de Preregistrados Generales (`!isDirectInvite && type !== 'direct_invite'`):**
      - **Contenido del QR:** Codifica únicamente `${cleanId}` (sin la palabra VIP).
      - **Texto Visible:** Muestra únicamente el ID limpio (sin VIP).
@@ -1750,3 +1750,19 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
      - **Si es Invitado VIP:** Banner verde esmeralda brillante con icono de restaurante: `🍽️ PASE DE COMIDA VÁLIDO • ALMUERZO INCLUIDO (Invitado VIP autorizado para el servicio de buffet / alimentos del evento)`.
      - **Si es Asistente General:** Banner de precaución: `⚠️ ASISTENTE GENERAL • SIN PASE DE COMIDA (Acceso autorizado únicamente al piso de exhibición, stands y conferencias generales)`.
      - Lo mismo en `ScannerModule.jsx` y `expo-ferre-flutter` (`hasMealPass`, `mealStatus`).
+
+### 🖨️ Calibración de Impresión Térmica para Brother QL-810W (62mm x 100mm)
+- **Fecha:** 16 de Octubre de 2026.
+- **Ajustes de Diseño y Escala del Gafete (`BadgeTemplate.jsx` & `PrintableBadgeList.jsx`):**
+  - Tipografía optimizada para máxima legibilidad a distancia: Nombre del Asistente a **17px negrita**, Empresa a **15px semibold** y Código QR ampliado a **125px**.
+  - Dimensiones del contenedor: ancho fijo de 62mm y altura automática/cortada a 100mm.
+  - Se eliminó del CSS `@page` la instrucción fija `size: 62mm 100mm;` (dejando `margin: 0mm !important;`), ya que los controladores Brother en Windows/macOS interpretaban esa dimensión como una solicitud forzada de etiqueta precortada/troquelada **DK-1202**, provocando conflicto con el sensor del rollo.
+- **Diagnóstico y Solución de Error de Soporte ("El soporte instalado en la máquina no coincide con el que se ha seleccionado en la aplicación"):**
+  - **Causa:** El rollo físico instalado es Cinta Continua de 62 mm (**DK-2205**), pero en las preferencias de impresión estaba seleccionado el perfil precortado `62mm x 100mm` (DK-1202).
+  - **Configuración Validada en el Controlador de Brother:**
+    1. **Tamaño de papel:** Seleccionar `62 mm` (Cinta continua).
+    2. **Longitud:** 100.0 mm.
+    3. **Opciones de corte:** Activar "Cortar cada: 1 Etiquetas" y "Cortar al final".
+    4. **Comprobación de soporte:** Desactivada en la pestaña "Otros" para evitar bloqueos por tolerancias mínimas de milímetros.
+    5. **Cuadro de diálogo del navegador:** Márgenes en "Ninguno" y Gráficos de fondo "Activados". Impresión y corte automático 100% operativos.
+
