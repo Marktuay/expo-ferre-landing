@@ -352,7 +352,7 @@ export default function AdminSponsors({ onBack }) {
             <table className="w-full text-left border-collapse text-xs md:text-sm">
               <thead>
                 <tr className="bg-surface-variant/30 border-b border-outline-variant">
-                  <th className="px-3 py-3 font-bold text-on-surface">Nombre</th>
+                  <th className="px-3 py-3 font-bold text-on-surface">Responsable</th>
                   <th className="px-3 py-3 font-bold text-on-surface">Empresa</th>
                   <th className="px-3 py-3 font-bold text-on-surface">Stand</th>
                   <th className="px-3 py-3 font-bold text-on-surface">Email / Rol</th>
@@ -380,16 +380,36 @@ export default function AdminSponsors({ onBack }) {
                   sponsors.map((sponsor) => (
                     <tr key={sponsor.id} className="border-b border-outline-variant hover:bg-surface-variant/10 transition-colors">
                       <td className="px-3 py-2.5 text-on-surface font-medium">
-                        <div className="flex items-center gap-1.5">
-                          {sponsor.lastActive && (Date.now() - sponsor.lastActive.toMillis() < 5 * 60 * 1000) ? (
-                            <span className="w-2 h-2 bg-green-500 rounded-full shrink-0" title="En línea"></span>
-                          ) : (
-                            <span className="w-2 h-2 bg-gray-300 rounded-full shrink-0" title="Desconectado"></span>
-                          )}
-                          <span className="truncate max-w-[130px] inline-block" title={(`${sponsor.nombre || sponsor.name || ''} ${sponsor.apellido || ''}`).trim() || 'Sin Nombre'}>
-                            {(`${sponsor.nombre || sponsor.name || ''} ${sponsor.apellido || ''}`).trim() || 'Sin Nombre'}
-                          </span>
-                        </div>
+                        {(() => {
+                          const rawName = (`${sponsor.nombre || sponsor.name || ''} ${sponsor.apellido || ''}`).trim();
+                          const compName = (sponsor.empresa || sponsor.company || '').trim();
+                          const isAssigned = rawName && rawName.toLowerCase() !== compName.toLowerCase() && rawName.toLowerCase() !== 'patrocinador oficial';
+
+                          return (
+                            <div className="flex items-center gap-1.5">
+                              {sponsor.lastActive && (Date.now() - sponsor.lastActive.toMillis() < 5 * 60 * 1000) ? (
+                                <span className="w-2 h-2 bg-green-500 rounded-full shrink-0" title="En línea"></span>
+                              ) : (
+                                <span className="w-2 h-2 bg-gray-300 rounded-full shrink-0" title="Desconectado"></span>
+                              )}
+                              {isAssigned ? (
+                                <span className="font-bold text-slate-900 truncate max-w-[140px] inline-block" title={rawName}>
+                                  {rawName}
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedSponsor(sponsor)}
+                                  className="text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2 py-0.5 rounded text-[11px] font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                                  title="Hacer clic para asignar persona responsable"
+                                >
+                                  <span className="material-symbols-outlined text-[13px]">person_add</span>
+                                  Sin asignar
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-3 py-2.5 text-secondary font-semibold">
                         <span className="truncate max-w-[120px] inline-block" title={sponsor.empresa || sponsor.company || 'N/A'}>

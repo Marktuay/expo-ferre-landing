@@ -472,9 +472,27 @@ export default function AdminSponsorDetails({ sponsor, onBack }) {
                   <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-green-400 align-middle ml-2">Aprobado</span>
                 )}
               </h1>
-              <p className="text-on-surface-variant mt-1">
-                <strong>Contacto:</strong> {currentSponsor.nombre} {currentSponsor.apellido} | <strong>Email:</strong> {currentSponsor.correo} | <strong>Teléfono:</strong> {currentSponsor.telefono}
-              </p>
+              <div className="text-on-surface-variant mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                <span>
+                  <strong>Responsable:</strong>{' '}
+                  {(() => {
+                    const rName = (`${currentSponsor.nombre || ''} ${currentSponsor.apellido || ''}`).trim();
+                    const cName = (currentSponsor.empresa || currentSponsor.company || '').trim();
+                    if (rName && rName.toLowerCase() !== cName.toLowerCase() && rName.toLowerCase() !== 'patrocinador oficial') {
+                      return <strong className="text-slate-900">{rName}</strong>;
+                    }
+                    return (
+                      <span className="text-amber-800 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded text-xs font-semibold">
+                        Por Asignar
+                      </span>
+                    );
+                  })()}
+                </span>
+                <span className="text-gray-300">|</span>
+                <span><strong>Email:</strong> {currentSponsor.correo || currentSponsor.email || 'N/A'}</span>
+                <span className="text-gray-300">|</span>
+                <span><strong>Teléfono:</strong> {currentSponsor.telefono || currentSponsor.phone || 'N/A'}</span>
+              </div>
             </div>
           </div>
 

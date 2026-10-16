@@ -79,12 +79,17 @@ export default function AdminAttendanceReport({ onBack }) {
       usersSnap.forEach(doc => {
         const d = doc.data();
         if (d.role === 'sponsor') {
+          const rawPerson = `${d.nombre || d.name || ''} ${d.apellido || ''}`.trim();
+          const comp = (d.empresa || d.company || '').trim();
+          const hasRealPerson = rawPerson && rawPerson.toLowerCase() !== comp.toLowerCase();
+          const displayName = hasRealPerson ? rawPerson : (comp ? `Resp. ${comp}` : 'Patrocinador');
+
           consolidated.push({
             id: doc.id,
-            name: d.empresa || d.nombre || 'Patrocinador',
+            name: displayName,
             category: 'Patrocinador',
-            contact: d.correo || d.telefono || 'N/A',
-            company: d.empresa || 'N/A',
+            contact: d.correo || d.email || d.telefono || 'N/A',
+            company: comp || 'N/A',
             checkedIn: !!d.checkedIn,
             checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
             collection: 'users',
