@@ -2307,9 +2307,9 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     const art = getSponsorArt(person?.sponsorName || 'general');
     // Para las campañas especiales con cuenta regresiva oficial (jueves "Faltan 2 días" y viernes "Falta 1 día")
     const headerImg = dayCampaign === 'jueves'
-      ? 'https://expoferrenicaragua.com/email-header-jueves.png'
+      ? 'https://cdn.jsdelivr.net/gh/Marktuay/expo-ferre-landing@main/public/email-header-jueves.png'
       : dayCampaign === 'viernes'
-        ? 'https://expoferrenicaragua.com/email-header-viernes.png'
+        ? 'https://cdn.jsdelivr.net/gh/Marktuay/expo-ferre-landing@main/public/email-header-viernes.png'
         : (art.headerBannerUrl?.startsWith('http')
             ? art.headerBannerUrl
             : `https://expoferrenicaragua.com${art.headerBannerUrl || '/email-header.png'}`);
