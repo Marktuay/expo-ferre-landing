@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import BadgeTemplate from './BadgeTemplate';
 
 export default function PrintableBadgeList({ items, roleLabel = 'Staff', colorClass, onClose }) {
+  const [includeQr, setIncludeQr] = useState(false);
   
   // Detonador de impresión al montar
   useEffect(() => {
@@ -23,11 +24,25 @@ export default function PrintableBadgeList({ items, roleLabel = 'Staff', colorCl
             </h2>
           </div>
           <p className="text-slate-500 text-xs mt-0.5">
-            Rollo <strong>DK-2205 Continuo (62 mm × 100 mm)</strong> • {items.length} gafete(s) listo(s) para corte automático.
+            Rollo <strong>DK-2205 Continuo (62 mm × 100 mm)</strong> • {items.length} gafete(s) • {includeQr ? 'Con Código QR' : 'Sin QR (Nombres y Empresa más grandes)'}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Toggle de Código QR */}
+          <label className="flex items-center gap-2 cursor-pointer bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-300 transition-colors select-none text-xs font-bold text-slate-800">
+            <input 
+              type="checkbox"
+              checked={includeQr}
+              onChange={(e) => setIncludeQr(e.target.checked)}
+              className="w-4 h-4 text-[#0d47a1] rounded cursor-pointer accent-[#0d47a1]"
+            />
+            <span className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[16px] text-slate-600">qr_code_2</span>
+              {includeQr ? 'Con Código QR' : 'Sin QR (Texto Grande)'}
+            </span>
+          </label>
+
           <button 
             type="button"
             onClick={onClose}
@@ -54,6 +69,7 @@ export default function PrintableBadgeList({ items, roleLabel = 'Staff', colorCl
             data={item} 
             roleLabel={item.roleLabel || roleLabel} 
             colorClass={item.colorClass || colorClass} 
+            showQr={includeQr}
           />
         ))}
       </div>
