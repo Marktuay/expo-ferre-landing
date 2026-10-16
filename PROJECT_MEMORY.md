@@ -1722,3 +1722,12 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     - **Stands 26–30 (Pared Occidental):** Centrados en `x: '40.35%'`.
     - **Stands 31–38 (Corredor inferior):** Calibrados con separación mínima de 5.90% entre stands contiguos.
 - **Compilación & Despliegue:** Verificado con `npm run build` y subido a GitHub en el commit `0a1c52a`.
+
+### 🖼️ Banner Especial de Recordatorio Viernes ("Falta 1 Día")
+- **Fecha:** 16 de Octubre de 2026.
+- **Header Banner:** Se incorporó el nuevo arte gráfico `email-header-viernes.png` (975x375) destacando: *"FALTA 1 DÍA • 17 DE OCTUBRE • CENTRO DE CONVENCIONES CROWNE PLAZA MANAGUA • JUNTOS HACEMOS UNA FERRETERÍA MÁS FUERTE"*.
+- **Aplicación para la Campaña:**
+  - Guardado en `public/email-header-viernes.png`.
+  - Vinculado dinámicamente en `buildRegisteredEventReminderEmail` de [`AdminDirectInvites.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminDirectInvites.jsx) cuando `dayCampaign === 'viernes'`.
+  - Selección automática de la campaña de viernes por fecha actual en Managua (`d === 16 -> 'viernes'`).
+  - Verificado con `npm run build` y subido a GitHub en el commit `7034e4e`.
