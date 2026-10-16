@@ -2,44 +2,61 @@ import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { getEventBasePath } from './eventConfig.js';
 
 export const initialStandsList = [
-  { id: 'stand-1', x: '67.71%', y: '56.10%', name: 'Stand 1', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
-  { id: 'stand-2', x: '67.72%', y: '49.68%', name: 'Stand 2', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
-  { id: 'stand-3', x: '67.77%', y: '42.84%', name: 'Stand 3', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
-  { id: 'stand-4', x: '67.71%', y: '36.39%', name: 'Stand 4', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
-  { id: 'stand-5', x: '67.71%', y: '29.79%', name: 'Stand 5', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
-  { id: 'stand-6', x: '61.50%', y: '28.23%', name: 'Stand 6', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
-  { id: 'stand-7', x: '62.85%', y: '34.14%', name: 'Stand 7', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-8', x: '62.89%', y: '38.96%', name: 'Stand 8', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-9', x: '62.76%', y: '44.29%', name: 'Stand 9', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-10', x: '62.89%', y: '49.06%', name: 'Stand 10', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-11', x: '61.62%', y: '54.34%', name: 'Stand 11', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
-  { id: 'stand-12', x: '59.34%', y: '49.22%', name: 'Stand 12', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-13', x: '59.34%', y: '44.11%', name: 'Stand 13', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-14', x: '59.31%', y: '39.15%', name: 'Stand 14', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-15', x: '59.27%', y: '34.17%', name: 'Stand 15', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-16', x: '51.20%', y: '28.16%', name: 'Stand 16', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
-  { id: 'stand-17', x: '52.81%', y: '33.84%', name: 'Stand 17', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-18', x: '52.84%', y: '39.05%', name: 'Stand 18', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-19', x: '52.81%', y: '44.21%', name: 'Stand 19', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-20', x: '52.76%', y: '49.19%', name: 'Stand 20', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-21', x: '51.13%', y: '54.11%', name: 'Stand 21', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
-  { id: 'stand-22', x: '48.94%', y: '49.12%', name: 'Stand 22', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-23', x: '49.02%', y: '43.96%', name: 'Stand 23', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-24', x: '49.08%', y: '39.09%', name: 'Stand 24', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-25', x: '49.08%', y: '34.12%', name: 'Stand 25', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-26', x: '39.70%', y: '30.08%', name: 'Stand 26', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
-  { id: 'stand-27', x: '39.72%', y: '36.66%', name: 'Stand 27', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
-  { id: 'stand-28', x: '39.70%', y: '43.25%', name: 'Stand 28', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
-  { id: 'stand-29', x: '39.72%', y: '49.71%', name: 'Stand 29', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
-  { id: 'stand-30', x: '39.79%', y: '56.14%', name: 'Stand 30', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
-  { id: 'stand-31', x: '43.72%', y: '66.52%', name: 'Stand 31', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
-  { id: 'stand-32', x: '38.76%', y: '66.54%', name: 'Stand 32', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-33', x: '31.30%', y: '75.59%', name: 'Stand 33', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-34', x: '36.79%', y: '75.57%', name: 'Stand 34', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
-  { id: 'stand-35', x: '64.09%', y: '75.56%', name: 'Stand 35', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
-  { id: 'stand-36', x: '68.78%', y: '75.56%', name: 'Stand 36', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-37', x: '61.14%', y: '66.53%', name: 'Stand 37', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
-  { id: 'stand-38', x: '56.88%', y: '66.52%', name: 'Stand 38', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' }
+  // Columna 4 (Derecha - Pared Oriental): Stands 1 al 5
+  { id: 'stand-1', x: '74.65%', y: '53.61%', name: 'Stand 1', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
+  { id: 'stand-2', x: '74.65%', y: '48.99%', name: 'Stand 2', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
+  { id: 'stand-3', x: '74.65%', y: '43.13%', name: 'Stand 3', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
+  { id: 'stand-4', x: '74.65%', y: '36.61%', name: 'Stand 4', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
+  { id: 'stand-5', x: '74.65%', y: '30.01%', name: 'Stand 5', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
+
+  // Bloque Isla 3 (Plata & Diamante):
+  // Stand 6 (Diamante Norte)
+  { id: 'stand-6', x: '64.27%', y: '28.48%', name: 'Stand 6', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
+  // Stands 7 al 10 (Plata - Mirando hacia pasillo derecho)
+  { id: 'stand-7', x: '67.00%', y: '34.15%', name: 'Stand 7', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-8', x: '67.00%', y: '39.03%', name: 'Stand 8', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-9', x: '67.00%', y: '44.24%', name: 'Stand 9', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-10', x: '67.00%', y: '49.28%', name: 'Stand 10', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  // Stand 11 (Diamante Sur)
+  { id: 'stand-11', x: '64.30%', y: '54.64%', name: 'Stand 11', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
+  // Stands 12 al 15 (Plata - Mirando hacia pasillo izquierdo)
+  { id: 'stand-12', x: '61.00%', y: '49.21%', name: 'Stand 12', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-13', x: '61.00%', y: '44.10%', name: 'Stand 13', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-14', x: '61.00%', y: '38.81%', name: 'Stand 14', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-15', x: '61.00%', y: '34.13%', name: 'Stand 15', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+
+  // Bloque Isla 2 (Plata & Diamante Central):
+  // Stand 16 (Diamante Norte)
+  { id: 'stand-16', x: '51.81%', y: '28.50%', name: 'Stand 16', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
+  // Stands 17 al 20 (Plata - Mirando hacia pasillo derecho)
+  { id: 'stand-17', x: '54.40%', y: '33.71%', name: 'Stand 17', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-18', x: '54.40%', y: '38.90%', name: 'Stand 18', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-19', x: '54.40%', y: '44.17%', name: 'Stand 19', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-20', x: '54.40%', y: '49.13%', name: 'Stand 20', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  // Stand 21 (Diamante Sur)
+  { id: 'stand-21', x: '51.74%', y: '54.50%', name: 'Stand 21', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
+  // Stands 22 al 25 (Plata - Mirando hacia pasillo izquierdo)
+  { id: 'stand-22', x: '48.40%', y: '49.06%', name: 'Stand 22', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-23', x: '48.40%', y: '43.90%', name: 'Stand 23', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-24', x: '48.40%', y: '38.93%', name: 'Stand 24', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-25', x: '48.40%', y: '33.95%', name: 'Stand 25', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+
+  // Columna 1 (Izquierda - Pared Occidental): Stands 26 al 30
+  { id: 'stand-26', x: '40.35%', y: '30.14%', name: 'Stand 26', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
+  { id: 'stand-27', x: '40.35%', y: '36.69%', name: 'Stand 27', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
+  { id: 'stand-28', x: '40.35%', y: '43.26%', name: 'Stand 28', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
+  { id: 'stand-29', x: '40.35%', y: '49.80%', name: 'Stand 29', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
+  { id: 'stand-30', x: '40.35%', y: '56.35%', name: 'Stand 30', status: 'available', price: 'U$2,700', size: 'Oro (4x3 mts)' },
+
+  // Corredor Inferior: Stands 31 al 38
+  { id: 'stand-31', x: '42.65%', y: '67.50%', name: 'Stand 31', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
+  { id: 'stand-32', x: '36.70%', y: '67.50%', name: 'Stand 32', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-33', x: '27.30%', y: '77.00%', name: 'Stand 33', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-34', x: '33.20%', y: '77.00%', name: 'Stand 34', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
+  { id: 'stand-35', x: '67.65%', y: '77.00%', name: 'Stand 35', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' },
+  { id: 'stand-36', x: '73.60%', y: '77.00%', name: 'Stand 36', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-37', x: '64.20%', y: '67.50%', name: 'Stand 37', status: 'available', price: 'U$1600', size: 'Plata (3x3 mts)' },
+  { id: 'stand-38', x: '58.30%', y: '67.50%', name: 'Stand 38', status: 'available', price: 'U$3,800', size: 'Diamante (6x3 mts)' }
 ];
 
 export const DEFAULT_OFFICIAL_STANDS = [
