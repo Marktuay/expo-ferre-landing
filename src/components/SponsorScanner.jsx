@@ -44,8 +44,12 @@ export default function SponsorScanner({ onBack }) {
 
         const sponsorId = currentUser.uid;
 
+        const rawCode = (decodedText || '').trim();
+        const cleanCode = rawCode.replace(/^VIP[-_:\s]+/i, '').trim();
+        const candidateCodes = Array.from(new Set([cleanCode, rawCode].filter(Boolean)));
+
         // Check if lead already exists
-        const leadRef = doc(db, `${getEventBasePath()}/sponsors/${sponsorId}/leads`, decodedText);
+        const leadRef = doc(db, `${getEventBasePath()}/sponsors/${sponsorId}/leads`, cleanCode);
         const leadSnap = await getDoc(leadRef);
 
         if (leadSnap.exists()) {
@@ -63,16 +67,19 @@ export default function SponsorScanner({ onBack }) {
         let foundData = null;
         let foundCollection = '';
 
-        for (const coll of collectionsToSearch) {
-          const path = coll === 'users' ? coll : `${getEventBasePath()}/${coll}`;
-          const docRef = doc(db, path, decodedText);
-          const docSnap = await getDoc(docRef);
+        for (const testCode of candidateCodes) {
+          for (const coll of collectionsToSearch) {
+            const path = coll === 'users' ? coll : `${getEventBasePath()}/${coll}`;
+            const docRef = doc(db, path, testCode);
+            const docSnap = await getDoc(docRef);
 
-          if (docSnap.exists()) {
-            foundData = { id: docSnap.id, ...docSnap.data() };
-            foundCollection = coll;
-            break;
+            if (docSnap.exists()) {
+              foundData = { id: docSnap.id, ...docSnap.data() };
+              foundCollection = coll;
+              break;
+            }
           }
+          if (foundData) break;
         }
 
         if (foundData) {

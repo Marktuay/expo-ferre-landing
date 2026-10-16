@@ -149,15 +149,42 @@ export default function AdminCheckIn({ onBack }) {
     if (colKey === 'staff') return 'STAFF';
     if (colKey === 'speakers') return 'CONFERENCISTA';
     if (colKey === 'users' || data.role === 'sponsor') return 'PATROCINADOR';
-    if (data.isDirectInvite || data.type === 'direct_invite' || data.position === 'Invitado Especial' || data.position === 'Invitado VIP') {
+    if (
+      data.isVip ||
+      data.isDirectInvite ||
+      data.type === 'direct_invite' ||
+      data.source === 'Invitación Directa' ||
+      data.position === 'Invitado Especial' ||
+      data.position === 'Invitado VIP' ||
+      (data.roleLabel && data.roleLabel.toUpperCase().includes('VIP')) ||
+      (data.position && data.position.toLowerCase().includes('invitado'))
+    ) {
       return 'INVITADO VIP';
     }
     return 'ASISTENTE';
   };
 
   const processQRCode = async (code) => {
-    const rawCode = (code || '').trim();
+    let rawCode = (code || '').trim();
     if (!rawCode || isProcessing) return;
+
+    // 0. Si viene como URL completa (ej. https://expoferre.com/?invite=inv_xxx o ?code=VIP-xxx)
+    if (rawCode.includes('?') && (rawCode.startsWith('http://') || rawCode.startsWith('https://'))) {
+      try {
+        const urlObj = new URL(rawCode);
+        const inviteParam = urlObj.searchParams.get('invite') || urlObj.searchParams.get('code') || urlObj.searchParams.get('id');
+        if (inviteParam) {
+          rawCode = inviteParam.trim();
+        }
+      } catch (e) {
+        const match = rawCode.match(/[?&](invite|code|id)=([^&#]+)/i);
+        if (match && match[2]) rawCode = decodeURIComponent(match[2]).trim();
+      }
+    }
+
+    // Normalizar ID limpio removiendo el prefijo VIP- si viene en el QR escaneado
+    const cleanCode = rawCode.replace(/^VIP[-_:\s]+/i, '').trim();
+
     setIsProcessing(true);
     setLastScanResult(null);
 
@@ -166,37 +193,45 @@ export default function AdminCheckIn({ onBack }) {
     let foundCollectionName = '';
     let foundColKey = '';
 
+    // Probar códigos candidatos (cleanCode primero, luego rawCode si difiere)
+    const candidateCodes = Array.from(new Set([cleanCode, rawCode].filter(Boolean)));
+
     try {
       // 1. Búsqueda directa por ID en las colecciones oficiales
-      for (const col of collectionsToCheck) {
-        const docRef = doc(db, col.path, rawCode);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          foundRef = docRef;
-          foundData = { id: docSnap.id, ...docSnap.data() };
-          foundCollectionName = col.name;
-          foundColKey = col.key;
-          break;
+      for (const testCode of candidateCodes) {
+        for (const col of collectionsToCheck) {
+          const docRef = doc(db, col.path, testCode);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            foundRef = docRef;
+            foundData = { id: docSnap.id, ...docSnap.data() };
+            foundCollectionName = col.name;
+            foundColKey = col.key;
+            break;
+          }
         }
+        if (foundRef) break;
       }
 
       // 2. Si no se encontró por ID directo, buscar si el código escaneado es un token de invitación
       if (!foundRef) {
-        // Buscar en directInvites
-        const qInv = query(collection(db, `${basePath}/directInvites`), where('token', '==', rawCode));
-        const snapInv = await getDocs(qInv);
-        if (!snapInv.empty) {
-          const invData = snapInv.docs[0].data();
-          const attendeeId = invData.registeredAttendeeId;
-          if (attendeeId) {
-            const attRef = doc(db, `${basePath}/preregistrations`, attendeeId);
-            const attSnap = await getDoc(attRef);
-            if (attSnap.exists()) {
-              foundRef = attRef;
-              foundData = { id: attSnap.id, ...attSnap.data() };
-              foundCollectionName = 'Invitado Directo (Patrocinador)';
-              foundColKey = 'preregistrations';
+        for (const testCode of candidateCodes) {
+          const qInv = query(collection(db, `${basePath}/directInvites`), where('token', '==', testCode));
+          const snapInv = await getDocs(qInv);
+          if (!snapInv.empty) {
+            const invData = snapInv.docs[0].data();
+            const attendeeId = invData.registeredAttendeeId;
+            if (attendeeId) {
+              const attRef = doc(db, `${basePath}/preregistrations`, attendeeId);
+              const attSnap = await getDoc(attRef);
+              if (attSnap.exists()) {
+                foundRef = attRef;
+                foundData = { id: attSnap.id, ...attSnap.data() };
+                foundCollectionName = 'Invitado Directo (Patrocinador)';
+                foundColKey = 'preregistrations';
+                break;
+              }
             }
           }
         }
@@ -204,14 +239,33 @@ export default function AdminCheckIn({ onBack }) {
 
       // 3. Si aún no se encontró, buscar en preregistrations por inviteToken
       if (!foundRef) {
-        const qPre = query(collection(db, `${basePath}/preregistrations`), where('inviteToken', '==', rawCode));
-        const snapPre = await getDocs(qPre);
-        if (!snapPre.empty) {
-          const preDoc = snapPre.docs[0];
-          foundRef = preDoc.ref;
-          foundData = { id: preDoc.id, ...preDoc.data() };
-          foundCollectionName = 'Invitado Directo (Patrocinador)';
-          foundColKey = 'preregistrations';
+        for (const testCode of candidateCodes) {
+          const qPre = query(collection(db, `${basePath}/preregistrations`), where('inviteToken', '==', testCode));
+          const snapPre = await getDocs(qPre);
+          if (!snapPre.empty) {
+            const preDoc = snapPre.docs[0];
+            foundRef = preDoc.ref;
+            foundData = { id: preDoc.id, ...preDoc.data() };
+            foundCollectionName = 'Invitado Directo (Patrocinador)';
+            foundColKey = 'preregistrations';
+            break;
+          }
+        }
+      }
+
+      // 4. Buscar por qrCode field si está almacenado
+      if (!foundRef) {
+        for (const testCode of candidateCodes) {
+          const qQr = query(collection(db, `${basePath}/preregistrations`), where('qrCode', '==', testCode));
+          const snapQr = await getDocs(qQr);
+          if (!snapQr.empty) {
+            const qrDoc = snapQr.docs[0];
+            foundRef = qrDoc.ref;
+            foundData = { id: qrDoc.id, ...qrDoc.data() };
+            foundCollectionName = 'Preregistro';
+            foundColKey = 'preregistrations';
+            break;
+          }
         }
       }
 
@@ -223,16 +277,25 @@ export default function AdminCheckIn({ onBack }) {
       }
 
       const roleLabel = determineBadgeRole(foundColKey, foundData);
+      const isVip = Boolean(
+        roleLabel.includes('VIP') ||
+        foundData.isVip ||
+        foundData.isDirectInvite ||
+        foundData.type === 'direct_invite' ||
+        foundData.source === 'Invitación Directa'
+      );
+
       const attendeeName = foundData.name || `${foundData.nombre || ''} ${foundData.apellido || ''}`.trim() || 'Participante';
       const attendeeCompany = foundData.company || foundData.empresa || foundData.sponsorName || '';
       const attendeePosition = foundData.position || foundData.cargo || foundData.puesto || '';
 
       const badgeItem = {
-        id: foundData.id || rawCode,
+        id: foundData.id || cleanCode,
         name: attendeeName,
         company: attendeeCompany,
         position: attendeePosition,
-        roleLabel: roleLabel
+        roleLabel: isVip ? 'INVITADO VIP' : roleLabel,
+        isVip: isVip
       };
 
       if (foundData.checkedIn) {
@@ -242,7 +305,9 @@ export default function AdminCheckIn({ onBack }) {
           message: `El participante ya había ingresado previamente.`,
           name: attendeeName,
           company: attendeeCompany,
-          roleLabel: roleLabel,
+          roleLabel: isVip ? 'INVITADO VIP' : roleLabel,
+          isVip: isVip,
+          hasMealPass: isVip,
           collection: foundCollectionName,
           time: foundData.checkInTime?.toDate ? foundData.checkInTime.toDate().toLocaleString('es-NI', { timeZone: 'America/Managua' }) : 'Desconocido',
           badgeData: badgeItem
@@ -272,7 +337,9 @@ export default function AdminCheckIn({ onBack }) {
           message: `Check-in exitoso. Gafete enviado a impresión.`,
           name: attendeeName,
           company: attendeeCompany,
-          roleLabel: roleLabel,
+          roleLabel: isVip ? 'INVITADO VIP' : roleLabel,
+          isVip: isVip,
+          hasMealPass: isVip,
           collection: foundCollectionName,
           badgeData: badgeItem
         });
@@ -401,37 +468,70 @@ export default function AdminCheckIn({ onBack }) {
                     <p className="text-on-surface-variant text-base mb-2">{lastScanResult.message}</p>
                     
                     {lastScanResult.name && (
-                      <div className="mt-4 bg-white/70 border border-slate-200/80 p-4 rounded-xl flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-black text-white">
-                              {lastScanResult.roleLabel || 'ASISTENTE'}
-                            </span>
-                            <span className="text-xs text-secondary font-medium">{lastScanResult.collection}</span>
+                      <div className="mt-4 bg-white/70 border border-slate-200/80 p-4 rounded-xl flex flex-col gap-3">
+                        <div className="flex flex-wrap items-center justify-between gap-4">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
+                                lastScanResult.isVip ? 'bg-black text-amber-300 border border-amber-400' : 'bg-slate-900 text-white'
+                              }`}>
+                                {lastScanResult.roleLabel || (lastScanResult.isVip ? '★ INVITADO VIP ★' : 'ASISTENTE')}
+                              </span>
+                              <span className="text-xs text-secondary font-medium">{lastScanResult.collection}</span>
+                            </div>
+                            <p className="font-black text-on-surface text-xl leading-tight">{lastScanResult.name}</p>
+                            {lastScanResult.company && (
+                              <p className="text-sm font-bold text-slate-700 uppercase mt-0.5">{lastScanResult.company}</p>
+                            )}
+                            {lastScanResult.time && (
+                              <p className="text-xs text-amber-900 mt-2 font-medium bg-amber-50 px-2.5 py-1 rounded border border-amber-200 inline-block">
+                                🕒 Hora del primer check-in: {lastScanResult.time}
+                              </p>
+                            )}
                           </div>
-                          <p className="font-black text-on-surface text-xl leading-tight">{lastScanResult.name}</p>
-                          {lastScanResult.company && (
-                            <p className="text-sm font-bold text-slate-700 uppercase mt-0.5">{lastScanResult.company}</p>
-                          )}
-                          {lastScanResult.time && (
-                            <p className="text-xs text-amber-900 mt-2 font-medium bg-amber-50 px-2.5 py-1 rounded border border-amber-200 inline-block">
-                              🕒 Hora del primer check-in: {lastScanResult.time}
-                            </p>
+
+                          {/* Botón de Impresión / Re-impresión Manual */}
+                          {lastScanResult.badgeData && (
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setPrintBadgeItems([lastScanResult.badgeData])}
+                                className="px-4 py-2.5 bg-[#0d47a1] hover:bg-blue-800 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-900/20 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                                title="Imprimir credencial en impresora Brother QL-810Wc"
+                              >
+                                <span className="material-symbols-outlined text-[18px]">print</span>
+                                <span>{lastScanResult.type === 'warning' ? 'Re-imprimir Gafete' : 'Imprimir Gafete'}</span>
+                              </button>
+                            </div>
                           )}
                         </div>
 
-                        {/* Botón de Impresión / Re-impresión Manual */}
-                        {lastScanResult.badgeData && (
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setPrintBadgeItems([lastScanResult.badgeData])}
-                              className="px-4 py-2.5 bg-[#0d47a1] hover:bg-blue-800 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-900/20 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
-                              title="Imprimir credencial en impresora Brother QL-810Wc"
-                            >
-                              <span className="material-symbols-outlined text-[18px]">print</span>
-                              <span>{lastScanResult.type === 'warning' ? 'Re-imprimir Gafete' : 'Imprimir Gafete'}</span>
-                            </button>
+                        {/* ALERTA VISUAL DESTACADA DE DERECHO A COMIDA / ALMUERZO */}
+                        {lastScanResult.isVip ? (
+                          <div className="bg-emerald-600 text-white px-4 py-3 rounded-xl flex items-center justify-between gap-3 shadow-sm border border-emerald-500">
+                            <div className="flex items-center gap-3">
+                              <span className="material-symbols-outlined text-3xl shrink-0">restaurant</span>
+                              <div>
+                                <p className="font-black text-sm uppercase tracking-wide">🍽️ PASE DE COMIDA VÁLIDO • ALMUERZO INCLUIDO</p>
+                                <p className="text-xs text-emerald-100 font-medium">Invitado VIP registrado. Tiene derecho al servicio de alimentos del evento.</p>
+                              </div>
+                            </div>
+                            <span className="px-2.5 py-1 bg-black/30 border border-emerald-400 text-amber-300 rounded-md text-xs font-black tracking-widest uppercase shrink-0">
+                              VIP
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="bg-slate-100 text-slate-800 px-4 py-3 rounded-xl flex items-center justify-between gap-3 border border-slate-300">
+                            <div className="flex items-center gap-3">
+                              <span className="material-symbols-outlined text-3xl text-amber-600 shrink-0">no_meals</span>
+                              <div>
+                                <p className="font-black text-sm text-slate-900 uppercase tracking-wide">⚠️ ASISTENTE GENERAL • SIN PASE DE COMIDA</p>
+                                <p className="text-xs text-slate-600 font-medium">Preregistro web general. Acceso únicamente al piso de exhibición y conferencias.</p>
+                              </div>
+                            </div>
+                            <span className="px-2.5 py-1 bg-slate-200 text-slate-700 rounded-md text-xs font-bold tracking-wider uppercase shrink-0">
+                              GENERAL
+                            </span>
                           </div>
                         )}
                       </div>

@@ -132,8 +132,8 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
     ctx.font = '600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillText('EL ENCUENTRO OFICIAL DEL SECTOR FERRETERO', width / 2, 74);
 
-    // Badge Dorado: "PASE OFICIAL DE ACCESO"
-    const pillText = '★ INVITADO ESPECIAL • PASE DIGITAL ★';
+    // Badge Dorado: "PASE OFICIAL DE ACCESO INVITADO VIP"
+    const pillText = '★ INVITADO VIP • ALMUERZO INCLUIDO ★';
     ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     const pillW = ctx.measureText(pillText).width + 24;
     const pillX = (width - pillW) / 2;
@@ -198,14 +198,15 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
     const qrY = qrBoxY + (qrBoxSize - qrSize) / 2;
     ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
 
-    // Código de Registro
-    ctx.fillStyle = '#334155';
+    // Código de Registro VIP
+    const cleanId = String(attendeeId).replace(/^VIP[-_:\s]+/i, '');
+    ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 16px "SF Mono", Monaco, Consolas, monospace';
-    ctx.fillText(`CÓDIGO: ${attendeeId}`, width / 2, 695);
+    ctx.fillText(`CÓDIGO VIP: VIP - ${cleanId}`, width / 2, 695);
 
-    ctx.fillStyle = '#64748b';
-    ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText('Presenta este código en la entrada principal', width / 2, 720);
+    ctx.fillStyle = '#059669';
+    ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('🍽️ Pase VIP: Incluye Acceso a Alimentos y Conferencias', width / 2, 720);
 
     // Pie de la Tarjeta
     ctx.fillStyle = '#f1f5f9';
@@ -617,22 +618,28 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
               </p>
             )}
 
+            {/* Distintivo VIP Oficial y Pase de Alimentos */}
+            <div className="mb-3 inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs px-3.5 py-1.5 rounded-full shadow-sm border border-amber-300">
+              <span className="text-sm">⭐</span>
+              <span>PASE INVITADO VIP • ALMUERZO INCLUIDO</span>
+            </div>
+
             {/* Código QR Oficial */}
-            <div className="bg-white p-3 rounded-xl inline-block border border-outline/30 shadow-xs mb-2">
+            <div className="bg-white p-3 rounded-xl inline-block border-2 border-amber-400 shadow-md mb-2">
               <QRCodeSVG 
                 id="qr-pass-svg"
-                value={registeredData.id} 
+                value={registeredData.id ? `VIP-${String(registeredData.id).replace(/^VIP[-_:\s]+/i, '')}` : 'VIP-INVITADO'} 
                 size={190} 
                 level="M" 
                 includeMargin={true}
               />
             </div>
 
-            <p className="text-[11px] text-slate-500 font-mono font-bold mt-1">
-              Código de Registro: {registeredData.id}
+            <p className="text-[12px] text-slate-900 font-mono font-black mt-1">
+              Código de Acceso: <span className="bg-slate-100 text-amber-800 px-2.5 py-0.5 rounded border border-slate-300 tracking-wider">VIP - {registeredData.id ? String(registeredData.id).replace(/^VIP[-_:\s]+/i, '') : ''}</span>
             </p>
-            <p className="text-[11px] text-secondary font-medium mt-0.5">
-              Presenta este código en la entrada principal
+            <p className="text-[11px] text-emerald-800 font-bold mt-1.5 bg-emerald-50 border border-emerald-200 rounded-lg py-1 px-3 inline-block">
+              🍽️ Acceso Válido a Alimentos y Bebidas del Evento
             </p>
           </div>
 

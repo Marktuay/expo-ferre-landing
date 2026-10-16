@@ -1727,7 +1727,26 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Fecha:** 16 de Octubre de 2026.
 - **Header Banner:** Se incorporó el nuevo arte gráfico `email-header-viernes.png` (975x375) destacando: *"FALTA 1 DÍA • 17 DE OCTUBRE • CENTRO DE CONVENCIONES CROWNE PLAZA MANAGUA • JUNTOS HACEMOS UNA FERRETERÍA MÁS FUERTE"*.
 - **Aplicación para la Campaña:**
-  - Guardado en `public/email-header-viernes.png`.
-  - Vinculado dinámicamente en `buildRegisteredEventReminderEmail` de [`AdminDirectInvites.jsx`](file:///Users/informatica/Documents/Expoferre/expo-ferre-landing/src/components/AdminDirectInvites.jsx) cuando `dayCampaign === 'viernes'`.
-  - Selección automática de la campaña de viernes por fecha actual en Managua (`d === 16 -> 'viernes'`).
-  - Verificado con `npm run build` y subido a GitHub en el commit `7034e4e`.
+### 🎟️ Separación Oficial de Bases: QRs de Invitados (VIP con Almuerzo) vs Preregistrados Generales (Sin Almuerzo)
+- **Fecha:** 16 de Octubre de 2026.
+- **Objetivo:** Diferenciar de manera infalible a los **Invitados** (provenientes de listas de patrocinadores, invitaciones directas `directInvites`, y listas VIP) de los **Preregistrados Generales** (usuarios registrados libremente en la web `preregistrations` que no tienen pase de alimentos).
+- **Especificaciones Implementadas:**
+  1. **QRs de Invitados Directos / Especiales / Patrocinadores:**
+     - **Contenido del QR:** Codifica `VIP-${id}` (ej. `VIP-inv_mva5bz5f_r7hvbn4t`).
+     - **Texto / Etiqueta Visible:** Muestra claramente `VIP - ${id}`.
+     - **Rol del Gafete Térmico (`BadgeTemplate.jsx`):** Muestra `★ INVITADO VIP ★` con franja negra destacada y etiqueta superior `⭐ PASE VIP • ALMUERZO INCLUIDO`.
+     - **Pase Digital (`DirectInviteRegistration.jsx`):** En móvil y descarga canvas PNG se resalta `⭐ PASE INVITADO VIP • ALMUERZO INCLUIDO` y `🍽️ Acceso Válido a Alimentos y Bebidas del Evento`.
+     - **Modal Administrativo (`AdminQRViewModal.jsx`):** Incluye distintivo `★ INVITADO VIP ★`, aviso `🍽️ ALMUERZO INCLUIDO • Pase VIP con acceso a alimentos` y formato de WhatsApp indicando categoría VIP.
+  2. **QRs de Preregistrados Generales (`!isDirectInvite && type !== 'direct_invite'`):**
+     - **Contenido del QR:** Codifica únicamente `${cleanId}` (sin la palabra VIP).
+     - **Texto Visible:** Muestra únicamente el ID limpio (sin VIP).
+     - **Rol del Gafete Térmico:** Muestra `ASISTENTE` y no incluye mención ni acceso a comida.
+     - **Modal Administrativo:** Advierte `Asistente General • Sin pase de alimentos`.
+  3. **Compatibilidad Universal y Prevención de Errores de Escaneo:**
+     - Todos los escáneres (`AdminCheckIn.jsx`, `ScannerModule.jsx`, `SponsorScanner.jsx`, y `expo-ferre-flutter/lib/services/firestore_service.dart`) normalizan el código escaneado extrayendo `cleanCode = rawCode.replace(/^VIP[-_:\s]+/i, '').trim()`.
+     - Permite escanear tanto códigos nuevos `VIP-xxx` como códigos antiguos sin romper ninguna consulta a Firestore.
+     - Soporta lectura de URLs directas (`?invite=`, `?code=`, `?id=`).
+  4. **Detección y Alerta de Almuerzo en Puerta de Entrada (`AdminCheckIn.jsx`):**
+     - **Si es Invitado VIP:** Banner verde esmeralda brillante con icono de restaurante: `🍽️ PASE DE COMIDA VÁLIDO • ALMUERZO INCLUIDO (Invitado VIP autorizado para el servicio de buffet / alimentos del evento)`.
+     - **Si es Asistente General:** Banner de precaución: `⚠️ ASISTENTE GENERAL • SIN PASE DE COMIDA (Acceso autorizado únicamente al piso de exhibición, stands y conferencias generales)`.
+     - Lo mismo en `ScannerModule.jsx` y `expo-ferre-flutter` (`hasMealPass`, `mealStatus`).

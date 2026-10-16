@@ -44,26 +44,43 @@ export default function ScannerModule({ onBack }) {
       scanner.pause(true);
 
       try {
+        const rawCode = (decodedText || '').trim();
+        const cleanCode = rawCode.replace(/^VIP[-_:\s]+/i, '').trim();
+        const candidateCodes = Array.from(new Set([cleanCode, rawCode].filter(Boolean)));
+
         const collectionsToSearch = ['guests', 'staff', 'speakers', 'preregistrations', 'users'];
         let foundData = null;
         let foundCollection = '';
 
         // Buscar en todas las subcolecciones posibles
-        for (const coll of collectionsToSearch) {
-          // La colección de usuarios (Sponsors) está en la raíz, no dentro de events/2026/
-          const path = coll === 'users' ? coll : `${getEventBasePath()}/${coll}`;
-          const docRef = doc(db, path, decodedText);
-          const docSnap = await getDoc(docRef);
+        for (const testCode of candidateCodes) {
+          for (const coll of collectionsToSearch) {
+            const path = coll === 'users' ? coll : `${getEventBasePath()}/${coll}`;
+            const docRef = doc(db, path, testCode);
+            const docSnap = await getDoc(docRef);
 
-          if (docSnap.exists()) {
-            foundData = { id: docSnap.id, ...docSnap.data() };
-            foundCollection = coll;
-            break;
+            if (docSnap.exists()) {
+              foundData = { id: docSnap.id, ...docSnap.data() };
+              foundCollection = coll;
+              break;
+            }
           }
+          if (foundData) break;
         }
 
         if (foundData) {
           const alreadyCheckedIn = foundData.checkedIn === true;
+
+          const isVip = Boolean(
+            foundCollection === 'guests' || 
+            foundData.isVip || 
+            foundData.isDirectInvite || 
+            foundData.type === 'direct_invite' ||
+            foundData.source === 'Invitación Directa' ||
+            foundData.position === 'Invitado Especial' ||
+            foundData.position === 'Invitado VIP' ||
+            (foundData.roleLabel && foundData.roleLabel.toUpperCase().includes('VIP'))
+          );
 
           if (!alreadyCheckedIn) {
             // Marcar como "checkedIn" si es primera vez
@@ -78,6 +95,7 @@ export default function ScannerModule({ onBack }) {
           setScanResult({
             success: true,
             warning: alreadyCheckedIn,
+            isVip: isVip,
             message: alreadyCheckedIn 
               ? `¡Atención! Este QR ya fue escaneado anteriormente.` 
               : `¡Asistencia registrada para ${foundData.nombre || foundData.name}!`,
@@ -102,15 +120,13 @@ export default function ScannerModule({ onBack }) {
               users: 'PATROCINADOR'
             };
 
-            const isVip = foundCollection === 'guests' || 
-                          foundData.isDirectInvite || 
-                          foundData.position === 'Invitado Especial' ||
-                          foundData.position === 'Invitado VIP';
-
             const itemToPrint = {
               id: foundData.id,
+              name: foundData.nombre || foundData.name,
               nombre: foundData.nombre || foundData.name,
+              company: foundData.empresa || foundData.company || foundData.sponsorName || 'Expo Ferre',
               empresa: foundData.empresa || foundData.company || foundData.sponsorName || 'Expo Ferre',
+              isVip: isVip,
               roleLabel: isVip ? 'INVITADO VIP' : typeLabels[foundCollection],
               colorClass: typeColors[foundCollection]
             };
@@ -200,9 +216,17 @@ export default function ScannerModule({ onBack }) {
                     Hora de registro original: {new Date(scanResult.data.checkInTime).toLocaleTimeString()}
                   </p>
                 )}
-                <p className={`text-xs uppercase mt-3 px-2 py-1 rounded-full inline-block ${scanResult.warning ? 'bg-yellow-200 text-yellow-900' : 'bg-green-200'}`}>
-                  {scanResult.type}
-                </p>
+                <div className="mt-3">
+                  {scanResult.isVip ? (
+                    <span className="inline-block px-3 py-1 bg-black text-amber-300 border border-amber-400 rounded-lg text-xs font-black uppercase tracking-wider shadow-xs">
+                      🍽️ ALMUERZO INCLUIDO • INVITADO VIP
+                    </span>
+                  ) : (
+                    <span className="inline-block px-3 py-1 bg-slate-200 text-slate-800 rounded-lg text-xs font-bold uppercase tracking-wider">
+                      ⚠️ ASISTENTE GENERAL • SIN PASE DE COMIDA
+                    </span>
+                  )}
+                </div>
               </div>
               
               {scanResult.warning && (
@@ -211,12 +235,15 @@ export default function ScannerModule({ onBack }) {
                     onClick={() => {
                       // Función para obligar a imprimir de nuevo si lo desean
                       const typeColors = { guests: 'bg-[#f39200]', staff: 'bg-red-600', speakers: 'bg-purple-600', preregistrations: 'bg-green-600' };
-                      const typeLabels = { guests: 'INVITADO', staff: 'STAFF', speakers: 'CONFERENCISTA', preregistrations: 'VISITANTE' };
+                      const typeLabels = { guests: 'INVITADO VIP', staff: 'STAFF', speakers: 'CONFERENCISTA', preregistrations: 'VISITANTE' };
                       setPrintData([{
                         id: scanResult.data.id,
                         nombre: scanResult.data.nombre || scanResult.data.name,
+                        name: scanResult.data.nombre || scanResult.data.name,
                         empresa: scanResult.data.empresa || scanResult.data.company || 'Expo Ferre',
-                        roleLabel: typeLabels[scanResult.type],
+                        company: scanResult.data.empresa || scanResult.data.company || 'Expo Ferre',
+                        isVip: scanResult.isVip,
+                        roleLabel: scanResult.isVip ? 'INVITADO VIP' : typeLabels[scanResult.type],
                         colorClass: typeColors[scanResult.type]
                       }]);
                     }}

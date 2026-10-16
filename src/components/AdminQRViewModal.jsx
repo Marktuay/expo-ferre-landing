@@ -8,10 +8,31 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
 
   const isPendingInvite = person.isInviteLink || person.status === 'pending';
   
-  // Si es invitación pendiente, el QR debe ser la URL de registro. Si ya está registrado, el ID del documento para check-in.
+  // Identificar si es Invitado VIP (con derecho a almuerzo) vs Preregistro General
+  const isVip = Boolean(
+    person.isVip ||
+    person.isDirectInvite ||
+    person.type === 'direct_invite' ||
+    person.source === 'Invitación Directa' ||
+    person.sponsorName ||
+    person.patrocinador ||
+    (person.roleLabel && person.roleLabel.toUpperCase().includes('VIP')) ||
+    (roleLabel && roleLabel.toUpperCase().includes('VIP')) ||
+    (person.position && person.position.toLowerCase().includes('invitado'))
+  );
+
+  const rawId = person.registeredAttendeeId || person.id || '';
+  const cleanId = String(rawId).replace(/^VIP[-_:\s]+/i, '').trim();
+
+  // Si es invitación pendiente, el QR debe ser la URL de registro. 
+  // Si ya está registrado: si es VIP lleva 'VIP-id' para identificación inmediata, si es general lleva solo 'id'.
   const qrValue = isPendingInvite 
     ? (person.inviteUrl || `${window.location.origin}/?invite=${encodeURIComponent(person.id)}`)
-    : (person.registeredAttendeeId || person.id || '');
+    : (isVip ? `VIP-${cleanId}` : cleanId);
+
+  const displayId = isPendingInvite 
+    ? qrValue 
+    : (isVip ? `VIP - ${cleanId}` : cleanId);
 
   const name = person.name || person.nombre || person.registeredName || 'Invitado Especial';
   const company = person.company || person.empresa || person.registeredCompany || 'Particular';
@@ -41,8 +62,8 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
         ctx.drawImage(img, 20, 20);
         const pngFile = canvas.toDataURL('image/png');
         const downloadLink = document.createElement('a');
-        const prefix = isPendingInvite ? 'QR_Invitacion_' : 'QR_Acceso_';
-        const safeName = (name || person.id).replace(/[^a-zA-Z0-9]/g, '_');
+        const prefix = isPendingInvite ? 'QR_Invitacion_' : (isVip ? 'QR_VIP_' : 'QR_Acceso_');
+        const safeName = (name || cleanId).replace(/[^a-zA-Z0-9]/g, '_');
         downloadLink.download = `${prefix}${safeName}.png`;
         downloadLink.href = pngFile;
         downloadLink.click();
@@ -60,13 +81,13 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
 
     const passUrl = isPendingInvite 
       ? qrValue 
-      : `${window.location.origin}/?invite=${encodeURIComponent(person.inviteToken || person.id)}&src=wa_admin_qr`;
+      : `${window.location.origin}/?invite=${encodeURIComponent(person.inviteToken || cleanId)}&src=wa_admin_qr`;
 
     let msg = '';
     if (isPendingInvite) {
       msg = `¡Hola ${name}! 👋 Te compartimos tu enlace de registro exclusivo para *EXPO FERRE Nicaragua 2026*:\n\n${passUrl}\n\nCompleta tus datos para activar tu Pase Oficial con Código QR.`;
     } else {
-      msg = `¡Hola ${name}! 👋 Aquí tienes tu *Pase Oficial y Código QR* para *EXPO FERRE Nicaragua 2026*:\n\n👤 *Titular:* ${name}\n🏢 *Empresa:* ${company}\n🎟️ *Código de Registro:* ${qrValue}\n📅 *Fecha:* 17 de Octubre, 2026 (8:00 AM - 5:00 PM)\n📍 *Lugar:* Centro de Convenciones Crowne Plaza Managua\n\n📲 *Accede a tu Gafete con Código QR aquí:*\n${passUrl}\n\nPresenta tu código QR en tu celular al llegar al evento. ¡Te esperamos!`;
+      msg = `¡Hola ${name}! 👋 Aquí tienes tu *Pase Oficial y Código QR* para *EXPO FERRE Nicaragua 2026*:\n\n👤 *Titular:* ${name}\n🏢 *Empresa:* ${company}\n🎟️ *Categoría:* ${isVip ? '⭐ INVITADO VIP (Almuerzo Incluido)' : 'Asistente General'}\n🔢 *Código de Registro:* ${displayId}\n📅 *Fecha:* 17 de Octubre, 2026 (8:00 AM - 5:00 PM)\n📍 *Lugar:* Centro de Convenciones Crowne Plaza Managua\n\n📲 *Accede a tu Gafete con Código QR aquí:*\n${passUrl}\n\nPresenta tu código QR en tu celular al llegar al evento. ¡Te esperamos!`;
     }
 
     const waLink = cleanPhone 
@@ -116,9 +137,13 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-left space-y-1">
             <div className="flex items-center justify-between">
               <span className={`inline-block px-2.5 py-0.5 font-bold text-xs rounded-full uppercase tracking-wider ${
-                isPendingInvite ? 'bg-amber-100 text-amber-800' : 'bg-[#f39200]/10 text-[#f39200]'
+                isPendingInvite 
+                  ? 'bg-amber-100 text-amber-800' 
+                  : isVip 
+                    ? 'bg-black text-amber-300 border border-amber-400 font-black' 
+                    : 'bg-slate-200 text-slate-800'
               }`}>
-                {isPendingInvite ? 'Invitación Pendiente' : roleLabel}
+                {isPendingInvite ? 'Invitación Pendiente' : isVip ? '★ INVITADO VIP ★' : (roleLabel || 'ASISTENTE')}
               </span>
               {person.status && (
                 <span className={`text-[11px] font-bold uppercase ${
@@ -150,6 +175,21 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
                 ⭐ Patrocinador: {sponsor} {person.sponsorStands ? `(Stand ${person.sponsorStands})` : ''}
               </div>
             )}
+
+            {/* Distinción clara de Almuerzo / Comida */}
+            {!isPendingInvite && (
+              isVip ? (
+                <div className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-300 p-2 rounded-lg font-bold flex items-center gap-1.5 mt-2">
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600 shrink-0">restaurant</span>
+                  <span>🍽️ ALMUERZO INCLUIDO • Pase VIP con acceso a alimentos</span>
+                </div>
+              ) : (
+                <div className="text-[11px] text-slate-600 bg-slate-100 border border-slate-200 p-2 rounded-lg font-medium flex items-center gap-1.5 mt-2">
+                  <span className="material-symbols-outlined text-[16px] text-slate-500 shrink-0">info</span>
+                  <span>Asistente General • Sin pase de alimentos</span>
+                </div>
+              )
+            )}
           </div>
 
           {/* Renderizado del Código QR */}
@@ -165,8 +205,10 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
             </div>
 
             <div className="mt-3 flex items-center justify-center gap-2 max-w-full">
-              <span className="font-mono text-[10.5px] text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 truncate max-w-[240px]" title={qrValue}>
-                {isPendingInvite ? qrValue : `ID: ${qrValue}`}
+              <span className={`font-mono text-[11px] px-2.5 py-1 rounded-md border truncate max-w-[240px] font-bold ${
+                isVip ? 'bg-amber-50 text-amber-900 border-amber-300' : 'bg-slate-100 text-slate-700 border-slate-200'
+              }`} title={displayId}>
+                {displayId}
               </span>
               <button
                 onClick={handleCopy}
@@ -183,7 +225,9 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
             <p className="text-[11px] text-slate-500 mt-2">
               {isPendingInvite 
                 ? '📱 Escanea con la cámara del celular para abrir el formulario de registro de este invitado.' 
-                : '✅ Código QR oficial compatible con el escáner de Check-in en puerta.'}
+                : isVip 
+                  ? '⭐ Código QR VIP oficial (Almuerzo Incluido) compatible con el escáner de Check-in en puerta.'
+                  : '✅ Código QR oficial compatible con el escáner de Check-in en puerta.'}
             </p>
           </div>
 
@@ -219,7 +263,11 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
               <button
                 onClick={() => {
                   onClose();
-                  onPrintBadge(person);
+                  onPrintBadge({
+                    ...person,
+                    isVip,
+                    roleLabel: isVip ? 'INVITADO VIP' : (person.roleLabel || roleLabel)
+                  });
                 }}
                 className="col-span-1 sm:col-span-2 px-4 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-700 font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
               >
