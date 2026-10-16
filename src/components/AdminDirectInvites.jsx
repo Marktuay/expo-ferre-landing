@@ -207,7 +207,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     enabled: true,
     jueves: { date: '2026-10-15', time: '09:00', completed: false },
     viernes: { date: '2026-10-16', time: '09:00', completed: false },
-    sabado: { date: '2026-10-17', time: '06:30', completed: false }
+    sabado: { date: '2026-10-17', time: '06:00', completed: false }
   });
   const [savingScheduleConfig, setSavingScheduleConfig] = useState(false);
 
@@ -2305,14 +2305,16 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     const guestName = person?.nombre ? person.nombre.trim() : 'Estimado(a) Participante';
 
     const art = getSponsorArt(person?.sponsorName || 'general');
-    // Para las campañas especiales con cuenta regresiva oficial (jueves "Faltan 2 días" y viernes "Falta 1 día")
+    // Para las campañas especiales con cuenta regresiva oficial (jueves "Faltan 2 días", viernes "Falta 1 día" y sábado "Hoy es el día")
     const headerImg = dayCampaign === 'jueves'
       ? 'https://cdn.jsdelivr.net/gh/Marktuay/expo-ferre-landing@main/public/email-header-jueves.png'
       : dayCampaign === 'viernes'
         ? 'https://cdn.jsdelivr.net/gh/Marktuay/expo-ferre-landing@main/public/email-header-viernes.png'
-        : (art.headerBannerUrl?.startsWith('http')
-            ? art.headerBannerUrl
-            : `https://expoferrenicaragua.com${art.headerBannerUrl || '/email-header.png'}`);
+        : dayCampaign === 'sabado'
+          ? 'https://cdn.jsdelivr.net/gh/Marktuay/expo-ferre-landing@main/public/email-header-sabado.png'
+          : (art.headerBannerUrl?.startsWith('http')
+              ? art.headerBannerUrl
+              : `https://expoferrenicaragua.com${art.headerBannerUrl || '/email-header.png'}`);
     const footerImg = art.footerBannerUrl?.startsWith('http')
       ? art.footerBannerUrl
       : `https://expoferrenicaragua.com${art.footerBannerUrl || '/email-footer.png'}`;
@@ -7261,7 +7263,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                           </div>
                           <input
                             type="time"
-                            value={reminderScheduleConfig.sabado?.time || '06:30'}
+                            value={reminderScheduleConfig.sabado?.time || '06:00'}
                             onChange={(e) => {
                               const updated = {
                                 ...reminderScheduleConfig,
