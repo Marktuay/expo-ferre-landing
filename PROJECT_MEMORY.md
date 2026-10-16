@@ -1766,8 +1766,17 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     4. **Comprobación de soporte:** Desactivada en la pestaña "Otros" para evitar bloqueos por tolerancias mínimas de milímetros.
     5. **Cuadro de diálogo del navegador:** Márgenes en "Ninguno" y Gráficos de fondo "Activados". Impresión y corte automático 100% operativos.
 - **Modo Gafete Limpio Sin Código QR (`showQr: false` por defecto):**
-  - Se configuró la opción de imprimir etiquetas térmicas sin código QR. Al no llevar el recuadro del QR, el diseño aprovecha todo el alto de 100 mm para maximizar el tamaño del **Nombre del Asistente (22px black)** y el **Nombre de la Empresa (17px black con borde)**, siendo perfectamente legible a varios metros de distancia.
-  - Se implementó un toggle en la barra de control de impresión (`PrintableBadgeList.jsx`) que permite alternar con un clic entre `🔘 Sin QR (Texto Grande - Recomendado)` y `🔘 Con Código QR`.
-  - El servicio de impresión en Flutter (`badge_print_service.dart`) se actualizó en paralelo con soporte para `showQr = false`.
+  - **Fundamento Operativo:** Debido a que el control de acceso y validación de alimentos (VIP vs Asistente General) se realiza en los puntos de entrada mediante el escaneo del código digital (en pantalla móvil o impreso), la etiqueta adhesiva física para solapa/pecho funciona exclusivamente como identificador visual humano entre participantes. Al retirar el recuadro del código QR, se libera más del 40% del área de la etiqueta de 62 mm x 100 mm.
+  - **Jerarquía Tipográfica Optimizada:**
+    - **Nombre del Asistente:** Aumentado a **22px black** (mayúsculas, centrado, hasta 3 líneas), legible a más de 3 metros de distancia.
+    - **Empresa / Patrocinador:** Recuadro destacado con bordes y fondo a **17px black**.
+    - **Cargo / Stand:** Aumentado a **12px bold**.
+    - **Identificador de Respaldo:** En la base se mantiene un ID alfanumérico discreto (`ID: VIP-inv_...` a 9px mono) para auditoría manual si fuese requerida.
+  - **Control en Interfaz Web (`PrintableBadgeList.jsx`):** Selector interactivo en la barra superior que permite alternar instantáneamente entre `🔘 Sin QR (Texto Grande - Recomendado)` y `🔘 Con Código QR` sin necesidad de recargar la página.
+  - **Sincronización en App Móvil Flutter (`badge_print_service.dart`):** Soporte homologado con parámetro `showQr = false`, incrementando el tamaño del nombre a 18pt y empresa a 15pt para impresión térmica nativa.
+  - **Commits en Repositorio Oficial (`main`):**
+    - `f3cc2ea`: *feat(print): permitir imprimir gafetes térmicos sin QR con tipografía gigante y agregar toggle de QR*
+    - `76e519e`: *docs(memory): registrar soporte para impresión térmica sin QR*
+
 
 
