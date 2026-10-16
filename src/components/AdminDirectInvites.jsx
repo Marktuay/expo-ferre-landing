@@ -179,7 +179,17 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   // Modal de Recordatorios por Correo para TODOS LOS REGISTRADOS (Jueves, Viernes y Día del Evento)
   const [regReminderModal, setRegReminderModal] = useState({
     open: false,
-    dayCampaign: 'jueves', // 'jueves' | 'viernes' | 'sabado'
+    dayCampaign: (() => {
+      try {
+        const nowManagua = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Managua' }));
+        const d = nowManagua.getDate();
+        if (d === 16) return 'viernes';
+        if (d >= 17) return 'sabado';
+        return 'jueves';
+      } catch {
+        return 'viernes';
+      }
+    })(), // 'jueves' | 'viernes' | 'sabado'
     audienceType: 'all_registered', // 'all_registered' | 'direct_invites_only' | 'preregistrations_only'
     skipAlreadySentToday: true,
     showPreview: false,
@@ -2295,12 +2305,14 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     const guestName = person?.nombre ? person.nombre.trim() : 'Estimado(a) Participante';
 
     const art = getSponsorArt(person?.sponsorName || 'general');
-    // Para la campaña especial de hoy jueves ("Faltan 2 días"), se utiliza el arte especial de 2 días
+    // Para las campañas especiales con cuenta regresiva oficial (jueves "Faltan 2 días" y viernes "Falta 1 día")
     const headerImg = dayCampaign === 'jueves'
       ? 'https://expoferrenicaragua.com/email-header-jueves.png'
-      : (art.headerBannerUrl?.startsWith('http')
-          ? art.headerBannerUrl
-          : `https://expoferrenicaragua.com${art.headerBannerUrl || '/email-header.png'}`);
+      : dayCampaign === 'viernes'
+        ? 'https://expoferrenicaragua.com/email-header-viernes.png'
+        : (art.headerBannerUrl?.startsWith('http')
+            ? art.headerBannerUrl
+            : `https://expoferrenicaragua.com${art.headerBannerUrl || '/email-header.png'}`);
     const footerImg = art.footerBannerUrl?.startsWith('http')
       ? art.footerBannerUrl
       : `https://expoferrenicaragua.com${art.footerBannerUrl || '/email-footer.png'}`;
@@ -2324,7 +2336,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         <div style="background-color: #eff6ff; border-left: 4px solid #0d47a1; padding: 16px; border-radius: 6px; margin: 20px 0; text-align: left;">
           <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">📅 Sábado 17 de octubre</p>
           <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">📍 Centro de Convenciones Crowne Plaza, Managua</p>
-          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">🕗 Inicio de actividades: 7:30am a 6:00pm</p>
+          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">🕗 Inicio de actividades: 7:30 AM a 6:00 PM</p>
         </div>
 
         <p style="font-size: 15px; line-height: 1.6; color: #1f2937; font-weight: bold;">
@@ -2360,7 +2372,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         <div style="background-color: #eff6ff; border-left: 4px solid #0d47a1; padding: 16px; border-radius: 6px; margin: 20px 0; text-align: left;">
           <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">📅 Mañana, sábado 17 de octubre</p>
           <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">📍 Centro de Convenciones Crowne Plaza, Managua</p>
-          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">🕗 Inicio de actividades: 7:30 aM A 6:00PM</p>
+          <p style="margin: 5px 0; font-size: 14px; color: #1e3a8a;">🕗 Inicio de actividades: 7:30 AM a 6:00 PM</p>
         </div>
 
         <p style="font-size: 15px; line-height: 1.6; color: #1f2937; font-weight: bold;">
