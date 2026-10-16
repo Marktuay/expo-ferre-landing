@@ -12,9 +12,9 @@ export default function PrintableBadgeList({ items, roleLabel = 'Staff', colorCl
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-xs overflow-y-auto">
+    <div className="print-thermal-modal-wrapper fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-xs overflow-y-auto">
       {/* Barra superior de control (oculta en impresión) */}
-      <div className="sticky top-0 bg-white border-b border-slate-200 shadow-sm p-4 px-6 flex flex-wrap justify-between items-center z-[101] print:hidden gap-3">
+      <div className="print-thermal-toolbar sticky top-0 bg-white border-b border-slate-200 shadow-sm p-4 px-6 flex flex-wrap justify-between items-center z-[101] print:hidden gap-3">
         <div>
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[#0d47a1] text-2xl">print</span>
@@ -62,16 +62,19 @@ export default function PrintableBadgeList({ items, roleLabel = 'Staff', colorCl
       <style dangerouslySetInnerHTML={{__html: `
         @page {
           size: 62mm 100mm;
-          margin: 0mm;
+          margin: 0mm !important;
         }
 
         @media print {
           html, body {
             width: 62mm !important;
             height: 100mm !important;
+            min-height: 100mm !important;
+            max-height: 100mm !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
+            overflow: hidden !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -80,25 +83,55 @@ export default function PrintableBadgeList({ items, roleLabel = 'Staff', colorCl
             visibility: hidden !important;
           }
 
-          .print-thermal-container, .print-thermal-container * {
+          .print-thermal-modal-wrapper,
+          .print-thermal-modal-wrapper * {
             visibility: visible !important;
+          }
+
+          .print-thermal-toolbar {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+
+          .print-thermal-modal-wrapper {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 62mm !important;
+            height: 100mm !important;
+            max-height: 100mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            overflow: hidden !important;
+            z-index: 999999 !important;
           }
 
           .print-thermal-container {
             position: absolute !important;
-            left: 0 !important;
             top: 0 !important;
+            left: 0 !important;
             width: 62mm !important;
+            height: 100mm !important;
+            max-height: 100mm !important;
             margin: 0 !important;
             padding: 0 !important;
-            background: white !important;
+            background: #ffffff !important;
+            overflow: hidden !important;
+            display: block !important;
           }
 
           .brother-thermal-badge {
             width: 62mm !important;
             height: 100mm !important;
-            max-width: 62mm !important;
+            min-height: 100mm !important;
             max-height: 100mm !important;
+            max-width: 62mm !important;
             page-break-after: always !important;
             break-after: page !important;
             page-break-inside: avoid !important;
@@ -110,6 +143,9 @@ export default function PrintableBadgeList({ items, roleLabel = 'Staff', colorCl
             box-shadow: none !important;
             overflow: hidden !important;
             box-sizing: border-box !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
           }
 
           .print\\:hidden {

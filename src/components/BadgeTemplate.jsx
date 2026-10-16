@@ -30,21 +30,21 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF' }) {
       
       {/* 1. Cabecera del Evento */}
       <div className="w-full text-center pt-0.5">
-        <h3 className="text-[11px] font-black tracking-[0.2em] uppercase text-black leading-none">
+        <h3 className="text-[11.5px] font-black tracking-[0.22em] uppercase text-black leading-none">
           EXPO FERRE 2026
         </h3>
       </div>
 
       {/* 2. Franja de Rol Distintiva */}
-      <div className={`w-full text-center font-black text-[11px] py-1 px-1 tracking-[0.18em] uppercase my-1 rounded-xs ${
+      <div className={`w-full text-center font-black text-[12.5px] py-1.5 px-1 tracking-[0.16em] uppercase my-1 rounded-xs ${
         isVip ? 'bg-black text-white border-2 border-black' : 'bg-slate-900 text-white'
       }`}>
         {displayRole}
       </div>
 
       {/* 3. Nombre del Asistente */}
-      <div className="w-full text-center px-1 my-0.5">
-        <h2 className="text-[14.5px] font-black uppercase text-black leading-tight line-clamp-2 break-words">
+      <div className="w-full text-center px-1 my-1">
+        <h2 className="text-[17px] font-black uppercase text-black leading-tight line-clamp-2 break-words">
           {fullName}
         </h2>
       </div>
@@ -52,7 +52,7 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF' }) {
       {/* 4. Nombre de la Empresa / Patrocinador (DESTACADO EN GRANDE) */}
       {company && company.toLowerCase() !== 'particular' && company.toLowerCase() !== 'n/a' && (
         <div className="w-full bg-slate-100 border-y-2 border-black/80 py-1.5 px-1 text-center my-1 rounded-xs">
-          <p className="text-[14px] font-black uppercase tracking-tight text-black leading-tight line-clamp-2 break-words">
+          <p className="text-[15px] font-black uppercase tracking-tight text-black leading-tight line-clamp-2 break-words">
             {company}
           </p>
         </div>
@@ -63,7 +63,7 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF' }) {
        position.toUpperCase() !== displayRole && 
        !position.toLowerCase().includes('invitado') && (
         <div className="w-full text-center px-1 -mt-0.5 mb-1">
-          <p className="text-[9.5px] font-bold text-black/90 uppercase tracking-tight line-clamp-1 truncate">
+          <p className="text-[10px] font-bold text-black/90 uppercase tracking-tight line-clamp-1 truncate">
             {position}
           </p>
         </div>
@@ -74,22 +74,20 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF' }) {
         <div className="bg-white p-1 border border-black/30 rounded-xs flex items-center justify-center">
           <QRCodeSVG 
             value={qrValue} 
-            size={105} 
+            size={125} 
             level="M" 
             bgColor="#ffffff"
             fgColor="#000000"
           />
         </div>
-        <span className={`text-[8.5px] font-mono font-bold mt-1 leading-none text-center tracking-wider ${
-          isVip ? 'text-black font-black' : 'text-black'
-        }`}>
+        <span className="text-[10px] font-mono font-black mt-1 leading-none text-center tracking-wider text-black">
           {displayId}
         </span>
       </div>
 
       {/* 7. Pie de Gafete Oficial */}
-      <div className="w-full border-t border-black/30 pt-1 text-center mt-auto">
-        <p className="text-[7.5px] font-black text-black/80 uppercase tracking-widest leading-none">
+      <div className="w-full border-t border-black/30 pt-1.5 text-center mt-auto pb-0.5">
+        <p className="text-[8.5px] font-black text-black/90 uppercase tracking-widest leading-none">
           17 OCTUBRE 2026 • HOTEL CROWNE PLAZA
         </p>
       </div>
