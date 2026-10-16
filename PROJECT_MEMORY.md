@@ -67,7 +67,15 @@ Este archivo funciona como la "memoria" del proyecto. Contiene el estado actual 
     - **Carga Masiva (Excel / CSV):** Permite subir lotes de contactos asignándolos de inmediato al patrocinador seleccionado o detectando la columna `Patrocinador` en el Excel, con escritura por lotes atómicos (`writeBatch`) en Firestore.
     - **Descarga de Plantilla:** Botón para generar y descargar `Plantilla_Carga_Masiva_Invitaciones_ExpoFerre.xlsx` con el formato exacto requerido.
     - **Base de Stands Confirmada:** 35 stands reservados correspondientes a 27 empresas patrocinadoras activas.
-  - **Check-In (Escáner QR):** Módulo funcional utilizando la cámara del dispositivo para escanear Códigos QR, buscar asistentes en la base de datos y registrar su asistencia en tiempo real con estadísticas.
+  - **Check-In y Acreditación en Puerta (Día del Evento - 17/OCT/2026):**
+    - **Acreditación por Listas (Sin Escáner QR de Cámara):** Para máxima agilidad el día del evento, el personal de recepción NO utiliza lectores de cámara QR; todo el control se realiza buscando personas por Nombre, Apellido o Empresa en las listas del sistema (`AdminPreRegistrations`, `AdminDirectInvites`, `AdminAttendanceReport`, `AdminStaff`, `AdminSpeakers`, `AdminSponsors`).
+    - **Imprimir Gafete = Check-In Automático:** Al hacer clic en "Imprimir" desde cualquier módulo o vista, se marca automáticamente al asistente en Firestore con `checkedIn: true`, `checkInTime: serverTimestamp()`, `badgePrinted: true`, `badgePrintedAt: serverTimestamp()`, `attended: true` y `attendedAt: serverTimestamp()`. Si es invitación directa, su estado pasa a `'used'`.
+    - **Formato de Gafete Térmico Sin QR:** Soporta impresión con o sin código QR (`showQr: false` por defecto para térmicas de cinta angosta/58mm/50x30mm). Al ocultar el QR, el Nombre se expande a **22px negro negrita** y la Empresa a **17px negro negrita** ocupando todo el ancho de la etiqueta, con un ID discreto al pie.
+    - **Control Exacto de Catering y Platos de Almuerzo:** Solo los **Invitados VIP** (provenientes de `directInvites` y `guests`) tienen derecho a almuerzo/comida provista por el evento. Se totalizan ~405 invitados VIP.
+    - **Módulo de Reporte y Monitoreo de Catering (`AdminAttendanceReport.jsx` y `AdminCheckIn.jsx`):**
+      - Muestra tarjetas KPI interactivas filtrables para las 5 categorías: ⭐ **Invitados VIP (Almuerzos)**, 🎟️ **Asistentes Generales**, 🏢 **Patrocinadores**, 👔 **Staff Técnico**, 🎤 **Conferencistas**.
+      - Muestra el contador destacado en tiempo real: `🍽️ Platos de Almuerzo a Servir: X de 405 max`, permitiendo al equipo de logística conocer en cualquier momento del evento la cantidad exacta de comida a servir en cocina/buffet.
+      - Botón de **"Imprimir & Check-In"** directo en cada fila de la tabla unificada de asistencia.
 - **Exportación:** Todas las tablas de administración tienen la capacidad de exportar sus datos a archivos Excel (`.xlsx`), incluyendo las últimas adiciones de campos (ej. Teléfono en Leads).
 
 ---

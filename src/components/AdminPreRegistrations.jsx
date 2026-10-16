@@ -669,16 +669,22 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                         {reg.position || <span className="text-slate-400">N/D</span>}
                       </td>
                       <td className="py-3 px-2 whitespace-nowrap text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider ${
-                          reg.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 
-                          reg.status === 'no_show' ? 'bg-slate-100 text-slate-700 border border-slate-300' :
-                          reg.status === 'migrated' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
-                          'bg-amber-100 text-amber-800 border border-amber-200'
-                        }`}>
-                          {reg.status === 'approved' ? 'APROBADO' : 
-                           reg.status === 'no_show' ? 'NO ASISTIÓ' : 
-                           reg.status === 'migrated' ? 'MIGRADO' : 'PENDIENTE'}
-                        </span>
+                        {reg.checkedIn ? (
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-emerald-600 text-white shadow-xs">
+                            ✅ ASISTIÓ (IMPRESO)
+                          </span>
+                        ) : (
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider ${
+                            reg.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 
+                            reg.status === 'no_show' ? 'bg-slate-100 text-slate-700 border border-slate-300' :
+                            reg.status === 'migrated' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+                            'bg-amber-100 text-amber-800 border border-amber-200'
+                          }`}>
+                            {reg.status === 'approved' ? 'APROBADO' : 
+                             reg.status === 'no_show' ? 'NO ASISTIÓ' : 
+                             reg.status === 'migrated' ? 'MIGRADO' : 'PENDIENTE'}
+                          </span>
+                        )}
                       </td>
                       <td className="py-3 px-2 text-slate-500 whitespace-nowrap text-center text-xs">
                         {reg.createdAt.toLocaleDateString('es-ES', {
@@ -747,7 +753,27 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                           )}
                           {reg.status === 'approved' && (
                             <>
-                              <button onClick={() => setPrintItems([reg])} className="text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition-colors" title="Imprimir Etiqueta Térmica (Brother QL)">
+                              <button 
+                                onClick={async () => {
+                                  try {
+                                    const regRef = doc(db, `${getEventBasePath()}/preregistrations`, reg.id);
+                                    await updateDoc(regRef, {
+                                      checkedIn: true,
+                                      checkInTime: serverTimestamp(),
+                                      badgePrinted: true,
+                                      badgePrintedAt: serverTimestamp(),
+                                      attended: true,
+                                      attendedAt: serverTimestamp()
+                                    });
+                                    setRegistrations(prev => prev.map(r => r.id === reg.id ? { ...r, checkedIn: true, badgePrinted: true } : r));
+                                  } catch (e) {
+                                    console.warn("Error al registrar checkin preregistro:", e);
+                                  }
+                                  setPrintItems([reg]);
+                                }} 
+                                className={`p-1.5 rounded-lg transition-colors ${reg.checkedIn ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-bold' : 'text-slate-700 hover:bg-slate-100'}`} 
+                                title="Imprimir Etiqueta Térmica & Marcar Check-In"
+                              >
                                 <span className="material-symbols-outlined text-[18px]">print</span>
                               </button>
                               <button onClick={() => handleResendQR(reg)} className="text-[#0d47a1] hover:bg-blue-50 p-1.5 rounded-lg transition-colors" title="Reenviar Código QR">

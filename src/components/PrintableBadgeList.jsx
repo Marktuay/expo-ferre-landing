@@ -1,16 +1,100 @@
 import React, { useEffect, useState } from 'react';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
+import { getEventBasePath } from '../config/eventConfig';
 import BadgeTemplate from './BadgeTemplate';
 
-export default function PrintableBadgeList({ items, roleLabel = 'Staff', colorClass, onClose }) {
+export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', colorClass, onClose, onPrinted }) {
   const [includeQr, setIncludeQr] = useState(false);
   
-  // Detonador de impresión al montar
+  // Detonador de impresión y registro de Check-In automático al montar
   useEffect(() => {
+    // 1. Marcar check-in en Firestore para todos los asistentes cuyo gafete se imprime
+    const markCheckedIn = async () => {
+      if (!items || items.length === 0) return;
+      const basePath = getEventBasePath();
+
+      for (const item of items) {
+        try {
+          const itemId = item.id || item.registeredAttendeeId;
+          if (!itemId) continue;
+
+          const updatePayload = {
+            checkedIn: true,
+            checkInTime: serverTimestamp(),
+            badgePrinted: true,
+            badgePrintedAt: serverTimestamp(),
+            attended: true,
+            attendedAt: serverTimestamp()
+          };
+
+          // A) Si el item tiene colección explícita
+          if (item.collection) {
+            const colPath = item.collection.includes('/') 
+              ? item.collection 
+              : (item.collection === 'users' ? 'users' : `${basePath}/${item.collection}`);
+            try {
+              await updateDoc(doc(db, colPath, itemId), updatePayload);
+            } catch (colErr) {
+              console.warn(`Error al actualizar colección ${colPath}:`, colErr);
+            }
+          } else {
+            // B) Detección por rol y propiedades del item
+            const role = (item.roleLabel || roleLabel || '').toUpperCase();
+            
+            if (role.includes('STAFF')) {
+              await updateDoc(doc(db, `${basePath}/staff`, itemId), updatePayload);
+            } else if (role.includes('CONFERENCISTA') || role.includes('SPEAKER')) {
+              await updateDoc(doc(db, `${basePath}/speakers`, itemId), updatePayload);
+            } else if (role.includes('PATROCINADOR') || role.includes('SPONSOR')) {
+              await updateDoc(doc(db, 'users', itemId), updatePayload);
+            } else if (role.includes('VIP') || item.isDirectInvite || item.type === 'direct_invite') {
+              // Intentar en directInvites primero
+              let updatedInDirect = false;
+              try {
+                await updateDoc(doc(db, `${basePath}/directInvites`, itemId), {
+                  ...updatePayload,
+                  status: 'used'
+                });
+                updatedInDirect = true;
+              } catch (_) {}
+
+              if (item.registeredAttendeeId) {
+                try {
+                  await updateDoc(doc(db, `${basePath}/preregistrations`, item.registeredAttendeeId), updatePayload);
+                } catch (_) {}
+              }
+
+              if (!updatedInDirect) {
+                try {
+                  await updateDoc(doc(db, `${basePath}/guests`, itemId), updatePayload);
+                } catch (_) {
+                  await updateDoc(doc(db, `${basePath}/preregistrations`, itemId), updatePayload);
+                }
+              }
+            } else {
+              // Asistente General
+              await updateDoc(doc(db, `${basePath}/preregistrations`, itemId), updatePayload);
+            }
+          }
+        } catch (err) {
+          console.warn("Auto check-in al imprimir gafete:", err);
+        }
+      }
+
+      if (onPrinted) {
+        onPrinted(items);
+      }
+    };
+
+    markCheckedIn();
+
+    // 2. Detonar el cuadro de diálogo del navegador
     const timer = setTimeout(() => {
       window.print();
     }, 400);
     return () => clearTimeout(timer);
-  }, []);
+  }, [items, roleLabel, onPrinted]);
 
   return (
     <div className="print-thermal-modal-wrapper fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-xs overflow-y-auto">

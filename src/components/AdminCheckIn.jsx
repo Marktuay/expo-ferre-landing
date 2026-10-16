@@ -44,7 +44,8 @@ export default function AdminCheckIn({ onBack }) {
     sponsors: { total: 0, checkedIn: 0 },
     staff: { total: 0, checkedIn: 0 },
     speakers: { total: 0, checkedIn: 0 },
-    guests: { total: 0, checkedIn: 0 }
+    guests: { total: 0, checkedIn: 0 },
+    directInvites: { total: 0, checkedIn: 0 }
   });
   
   const basePath = getEventBasePath();
@@ -125,12 +126,19 @@ export default function AdminCheckIn({ onBack }) {
       setStats(s => ({ ...s, guests: { total: snap.size, checkedIn } }));
     });
 
+    const unsubDirectInvites = onSnapshot(query(collection(db, `${basePath}/directInvites`)), (snap) => {
+      let checkedIn = 0;
+      snap.forEach(d => { if (d.data().checkedIn) checkedIn++; });
+      setStats(s => ({ ...s, directInvites: { total: snap.size, checkedIn } }));
+    });
+
     return () => {
       unsubPrereg();
       unsubUsers();
       unsubStaff();
       unsubSpeakers();
       unsubGuests();
+      unsubDirectInvites();
     };
   }, [basePath]);
 
@@ -572,11 +580,39 @@ export default function AdminCheckIn({ onBack }) {
               </div>
 
               <div className="space-y-4">
-                <StatRow label="Preregistros (General)" stats={stats.preregistrations} />
-                <StatRow label="Patrocinadores" stats={stats.sponsors} />
-                <StatRow label="Staff Técnico" stats={stats.staff} />
-                <StatRow label="Conferencistas" stats={stats.speakers} />
-                <StatRow label="Invitados Especiales" stats={stats.guests} />
+                {/* Invitados VIP con derecho a comida (Directos de patrocinadores + Especiales) */}
+                <StatRow 
+                  label="⭐ Invitados VIP (Almuerzo Incluido)" 
+                  stats={{
+                    total: (stats.directInvites?.total || 0) + (stats.guests?.total || 0),
+                    checkedIn: (stats.directInvites?.checkedIn || 0) + (stats.guests?.checkedIn || 0)
+                  }}
+                  color="bg-emerald-600"
+                  highlight={true}
+                />
+                <StatRow label="🎟️ Preregistros (General - Sin Almuerzo)" stats={stats.preregistrations} />
+                <StatRow label="🏢 Patrocinadores" stats={stats.sponsors} />
+                <StatRow label="👔 Staff Técnico" stats={stats.staff} />
+                <StatRow label="🎤 Conferencistas" stats={stats.speakers} />
+              </div>
+
+              {/* Métrica Destacada de Platos a Servir */}
+              <div className="mt-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🍽️</span>
+                  <div>
+                    <p className="text-xs font-black uppercase text-emerald-950 tracking-wider">Platos de Almuerzo a Servir</p>
+                    <p className="text-[11px] text-emerald-700 font-medium">Invitados VIP que llegaron y tienen gafete</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-black text-emerald-800 bg-white px-3 py-1 rounded-lg border border-emerald-300 shadow-2xs inline-block">
+                    {(stats.directInvites?.checkedIn || 0) + (stats.guests?.checkedIn || 0)}
+                  </span>
+                  <p className="text-[10px] text-emerald-600 font-bold mt-0.5">
+                    de {(stats.directInvites?.total || 0) + (stats.guests?.total || 0)} max
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -586,18 +622,18 @@ export default function AdminCheckIn({ onBack }) {
   );
 }
 
-function StatRow({ label, stats }) {
+function StatRow({ label, stats, color = 'bg-secondary', highlight = false }) {
   const percentage = stats.total > 0 ? (stats.checkedIn / stats.total) * 100 : 0;
   
   return (
-    <div>
+    <div className={highlight ? "p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-200/80" : ""}>
       <div className="flex justify-between text-sm mb-1">
-        <span className="font-bold text-on-surface">{label}</span>
-        <span className="text-secondary font-medium">{stats.checkedIn} de {stats.total}</span>
+        <span className={`font-bold ${highlight ? 'text-emerald-900' : 'text-on-surface'}`}>{label}</span>
+        <span className={`${highlight ? 'text-emerald-800 font-black' : 'text-secondary font-medium'}`}>{stats.checkedIn} de {stats.total}</span>
       </div>
       <div className="w-full bg-surface-variant/50 h-2 rounded-full overflow-hidden">
         <div 
-          className="bg-secondary h-full transition-all duration-500" 
+          className={`${color} h-full transition-all duration-500`} 
           style={{ width: `${percentage}%` }}
         ></div>
       </div>

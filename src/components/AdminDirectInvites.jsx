@@ -4475,9 +4475,13 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                             {/* Estado del Enlace & Correo */}
                             <td className="p-4 space-y-1">
                               <div>
-                                {isUsed ? (
+                                {inv.checkedIn ? (
+                                  <span className="inline-flex items-center gap-1 bg-emerald-600 text-white font-black px-2.5 py-0.5 rounded-full text-[11px] shadow-xs">
+                                    <CheckCircle2 size={11} /> ✅ LLEGÓ (IMPRESO)
+                                  </span>
+                                ) : isUsed ? (
                                   <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 font-bold px-2.5 py-0.5 rounded-full text-[11px] border border-green-200">
-                                    <CheckCircle2 size={11} /> USADO / REGISTRADO
+                                    <CheckCircle2 size={11} /> REGISTRADO
                                   </span>
                                 ) : (
                                   <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 font-bold px-2.5 py-0.5 rounded-full text-[11px] border border-amber-200">
@@ -4550,23 +4554,56 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   <span className="hidden xl:inline">QR</span>
                                 </button>
 
-                                {/* Imprimir Gafete Térmico Brother si ya completó su registro */}
-                                {isUsed && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setPrintItems([{
+                                {/* Imprimir Gafete Térmico Brother & Marcar Check-In */}
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    try {
+                                      const invRef = doc(db, `${basePath}/directInvites`, inv.id);
+                                      await updateDoc(invRef, {
+                                        checkedIn: true,
+                                        checkInTime: serverTimestamp(),
+                                        badgePrinted: true,
+                                        badgePrintedAt: serverTimestamp(),
+                                        status: 'used',
+                                        attended: true,
+                                        attendedAt: serverTimestamp()
+                                      });
+                                      if (inv.registeredAttendeeId) {
+                                        const attRef = doc(db, `${basePath}/preregistrations`, inv.registeredAttendeeId);
+                                        await updateDoc(attRef, {
+                                          checkedIn: true,
+                                          checkInTime: serverTimestamp(),
+                                          badgePrinted: true,
+                                          badgePrintedAt: serverTimestamp(),
+                                          attended: true,
+                                          attendedAt: serverTimestamp()
+                                        });
+                                      }
+                                    } catch (e) {
+                                      console.warn("Error al registrar checkin de invitado:", e);
+                                    }
+
+                                    setPrintItems([{
                                       id: inv.registeredAttendeeId || inv.id,
-                                      nombre: inv.registeredName || inv.nombre,
+                                      nombre: inv.registeredName || inv.nombre || 'Invitado VIP',
                                       empresa: inv.registeredCompany || inv.empresa || inv.sponsorName || '',
-                                      roleLabel: 'Invitado VIP'
-                                    }])}
-                                    title="Imprimir Gafete Térmico Brother (62 mm × 100 mm)"
-                                    className="p-2 rounded-lg bg-slate-800 hover:bg-slate-900 text-white transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer"
-                                  >
-                                    <Printer size={14} />
-                                    <span className="hidden xl:inline">Imprimir</span>
-                                  </button>
-                                )}
+                                      roleLabel: 'Invitado VIP',
+                                      isDirectInvite: true,
+                                      isVip: true,
+                                      collection: 'directInvites'
+                                    }]);
+                                  }}
+                                  title="Imprimir Gafete Térmico Brother & Marcar Check-In"
+                                  className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer ${
+                                    inv.checkedIn 
+                                      ? 'bg-emerald-700 hover:bg-emerald-800 text-white' 
+                                      : 'bg-slate-800 hover:bg-slate-900 text-white'
+                                  }`}
+                                >
+                                  <Printer size={14} />
+                                  <span className="hidden xl:inline">{inv.checkedIn ? 'Re-imprimir' : 'Imprimir'}</span>
+                                </button>
 
                                 {/* Editar Invitado */}
                                 <button
