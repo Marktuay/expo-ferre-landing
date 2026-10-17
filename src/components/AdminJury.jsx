@@ -825,7 +825,17 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                     <span className="bg-[#f39200]/10 text-[#f39200] px-2.5 py-0.5 rounded text-[11px] font-black uppercase inline-block mb-1">
                       Jurado Calificador
                     </span>
-                    <h3 className="font-black text-gray-900 text-xl">{ev.judgeName}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-black text-gray-900 text-xl">{ev.judgeName}</h3>
+                      <button
+                        type="button"
+                        onClick={() => setPrintItems([formatJudgeForPrint(ev, 'juryEvaluations')])}
+                        className="p-1.5 rounded-lg bg-slate-900 hover:bg-black text-amber-400 transition-colors cursor-pointer shadow-2xs flex items-center justify-center"
+                        title={`Imprimir Gafete VIP de ${ev.judgeName}`}
+                      >
+                        <Printer size={15} />
+                      </button>
+                    </div>
                     <p className="text-xs text-gray-500">
                       {ev.judgeCompany ? `${ev.judgeCompany} · ` : ''}{ev.submittedAtStr || 'Fecha reciente'}
                     </p>
@@ -1088,6 +1098,14 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                           {/* Jurado */}
                           <td className="py-3.5 px-4">
                             <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setPrintItems([formatJudgeForPrint(j, 'invitedJudges')])}
+                                title={`Imprimir Gafete VIP de ${j.name}`}
+                                className="p-1.5 bg-slate-900 hover:bg-black text-amber-400 rounded-lg transition-all cursor-pointer shadow-2xs shrink-0 flex items-center justify-center"
+                              >
+                                <Printer size={14} />
+                              </button>
                               <span className="font-bold text-gray-900 block text-sm">
                                 {j.name}
                               </span>

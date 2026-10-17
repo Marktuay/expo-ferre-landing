@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
@@ -117,8 +118,9 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
   }, [items, roleLabel, onPrinted, onClose]);
 
   const isHorizontal = orientation === 'horizontal';
+  const isSingleItem = items.length <= 1;
 
-  return (
+  const modalContent = (
     <div className="print-thermal-modal-wrapper fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-xs overflow-y-auto">
       {/* Barra superior de control (oculta en impresión) */}
       <div className="print-thermal-toolbar sticky top-0 bg-white border-b border-slate-200 shadow-sm p-4 px-6 flex flex-wrap justify-between items-center z-[101] print:hidden gap-3">
@@ -209,32 +211,34 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
         ))}
       </div>
 
-      {/* Reglas CSS para la impresora térmica Brother QL-810Wc (Soporta 1 o múltiples gafetes con corte individual) */}
+      {/* Reglas CSS para la impresora térmica Brother QL-810Wc (Evita segunda hoja en blanco) */}
       <style dangerouslySetInnerHTML={{__html: `
         @page {
-          size: auto !important;
+          size: ${isHorizontal ? '100mm 62mm' : '62mm 100mm'};
           margin: 0mm !important;
         }
 
         @media print {
           html, body {
             width: ${isHorizontal ? '100mm' : '62mm'} !important;
-            height: auto !important;
+            height: ${isSingleItem ? (isHorizontal ? '59.5mm' : '97.5mm') : 'auto'} !important;
+            max-height: ${isSingleItem ? (isHorizontal ? '59.5mm' : '97.5mm') : 'none'} !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
-            overflow: visible !important;
+            overflow: ${isSingleItem ? 'hidden' : 'visible'} !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
 
-          body * {
-            visibility: hidden !important;
-          }
-
-          .print-thermal-modal-wrapper,
-          .print-thermal-modal-wrapper * {
-            visibility: visible !important;
+          /* Colapsar por completo #root y cualquier elemento fuera del portal de impresión para no generar páginas vacías */
+          body > *:not(.print-thermal-modal-wrapper) {
+            display: none !important;
+            height: 0 !important;
+            max-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
           }
 
           .print-thermal-toolbar,
@@ -247,43 +251,40 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
           }
 
           .print-thermal-modal-wrapper {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
+            position: static !important;
             width: ${isHorizontal ? '100mm' : '62mm'} !important;
-            height: auto !important;
-            max-height: none !important;
+            height: ${isSingleItem ? (isHorizontal ? '59.5mm' : '97.5mm') : 'auto'} !important;
+            max-height: ${isSingleItem ? (isHorizontal ? '59.5mm' : '97.5mm') : 'none'} !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
-            overflow: visible !important;
-            z-index: 999999 !important;
+            overflow: ${isSingleItem ? 'hidden' : 'visible'} !important;
           }
 
           .print-thermal-container {
             position: static !important;
             width: ${isHorizontal ? '100mm' : '62mm'} !important;
-            height: auto !important;
-            max-height: none !important;
+            height: ${isSingleItem ? (isHorizontal ? '59.5mm' : '97.5mm') : 'auto'} !important;
+            max-height: ${isSingleItem ? (isHorizontal ? '59.5mm' : '97.5mm') : 'none'} !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
-            overflow: visible !important;
+            overflow: ${isSingleItem ? 'hidden' : 'visible'} !important;
             display: block !important;
           }
 
           .brother-thermal-badge {
             width: ${isHorizontal ? '100mm' : '62mm'} !important;
-            height: ${isHorizontal ? '62mm' : '100mm'} !important;
-            min-height: ${isHorizontal ? '62mm' : '100mm'} !important;
-            max-height: ${isHorizontal ? '62mm' : '100mm'} !important;
+            height: ${isHorizontal ? '59.5mm' : '97.5mm'} !important;
+            min-height: ${isHorizontal ? '59.5mm' : '97.5mm'} !important;
+            max-height: ${isHorizontal ? '59.5mm' : '97.5mm'} !important;
             max-width: ${isHorizontal ? '100mm' : '62mm'} !important;
-            page-break-after: always !important;
-            break-after: page !important;
+            page-break-after: ${isSingleItem ? 'avoid' : 'always'} !important;
+            break-after: ${isSingleItem ? 'avoid' : 'page'} !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             margin: 0 !important;
-            padding: ${isHorizontal ? '2mm 3.5mm' : '2.5mm 3mm'} !important;
+            padding: ${isHorizontal ? '1.8mm 3.5mm' : '2.2mm 3mm'} !important;
             border: none !important;
             border-radius: 0 !important;
             box-shadow: none !important;
@@ -295,11 +296,14 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
           }
 
           .brother-thermal-badge:last-child {
-            page-break-after: auto !important;
-            break-after: auto !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
           }
         }
       `}} />
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }
+
