@@ -297,6 +297,10 @@ export default function AdminStaff({ onBack }) {
     });
   }, [staffList, sponsorsMap, searchTerm, sponsorFilter]);
 
+  const unprintedFilteredStaff = useMemo(() => {
+    return filteredStaff.filter(s => !(s.checkedIn || s.attended || s.badgePrinted));
+  }, [filteredStaff]);
+
   const uniqueSponsorsInStaff = useMemo(() => {
     const byNormName = new Map();
     staffList.forEach(s => {
@@ -372,15 +376,15 @@ export default function AdminStaff({ onBack }) {
             <button
               type="button"
               onClick={() => {
-                if (filteredStaff.length === 0) return;
-                setPrintItems(filteredStaff.map(mapStaffForPrint));
+                if (unprintedFilteredStaff.length === 0) return;
+                setPrintItems(unprintedFilteredStaff.map(mapStaffForPrint));
               }}
-              disabled={filteredStaff.length === 0}
+              disabled={unprintedFilteredStaff.length === 0}
               className="px-4 py-2 bg-[#f39200] hover:bg-[#d98200] text-black border border-[#f39200] rounded-md transition-colors font-bold flex items-center gap-2 cursor-pointer text-sm shadow-xs disabled:opacity-50"
-              title="Imprimir masivamente los gafetes de la lista actual"
+              title="Imprimir masivamente solo los gafetes de staff que aún no se han impreso"
             >
               <Printer size={16} />
-              Imprimir Lista ({filteredStaff.length})
+              Imprimir Pendientes ({unprintedFilteredStaff.length})
             </button>
             <button
               onClick={() => {
