@@ -102,11 +102,22 @@ export default function AdminStaff({ onBack }) {
     }
   };
 
+  const mapStaffForPrint = (s) => ({
+    ...s,
+    nombre: `${s.nombre || ''} ${s.apellido || ''}`.trim() || s.name || 'Staff',
+    empresa: s.empresa || sponsorsMap[s.sponsorId] || s.sponsorName || '',
+    cargo: s.cargo || 'Staff',
+    roleLabel: 'STAFF',
+    isVip: false,
+    isDirectInvite: false,
+    collection: 'staff'
+  });
+
   if (printItems) {
     return (
       <PrintableBadgeList
         items={printItems}
-        roleLabel="Staff"
+        roleLabel="STAFF"
         colorClass="border-green-600 text-green-600"
         onClose={() => setPrintItems(null)}
       />
@@ -130,7 +141,7 @@ export default function AdminStaff({ onBack }) {
           </div>
           <div className="flex flex-wrap gap-3">
             <button
-              onClick={() => setPrintItems(filteredStaff)}
+              onClick={() => setPrintItems(filteredStaff.map(mapStaffForPrint))}
               disabled={filteredStaff.length === 0}
               className="px-4 py-2 bg-primary text-on-primary border border-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-sm"
             >
@@ -265,11 +276,7 @@ export default function AdminStaff({ onBack }) {
                             {/* Ver / Descargar Código QR */}
                             <button
                               onClick={() => {
-                                setSelectedPersonForQR({
-                                  ...staff,
-                                  nombre: fullName,
-                                  empresa: staff.empresa || sponsorsMap[staff.sponsorId] || ''
-                                });
+                                setSelectedPersonForQR(mapStaffForPrint(staff));
                                 setQrModalOpen(true);
                               }}
                               className="p-2 text-[#0d47a1] bg-[#0d47a1]/5 hover:bg-[#0d47a1]/15 rounded-lg transition-colors cursor-pointer"
@@ -280,7 +287,7 @@ export default function AdminStaff({ onBack }) {
 
                             {/* Imprimir Gafete */}
                             <button
-                              onClick={() => setPrintItems([staff])}
+                              onClick={() => setPrintItems([mapStaffForPrint(staff)])}
                               className="p-2 text-primary bg-primary/5 hover:bg-primary/15 rounded-lg transition-colors cursor-pointer"
                               title="Imprimir Gafete de Staff"
                             >
@@ -316,8 +323,8 @@ export default function AdminStaff({ onBack }) {
             setSelectedPersonForQR(null);
           }}
           person={selectedPersonForQR}
-          roleLabel="Staff"
-          onPrintBadge={(s) => setPrintItems([s])}
+          roleLabel="STAFF"
+          onPrintBadge={(s) => setPrintItems([mapStaffForPrint(s)])}
         />
       )}
     </div>

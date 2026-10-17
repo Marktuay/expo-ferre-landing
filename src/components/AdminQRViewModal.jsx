@@ -8,16 +8,25 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
 
   const isPendingInvite = person.isInviteLink || person.status === 'pending';
   
-  // Identificar si es Invitado VIP (con derecho a almuerzo) vs Preregistro General
-  const isVip = Boolean(
+  const effectiveRole = (person.roleLabel || roleLabel || 'ASISTENTE').toUpperCase();
+  const isNonVipRole =
+    person.collection === 'staff' ||
+    person.collection === 'speakers' ||
+    person.collection === 'users' ||
+    effectiveRole.includes('STAFF') ||
+    effectiveRole.includes('CONFERENCISTA') ||
+    effectiveRole.includes('PATROCINADOR') ||
+    effectiveRole.includes('JURADO');
+
+  // Identificar si es Invitado VIP (con derecho a almuerzo) vs Staff o Preregistro General
+  const isVip = !isNonVipRole && Boolean(
     person.isVip ||
     person.isDirectInvite ||
     person.type === 'direct_invite' ||
     person.source === 'Invitación Directa' ||
     person.sponsorName ||
     person.patrocinador ||
-    (person.roleLabel && person.roleLabel.toUpperCase().includes('VIP')) ||
-    (roleLabel && roleLabel.toUpperCase().includes('VIP')) ||
+    effectiveRole.includes('VIP') ||
     (person.position && person.position.toLowerCase().includes('invitado'))
   );
 

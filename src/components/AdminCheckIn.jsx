@@ -285,7 +285,7 @@ export default function AdminCheckIn({ onBack }) {
       }
 
       const roleLabel = determineBadgeRole(foundColKey, foundData);
-      const isVip = Boolean(
+      const isVip = foundColKey !== 'staff' && foundColKey !== 'speakers' && foundColKey !== 'users' && Boolean(
         roleLabel.includes('VIP') ||
         foundData.isVip ||
         foundData.isDirectInvite ||

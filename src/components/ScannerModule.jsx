@@ -71,7 +71,7 @@ export default function ScannerModule({ onBack }) {
         if (foundData) {
           const alreadyCheckedIn = foundData.checkedIn === true;
 
-          const isVip = Boolean(
+          const isVip = foundCollection !== 'staff' && foundCollection !== 'speakers' && foundCollection !== 'users' && Boolean(
             foundCollection === 'guests' || 
             foundData.isVip || 
             foundData.isDirectInvite || 

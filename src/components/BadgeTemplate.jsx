@@ -11,18 +11,27 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF', showQr = fals
   const position = data.position || data.cargo || data.puesto || '';
   const rawId = data.id || data.registeredAttendeeId || 'N/A';
 
-  // Identificar si es Invitado VIP (con derecho a comida) vs Asistente general de preregistro
-  const isVip = Boolean(
+  const effectiveRole = (data.roleLabel || roleLabel || 'ASISTENTE').toUpperCase();
+  const isNonVipRole =
+    data.collection === 'staff' ||
+    data.collection === 'speakers' ||
+    data.collection === 'users' ||
+    effectiveRole.includes('STAFF') ||
+    effectiveRole.includes('CONFERENCISTA') ||
+    effectiveRole.includes('PATROCINADOR') ||
+    effectiveRole.includes('JURADO');
+
+  // Identificar si es Invitado VIP (con derecho a comida) vs Asistente general o Staff
+  const isVip = !isNonVipRole && Boolean(
     data.isVip ||
     data.isDirectInvite ||
     data.type === 'direct_invite' ||
     data.source === 'Invitación Directa' ||
-    (data.roleLabel && data.roleLabel.toUpperCase().includes('VIP')) ||
-    (roleLabel && roleLabel.toUpperCase().includes('VIP')) ||
+    effectiveRole.includes('VIP') ||
     (data.position && data.position.toLowerCase().includes('invitado'))
   );
 
-  const displayRole = isVip ? '★ INVITADO VIP ★' : (data.roleLabel || roleLabel || 'ASISTENTE').toUpperCase();
+  const displayRole = isVip ? '★ INVITADO VIP ★' : (effectiveRole.includes('STAFF') ? 'STAFF' : effectiveRole);
   const cleanId = String(rawId).replace(/^VIP[-_:\s]+/i, '').trim();
   const qrValue = isVip ? `VIP-${cleanId}` : cleanId;
   const displayId = isVip ? `VIP - ${cleanId}` : cleanId;
