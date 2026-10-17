@@ -10,24 +10,32 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
   
   // Detonador de impresión y registro de Check-In automático al montar
   useEffect(() => {
-    // 1. Marcar check-in en Firestore para todos los asistentes cuyo gafete se imprime
+    // 1. Marcar en Firestore:
+    // - Si es impresión individual en puerta (items.length === 1), marca Check-In + Asistencia + Gafete Impreso.
+    // - Si es impresión masiva de una lista completa (items.length > 1), solo marca badgePrinted: true para no alterar el conteo de asistencia/almuerzos antes de que lleguen.
     const markCheckedIn = async () => {
       if (!items || items.length === 0) return;
       const basePath = getEventBasePath();
+      const isSingleDoorPrint = items.length === 1 && !items[0]?.skipAutoCheckIn;
 
       for (const item of items) {
         try {
           const itemId = item.id || item.registeredAttendeeId;
           if (!itemId) continue;
 
-          const updatePayload = {
-            checkedIn: true,
-            checkInTime: serverTimestamp(),
-            badgePrinted: true,
-            badgePrintedAt: serverTimestamp(),
-            attended: true,
-            attendedAt: serverTimestamp()
-          };
+          const updatePayload = isSingleDoorPrint
+            ? {
+                checkedIn: true,
+                checkInTime: serverTimestamp(),
+                badgePrinted: true,
+                badgePrintedAt: serverTimestamp(),
+                attended: true,
+                attendedAt: serverTimestamp()
+              }
+            : {
+                badgePrinted: true,
+                badgePrintedAt: serverTimestamp()
+              };
 
           // A) Si el item tiene colección explícita
           if (item.collection) {
@@ -50,12 +58,11 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
             } else if (role.includes('PATROCINADOR') || role.includes('SPONSOR')) {
               await updateDoc(doc(db, 'users', itemId), updatePayload);
             } else if (role.includes('VIP') || item.isDirectInvite || item.type === 'direct_invite') {
-              // Intentar en directInvites primero
               let updatedInDirect = false;
               try {
                 await updateDoc(doc(db, `${basePath}/directInvites`, itemId), {
                   ...updatePayload,
-                  status: 'used'
+                  ...(isSingleDoorPrint ? { status: 'used' } : {})
                 });
                 updatedInDirect = true;
               } catch (_) {}
@@ -79,7 +86,7 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
             }
           }
         } catch (err) {
-          console.warn("Auto check-in al imprimir gafete:", err);
+          console.warn("Auto actualización al imprimir gafete:", err);
         }
       }
 
@@ -95,10 +102,9 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
       window.print();
     }, 400);
 
-    // 3. Al terminar la impresión (o cancelarla en el teléfono), cerrar el modal automáticamente
-    // para volver de inmediato a la cámara y poder escanear al siguiente asistente en fila
+    // 3. Si es impresión individual en puerta (1 gafete), cerrar el modal automáticamente tras imprimir
     const handleAfterPrint = () => {
-      if (onClose) {
+      if (items.length === 1 && onClose) {
         onClose();
       }
     };
@@ -124,7 +130,7 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
             </h2>
           </div>
           <p className="text-slate-500 text-xs mt-0.5">
-            Rollo <strong>DK-2205 Continuo (62 mm)</strong> • Formato: <strong>{isHorizontal ? 'Horizontal (100 mm × 62 mm)' : 'Vertical (62 mm × 100 mm)'}</strong> • {items.length} gafete(s)
+            Rollo <strong>DK-2205 Continuo (62 mm)</strong> • Formato: <strong>{isHorizontal ? 'Horizontal (100 mm × 62 mm)' : 'Vertical (62 mm × 100 mm)'}</strong> • <strong>{items.length} gafete(s)</strong> en cola
           </p>
         </div>
 
@@ -184,7 +190,7 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
             className="px-5 py-2 bg-[#0d47a1] hover:bg-blue-800 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-900/20 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
           >
             <span className="material-symbols-outlined text-[18px]">print</span>
-            Imprimir Ahora
+            Imprimir {items.length > 1 ? `Todos (${items.length})` : 'Ahora'}
           </button>
         </div>
       </div>
@@ -203,7 +209,7 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
         ))}
       </div>
 
-      {/* Reglas CSS para la impresora térmica Brother QL-810Wc */}
+      {/* Reglas CSS para la impresora térmica Brother QL-810Wc (Soporta 1 o múltiples gafetes con corte individual) */}
       <style dangerouslySetInnerHTML={{__html: `
         @page {
           size: auto !important;
@@ -213,13 +219,11 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
         @media print {
           html, body {
             width: ${isHorizontal ? '100mm' : '62mm'} !important;
-            height: ${isHorizontal ? '62mm' : '100mm'} !important;
-            min-height: ${isHorizontal ? '62mm' : '100mm'} !important;
-            max-height: ${isHorizontal ? '62mm' : '100mm'} !important;
+            height: auto !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
-            overflow: hidden !important;
+            overflow: visible !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -233,7 +237,8 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
             visibility: visible !important;
           }
 
-          .print-thermal-toolbar {
+          .print-thermal-toolbar,
+          .print\\:hidden {
             display: none !important;
             visibility: hidden !important;
             height: 0 !important;
@@ -242,32 +247,28 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
           }
 
           .print-thermal-modal-wrapper {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            width: ${isHorizontal ? '100mm' : '62mm'} !important;
-            height: ${isHorizontal ? '62mm' : '100mm'} !important;
-            max-height: ${isHorizontal ? '62mm' : '100mm'} !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #ffffff !important;
-            overflow: hidden !important;
-            z-index: 999999 !important;
-          }
-
-          .print-thermal-container {
             position: absolute !important;
             top: 0 !important;
             left: 0 !important;
             width: ${isHorizontal ? '100mm' : '62mm'} !important;
-            height: ${isHorizontal ? '62mm' : '100mm'} !important;
-            max-height: ${isHorizontal ? '62mm' : '100mm'} !important;
+            height: auto !important;
+            max-height: none !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
-            overflow: hidden !important;
+            overflow: visible !important;
+            z-index: 999999 !important;
+          }
+
+          .print-thermal-container {
+            position: static !important;
+            width: ${isHorizontal ? '100mm' : '62mm'} !important;
+            height: auto !important;
+            max-height: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            overflow: visible !important;
             display: block !important;
           }
 
@@ -293,8 +294,9 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
             justify-content: space-between !important;
           }
 
-          .print\\:hidden {
-            display: none !important;
+          .brother-thermal-badge:last-child {
+            page-break-after: auto !important;
+            break-after: auto !important;
           }
         }
       `}} />

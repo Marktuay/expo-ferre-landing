@@ -3984,6 +3984,29 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   <span>Ver ({genInv.length})</span>
                                 </button>
 
+                                {/* Botón Imprimir Lista Completa */}
+                                <button
+                                  onClick={() => {
+                                    if (genInv.length === 0) return;
+                                    setPrintItems(genInv.map(inv => ({
+                                      id: inv.registeredAttendeeId || inv.id,
+                                      nombre: inv.registeredName || inv.nombre || 'Invitado VIP',
+                                      empresa: inv.registeredCompany || inv.empresa || inv.sponsorName || '',
+                                      cargo: inv.registeredPosition || inv.cargo || '',
+                                      roleLabel: 'Invitado VIP',
+                                      isDirectInvite: true,
+                                      isVip: true,
+                                      collection: 'directInvites'
+                                    })));
+                                  }}
+                                  disabled={genInv.length === 0}
+                                  className="px-2 py-1.5 bg-slate-900 hover:bg-black text-amber-400 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs disabled:opacity-40 shrink-0"
+                                  title={`Imprimir masivamente los ${genInv.length} gafetes de la lista General`}
+                                >
+                                  <Printer size={13} />
+                                  <span>Imprimir ({genInv.length})</span>
+                                </button>
+
                                 {/* Plantilla */}
                                 <button
                                   onClick={() => handleDownloadTemplateForSponsor('general')}
@@ -4262,6 +4285,29 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                 <span>Ver ({spInvites.length})</span>
                               </button>
 
+                              {/* Botón Imprimir Lista Completa */}
+                              <button
+                                onClick={() => {
+                                  if (spInvites.length === 0) return;
+                                  setPrintItems(spInvites.map(inv => ({
+                                    id: inv.registeredAttendeeId || inv.id,
+                                    nombre: inv.registeredName || inv.nombre || 'Invitado VIP',
+                                    empresa: inv.registeredCompany || inv.empresa || inv.sponsorName || sp || '',
+                                    cargo: inv.registeredPosition || inv.cargo || '',
+                                    roleLabel: 'Invitado VIP',
+                                    isDirectInvite: true,
+                                    isVip: true,
+                                    collection: 'directInvites'
+                                  })));
+                                }}
+                                disabled={spInvites.length === 0}
+                                className="px-2 py-1.5 bg-slate-900 hover:bg-black text-amber-400 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs disabled:opacity-40 shrink-0"
+                                title={`Imprimir masivamente los ${spInvites.length} gafetes de ${sp}`}
+                              >
+                                <Printer size={13} />
+                                <span>Imprimir ({spInvites.length})</span>
+                              </button>
+
                               {/* Plantilla */}
                               <button
                                 onClick={() => handleDownloadTemplateForSponsor(sp)}
@@ -4323,6 +4369,29 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
+                {/* Botón Imprimir Lista Filtrada */}
+                <button
+                  onClick={() => {
+                    if (filteredInvites.length === 0) return;
+                    setPrintItems(filteredInvites.map(inv => ({
+                      id: inv.registeredAttendeeId || inv.id,
+                      nombre: inv.registeredName || inv.nombre || 'Invitado VIP',
+                      empresa: inv.registeredCompany || inv.empresa || inv.sponsorName || '',
+                      cargo: inv.registeredPosition || inv.cargo || '',
+                      roleLabel: 'Invitado VIP',
+                      isDirectInvite: true,
+                      isVip: true,
+                      collection: 'directInvites'
+                    })));
+                  }}
+                  disabled={filteredInvites.length === 0}
+                  className="px-3.5 py-2 bg-slate-900 hover:bg-black text-amber-400 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                  title={`Imprimir masivamente los ${filteredInvites.length} gafetes de la vista actual`}
+                >
+                  <Printer size={14} />
+                  Imprimir Lista ({filteredInvites.length})
+                </button>
+
                 {/* Botón Enviar Correos Masivos */}
                 {(() => {
                   const pendingWithEmail = filteredInvites.filter(i => i.status === 'pending' && i.email && i.email.includes('@'));
@@ -4590,6 +4659,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                       id: inv.registeredAttendeeId || inv.id,
                                       nombre: inv.registeredName || inv.nombre || 'Invitado VIP',
                                       empresa: inv.registeredCompany || inv.empresa || inv.sponsorName || '',
+                                      cargo: inv.registeredPosition || inv.cargo || '',
                                       roleLabel: 'Invitado VIP',
                                       isDirectInvite: true,
                                       isVip: true,
