@@ -3285,14 +3285,49 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && i.status === 'pending' && !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt);
   }).length + (invites.some(i => (!i.sponsorName || i.sponsorId === 'general') && i.status === 'pending' && !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt) ? 1 : 0);
 
+  const doesInviteMatchSearchTerm = (inv, rawTerm) => {
+    const term = (rawTerm || '').toLowerCase().trim();
+    if (!term) return true;
+    const fields = [
+      inv.nombre,
+      inv.registeredName,
+      inv.empresa,
+      inv.registeredCompany,
+      inv.email,
+      inv.registeredEmail,
+      inv.telefono,
+      inv.registeredPhone,
+      inv.id,
+      inv.registeredAttendeeId
+    ];
+    return fields.some(val => val && String(val).toLowerCase().includes(term));
+  };
+
+  // Personas encontradas desde el buscador principal del directorio en cualquiera de las listas
+  const matchingPeopleFromDirectorySearch = (() => {
+    const term = sponsorSearchTerm.toLowerCase().trim();
+    if (!term) return [];
+    return invites.filter(inv => {
+      if (!doesInviteMatchSearchTerm(inv, term)) return false;
+      if (sponsorFilterStatus === 'has_registered') return inv.status === 'used';
+      if (sponsorFilterStatus === 'has_pending') return inv.status === 'pending';
+      if (sponsorFilterStatus === 'has_unsent_emails') {
+        return inv.status === 'pending' && !inv.emailSent && !inv.emailSentAt && !inv.whatsappSent && !inv.whatsappSentAt;
+      }
+      return true;
+    });
+  })();
+
   // Filtrar lista de patrocinadores para el directorio (Búsqueda + Filtro de Estado)
   const filteredSponsorsList = sponsorsList.filter(sp => {
     const term = sponsorSearchTerm.toLowerCase().trim();
     const stands = (sponsorsMap[sp]?.stands || []).join(' ').toLowerCase();
-    const matchesSearch = !term || sp.toLowerCase().includes(term) || stands.includes(term);
-    if (!matchesSearch) return false;
-
     const spInvites = invites.filter(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp)));
+    const matchesSponsorOrStand = !term || sp.toLowerCase().includes(term) || stands.includes(term);
+    const matchesPersonInList = term ? spInvites.some(i => doesInviteMatchSearchTerm(i, term)) : false;
+
+    if (!matchesSponsorOrStand && !matchesPersonInList) return false;
+
     if (sponsorFilterStatus === 'has_invites') return spInvites.length > 0;
     if (sponsorFilterStatus === 'has_registered') return spInvites.some(i => i.status === 'used');
     if (sponsorFilterStatus === 'has_pending') return spInvites.some(i => i.status === 'pending');
@@ -3304,10 +3339,12 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   // Visibilidad de la fila Especial General según filtros
   const showGeneralRow = (() => {
     const term = sponsorSearchTerm.toLowerCase().trim();
-    const matchesSearch = !term || 'invitacion general expoferre karen torres'.includes(term);
-    if (!matchesSearch) return false;
-
     const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
+    const matchesGeneralTitle = !term || 'invitacion general expoferre karen torres'.includes(term);
+    const matchesPersonInGeneral = term ? genInv.some(i => doesInviteMatchSearchTerm(i, term)) : false;
+
+    if (!matchesGeneralTitle && !matchesPersonInGeneral) return false;
+
     if (sponsorFilterStatus === 'has_invites') return genInv.length > 0;
     if (sponsorFilterStatus === 'has_registered') return genInv.some(i => i.status === 'used');
     if (sponsorFilterStatus === 'has_pending') return genInv.some(i => i.status === 'pending');
@@ -3627,19 +3664,19 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
               
               {/* Fila Superior: Búsqueda + Botón de Informe Ejecutivo */}
               <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
-                <div className="relative w-full md:w-96">
+                <div className="relative w-full md:w-[460px]">
                   <Search size={18} className="absolute left-3.5 top-3 text-secondary" />
                   <input
                     type="text"
-                    placeholder="Buscar patrocinador o stand..."
+                    placeholder="Buscar patrocinador, stand o persona en cualquier lista..."
                     value={sponsorSearchTerm}
                     onChange={(e) => setSponsorSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-surface border border-outline-variant rounded-xl text-sm outline-none focus:border-primary"
+                    className="w-full pl-10 pr-16 py-2 bg-surface border border-outline-variant rounded-xl text-sm outline-none focus:border-primary"
                   />
                   {sponsorSearchTerm && (
                     <button 
                       onClick={() => setSponsorSearchTerm('')}
-                      className="absolute right-3 top-2.5 text-secondary hover:text-on-surface text-xs font-bold"
+                      className="absolute right-3 top-2.5 text-secondary hover:text-on-surface text-xs font-bold cursor-pointer"
                     >
                       Limpiar
                     </button>
@@ -3658,7 +3695,10 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                   </button>
 
                   <div className="text-xs text-secondary font-medium pl-2 border-l border-outline-variant hidden sm:block">
-                    Mostrando <strong>{filteredSponsorsList.length + (showGeneralRow ? 1 : 0)}</strong> de {sponsorsList.length + 1}
+                    Mostrando <strong>{filteredSponsorsList.length + (showGeneralRow ? 1 : 0)}</strong> de {sponsorsList.length + 1} listas
+                    {sponsorSearchTerm.trim() && (
+                      <span> · <strong>{matchingPeopleFromDirectorySearch.length}</strong> persona{matchingPeopleFromDirectorySearch.length !== 1 ? 's' : ''}</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -3740,6 +3780,198 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
               </div>
 
             </div>
+
+            {/* RESULTADOS DE PERSONAS ENCONTRADAS EN CUALQUIERA DE LAS LISTAS */}
+            {sponsorSearchTerm.trim() !== '' && matchingPeopleFromDirectorySearch.length > 0 && (
+              <div className="bg-white rounded-2xl border-2 border-amber-300 shadow-md overflow-hidden">
+                <div className="bg-amber-50/80 px-5 py-3.5 border-b border-amber-200 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Users size={18} className="text-amber-700" />
+                    <h3 className="font-black text-slate-900 text-sm">
+                      Personas encontradas en las listas ({matchingPeopleFromDirectorySearch.length})
+                    </h3>
+                    <span className="text-xs text-amber-800 font-medium">
+                      Coincidencias para "{sponsorSearchTerm.trim()}"
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchTerm(sponsorSearchTerm.trim());
+                      setSelectedSponsorFilter('all');
+                      setViewMode('invites');
+                    }}
+                    className="px-3 py-1.5 bg-slate-900 hover:bg-black text-amber-400 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5"
+                  >
+                    <ExternalLink size={13} />
+                    Abrir en Vista Detallada
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
+                  <table className="w-full text-left border-collapse text-sm min-w-[980px]">
+                    <thead>
+                      <tr className="bg-surface-variant/40 border-b border-outline-variant text-[11px] uppercase tracking-wider text-secondary sticky top-0 z-10">
+                        <th className="p-3.5 font-bold">Invitado / Persona</th>
+                        <th className="p-3.5 font-bold">Lista / Patrocinador</th>
+                        <th className="p-3.5 font-bold">Estado</th>
+                        <th className="p-3.5 pr-5 font-bold text-center">Acciones Directas</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant/60">
+                      {matchingPeopleFromDirectorySearch.map((inv) => {
+                        const isUsed = inv.status === 'used';
+                        const listSponsorFilter = (!inv.sponsorName || inv.sponsorId === 'general' || getSponsorKey(inv.sponsorName) === 'general')
+                          ? 'general'
+                          : inv.sponsorName;
+
+                        return (
+                          <tr key={`dir_search_${inv.id}`} className="hover:bg-amber-50/30 transition-colors">
+                            <td className="p-3.5">
+                              <div className="font-bold text-on-surface">
+                                {inv.registeredName || inv.nombre || <span className="text-secondary italic">Sin nombre previo</span>}
+                              </div>
+                              {(inv.registeredCompany || inv.empresa) && (
+                                <div className="text-xs text-secondary flex items-center gap-1 mt-0.5 font-medium">
+                                  <Building2 size={12} /> {inv.registeredCompany || inv.empresa}
+                                </div>
+                              )}
+                              <div className="text-xs text-slate-500 font-mono mt-0.5 flex flex-wrap gap-2">
+                                {(inv.registeredEmail || inv.email) && <span>✉️ {inv.registeredEmail || inv.email}</span>}
+                                {(inv.registeredPhone || inv.telefono) && <span>📞 {inv.registeredPhone || inv.telefono}</span>}
+                              </div>
+                            </td>
+
+                            <td className="p-3.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedSponsorFilter(listSponsorFilter);
+                                  setSearchTerm(sponsorSearchTerm.trim());
+                                  setViewMode('invites');
+                                }}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition-colors cursor-pointer"
+                                title="Abrir la lista de este patrocinador filtrada por esta persona"
+                              >
+                                🏢 {inv.sponsorName || 'Invitación General'}
+                              </button>
+                              {inv.sponsorStands && (
+                                <div className="text-[11px] text-amber-700 font-medium mt-1">
+                                  Stand: {inv.sponsorStands}
+                                </div>
+                              )}
+                            </td>
+
+                            <td className="p-3.5">
+                              {inv.checkedIn ? (
+                                <span className="inline-flex items-center gap-1 bg-emerald-600 text-white font-black px-2.5 py-0.5 rounded-full text-[11px] shadow-xs">
+                                  <CheckCircle2 size={11} /> ✅ LLEGÓ (IMPRESO)
+                                </span>
+                              ) : isUsed ? (
+                                <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 font-bold px-2.5 py-0.5 rounded-full text-[11px] border border-green-200">
+                                  <CheckCircle2 size={11} /> REGISTRADO
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 font-bold px-2.5 py-0.5 rounded-full text-[11px] border border-amber-200">
+                                  <Clock size={11} /> PENDIENTE REGISTRO
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="p-3.5 pr-5 text-center">
+                              <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedPersonForQR({
+                                      id: isUsed ? (inv.registeredAttendeeId || inv.id) : inv.id,
+                                      nombre: inv.registeredName || inv.nombre,
+                                      empresa: inv.registeredCompany || inv.empresa,
+                                      email: inv.registeredEmail || inv.email,
+                                      telefono: inv.registeredPhone || inv.telefono,
+                                      sponsorName: inv.sponsorName,
+                                      sponsorStands: inv.sponsorStands,
+                                      status: inv.status,
+                                      inviteUrl: getInviteUrl(inv.id)
+                                    });
+                                    setQrModalOpen(true);
+                                  }}
+                                  className={`px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer ${
+                                    isUsed ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                                  }`}
+                                  title="Ver Código QR"
+                                >
+                                  <QrCode size={13} />
+                                  <span>QR</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    try {
+                                      const invRef = doc(db, `${basePath}/directInvites`, inv.id);
+                                      await updateDoc(invRef, {
+                                        checkedIn: true,
+                                        checkInTime: serverTimestamp(),
+                                        badgePrinted: true,
+                                        badgePrintedAt: serverTimestamp(),
+                                        status: 'used',
+                                        attended: true,
+                                        attendedAt: serverTimestamp()
+                                      });
+                                      if (inv.registeredAttendeeId) {
+                                        const attRef = doc(db, `${basePath}/preregistrations`, inv.registeredAttendeeId);
+                                        await updateDoc(attRef, {
+                                          checkedIn: true,
+                                          checkInTime: serverTimestamp(),
+                                          badgePrinted: true,
+                                          badgePrintedAt: serverTimestamp(),
+                                          attended: true,
+                                          attendedAt: serverTimestamp()
+                                        });
+                                      }
+                                    } catch (e) {
+                                      console.warn("Error al registrar checkin de invitado:", e);
+                                    }
+
+                                    setPrintItems([{
+                                      id: inv.registeredAttendeeId || inv.id,
+                                      nombre: inv.registeredName || inv.nombre || 'Invitado VIP',
+                                      empresa: inv.registeredCompany || inv.empresa || inv.sponsorName || '',
+                                      cargo: inv.registeredPosition || inv.cargo || '',
+                                      roleLabel: 'Invitado VIP',
+                                      isDirectInvite: true,
+                                      isVip: true,
+                                      collection: 'directInvites'
+                                    }]);
+                                  }}
+                                  className={`px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer ${
+                                    inv.checkedIn ? 'bg-emerald-700 hover:bg-emerald-800 text-white' : 'bg-slate-800 hover:bg-slate-900 text-white'
+                                  }`}
+                                  title="Imprimir Gafete VIP Individual"
+                                >
+                                  <Printer size={13} />
+                                  <span>{inv.checkedIn ? 'Re-imprimir' : 'Imprimir'}</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditGuest(inv)}
+                                  title="Editar datos del invitado"
+                                  className="p-1.5 bg-white border border-outline-variant hover:bg-surface text-secondary hover:text-primary rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Edit2 size={13} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
 
             {/* TABLA PRINCIPAL DE PATROCINADORES */}
             <div className="bg-white rounded-2xl border border-outline-variant shadow-md overflow-hidden">
