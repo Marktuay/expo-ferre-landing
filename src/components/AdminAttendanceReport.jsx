@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { collection, query, getDocs, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
-import { exportConsolidatedBaseToExcel } from '../utils/exportConsolidatedExcel';
+import { exportConsolidatedBaseToExcel, exportConsolidatedBaseToCSV } from '../utils/exportConsolidatedExcel';
 import { getPrintDateObj, formatPrintTime, formatPrintDateTimeFull } from '../utils/formatPrintTime';
 import PrintableBadgeList from './PrintableBadgeList';
 
@@ -14,22 +14,38 @@ export default function AdminAttendanceReport({ onBack }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [isExporting, setIsExporting] = useState(false);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
+  const [isExportingCSV, setIsExportingCSV] = useState(false);
 
   const basePath = getEventBasePath();
 
-  const handleExportAll = async () => {
-    setIsExporting(true);
+  const handleExportExcel = async () => {
+    setIsExportingExcel(true);
     try {
-      const res = await exportConsolidatedBaseToExcel();
+      const res = await exportConsolidatedBaseToExcel({ format: 'excel' });
       if (res?.totalRecords) {
-        alert(`✅ Base Consolidada exportada con éxito (${res.totalRecords} registros).\nSe descargaron ambos archivos: Excel (.xlsx) y CSV (.csv).`);
+        alert(`✅ Base Consolidada exportada con éxito en Excel (${res.totalRecords} registros).\nArchivo: ${res.fileName}.xlsx`);
       }
     } catch (err) {
-      console.error("Error al exportar:", err);
-      alert("Hubo un error al exportar: " + err.message);
+      console.error("Error al exportar Excel:", err);
+      alert("Hubo un error al exportar Excel: " + err.message);
     } finally {
-      setIsExporting(false);
+      setIsExportingExcel(false);
+    }
+  };
+
+  const handleExportCSV = async () => {
+    setIsExportingCSV(true);
+    try {
+      const res = await exportConsolidatedBaseToCSV();
+      if (res?.totalRecords) {
+        alert(`✅ Base Consolidada exportada con éxito en CSV (${res.totalRecords} registros).\nArchivo: ${res.fileName}.csv`);
+      }
+    } catch (err) {
+      console.error("Error al exportar CSV:", err);
+      alert("Hubo un error al exportar CSV: " + err.message);
+    } finally {
+      setIsExportingCSV(false);
     }
   };
 
@@ -439,15 +455,26 @@ export default function AdminAttendanceReport({ onBack }) {
               Refrescar
             </button>
             <button 
-              onClick={handleExportAll} 
-              disabled={isExporting}
+              onClick={handleExportExcel} 
+              disabled={isExportingExcel || isExportingCSV}
               className="px-4 py-2 bg-[#16a34a] text-white rounded-md hover:bg-[#15803d] transition-colors font-label-lg flex items-center gap-2 text-sm cursor-pointer shadow-2xs disabled:opacity-50 font-bold"
-              title="Descarga automáticamente tanto el archivo Excel (.xlsx) como el archivo CSV (.csv) con todos los registros y asistencia"
+              title="Descarga la base consolidada completa en formato Excel (.xlsx)"
             >
-              <span className={`material-symbols-outlined text-[18px] ${isExporting ? 'animate-spin' : ''}`}>
-                {isExporting ? 'sync' : 'download'}
+              <span className={`material-symbols-outlined text-[18px] ${isExportingExcel ? 'animate-spin' : ''}`}>
+                {isExportingExcel ? 'sync' : 'table_view'}
               </span>
-              {isExporting ? 'Generando Excel y CSV...' : 'Exportar Base Consolidada (Excel y CSV)'}
+              {isExportingExcel ? 'Generando Excel...' : 'Exportar Base (Excel)'}
+            </button>
+            <button 
+              onClick={handleExportCSV} 
+              disabled={isExportingExcel || isExportingCSV}
+              className="px-4 py-2 bg-[#0284c7] text-white rounded-md hover:bg-[#0369a1] transition-colors font-label-lg flex items-center gap-2 text-sm cursor-pointer shadow-2xs disabled:opacity-50 font-bold"
+              title="Descarga la base consolidada completa exclusivamente en formato CSV (.csv) compatible con Excel y UTF-8"
+            >
+              <span className={`material-symbols-outlined text-[18px] ${isExportingCSV ? 'animate-spin' : ''}`}>
+                {isExportingCSV ? 'sync' : 'download'}
+              </span>
+              {isExportingCSV ? 'Generando CSV...' : 'Exportar Base (CSV)'}
             </button>
             <button onClick={onBack} className="px-4 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2 text-sm cursor-pointer">
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>

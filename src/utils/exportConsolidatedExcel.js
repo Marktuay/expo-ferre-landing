@@ -8,7 +8,8 @@ import { getPrintDateObj, formatPrintDateTimeFull } from './formatPrintTime';
  * Incluye: Preregistros, Invitados VIP (Directos y Manuales), Patrocinadores, Staff, Conferencistas y Jurados,
  * con su estatus de asistencia y hora de impresión.
  */
-export async function exportConsolidatedBaseToExcel() {
+export async function exportConsolidatedBaseToExcel(options = {}) {
+  const format = options?.format || 'excel';
   const basePath = getEventBasePath();
   const consolidated = [];
 
@@ -305,22 +306,34 @@ export async function exportConsolidatedBaseToExcel() {
   const baseFileName = `Base_Consolidada_ExpoFerre_${todayStr}`;
 
   // 1. Descarga del archivo EXCEL (.xlsx)
-  XLSX.writeFile(workbook, `${baseFileName}.xlsx`);
+  if (format === 'excel' || format === 'both') {
+    XLSX.writeFile(workbook, `${baseFileName}.xlsx`);
+  }
 
   // 2. Descarga del archivo CSV (.csv) con BOM UTF-8 (\uFEFF) para visualización perfecta de tildes y ñ
-  const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const downloadAnchor = document.createElement('a');
-  downloadAnchor.href = url;
-  downloadAnchor.setAttribute('download', `${baseFileName}.csv`);
-  document.body.appendChild(downloadAnchor);
-  downloadAnchor.click();
-  document.body.removeChild(downloadAnchor);
-  URL.revokeObjectURL(url);
+  if (format === 'csv' || format === 'both') {
+    const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.href = url;
+    downloadAnchor.setAttribute('download', `${baseFileName}.csv`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    document.body.removeChild(downloadAnchor);
+    URL.revokeObjectURL(url);
+  }
 
   return {
     totalRecords: dataToExport.length,
-    fileName: baseFileName
+    fileName: baseFileName,
+    format
   };
+}
+
+/**
+ * Exporta la base consolidada completa de EXPO FERRE 2026 exclusivamente en formato CSV (.csv)
+ */
+export async function exportConsolidatedBaseToCSV() {
+  return exportConsolidatedBaseToExcel({ format: 'csv' });
 }
