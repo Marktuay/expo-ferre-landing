@@ -158,14 +158,11 @@ export default function AdminCheckIn({ onBack }) {
     if (colKey === 'speakers') return 'CONFERENCISTA';
     if (colKey === 'users' || data.role === 'sponsor') return 'PATROCINADOR';
     if (
-      data.isVip ||
-      data.isDirectInvite ||
+      colKey === 'directInvites' ||
+      data.isDirectInvite === true ||
       data.type === 'direct_invite' ||
       data.source === 'Invitación Directa' ||
-      data.position === 'Invitado Especial' ||
-      data.position === 'Invitado VIP' ||
-      (data.roleLabel && data.roleLabel.toUpperCase().includes('VIP')) ||
-      (data.position && data.position.toLowerCase().includes('invitado'))
+      Boolean(data.inviteToken)
     ) {
       return 'INVITADO VIP';
     }
@@ -286,11 +283,11 @@ export default function AdminCheckIn({ onBack }) {
 
       const roleLabel = determineBadgeRole(foundColKey, foundData);
       const isVip = foundColKey !== 'staff' && foundColKey !== 'speakers' && foundColKey !== 'users' && Boolean(
-        roleLabel.includes('VIP') ||
-        foundData.isVip ||
-        foundData.isDirectInvite ||
+        foundColKey === 'directInvites' ||
+        foundData.isDirectInvite === true ||
         foundData.type === 'direct_invite' ||
-        foundData.source === 'Invitación Directa'
+        foundData.source === 'Invitación Directa' ||
+        Boolean(foundData.inviteToken)
       );
 
       const attendeeName = foundData.name || `${foundData.nombre || ''} ${foundData.apellido || ''}`.trim() || 'Participante';

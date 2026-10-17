@@ -18,16 +18,14 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
     effectiveRole.includes('PATROCINADOR') ||
     effectiveRole.includes('JURADO');
 
-  // Identificar si es Invitado VIP (con derecho a almuerzo) vs Staff o Preregistro General
+  // ÚNICAMENTE las listas de Invitaciones Directas llevan VIP
   const isVip = !isNonVipRole && Boolean(
-    person.isVip ||
-    person.isDirectInvite ||
+    person.collection === 'directInvites' ||
+    person.isDirectInvite === true ||
     person.type === 'direct_invite' ||
     person.source === 'Invitación Directa' ||
-    person.sponsorName ||
-    person.patrocinador ||
-    effectiveRole.includes('VIP') ||
-    (person.position && person.position.toLowerCase().includes('invitado'))
+    Boolean(person.inviteToken) ||
+    Boolean(person.inviteUrl)
   );
 
   const rawId = person.registeredAttendeeId || person.id || '';

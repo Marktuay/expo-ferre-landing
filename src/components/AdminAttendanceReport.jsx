@@ -29,13 +29,10 @@ export default function AdminAttendanceReport({ onBack }) {
         const d = doc.data();
         registeredAttendeeIds.add(doc.id);
         const isVip = Boolean(
-          d.isDirectInvite || 
-          d.isVip || 
-          (d.roleLabel && d.roleLabel.toUpperCase().includes('VIP')) || 
-          d.position === 'Invitado Especial' || 
-          d.position === 'Invitado VIP' ||
+          d.isDirectInvite === true || 
           d.type === 'direct_invite' ||
-          d.source === 'Invitación Directa'
+          d.source === 'Invitación Directa' ||
+          Boolean(d.inviteToken)
         );
 
         consolidated.push({

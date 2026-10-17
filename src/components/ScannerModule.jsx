@@ -72,14 +72,10 @@ export default function ScannerModule({ onBack }) {
           const alreadyCheckedIn = foundData.checkedIn === true;
 
           const isVip = foundCollection !== 'staff' && foundCollection !== 'speakers' && foundCollection !== 'users' && Boolean(
-            foundCollection === 'guests' || 
-            foundData.isVip || 
-            foundData.isDirectInvite || 
+            foundData.isDirectInvite === true || 
             foundData.type === 'direct_invite' ||
             foundData.source === 'Invitación Directa' ||
-            foundData.position === 'Invitado Especial' ||
-            foundData.position === 'Invitado VIP' ||
-            (foundData.roleLabel && foundData.roleLabel.toUpperCase().includes('VIP'))
+            Boolean(foundData.inviteToken)
           );
 
           if (!alreadyCheckedIn) {

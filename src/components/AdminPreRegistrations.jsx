@@ -456,12 +456,16 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
   const pendingCount = registrations.filter(reg => reg.status !== 'approved' && reg.status !== 'no_show' && reg.status !== 'migrated').length;
 
   if (printItems) {
-    const target = printItems[0] || {};
-    const role = target.position === 'Invitado Especial' || target.isDirectInvite ? 'Invitado VIP' : 'Asistente';
     return (
       <PrintableBadgeList
-        items={printItems}
-        roleLabel={role}
+        items={printItems.map(p => ({
+          ...p,
+          roleLabel: 'ASISTENTE',
+          isVip: false,
+          isDirectInvite: false,
+          collection: 'preregistrations'
+        }))}
+        roleLabel="ASISTENTE"
         onClose={() => setPrintItems(null)}
       />
     );
@@ -1104,9 +1108,21 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
             setQrModalOpen(false);
             setSelectedPersonForQR(null);
           }}
-          person={selectedPersonForQR}
-          roleLabel={selectedPersonForQR.position === 'Invitado Especial' || selectedPersonForQR.isDirectInvite ? 'Invitado VIP' : 'Asistente'}
-          onPrintBadge={(p) => setPrintItems([p])}
+          person={{
+            ...selectedPersonForQR,
+            roleLabel: 'ASISTENTE',
+            isVip: false,
+            isDirectInvite: false,
+            collection: 'preregistrations'
+          }}
+          roleLabel="ASISTENTE"
+          onPrintBadge={(p) => setPrintItems([{
+            ...p,
+            roleLabel: 'ASISTENTE',
+            isVip: false,
+            isDirectInvite: false,
+            collection: 'preregistrations'
+          }])}
         />
       )}
     </div>

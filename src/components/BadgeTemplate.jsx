@@ -21,17 +21,22 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF', showQr = fals
     effectiveRole.includes('PATROCINADOR') ||
     effectiveRole.includes('JURADO');
 
-  // Identificar si es Invitado VIP (con derecho a comida) vs Asistente general o Staff
+  // ÚNICAMENTE las listas de Invitaciones Directas llevan VIP
   const isVip = !isNonVipRole && Boolean(
-    data.isVip ||
-    data.isDirectInvite ||
+    data.collection === 'directInvites' ||
+    data.isDirectInvite === true ||
     data.type === 'direct_invite' ||
     data.source === 'Invitación Directa' ||
-    effectiveRole.includes('VIP') ||
-    (data.position && data.position.toLowerCase().includes('invitado'))
+    Boolean(data.inviteToken)
   );
 
-  const displayRole = isVip ? '★ INVITADO VIP ★' : (effectiveRole.includes('STAFF') ? 'STAFF' : effectiveRole);
+  const displayRole = isVip
+    ? '★ INVITADO VIP ★'
+    : effectiveRole.includes('STAFF')
+      ? 'STAFF'
+      : effectiveRole.includes('VIP')
+        ? 'ASISTENTE'
+        : effectiveRole;
   const cleanId = String(rawId).replace(/^VIP[-_:\s]+/i, '').trim();
   const qrValue = isVip ? `VIP-${cleanId}` : cleanId;
   const displayId = isVip ? `VIP - ${cleanId}` : cleanId;
