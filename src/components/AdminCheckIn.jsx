@@ -302,6 +302,7 @@ export default function AdminCheckIn({ onBack }) {
         name: attendeeName,
         company: attendeeCompany,
         position: attendeePosition,
+        cargo: attendeePosition,
         roleLabel: isVip ? 'INVITADO VIP' : roleLabel,
         isVip: isVip
       };

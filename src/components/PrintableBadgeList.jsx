@@ -94,8 +94,21 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
     const timer = setTimeout(() => {
       window.print();
     }, 400);
-    return () => clearTimeout(timer);
-  }, [items, roleLabel, onPrinted]);
+
+    // 3. Al terminar la impresión (o cancelarla en el teléfono), cerrar el modal automáticamente
+    // para volver de inmediato a la cámara y poder escanear al siguiente asistente en fila
+    const handleAfterPrint = () => {
+      if (onClose) {
+        onClose();
+      }
+    };
+    window.addEventListener('afterprint', handleAfterPrint);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, [items, roleLabel, onPrinted, onClose]);
 
   const isHorizontal = orientation === 'horizontal';
 
