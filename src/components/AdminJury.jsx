@@ -643,14 +643,6 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
             <Plus size={18} /> Invitar Jurado
           </button>
           <button
-            onClick={() => setPrintItems(allVipJudges)}
-            disabled={allVipJudges.length === 0}
-            className="bg-slate-900 hover:bg-black text-amber-400 font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-40"
-            title="Imprimir masivamente los gafetes VIP de todos los jurados calificadores"
-          >
-            <Printer size={18} /> Imprimir Gafetes VIP ({allVipJudges.length})
-          </button>
-          <button
             onClick={handleExportExcel}
             disabled={isExporting}
             className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer"
@@ -984,14 +976,6 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <button
-                  onClick={() => setPrintItems(filteredJudges.map(j => formatJudgeForPrint(j, 'invitedJudges')))}
-                  disabled={filteredJudges.length === 0}
-                  className="bg-slate-900 hover:bg-black text-amber-400 font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
-                  title="Imprimir gafetes VIP de la lista actual de jurados"
-                >
-                  <Printer size={15} /> Imprimir Lista ({filteredJudges.length})
-                </button>
                 <button
                   onClick={() => setIsInviteModalOpen(true)}
                   className="bg-[#f39200] hover:bg-[#d98200] text-black font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all hover:scale-105"

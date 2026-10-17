@@ -141,14 +141,6 @@ export default function AdminStaff({ onBack }) {
           </div>
           <div className="flex flex-wrap gap-3">
             <button
-              onClick={() => setPrintItems(filteredStaff.map(mapStaffForPrint))}
-              disabled={filteredStaff.length === 0}
-              className="px-4 py-2 bg-primary text-on-primary border border-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-sm"
-            >
-              <Printer size={16} />
-              Imprimir Todos ({filteredStaff.length})
-            </button>
-            <button
               onClick={() => {
                 import('xlsx').then(XLSX => {
                   const dataToExport = filteredStaff.map(s => ({

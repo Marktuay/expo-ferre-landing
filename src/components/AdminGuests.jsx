@@ -99,14 +99,6 @@ export default function AdminGuests({ onBack }) {
               />
               <span className="text-sm text-on-surface font-medium">Mostrar solo "Requiere Seguimiento"</span>
             </label>
-            <button 
-              onClick={() => setPrintItems(filteredGuests)}
-              disabled={filteredGuests.length === 0}
-              className="px-5 py-2 bg-primary text-on-primary border border-primary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="material-symbols-outlined">print</span>
-              Imprimir Todos
-            </button>
             <button onClick={() => {
               import('xlsx').then(XLSX => {
                 const dataToExport = filteredGuests.map(g => ({

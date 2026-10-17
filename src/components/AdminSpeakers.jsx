@@ -388,14 +388,6 @@ Contenido del paquete:
               Invitar Conferencista
             </button>
             <button 
-              onClick={() => setPrintItems(filteredSpeakers.map(formatSpeakerForPrint))}
-              disabled={filteredSpeakers.length === 0}
-              className="px-4 py-2 bg-slate-900 text-amber-400 border border-slate-900 rounded-md hover:bg-black transition-colors font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm cursor-pointer shadow-xs"
-            >
-              <span className="material-symbols-outlined text-base">print</span>
-              Imprimir Gafetes VIP ({filteredSpeakers.length})
-            </button>
-            <button 
               onClick={handleDownloadAllZip}
               disabled={isGeneratingZip || filteredSpeakers.length === 0}
               className="px-4 py-2 bg-[#0d47a1] text-white border border-[#0d47a1] rounded-md hover:bg-[#1565c0] transition-colors font-label-lg flex items-center gap-2 shadow-xs text-sm disabled:opacity-50 cursor-pointer"
