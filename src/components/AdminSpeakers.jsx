@@ -522,7 +522,14 @@ Contenido del paquete:
                               </div>
                             )}
                             <div>
-                              <div className="font-bold text-on-surface text-sm">{speakerName}</div>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-bold text-on-surface text-sm">{speakerName}</span>
+                                {(speaker.checkedIn || speaker.attended || speaker.badgePrinted) && (
+                                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-600 text-white inline-flex items-center gap-1 shadow-2xs">
+                                    ✅ ASISTIÓ
+                                  </span>
+                                )}
+                              </div>
                               <div className="text-xs text-on-surface-variant">{speaker.cargo || 'Conferencista'}</div>
                             </div>
                           </div>

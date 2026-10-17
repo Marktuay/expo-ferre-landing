@@ -11,32 +11,24 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
   
   // Detonador de impresión y registro de Check-In automático al montar
   useEffect(() => {
-    // 1. Marcar en Firestore:
-    // - Si es impresión individual en puerta (items.length === 1), marca Check-In + Asistencia + Gafete Impreso.
-    // - Si es impresión masiva de una lista completa (items.length > 1), solo marca badgePrinted: true para no alterar el conteo de asistencia/almuerzos antes de que lleguen.
+    // 1. Marcar en Firestore: TODA impresión cuenta como asistido (Check-In + Asistencia + Gafete Impreso)
     const markCheckedIn = async () => {
       if (!items || items.length === 0) return;
       const basePath = getEventBasePath();
-      const isSingleDoorPrint = items.length === 1 && !items[0]?.skipAutoCheckIn;
 
       for (const item of items) {
         try {
           const itemId = item.id || item.registeredAttendeeId;
           if (!itemId) continue;
 
-          const updatePayload = isSingleDoorPrint
-            ? {
-                checkedIn: true,
-                checkInTime: serverTimestamp(),
-                badgePrinted: true,
-                badgePrintedAt: serverTimestamp(),
-                attended: true,
-                attendedAt: serverTimestamp()
-              }
-            : {
-                badgePrinted: true,
-                badgePrintedAt: serverTimestamp()
-              };
+          const updatePayload = {
+            checkedIn: true,
+            checkInTime: serverTimestamp(),
+            badgePrinted: true,
+            badgePrintedAt: serverTimestamp(),
+            attended: true,
+            attendedAt: serverTimestamp()
+          };
 
           // A) Si el item tiene colección explícita
           if (item.collection) {
@@ -44,9 +36,18 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
               ? item.collection 
               : (item.collection === 'users' ? 'users' : `${basePath}/${item.collection}`);
             try {
-              await updateDoc(doc(db, colPath, itemId), updatePayload);
+              await updateDoc(doc(db, colPath, itemId), {
+                ...updatePayload,
+                ...(colPath.endsWith('directInvites') ? { status: 'used' } : {})
+              });
             } catch (colErr) {
               console.warn(`Error al actualizar colección ${colPath}:`, colErr);
+            }
+
+            if (item.registeredAttendeeId && item.registeredAttendeeId !== itemId) {
+              try {
+                await updateDoc(doc(db, `${basePath}/preregistrations`, item.registeredAttendeeId), updatePayload);
+              } catch (_) {}
             }
           } else {
             // B) Detección por rol y propiedades del item
@@ -56,6 +57,12 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
               await updateDoc(doc(db, `${basePath}/staff`, itemId), updatePayload);
             } else if (role.includes('CONFERENCISTA') || role.includes('SPEAKER')) {
               await updateDoc(doc(db, `${basePath}/speakers`, itemId), updatePayload);
+            } else if (role.includes('JURADO')) {
+              try {
+                await updateDoc(doc(db, `${basePath}/invitedJudges`, itemId), updatePayload);
+              } catch (_) {
+                await updateDoc(doc(db, `${basePath}/juryEvaluations`, itemId), updatePayload);
+              }
             } else if (role.includes('PATROCINADOR') || role.includes('SPONSOR')) {
               await updateDoc(doc(db, 'users', itemId), updatePayload);
             } else if (role.includes('VIP') || item.isDirectInvite || item.type === 'direct_invite') {
@@ -63,7 +70,7 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
               try {
                 await updateDoc(doc(db, `${basePath}/directInvites`, itemId), {
                   ...updatePayload,
-                  ...(isSingleDoorPrint ? { status: 'used' } : {})
+                  status: 'used'
                 });
                 updatedInDirect = true;
               } catch (_) {}

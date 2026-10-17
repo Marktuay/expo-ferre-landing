@@ -825,7 +825,7 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                     <span className="bg-[#f39200]/10 text-[#f39200] px-2.5 py-0.5 rounded text-[11px] font-black uppercase inline-block mb-1">
                       Jurado Calificador
                     </span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-black text-gray-900 text-xl">{ev.judgeName}</h3>
                       <button
                         type="button"
@@ -835,6 +835,11 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                       >
                         <Printer size={15} />
                       </button>
+                      {(ev.checkedIn || ev.attended || ev.badgePrinted) && (
+                        <span className="inline-flex items-center gap-1 bg-emerald-600 text-white font-black px-2.5 py-0.5 rounded-full text-[11px] shadow-xs">
+                          <CheckCircle2 size={11} /> ✅ ASISTIÓ (IMPRESO)
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-gray-500">
                       {ev.judgeCompany ? `${ev.judgeCompany} · ` : ''}{ev.submittedAtStr || 'Fecha reciente'}
@@ -1097,7 +1102,7 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                         <tr key={j.id} className={`transition-colors ${rowBg}`}>
                           {/* Jurado */}
                           <td className="py-3.5 px-4">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <button
                                 type="button"
                                 onClick={() => setPrintItems([formatJudgeForPrint(j, 'invitedJudges')])}
@@ -1109,6 +1114,11 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                               <span className="font-bold text-gray-900 block text-sm">
                                 {j.name}
                               </span>
+                              {(j.checkedIn || j.attended || j.badgePrinted) && (
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-600 text-white inline-flex items-center gap-1 shadow-2xs">
+                                  <CheckCircle2 size={10} /> ✅ ASISTIÓ
+                                </span>
+                              )}
                               {evaluated && (
                                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
                                   🏆 Votó

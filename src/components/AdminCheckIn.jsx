@@ -90,9 +90,11 @@ export default function AdminCheckIn({ onBack }) {
   }, []);
 
   useEffect(() => {
+    const isAttended = (data) => Boolean(data.checkedIn || data.attended || data.badgePrinted);
+
     const unsubPrereg = onSnapshot(query(collection(db, `${basePath}/preregistrations`)), (snap) => {
       let checkedIn = 0;
-      snap.forEach(d => { if (d.data().checkedIn) checkedIn++; });
+      snap.forEach(d => { if (isAttended(d.data())) checkedIn++; });
       setStats(s => ({ ...s, preregistrations: { total: snap.size, checkedIn } }));
     });
 
@@ -102,7 +104,7 @@ export default function AdminCheckIn({ onBack }) {
       snap.forEach(d => {
         if (d.data().role === 'sponsor') {
           totalSponsors++;
-          if (d.data().checkedIn) checkedInSponsors++;
+          if (isAttended(d.data())) checkedInSponsors++;
         }
       });
       setStats(s => ({ ...s, sponsors: { total: totalSponsors, checkedIn: checkedInSponsors } }));
@@ -110,25 +112,25 @@ export default function AdminCheckIn({ onBack }) {
 
     const unsubStaff = onSnapshot(query(collection(db, `${basePath}/staff`)), (snap) => {
       let checkedIn = 0;
-      snap.forEach(d => { if (d.data().checkedIn) checkedIn++; });
+      snap.forEach(d => { if (isAttended(d.data())) checkedIn++; });
       setStats(s => ({ ...s, staff: { total: snap.size, checkedIn } }));
     });
 
     const unsubSpeakers = onSnapshot(query(collection(db, `${basePath}/speakers`)), (snap) => {
       let checkedIn = 0;
-      snap.forEach(d => { if (d.data().checkedIn) checkedIn++; });
+      snap.forEach(d => { if (isAttended(d.data())) checkedIn++; });
       setStats(s => ({ ...s, speakers: { total: snap.size, checkedIn } }));
     });
 
     const unsubGuests = onSnapshot(query(collection(db, `${basePath}/guests`)), (snap) => {
       let checkedIn = 0;
-      snap.forEach(d => { if (d.data().checkedIn) checkedIn++; });
+      snap.forEach(d => { if (isAttended(d.data())) checkedIn++; });
       setStats(s => ({ ...s, guests: { total: snap.size, checkedIn } }));
     });
 
     const unsubDirectInvites = onSnapshot(query(collection(db, `${basePath}/directInvites`)), (snap) => {
       let checkedIn = 0;
-      snap.forEach(d => { if (d.data().checkedIn) checkedIn++; });
+      snap.forEach(d => { if (isAttended(d.data())) checkedIn++; });
       setStats(s => ({ ...s, directInvites: { total: snap.size, checkedIn } }));
     });
 

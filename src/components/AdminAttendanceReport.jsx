@@ -35,6 +35,9 @@ export default function AdminAttendanceReport({ onBack }) {
           Boolean(d.inviteToken)
         );
 
+        const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+        const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
+
         consolidated.push({
           id: doc.id,
           name: d.name || `${d.firstName || ''} ${d.lastName || ''}`.trim() || 'Sin Nombre',
@@ -43,8 +46,8 @@ export default function AdminAttendanceReport({ onBack }) {
           company: d.company || 'N/A',
           position: d.position || d.cargo || d.puesto || '',
           cargo: d.position || d.cargo || d.puesto || '',
-          checkedIn: !!d.checkedIn,
-          checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
+          checkedIn: isAttended,
+          checkInTime: attendedDate,
           isVip: isVip,
           collection: 'preregistrations',
           raw: d
@@ -56,6 +59,8 @@ export default function AdminAttendanceReport({ onBack }) {
       directSnap.forEach(doc => {
         const d = doc.data();
         if (!d.registeredAttendeeId || !registeredAttendeeIds.has(d.registeredAttendeeId)) {
+          const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+          const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
           consolidated.push({
             id: doc.id,
             name: d.registeredName || d.nombre || 'Invitado VIP',
@@ -64,8 +69,8 @@ export default function AdminAttendanceReport({ onBack }) {
             company: d.registeredCompany || d.empresa || d.sponsorName || 'N/A',
             position: d.cargo || d.puesto || d.position || d.registeredPosition || '',
             cargo: d.cargo || d.puesto || d.position || d.registeredPosition || '',
-            checkedIn: !!d.checkedIn,
-            checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
+            checkedIn: isAttended,
+            checkInTime: attendedDate,
             isVip: true,
             sponsorName: d.sponsorName || '',
             collection: 'directInvites',
@@ -84,6 +89,8 @@ export default function AdminAttendanceReport({ onBack }) {
           const comp = (d.empresa || d.company || '').trim();
           const hasRealPerson = rawPerson && rawPerson.toLowerCase() !== comp.toLowerCase();
           const displayName = hasRealPerson ? rawPerson : (comp ? `Resp. ${comp}` : 'Patrocinador');
+          const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+          const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
 
           consolidated.push({
             id: doc.id,
@@ -93,8 +100,8 @@ export default function AdminAttendanceReport({ onBack }) {
             company: comp || 'N/A',
             position: d.cargo || d.puesto || 'Patrocinador',
             cargo: d.cargo || d.puesto || 'Patrocinador',
-            checkedIn: !!d.checkedIn,
-            checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
+            checkedIn: isAttended,
+            checkInTime: attendedDate,
             collection: 'users',
             raw: d
           });
@@ -108,6 +115,8 @@ export default function AdminAttendanceReport({ onBack }) {
         const staffName = d.name || (`${d.nombre || ''} ${d.apellido || ''}`).trim() || 'Staff';
         const staffComp = d.company || d.empresa || d.sponsorCompany || d.sponsorName || 'ExpoFerre';
         const staffContact = d.email || d.correo || d.phone || d.telefono || 'N/A';
+        const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+        const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
         consolidated.push({
           id: doc.id,
           name: staffName,
@@ -116,8 +125,8 @@ export default function AdminAttendanceReport({ onBack }) {
           company: staffComp,
           position: d.cargo || d.tipoCargo || 'Staff',
           cargo: d.cargo || d.tipoCargo || 'Staff',
-          checkedIn: !!d.checkedIn,
-          checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
+          checkedIn: isAttended,
+          checkInTime: attendedDate,
           collection: 'staff',
           raw: d
         });
@@ -130,16 +139,19 @@ export default function AdminAttendanceReport({ onBack }) {
         const speakerName = d.name || (`${d.nombre || ''} ${d.apellido || ''}`).trim() || d.speaker || 'Conferencista';
         const speakerComp = d.company || d.empresa || d.sponsorCompany || d.sponsorName || (d.titulo ? `Tema: ${d.titulo}` : 'N/A');
         const speakerContact = d.email || d.correo || d.phone || d.telefono || 'N/A';
+        const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+        const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
         consolidated.push({
           id: doc.id,
           name: speakerName,
           category: 'Conferencista',
           contact: speakerContact,
           company: speakerComp,
-          position: d.cargo || 'Conferencista',
-          cargo: d.cargo || 'Conferencista',
-          checkedIn: !!d.checkedIn,
-          checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
+          position: d.cargo || 'Conferencista VIP',
+          cargo: d.cargo || 'Conferencista VIP',
+          checkedIn: isAttended,
+          checkInTime: attendedDate,
+          isVip: true,
           collection: 'speakers',
           raw: d
         });
@@ -152,6 +164,8 @@ export default function AdminAttendanceReport({ onBack }) {
         const guestName = d.name || (`${d.nombre || ''} ${d.apellido || ''}`).trim() || 'Invitado Especial';
         const guestComp = d.company || d.empresa || d.sponsorName || 'N/A';
         const guestContact = d.email || d.correo || d.phone || d.telefono || 'N/A';
+        const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+        const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
         consolidated.push({
           id: doc.id,
           name: guestName,
@@ -160,10 +174,61 @@ export default function AdminAttendanceReport({ onBack }) {
           company: guestComp,
           position: d.cargo || d.position || d.puesto || '',
           cargo: d.cargo || d.position || d.puesto || '',
-          checkedIn: !!d.checkedIn,
-          checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
+          checkedIn: isAttended,
+          checkInTime: attendedDate,
           isVip: true,
           collection: 'guests',
+          raw: d
+        });
+      });
+
+      // 7. Jurados Calificadores VIP (invitedJudges + juryEvaluations)
+      const seenJudgeKeys = new Set();
+      const invitedJudgesSnap = await getDocs(query(collection(db, `${basePath}/invitedJudges`)));
+      invitedJudgesSnap.forEach(doc => {
+        const d = doc.data();
+        const judgeName = (d.name || d.nombre || 'Jurado Calificador').trim();
+        const key = (d.email || judgeName).toLowerCase().trim();
+        if (key) seenJudgeKeys.add(key);
+        const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+        const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
+        consolidated.push({
+          id: doc.id,
+          name: judgeName,
+          category: 'Jurado VIP',
+          contact: d.email || d.phone || d.telefono || 'N/A',
+          company: d.company || d.empresa || 'Comité Evaluador EXPO FERRE',
+          position: 'Jurado Calificador VIP',
+          cargo: 'Jurado Calificador VIP',
+          checkedIn: isAttended,
+          checkInTime: attendedDate,
+          isVip: true,
+          collection: 'invitedJudges',
+          raw: d
+        });
+      });
+
+      const juryEvalsSnap = await getDocs(query(collection(db, `${basePath}/juryEvaluations`)));
+      juryEvalsSnap.forEach(doc => {
+        const d = doc.data();
+        const judgeName = (d.judgeName || d.name || 'Jurado Calificador').trim();
+        const key = (d.judgeEmail || judgeName).toLowerCase().trim();
+        if (key && seenJudgeKeys.has(key)) return;
+        if (key) seenJudgeKeys.add(key);
+        const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+        const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
+        consolidated.push({
+          id: doc.id,
+          name: judgeName,
+          category: 'Jurado VIP',
+          contact: d.judgeEmail || d.judgePhone || 'N/A',
+          company: d.judgeCompany || 'Comité Evaluador EXPO FERRE',
+          position: 'Jurado Calificador VIP',
+          cargo: 'Jurado Calificador VIP',
+          checkedIn: isAttended,
+          checkInTime: attendedDate,
+          isVip: true,
+          collection: 'juryEvaluations',
           raw: d
         });
       });
@@ -274,7 +339,8 @@ export default function AdminAttendanceReport({ onBack }) {
       // 1. Reset preregistrations
       const preregSnap = await getDocs(query(collection(db, `${basePath}/preregistrations`)));
       for (const d of preregSnap.docs) {
-        if (d.data().checkedIn) {
+        const dt = d.data();
+        if (dt.checkedIn || dt.attended || dt.badgePrinted) {
           await updateDoc(doc(db, `${basePath}/preregistrations`, d.id), resetPayload);
         }
       }
@@ -283,7 +349,7 @@ export default function AdminAttendanceReport({ onBack }) {
       const directSnap = await getDocs(query(collection(db, `${basePath}/directInvites`)));
       for (const d of directSnap.docs) {
         const data = d.data();
-        if (data.checkedIn || data.status === 'used') {
+        if (data.checkedIn || data.attended || data.badgePrinted || data.status === 'used') {
           await updateDoc(doc(db, `${basePath}/directInvites`, d.id), {
             ...resetPayload,
             status: (data.registeredName || data.nombre) ? 'registered' : 'pending'
@@ -294,7 +360,8 @@ export default function AdminAttendanceReport({ onBack }) {
       // 3. Reset users (sponsors)
       const usersSnap = await getDocs(query(collection(db, `users`)));
       for (const d of usersSnap.docs) {
-        if (d.data().checkedIn) {
+        const dt = d.data();
+        if (dt.checkedIn || dt.attended || dt.badgePrinted) {
           await updateDoc(doc(db, `users`, d.id), resetPayload);
         }
       }
@@ -302,7 +369,8 @@ export default function AdminAttendanceReport({ onBack }) {
       // 4. Reset staff
       const staffSnap = await getDocs(query(collection(db, `${basePath}/staff`)));
       for (const d of staffSnap.docs) {
-        if (d.data().checkedIn) {
+        const dt = d.data();
+        if (dt.checkedIn || dt.attended || dt.badgePrinted) {
           await updateDoc(doc(db, `${basePath}/staff`, d.id), resetPayload);
         }
       }
@@ -310,7 +378,8 @@ export default function AdminAttendanceReport({ onBack }) {
       // 5. Reset speakers
       const speakersSnap = await getDocs(query(collection(db, `${basePath}/speakers`)));
       for (const d of speakersSnap.docs) {
-        if (d.data().checkedIn) {
+        const dt = d.data();
+        if (dt.checkedIn || dt.attended || dt.badgePrinted) {
           await updateDoc(doc(db, `${basePath}/speakers`, d.id), resetPayload);
         }
       }
@@ -318,8 +387,25 @@ export default function AdminAttendanceReport({ onBack }) {
       // 6. Reset guests
       const guestsSnap = await getDocs(query(collection(db, `${basePath}/guests`)));
       for (const d of guestsSnap.docs) {
-        if (d.data().checkedIn) {
+        const dt = d.data();
+        if (dt.checkedIn || dt.attended || dt.badgePrinted) {
           await updateDoc(doc(db, `${basePath}/guests`, d.id), resetPayload);
+        }
+      }
+
+      // 7. Reset invitedJudges & juryEvaluations
+      const invJudgesSnap = await getDocs(query(collection(db, `${basePath}/invitedJudges`)));
+      for (const d of invJudgesSnap.docs) {
+        const dt = d.data();
+        if (dt.checkedIn || dt.attended || dt.badgePrinted) {
+          await updateDoc(doc(db, `${basePath}/invitedJudges`, d.id), resetPayload);
+        }
+      }
+      const evalJudgesSnap = await getDocs(query(collection(db, `${basePath}/juryEvaluations`)));
+      for (const d of evalJudgesSnap.docs) {
+        const dt = d.data();
+        if (dt.checkedIn || dt.attended || dt.badgePrinted) {
+          await updateDoc(doc(db, `${basePath}/juryEvaluations`, d.id), resetPayload);
         }
       }
 
@@ -365,14 +451,14 @@ export default function AdminAttendanceReport({ onBack }) {
     });
   };
 
-  const categories = ['ALL', 'Invitado VIP', 'Preregistro (General)', 'Patrocinador', 'Staff Técnico', 'Conferencista'];
+  const categories = ['ALL', 'Invitado VIP', 'Jurado VIP', 'Conferencista', 'Preregistro (General)', 'Patrocinador', 'Staff Técnico'];
 
   // --- Category Breakdown Calculations ---
-  const vipData = data.filter(d => d.category === 'Invitado VIP');
+  const vipData = data.filter(d => d.isVip);
   const preregData = data.filter(d => d.category === 'Preregistro (General)');
   const sponsorData = data.filter(d => d.category === 'Patrocinador');
   const staffData = data.filter(d => d.category === 'Staff Técnico');
-  const speakerData = data.filter(d => d.category === 'Conferencista');
+  const speakerData = data.filter(d => d.category === 'Conferencista' || d.category === 'Jurado VIP');
 
   const vipCheckedIn = vipData.filter(d => d.checkedIn).length;
   const preregCheckedIn = preregData.filter(d => d.checkedIn).length;
@@ -732,6 +818,8 @@ export default function AdminAttendanceReport({ onBack }) {
                         <span className={`px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
                           item.category === 'Invitado VIP'
                             ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : item.category === 'Jurado VIP'
+                            ? 'bg-slate-900 text-amber-400 border border-amber-500'
                             : item.category === 'Patrocinador'
                             ? 'bg-amber-100 text-amber-800 border border-amber-300'
                             : item.category === 'Staff Técnico'
@@ -796,7 +884,7 @@ export default function AdminAttendanceReport({ onBack }) {
             <span>Total listados: <strong className="text-on-surface">{filteredData.length}</strong></span>
             <div className="flex gap-4">
               <span>Asistieron en total: <strong className="text-[#16a34a]">{filteredData.filter(d => d.checkedIn).length}</strong></span>
-              <span>Platos de Almuerzo Servidos: <strong className="text-emerald-700">{filteredData.filter(d => d.category === 'Invitado VIP' && d.checkedIn).length}</strong></span>
+              <span>Platos de Almuerzo Servidos: <strong className="text-emerald-700">{filteredData.filter(d => d.isVip && d.checkedIn).length}</strong></span>
             </div>
           </div>
 
