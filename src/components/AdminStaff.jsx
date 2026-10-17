@@ -101,7 +101,7 @@ export default function AdminStaff({ onBack }) {
     if (clean.includes('midesa')) return 'midesa';
     if (clean.includes('noelito')) return 'noelito';
     if (clean.includes('sherwin')) return 'sherwin_williams';
-    if (clean.includes('armoconsa')) return 'armoconsa';
+    if (clean.includes('armoconsa') || clean.includes('armaconsa')) return 'armoconsa';
     if (clean.includes('extel')) return 'extel';
     if (clean.includes('megalina') || clean.includes('megalinea')) return 'megalineas';
     if (clean.includes('amanco') || clean.includes('wavin')) return 'amanco_wavin';
