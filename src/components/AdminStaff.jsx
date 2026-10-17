@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import PrintableBadgeList from './PrintableBadgeList';
 import AdminQRViewModal from './AdminQRViewModal';
+import { formatPrintTime, formatPrintDateTimeFull } from '../utils/formatPrintTime';
 
 export default function AdminStaff({ onBack }) {
   const [staffList, setStaffList] = useState([]);
@@ -147,6 +148,8 @@ export default function AdminStaff({ onBack }) {
                     Fecha: s.createdAt.toLocaleDateString() + ' ' + s.createdAt.toLocaleTimeString(),
                     Patrocinador: sponsorsMap[s.sponsorId] || s.sponsorName || 'No asignado',
                     Nombre: `${s.nombre || ''} ${s.apellido || ''}`.trim(),
+                    Asistencia: (s.checkedIn || s.attended || s.badgePrinted) ? 'ASISTIÓ (IMPRESO)' : 'No asistió',
+                    'Hora de Impresión': formatPrintDateTimeFull(s) || 'No impreso',
                     Email: s.email || '',
                     Teléfono: s.telefono || '',
                     Empresa: s.empresa || '',
@@ -240,7 +243,19 @@ export default function AdminStaff({ onBack }) {
                     return (
                       <tr key={staff.id} className="border-b border-outline-variant hover:bg-surface-variant/10 transition-colors group">
                         <td className="py-3 px-3 text-on-surface font-semibold max-w-[160px] break-words">
-                          {fullName}
+                          <div>{fullName}</div>
+                          {(staff.checkedIn || staff.attended || staff.badgePrinted) && (
+                            <div className="mt-1 flex flex-col items-start gap-0.5">
+                              <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-600 text-white shadow-2xs" title={formatPrintDateTimeFull(staff)}>
+                                ✅ ASISTIÓ (IMPRESO)
+                              </span>
+                              {formatPrintTime(staff) && (
+                                <span className="text-[9px] font-bold text-emerald-700">
+                                  🖨️ {formatPrintTime(staff)}
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </td>
                         <td className="py-3 px-3 text-secondary font-medium max-w-[140px] break-words">
                           {sponsorsMap[staff.sponsorId] || staff.sponsorName || 'No asignado'}

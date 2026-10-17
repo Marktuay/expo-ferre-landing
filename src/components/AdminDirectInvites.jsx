@@ -3,6 +3,7 @@ import { collection, query, onSnapshot, doc, setDoc, updateDoc, deleteDoc, addDo
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, auth, storage } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
+import { formatPrintTime, formatPrintDateTimeFull } from '../utils/formatPrintTime';
 import { 
   Send, 
   Copy, 
@@ -2898,6 +2899,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         Telefono: inv.telefono || 'N/A',
         Patrocinador_Anfitrion: inv.sponsorName || 'Invitación General',
         Stands_Patrocinador: inv.sponsorStands || 'N/A',
+        Asistio: (inv.checkedIn || inv.attended || inv.badgePrinted) ? 'SÍ (IMPRESO)' : 'NO',
+        Hora_Impresion: formatPrintDateTimeFull(inv) || 'No impreso',
         Estado: inv.status === 'used' ? 'REGISTRADO (USADO)' : 'PENDIENTE (DISPONIBLE)',
         Registrado_Nombre: inv.registeredName || '',
         Registrado_Empresa: inv.registeredCompany || '',
@@ -3863,10 +3866,17 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                             </td>
 
                             <td className="p-3.5">
-                              {inv.checkedIn ? (
-                                <span className="inline-flex items-center gap-1 bg-emerald-600 text-white font-black px-2.5 py-0.5 rounded-full text-[11px] shadow-xs">
-                                  <CheckCircle2 size={11} /> ✅ LLEGÓ (IMPRESO)
-                                </span>
+                              {(inv.checkedIn || inv.attended || inv.badgePrinted) ? (
+                                <div className="flex flex-col items-start gap-0.5">
+                                  <span className="inline-flex items-center gap-1 bg-emerald-600 text-white font-black px-2.5 py-0.5 rounded-full text-[11px] shadow-xs" title={formatPrintDateTimeFull(inv)}>
+                                    <CheckCircle2 size={11} /> ✅ ASISTIÓ (IMPRESO)
+                                  </span>
+                                  {formatPrintTime(inv) && (
+                                    <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1 pl-1">
+                                      🖨️ {formatPrintTime(inv)}
+                                    </span>
+                                  )}
+                                </div>
                               ) : isUsed ? (
                                 <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 font-bold px-2.5 py-0.5 rounded-full text-[11px] border border-green-200">
                                   <CheckCircle2 size={11} /> REGISTRADO
@@ -3946,12 +3956,12 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                     }]);
                                   }}
                                   className={`px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer ${
-                                    inv.checkedIn ? 'bg-emerald-700 hover:bg-emerald-800 text-white' : 'bg-slate-800 hover:bg-slate-900 text-white'
+                                    (inv.checkedIn || inv.attended || inv.badgePrinted) ? 'bg-emerald-700 hover:bg-emerald-800 text-white' : 'bg-slate-800 hover:bg-slate-900 text-white'
                                   }`}
                                   title="Imprimir Gafete VIP Individual"
                                 >
                                   <Printer size={13} />
-                                  <span>{inv.checkedIn ? 'Re-imprimir' : 'Imprimir'}</span>
+                                  <span>{(inv.checkedIn || inv.attended || inv.badgePrinted) ? 'Re-imprimir' : 'Imprimir'}</span>
                                 </button>
 
                                 <button
@@ -4737,10 +4747,17 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                             {/* Estado del Enlace & Correo */}
                             <td className="p-4 space-y-1">
                               <div>
-                                {inv.checkedIn ? (
-                                  <span className="inline-flex items-center gap-1 bg-emerald-600 text-white font-black px-2.5 py-0.5 rounded-full text-[11px] shadow-xs">
-                                    <CheckCircle2 size={11} /> ✅ LLEGÓ (IMPRESO)
-                                  </span>
+                                {(inv.checkedIn || inv.attended || inv.badgePrinted) ? (
+                                  <div className="flex flex-col items-start gap-0.5">
+                                    <span className="inline-flex items-center gap-1 bg-emerald-600 text-white font-black px-2.5 py-0.5 rounded-full text-[11px] shadow-xs" title={formatPrintDateTimeFull(inv)}>
+                                      <CheckCircle2 size={11} /> ✅ ASISTIÓ (IMPRESO)
+                                    </span>
+                                    {formatPrintTime(inv) && (
+                                      <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1 pl-1">
+                                        🖨️ {formatPrintTime(inv)}
+                                      </span>
+                                    )}
+                                  </div>
                                 ) : isUsed ? (
                                   <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 font-bold px-2.5 py-0.5 rounded-full text-[11px] border border-green-200">
                                     <CheckCircle2 size={11} /> REGISTRADO
@@ -4859,13 +4876,13 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                   }}
                                   title="Imprimir Gafete Térmico Brother & Marcar Check-In"
                                   className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-bold shadow-2xs cursor-pointer ${
-                                    inv.checkedIn 
+                                    (inv.checkedIn || inv.attended || inv.badgePrinted)
                                       ? 'bg-emerald-700 hover:bg-emerald-800 text-white' 
                                       : 'bg-slate-800 hover:bg-slate-900 text-white'
                                   }`}
                                 >
                                   <Printer size={14} />
-                                  <span className="hidden xl:inline">{inv.checkedIn ? 'Re-imprimir' : 'Imprimir'}</span>
+                                  <span className="hidden xl:inline">{(inv.checkedIn || inv.attended || inv.badgePrinted) ? 'Re-imprimir' : 'Imprimir'}</span>
                                 </button>
 
                                 {/* Editar Invitado */}

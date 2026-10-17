@@ -7,6 +7,7 @@ import InviteJudgeModal from './InviteJudgeModal';
 import PrintableBadgeList from './PrintableBadgeList';
 import AdminQRViewModal from './AdminQRViewModal';
 import { notifyAdminJuryCompleted, ADMIN_NOTIFICATION_EMAIL } from '../services/juryEmailService';
+import { formatPrintTime, formatPrintDateTimeFull } from '../utils/formatPrintTime';
 
 export default function AdminJury({ onBack, adminUser }) {
   // Verificación de Super Administrador (Exclusivo marktuay@gmail.com)
@@ -836,8 +837,8 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                         <Printer size={15} />
                       </button>
                       {(ev.checkedIn || ev.attended || ev.badgePrinted) && (
-                        <span className="inline-flex items-center gap-1 bg-emerald-600 text-white font-black px-2.5 py-0.5 rounded-full text-[11px] shadow-xs">
-                          <CheckCircle2 size={11} /> ✅ ASISTIÓ (IMPRESO)
+                        <span className="inline-flex items-center gap-1 bg-emerald-600 text-white font-black px-2.5 py-0.5 rounded-full text-[11px] shadow-xs" title={formatPrintDateTimeFull(ev)}>
+                          <CheckCircle2 size={11} /> ✅ ASISTIÓ {formatPrintTime(ev) ? `· 🖨️ ${formatPrintTime(ev)}` : '(IMPRESO)'}
                         </span>
                       )}
                     </div>
@@ -1115,8 +1116,8 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                                 {j.name}
                               </span>
                               {(j.checkedIn || j.attended || j.badgePrinted) && (
-                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-600 text-white inline-flex items-center gap-1 shadow-2xs">
-                                  <CheckCircle2 size={10} /> ✅ ASISTIÓ
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-600 text-white inline-flex items-center gap-1 shadow-2xs" title={formatPrintDateTimeFull(j)}>
+                                  <CheckCircle2 size={10} /> ✅ ASISTIÓ {formatPrintTime(j) ? `· 🖨️ ${formatPrintTime(j)}` : ''}
                                 </span>
                               )}
                               {evaluated && (

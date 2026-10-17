@@ -5,6 +5,7 @@ import { getEventBasePath } from '../config/eventConfig';
 import PrintableBadgeList from './PrintableBadgeList';
 import AdminFollowUpModal from './AdminFollowUpModal';
 import AdminQRViewModal from './AdminQRViewModal';
+import { formatPrintTime, formatPrintDateTimeFull } from '../utils/formatPrintTime';
 
 export default function AdminGuests({ onBack }) {
   const [guestsList, setGuestsList] = useState([]);
@@ -104,6 +105,8 @@ export default function AdminGuests({ onBack }) {
                 const dataToExport = filteredGuests.map(g => ({
                   Fecha: g.createdAt.toLocaleDateString() + ' ' + g.createdAt.toLocaleTimeString(),
                   Nombre: g.nombre || '',
+                  Asistencia: (g.checkedIn || g.attended || g.badgePrinted) ? 'ASISTIÓ (IMPRESO)' : 'No asistió',
+                  'Hora de Impresión': formatPrintDateTimeFull(g) || 'No impreso',
                   Email: g.email || '',
                   Teléfono: g.telefono || '',
                   Empresa: g.empresa || '',
@@ -167,7 +170,21 @@ export default function AdminGuests({ onBack }) {
                 ) : (
                   filteredGuests.map((guest) => (
                     <tr key={guest.id} className="border-b border-outline-variant hover:bg-surface-variant/10 transition-colors">
-                      <td className="p-4 text-on-surface font-medium">{guest.nombre}</td>
+                      <td className="p-4 text-on-surface font-medium">
+                        <div>{guest.nombre}</div>
+                        {(guest.checkedIn || guest.attended || guest.badgePrinted) && (
+                          <div className="mt-1 flex flex-col items-start gap-0.5">
+                            <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-600 text-white shadow-2xs" title={formatPrintDateTimeFull(guest)}>
+                              ✅ ASISTIÓ (IMPRESO)
+                            </span>
+                            {formatPrintTime(guest) && (
+                              <span className="text-[9px] font-bold text-emerald-700">
+                                🖨️ {formatPrintTime(guest)}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </td>
                       <td className="p-4 text-secondary">{guest.email}</td>
                       <td className="p-4 text-secondary">{guest.telefono}</td>
                       <td className="p-4 text-secondary">{guest.empresa}</td>

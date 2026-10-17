@@ -7,6 +7,7 @@ import { getEventBasePath } from '../config/eventConfig';
 import AdminFollowUpModal from './AdminFollowUpModal';
 import AdminQRViewModal from './AdminQRViewModal';
 import PrintableBadgeList from './PrintableBadgeList';
+import { formatPrintTime, formatPrintDateTimeFull } from '../utils/formatPrintTime';
 
 export default function AdminPreRegistrations({ onBack, adminUser }) {
   const [registrations, setRegistrations] = useState([]);
@@ -581,6 +582,8 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                   Teléfono: reg.phone || '',
                   Empleados: reg.employees || '',
                   Puesto: reg.position || '',
+                  Asistencia: (reg.checkedIn || reg.attended || reg.badgePrinted) ? 'ASISTIÓ (IMPRESO)' : 'No asistió',
+                  'Hora de Impresión': formatPrintDateTimeFull(reg) || 'No impreso',
                   Estado: reg.status === 'approved' ? 'Aprobado' : reg.status === 'no_show' ? 'No Asistió' : reg.status === 'migrated' ? 'Migrado' : 'Pendiente',
                   'Requiere Seguimiento': reg.needsFollowUp ? 'Sí' : 'No',
                   'Cant. Seguimientos': reg.followUps ? reg.followUps.length : 0,
@@ -673,10 +676,17 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
                         {reg.position || <span className="text-slate-400">N/D</span>}
                       </td>
                       <td className="py-3 px-2 whitespace-nowrap text-center">
-                        {reg.checkedIn ? (
-                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-emerald-600 text-white shadow-xs">
-                            ✅ ASISTIÓ (IMPRESO)
-                          </span>
+                        {(reg.checkedIn || reg.attended || reg.badgePrinted) ? (
+                          <div className="flex flex-col items-center gap-0.5">
+                            <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-emerald-600 text-white shadow-xs" title={formatPrintDateTimeFull(reg)}>
+                              ✅ ASISTIÓ (IMPRESO)
+                            </span>
+                            {formatPrintTime(reg) && (
+                              <span className="text-[10px] font-bold text-emerald-700">
+                                🖨️ {formatPrintTime(reg)}
+                              </span>
+                            )}
+                          </div>
                         ) : (
                           <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider ${
                             reg.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 

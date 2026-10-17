@@ -7,6 +7,7 @@ import CreateSpeakerModal from './CreateSpeakerModal';
 import InviteSpeakerModal from './InviteSpeakerModal';
 import AdminQRViewModal from './AdminQRViewModal';
 import JSZip from 'jszip';
+import { formatPrintTime, formatPrintDateTimeFull } from '../utils/formatPrintTime';
 
 export default function AdminSpeakers({ onBack }) {
   const [speakers, setSpeakers] = useState([]);
@@ -409,6 +410,8 @@ Contenido del paquete:
                   Nombre: `${s.nombre || ''} ${s.apellido || ''}`.trim(),
                   Cargo: s.cargo || '',
                   Empresa: s.empresa || 'Independiente',
+                  Asistio: (s.checkedIn || s.attended || s.badgePrinted) ? 'SÍ (IMPRESO)' : 'NO',
+                  Hora_Impresion: formatPrintDateTimeFull(s) || 'No impreso',
                   Email: s.email || s.correo || '',
                   Teléfono: s.telefono || '',
                   LinkedIn: s.linkedin || '',
@@ -525,8 +528,8 @@ Contenido del paquete:
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="font-bold text-on-surface text-sm">{speakerName}</span>
                                 {(speaker.checkedIn || speaker.attended || speaker.badgePrinted) && (
-                                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-600 text-white inline-flex items-center gap-1 shadow-2xs">
-                                    ✅ ASISTIÓ
+                                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-600 text-white inline-flex items-center gap-1 shadow-2xs" title={formatPrintDateTimeFull(speaker)}>
+                                    ✅ ASISTIÓ {formatPrintTime(speaker) ? `· 🖨️ ${formatPrintTime(speaker)}` : ''}
                                   </span>
                                 )}
                               </div>

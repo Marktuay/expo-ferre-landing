@@ -3,6 +3,7 @@ import { collection, query, getDocs, doc, updateDoc, serverTimestamp } from 'fir
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import { exportConsolidatedBaseToExcel } from '../utils/exportConsolidatedExcel';
+import { getPrintDateObj, formatPrintTime, formatPrintDateTimeFull } from '../utils/formatPrintTime';
 import PrintableBadgeList from './PrintableBadgeList';
 
 export default function AdminAttendanceReport({ onBack }) {
@@ -36,7 +37,7 @@ export default function AdminAttendanceReport({ onBack }) {
         );
 
         const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
-        const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
+        const attendedDate = getPrintDateObj(d);
 
         consolidated.push({
           id: doc.id,
@@ -60,7 +61,7 @@ export default function AdminAttendanceReport({ onBack }) {
         const d = doc.data();
         if (!d.registeredAttendeeId || !registeredAttendeeIds.has(d.registeredAttendeeId)) {
           const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
-          const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
+          const attendedDate = getPrintDateObj(d);
           consolidated.push({
             id: doc.id,
             name: d.registeredName || d.nombre || 'Invitado VIP',
@@ -90,7 +91,7 @@ export default function AdminAttendanceReport({ onBack }) {
           const hasRealPerson = rawPerson && rawPerson.toLowerCase() !== comp.toLowerCase();
           const displayName = hasRealPerson ? rawPerson : (comp ? `Resp. ${comp}` : 'Patrocinador');
           const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
-          const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
+          const attendedDate = getPrintDateObj(d);
 
           consolidated.push({
             id: doc.id,
@@ -116,7 +117,7 @@ export default function AdminAttendanceReport({ onBack }) {
         const staffComp = d.company || d.empresa || d.sponsorCompany || d.sponsorName || 'ExpoFerre';
         const staffContact = d.email || d.correo || d.phone || d.telefono || 'N/A';
         const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
-        const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
+        const attendedDate = getPrintDateObj(d);
         consolidated.push({
           id: doc.id,
           name: staffName,
@@ -140,7 +141,7 @@ export default function AdminAttendanceReport({ onBack }) {
         const speakerComp = d.company || d.empresa || d.sponsorCompany || d.sponsorName || (d.titulo ? `Tema: ${d.titulo}` : 'N/A');
         const speakerContact = d.email || d.correo || d.phone || d.telefono || 'N/A';
         const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
-        const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
+        const attendedDate = getPrintDateObj(d);
         consolidated.push({
           id: doc.id,
           name: speakerName,
@@ -165,7 +166,7 @@ export default function AdminAttendanceReport({ onBack }) {
         const guestComp = d.company || d.empresa || d.sponsorName || 'N/A';
         const guestContact = d.email || d.correo || d.phone || d.telefono || 'N/A';
         const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
-        const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
+        const attendedDate = getPrintDateObj(d);
         consolidated.push({
           id: doc.id,
           name: guestName,
@@ -191,7 +192,7 @@ export default function AdminAttendanceReport({ onBack }) {
         const key = (d.email || judgeName).toLowerCase().trim();
         if (key) seenJudgeKeys.add(key);
         const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
-        const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
+        const attendedDate = getPrintDateObj(d);
         consolidated.push({
           id: doc.id,
           name: judgeName,
@@ -216,7 +217,7 @@ export default function AdminAttendanceReport({ onBack }) {
         if (key && seenJudgeKeys.has(key)) return;
         if (key) seenJudgeKeys.add(key);
         const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
-        const attendedDate = d.checkInTime?.toDate?.() || d.attendedAt?.toDate?.() || d.badgePrintedAt?.toDate?.() || null;
+        const attendedDate = getPrintDateObj(d);
         consolidated.push({
           id: doc.id,
           name: judgeName,
@@ -259,7 +260,7 @@ export default function AdminAttendanceReport({ onBack }) {
 
   const handlePrintBadge = async (item) => {
     // 1. Optimistic update in table
-    setData(prev => prev.map(d => d.id === item.id ? { ...d, checkedIn: true, checkInTime: d.checkInTime || new Date() } : d));
+    setData(prev => prev.map(d => d.id === item.id ? { ...d, checkedIn: true, checkInTime: new Date() } : d));
 
     // 2. Prepare badge item with explicit collection
     const pos = item.position || item.cargo || item.puesto || item.raw?.cargo || item.raw?.position || item.raw?.puesto || '';
@@ -440,8 +441,8 @@ export default function AdminAttendanceReport({ onBack }) {
       'Empresa': item.company,
       'Categoría': item.category,
       'Contacto': item.contact,
-      'Estado': item.checkedIn ? 'Asistió' : 'Pendiente',
-      'Hora de Check-in': item.checkInTime ? item.checkInTime.toLocaleString('es-ES') : 'N/A'
+      'Estado': item.checkedIn ? 'Asistió (Impreso)' : 'Pendiente',
+      'Hora de Impresión': item.checkInTime ? formatPrintDateTimeFull(item.checkInTime) : 'No impreso'
     }));
     import('xlsx').then(XLSX => {
       const ws = XLSX.utils.json_to_sheet(wsData);
@@ -791,7 +792,7 @@ export default function AdminAttendanceReport({ onBack }) {
                   <th className="p-4 font-bold text-on-surface border-b border-outline-variant">Categoría</th>
                   <th className="p-4 font-bold text-on-surface border-b border-outline-variant">Contacto</th>
                   <th className="p-4 font-bold text-on-surface border-b border-outline-variant">Estado</th>
-                  <th className="p-4 font-bold text-on-surface border-b border-outline-variant">Hora Check-in</th>
+                  <th className="p-4 font-bold text-on-surface border-b border-outline-variant">Hora de Impresión</th>
                   <th className="p-4 font-bold text-on-surface border-b border-outline-variant text-right">Acción Gafete</th>
                 </tr>
               </thead>
@@ -846,7 +847,11 @@ export default function AdminAttendanceReport({ onBack }) {
                         )}
                       </td>
                       <td className="p-4 text-secondary text-sm">
-                        {item.checkInTime ? item.checkInTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                        {item.checkInTime ? (
+                          <span className="font-bold text-emerald-700 text-xs flex items-center gap-1 whitespace-nowrap" title={formatPrintDateTimeFull(item.checkInTime)}>
+                            🖨️ {formatPrintTime(item.checkInTime)}
+                          </span>
+                        ) : '-'}
                       </td>
                       <td className="p-4 text-right">
                         <div className="inline-flex items-center gap-1.5 justify-end">
