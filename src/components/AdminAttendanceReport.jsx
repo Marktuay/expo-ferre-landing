@@ -11,12 +11,27 @@ export default function AdminAttendanceReport({ onBack }) {
   const [isLoading, setIsLoading] = useState(true);
   const [printItems, setPrintItems] = useState(null);
   
-  // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [isExporting, setIsExporting] = useState(false);
 
   const basePath = getEventBasePath();
+
+  const handleExportAll = async () => {
+    setIsExporting(true);
+    try {
+      const res = await exportConsolidatedBaseToExcel();
+      if (res?.totalRecords) {
+        alert(`✅ Base Consolidada exportada con éxito (${res.totalRecords} registros).\nSe descargaron ambos archivos: Excel (.xlsx) y CSV (.csv).`);
+      }
+    } catch (err) {
+      console.error("Error al exportar:", err);
+      alert("Hubo un error al exportar: " + err.message);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -424,11 +439,15 @@ export default function AdminAttendanceReport({ onBack }) {
               Refrescar
             </button>
             <button 
-              onClick={exportConsolidatedBaseToExcel} 
-              className="px-4 py-2 bg-[#16a34a] text-white rounded-md hover:bg-[#15803d] transition-colors font-label-lg flex items-center gap-2 text-sm cursor-pointer shadow-2xs"
+              onClick={handleExportAll} 
+              disabled={isExporting}
+              className="px-4 py-2 bg-[#16a34a] text-white rounded-md hover:bg-[#15803d] transition-colors font-label-lg flex items-center gap-2 text-sm cursor-pointer shadow-2xs disabled:opacity-50 font-bold"
+              title="Descarga automáticamente tanto el archivo Excel (.xlsx) como el archivo CSV (.csv) con todos los registros y asistencia"
             >
-              <span className="material-symbols-outlined text-[18px]">download</span>
-              Exportar Base Consolidada (Excel)
+              <span className={`material-symbols-outlined text-[18px] ${isExporting ? 'animate-spin' : ''}`}>
+                {isExporting ? 'sync' : 'download'}
+              </span>
+              {isExporting ? 'Generando Excel y CSV...' : 'Exportar Base Consolidada (Excel y CSV)'}
             </button>
             <button onClick={onBack} className="px-4 py-2 bg-surface text-on-surface border border-outline-variant rounded-md hover:bg-surface-variant transition-colors font-label-lg flex items-center gap-2 text-sm cursor-pointer">
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>

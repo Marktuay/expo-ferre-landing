@@ -1,135 +1,326 @@
 import { collection, query, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
+import { getPrintDateObj, formatPrintDateTimeFull } from './formatPrintTime';
 
+/**
+ * Exporta la base consolidada completa de EXPO FERRE 2026 tanto en formato Excel (.xlsx) como en CSV (.csv).
+ * Incluye: Preregistros, Invitados VIP (Directos y Manuales), Patrocinadores, Staff, Conferencistas y Jurados,
+ * con su estatus de asistencia y hora de impresión.
+ */
 export async function exportConsolidatedBaseToExcel() {
   const basePath = getEventBasePath();
   const consolidated = [];
 
-  // 1. Preregistros
+  // Mapeo auxiliar de patrocinadores
+  const sponsorsMap = {};
+  try {
+    const usersSnap = await getDocs(query(collection(db, 'users')));
+    usersSnap.forEach(d => {
+      const data = d.data();
+      sponsorsMap[d.id] = data.empresa || data.nombre || 'Patrocinador';
+    });
+  } catch (err) {
+    console.warn("No se pudo cargar mapa de patrocinadores:", err);
+  }
+
+  // 1. Preregistros Generales
+  const registeredAttendeeIds = new Set();
   try {
     const preregSnap = await getDocs(query(collection(db, `${basePath}/preregistrations`)));
     preregSnap.forEach(doc => {
       const d = doc.data();
-      const nombreCompleto = d.name || `${d.nombre || d.firstName || ''} ${d.apellido || d.lastName || ''}`.trim() || 'Sin Nombre';
+      registeredAttendeeIds.add(doc.id);
+
+      const isVip = Boolean(
+        d.isDirectInvite === true || 
+        d.type === 'direct_invite' ||
+        d.source === 'Invitación Directa' ||
+        Boolean(d.inviteToken)
+      );
+
+      const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+      const attendedDate = getPrintDateObj(d);
+      const nombreCompleto = d.name || `${d.firstName || d.nombre || ''} ${d.lastName || d.apellido || ''}`.trim() || 'Sin Nombre';
+
       consolidated.push({
-        origen: 'Preregistro',
+        origen: isVip ? 'Invitado VIP (Directo)' : 'Preregistro General',
         nombre: nombreCompleto,
-        correo: d.email || d.correo || 'N/A',
         empresa: d.company || d.empresa || 'N/A',
-        empleados: d.tamanoEmpresa || d.companySize || d.empleados || d.cantEmpleados || 'N/A',
-        tipoInvitacion: d.status === 'approved' ? 'Preregistro General (Aprobado)' : (d.status === 'no_show' ? 'Preregistro No Asistió' : 'Preregistro General'),
+        cargo: d.position || d.cargo || d.puesto || 'N/A',
+        estadoAsistencia: isAttended ? 'Asistió (Impreso)' : 'Pendiente',
+        horaImpresion: attendedDate ? formatPrintDateTimeFull(attendedDate) : 'No impreso',
+        correo: d.email || d.correo || 'N/A',
+        celular: d.phone || d.telefono || d.celular || 'N/A',
         ciudad: d.city || d.ciudad || d.departamento || d.pais || 'N/A',
-        celular: d.phone || d.telefono || d.celular || 'N/A'
+        empleados: d.tamanoEmpresa || d.companySize || d.empleados || d.cantEmpleados || 'N/A',
+        patrocinadorDetalle: d.sponsorName || sponsorsMap[d.sponsorId] || d.invitadoPor || (isVip ? 'Invitación Directa' : 'Registro Web')
       });
     });
   } catch (err) {
-    console.error("Error cargando preregistros para exportación:", err);
+    console.error("Error cargando preregistros:", err);
   }
 
-  // 2. Patrocinadores
+  // 2. Invitaciones Directas (Patrocinadores y General)
   try {
-    const usersSnap = await getDocs(query(collection(db, `users`)));
-    usersSnap.forEach(doc => {
+    const directSnap = await getDocs(query(collection(db, `${basePath}/directInvites`)));
+    directSnap.forEach(doc => {
       const d = doc.data();
-      if (d.role === 'sponsor' || d.categoria || d.empresa) {
-        const nombreCompleto = `${d.nombre || ''} ${d.apellido || ''}`.trim() || d.contact || d.empresa || 'Patrocinador';
-        consolidated.push({
-          origen: 'Patrocinador',
-          nombre: nombreCompleto,
-          correo: d.correo || d.email || 'N/A',
-          empresa: d.empresa || d.company || 'N/A',
-          empleados: d.empleados || d.tamanoEmpresa || d.companySize || 'N/A',
-          tipoInvitacion: d.categoria ? `Patrocinador ${d.categoria}` : 'Patrocinador Oficial',
-          ciudad: d.ciudad || d.city || d.departamento || 'Managua',
-          celular: d.telefono || d.phone || d.celular || 'N/A'
-        });
+      // Si ya está incluido vía preregistrations con su ID, omitir duplicado
+      if (d.registeredAttendeeId && registeredAttendeeIds.has(d.registeredAttendeeId)) {
+        return;
       }
+
+      const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted || d.status === 'used');
+      const attendedDate = getPrintDateObj(d);
+      const nombreCompleto = d.registeredName || d.nombre || d.name || 'Invitado VIP';
+      const spName = d.sponsorName || sponsorsMap[d.sponsorId] || (d.sponsorId === 'general' ? 'Organización General' : (d.sponsorId || 'N/A'));
+
+      consolidated.push({
+        origen: 'Invitado VIP (Patrocinador)',
+        nombre: nombreCompleto,
+        empresa: d.registeredCompany || d.empresa || spName || 'N/A',
+        cargo: d.registeredPosition || d.cargo || d.position || 'Invitado Especial',
+        estadoAsistencia: isAttended ? 'Asistió (Impreso)' : 'Pendiente',
+        horaImpresion: attendedDate ? formatPrintDateTimeFull(attendedDate) : 'No impreso',
+        correo: d.email || d.correo || 'N/A',
+        celular: d.telefono || d.phone || d.celular || 'N/A',
+        ciudad: d.ciudad || d.city || 'N/A',
+        empleados: d.empleados || d.cantEmpleados || 'N/A',
+        patrocinadorDetalle: spName
+      });
     });
   } catch (err) {
-    console.error("Error cargando patrocinadores para exportación:", err);
+    console.error("Error cargando invitaciones directas:", err);
   }
 
-  // 3. Invitados VIP
+  // 3. Invitados Manuales VIP (guests)
   try {
     const guestsSnap = await getDocs(query(collection(db, `${basePath}/guests`)));
     guestsSnap.forEach(doc => {
       const d = doc.data();
-      const nombreCompleto = d.name || `${d.nombre || ''} ${d.apellido || ''}`.trim() || 'Invitado VIP';
+      const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+      const attendedDate = getPrintDateObj(d);
+      const nombreCompleto = d.name || `${d.nombre || ''} ${d.apellido || ''}`.trim() || 'Invitado Especial';
+      const spName = d.sponsorName || d.sponsorCompany || sponsorsMap[d.sponsorId] || 'N/A';
+
       consolidated.push({
-        origen: 'Invitado',
+        origen: 'Invitado VIP (Manual)',
         nombre: nombreCompleto,
+        empresa: d.company || d.empresa || spName,
+        cargo: d.cargo || d.position || d.puesto || 'Invitado VIP',
+        estadoAsistencia: isAttended ? 'Asistió (Impreso)' : 'Pendiente',
+        horaImpresion: attendedDate ? formatPrintDateTimeFull(attendedDate) : 'No impreso',
         correo: d.email || d.correo || 'N/A',
-        empresa: d.company || d.empresa || d.sponsorCompany || 'N/A',
-        empleados: d.tamanoEmpresa || d.empleados || d.companySize || 'N/A',
-        tipoInvitacion: d.sponsorCompany ? `Invitado VIP (${d.sponsorCompany})` : 'Invitado VIP',
+        celular: d.phone || d.telefono || d.celular || 'N/A',
         ciudad: d.city || d.ciudad || d.departamento || 'N/A',
-        celular: d.phone || d.telefono || d.celular || 'N/A'
+        empleados: d.tamanoEmpresa || d.empleados || d.companySize || 'N/A',
+        patrocinadorDetalle: spName
       });
     });
   } catch (err) {
-    console.error("Error cargando invitados para exportación:", err);
+    console.error("Error cargando invitados manuales:", err);
   }
 
-  // 4. Staff
+  // 4. Patrocinadores (users role === 'sponsor')
+  try {
+    const usersSnap = await getDocs(query(collection(db, 'users')));
+    usersSnap.forEach(doc => {
+      const d = doc.data();
+      if (d.role === 'sponsor' || d.categoria || d.empresa) {
+        const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+        const attendedDate = getPrintDateObj(d);
+        const nombreCompleto = `${d.nombre || ''} ${d.apellido || ''}`.trim() || d.contact || d.empresa || 'Patrocinador';
+
+        consolidated.push({
+          origen: 'Patrocinador Oficial',
+          nombre: nombreCompleto,
+          empresa: d.empresa || d.company || 'N/A',
+          cargo: d.cargo || 'Representante Oficial',
+          estadoAsistencia: isAttended ? 'Asistió (Impreso)' : 'Pendiente',
+          horaImpresion: attendedDate ? formatPrintDateTimeFull(attendedDate) : 'No impreso',
+          correo: d.correo || d.email || 'N/A',
+          celular: d.telefono || d.phone || d.celular || 'N/A',
+          ciudad: d.ciudad || d.city || d.departamento || 'Managua',
+          empleados: d.empleados || d.tamanoEmpresa || d.companySize || 'N/A',
+          patrocinadorDetalle: d.categoria ? `Categoría: ${d.categoria}` : (d.standList ? `Stands: ${d.standList.join(', ')}` : 'Patrocinador')
+        });
+      }
+    });
+  } catch (err) {
+    console.error("Error cargando patrocinadores:", err);
+  }
+
+  // 5. Staff Técnico y de Stand
   try {
     const staffSnap = await getDocs(query(collection(db, `${basePath}/staff`)));
     staffSnap.forEach(doc => {
       const d = doc.data();
-      const nombreCompleto = d.name || `${d.nombre || ''} ${d.apellido || ''}`.trim() || 'Staff';
+      const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+      const attendedDate = getPrintDateObj(d);
+      const nombreCompleto = `${d.nombre || ''} ${d.apellido || ''}`.trim() || d.name || 'Staff';
+      const spName = d.sponsorName || sponsorsMap[d.sponsorId] || d.empresa || 'Organización';
+
       consolidated.push({
-        origen: 'Staff',
+        origen: 'Staff de Stand / Técnico',
         nombre: nombreCompleto,
+        empresa: d.empresa || d.company || spName,
+        cargo: d.cargo || 'Staff de Stand',
+        estadoAsistencia: isAttended ? 'Asistió (Impreso)' : 'Pendiente',
+        horaImpresion: attendedDate ? formatPrintDateTimeFull(attendedDate) : 'No impreso',
         correo: d.email || d.correo || 'N/A',
-        empresa: d.company || d.empresa || d.sponsorCompany || 'ExpoFerre',
-        empleados: d.tamanoEmpresa || d.empleados || 'N/A',
-        tipoInvitacion: d.role ? `Staff (${d.role})` : (d.sponsorCompany ? `Staff Patrocinador (${d.sponsorCompany})` : 'Staff Acreditado'),
+        celular: d.telefono || d.phone || d.celular || 'N/A',
         ciudad: d.city || d.ciudad || 'N/A',
-        celular: d.phone || d.telefono || d.celular || 'N/A'
+        empleados: d.empleados || 'N/A',
+        patrocinadorDetalle: spName
       });
     });
   } catch (err) {
-    console.error("Error cargando staff para exportación:", err);
+    console.error("Error cargando staff:", err);
   }
 
-  // 5. Conferencistas (Speakers)
+  // 6. Conferencistas (Speakers)
   try {
     const speakersSnap = await getDocs(query(collection(db, `${basePath}/speakers`)));
     speakersSnap.forEach(doc => {
       const d = doc.data();
+      const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+      const attendedDate = getPrintDateObj(d);
       const nombreCompleto = `${d.nombre || ''} ${d.apellido || ''}`.trim() || d.name || 'Conferencista';
+
       consolidated.push({
-        origen: 'Conferencista',
+        origen: 'Conferencista VIP',
         nombre: nombreCompleto,
+        empresa: d.sponsorCompany || d.empresa || d.company || 'N/A',
+        cargo: d.cargo || 'Conferencista VIP',
+        estadoAsistencia: isAttended ? 'Asistió (Impreso)' : 'Pendiente',
+        horaImpresion: attendedDate ? formatPrintDateTimeFull(attendedDate) : 'No impreso',
         correo: d.email || d.correo || 'N/A',
-        empresa: d.empresa || d.company || d.sponsorCompany || 'N/A',
-        empleados: d.tamanoEmpresa || d.empleados || 'N/A',
-        tipoInvitacion: d.titulo ? `Speaker - "${d.titulo}"` : 'Speaker / Conferencista',
+        celular: d.telefono || d.phone || d.celular || 'N/A',
         ciudad: d.ciudad || d.city || 'N/A',
-        celular: d.telefono || d.phone || d.celular || 'N/A'
+        empleados: d.empleados || 'N/A',
+        patrocinadorDetalle: d.titulo || d.tema ? `Tema: "${d.titulo || d.tema}"` : 'Conferencista'
       });
     });
   } catch (err) {
-    console.error("Error cargando conferencistas para exportación:", err);
+    console.error("Error cargando conferencistas:", err);
   }
 
-  // Map to exact required column names requested by user
-  const dataToExport = consolidated.map(item => ({
-    "Origen": item.origen,
+  // 7. Jurados Calificadores VIP
+  const seenJudgeKeys = new Set();
+  try {
+    const invJudgesSnap = await getDocs(query(collection(db, `${basePath}/invitedJudges`)));
+    invJudgesSnap.forEach(doc => {
+      const d = doc.data();
+      const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+      const attendedDate = getPrintDateObj(d);
+      const nombreCompleto = (d.name || d.nombre || 'Jurado Calificador').trim();
+      const key = (d.email || nombreCompleto).toLowerCase().trim();
+      if (key) seenJudgeKeys.add(key);
+
+      consolidated.push({
+        origen: 'Jurado Calificador VIP',
+        nombre: nombreCompleto,
+        empresa: d.company || d.empresa || 'Comité Evaluador EXPO FERRE',
+        cargo: 'Jurado Calificador VIP',
+        estadoAsistencia: isAttended ? 'Asistió (Impreso)' : 'Pendiente',
+        horaImpresion: attendedDate ? formatPrintDateTimeFull(attendedDate) : 'No impreso',
+        correo: d.email || 'N/A',
+        celular: d.phone || d.telefono || 'N/A',
+        ciudad: d.ciudad || d.city || 'N/A',
+        empleados: 'N/A',
+        patrocinadorDetalle: 'Comité de Jurados Oficial'
+      });
+    });
+
+    const evalJudgesSnap = await getDocs(query(collection(db, `${basePath}/juryEvaluations`)));
+    evalJudgesSnap.forEach(doc => {
+      const d = doc.data();
+      const nombreCompleto = (d.judgeName || d.name || 'Jurado Calificador').trim();
+      const key = (d.judgeEmail || nombreCompleto).toLowerCase().trim();
+      if (key && seenJudgeKeys.has(key)) return;
+      if (key) seenJudgeKeys.add(key);
+
+      const isAttended = Boolean(d.checkedIn || d.attended || d.badgePrinted);
+      const attendedDate = getPrintDateObj(d);
+
+      consolidated.push({
+        origen: 'Jurado Calificador VIP',
+        nombre: nombreCompleto,
+        empresa: d.judgeCompany || 'Comité Evaluador EXPO FERRE',
+        cargo: 'Jurado Calificador VIP',
+        estadoAsistencia: isAttended ? 'Asistió (Impreso)' : 'Pendiente',
+        horaImpresion: attendedDate ? formatPrintDateTimeFull(attendedDate) : 'No impreso',
+        correo: d.judgeEmail || 'N/A',
+        celular: d.judgePhone || 'N/A',
+        ciudad: 'N/A',
+        empleados: 'N/A',
+        patrocinadorDetalle: 'Comité de Jurados Oficial'
+      });
+    });
+  } catch (err) {
+    console.error("Error cargando jurados:", err);
+  }
+
+  // Ordenar: primero los que asistieron (por fecha más reciente), luego el resto alfabéticamente
+  consolidated.sort((a, b) => {
+    if (a.estadoAsistencia.includes('Asistió') && !b.estadoAsistencia.includes('Asistió')) return -1;
+    if (!a.estadoAsistencia.includes('Asistió') && b.estadoAsistencia.includes('Asistió')) return 1;
+    return a.nombre.localeCompare(b.nombre);
+  });
+
+  // Mapear al formato tabular estructurado final
+  const dataToExport = consolidated.map((item, idx) => ({
+    "#": idx + 1,
+    "Origen / Categoría": item.origen,
     "Nombre": item.nombre,
-    "Correo": item.correo,
     "Empresa": item.empresa,
-    "Cantidad de empleados": item.empleados,
-    "Tipo de invitacion": item.tipoInvitacion,
+    "Cargo / Puesto": item.cargo,
+    "Estado Asistencia": item.estadoAsistencia,
+    "Hora de Impresión / Asistencia": item.horaImpresion,
+    "Correo Electrónico": item.correo,
+    "Teléfono / Celular": item.celular,
     "Ciudad": item.ciudad,
-    "Celular": item.celular
+    "Cantidad de Empleados": item.empleados,
+    "Patrocinador / Detalle": item.patrocinadorDetalle
   }));
 
   const XLSX = await import('xlsx');
   const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+  // Auto-ajustar anchos de columnas
+  const colWidths = Object.keys(dataToExport[0] || {}).map(key => {
+    const maxLen = Math.max(
+      key.length,
+      ...dataToExport.map(row => String(row[key] || '').length)
+    );
+    return { wch: Math.min(Math.max(maxLen + 2, 10), 45) };
+  });
+  worksheet['!cols'] = colWidths;
+
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Base Consolidada");
   
   const todayStr = new Date().toISOString().split('T')[0];
-  XLSX.writeFile(workbook, `Base_Consolidada_ExpoFerre_${todayStr}.xlsx`);
+  const baseFileName = `Base_Consolidada_ExpoFerre_${todayStr}`;
+
+  // 1. Descarga del archivo EXCEL (.xlsx)
+  XLSX.writeFile(workbook, `${baseFileName}.xlsx`);
+
+  // 2. Descarga del archivo CSV (.csv) con BOM UTF-8 (\uFEFF) para visualización perfecta de tildes y ñ
+  const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.href = url;
+  downloadAnchor.setAttribute('download', `${baseFileName}.csv`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  document.body.removeChild(downloadAnchor);
+  URL.revokeObjectURL(url);
+
+  return {
+    totalRecords: dataToExport.length,
+    fileName: baseFileName
+  };
 }
