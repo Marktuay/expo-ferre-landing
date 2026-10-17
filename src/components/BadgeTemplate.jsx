@@ -8,7 +8,7 @@ import { QRCodeSVG } from 'qrcode.react';
 export default function BadgeTemplate({ data, roleLabel = 'STAFF', showQr = false, orientation = 'horizontal' }) {
   const fullName = data.name || `${data.nombre || ''} ${data.apellido || ''}`.trim() || 'Participante';
   const company = data.company || data.empresa || data.sponsorName || '';
-  const position = data.position || data.cargo || '';
+  const position = data.position || data.cargo || data.puesto || '';
   const rawId = data.id || data.registeredAttendeeId || 'N/A';
 
   // Identificar si es Invitado VIP (con derecho a comida) vs Asistente general de preregistro
@@ -66,31 +66,26 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF', showQr = fals
               </div>
             </div>
 
-            {/* 2. Área Central (Nombre, Empresa y Cargo) Centrados */}
+            {/* 2. Área Central (Nombre, Cargo debajo del Nombre, y Empresa) Centrados */}
             <div className="w-full flex-1 flex flex-col justify-center items-center text-center my-auto gap-1 px-1">
               {/* Nombre del Asistente */}
               <div className="w-full">
                 <h2 className={`${nameFontSizeClass} font-black uppercase text-black leading-tight line-clamp-2 break-words`}>
                   {fullName}
                 </h2>
+                {/* Cargo ubicado justo debajo del nombre */}
+                {position && position.toUpperCase() !== displayRole && (
+                  <p className="text-[11px] font-bold text-black/85 uppercase tracking-tight line-clamp-1 mt-0.5">
+                    {position}
+                  </p>
+                )}
               </div>
 
               {/* Nombre de la Empresa / Patrocinador */}
               {company && company.toLowerCase() !== 'particular' && company.toLowerCase() !== 'n/a' && (
-                <div className="w-full max-w-[95%] bg-slate-100 border-y border-black/70 py-0.5 px-2 text-center rounded-xs">
+                <div className="w-full max-w-[95%] bg-slate-100 border-y border-black/70 py-0.5 px-2 text-center rounded-xs mt-0.5">
                   <p className={`${compFontSizeClass} font-black uppercase tracking-tight text-black leading-tight line-clamp-2 break-words`}>
                     {company}
-                  </p>
-                </div>
-              )}
-
-              {/* Cargo o Stand (si aplica) */}
-              {position && 
-               position.toUpperCase() !== displayRole && 
-               !position.toLowerCase().includes('invitado') && (
-                <div className="w-full text-center px-1">
-                  <p className="text-[9.5px] font-bold text-black/85 uppercase tracking-tight line-clamp-1">
-                    {position}
                   </p>
                 </div>
               )}
@@ -129,14 +124,15 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF', showQr = fals
                   <h2 className="text-[17px] font-black uppercase text-black leading-tight line-clamp-2 break-words">
                     {fullName}
                   </h2>
+                  {/* Cargo ubicado justo debajo del nombre */}
+                  {position && position.toUpperCase() !== displayRole && (
+                    <p className="text-[10px] font-bold text-black/80 uppercase line-clamp-1 mt-0.5">
+                      {position}
+                    </p>
+                  )}
                   {company && company.toLowerCase() !== 'particular' && company.toLowerCase() !== 'n/a' && (
                     <p className="text-[12.5px] font-black uppercase text-black/90 mt-0.5 line-clamp-1 break-words">
                       {company}
-                    </p>
-                  )}
-                  {position && position.toUpperCase() !== displayRole && (
-                    <p className="text-[9px] font-bold text-black/70 uppercase line-clamp-1">
-                      {position}
                     </p>
                   )}
                 </div>
@@ -191,32 +187,27 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF', showQr = fals
         {displayRole}
       </div>
 
-      {/* 3. Área Central (Nombre, Empresa y Cargo) */}
-      <div className={`w-full flex-1 flex flex-col justify-center items-center px-1 text-center ${showQr ? 'my-1 gap-1' : 'my-auto gap-3'}`}>
+      {/* 3. Área Central (Nombre, Cargo y Empresa) */}
+      <div className={`w-full flex-1 flex flex-col justify-center items-center px-1 text-center ${showQr ? 'my-1 gap-1' : 'my-auto gap-2'}`}>
         
         {/* Nombre del Asistente */}
         <div className="w-full">
           <h2 className={`${showQr ? 'text-[17px]' : 'text-[22px]'} font-black uppercase text-black leading-tight line-clamp-3 break-words`}>
             {fullName}
           </h2>
+          {/* Cargo ubicado justo debajo del nombre */}
+          {position && position.toUpperCase() !== displayRole && (
+            <p className={`${showQr ? 'text-[10px]' : 'text-[12px]'} font-bold text-black/90 uppercase tracking-tight line-clamp-2 mt-1`}>
+              {position}
+            </p>
+          )}
         </div>
 
         {/* Nombre de la Empresa / Patrocinador */}
         {company && company.toLowerCase() !== 'particular' && company.toLowerCase() !== 'n/a' && (
-          <div className={`w-full bg-slate-100 border-y-2 border-black/80 ${showQr ? 'py-1.5 text-[15px]' : 'py-2.5 text-[17px]'} px-1 text-center rounded-xs`}>
+          <div className={`w-full bg-slate-100 border-y-2 border-black/80 ${showQr ? 'py-1.5 text-[15px]' : 'py-2.5 text-[17px]'} px-1 text-center rounded-xs mt-1`}>
             <p className="font-black uppercase tracking-tight text-black leading-tight line-clamp-3 break-words">
               {company}
-            </p>
-          </div>
-        )}
-
-        {/* Cargo o Stand (si aplica) */}
-        {position && 
-         position.toUpperCase() !== displayRole && 
-         !position.toLowerCase().includes('invitado') && (
-          <div className="w-full text-center px-1">
-            <p className={`${showQr ? 'text-[10px]' : 'text-[12px]'} font-bold text-black/90 uppercase tracking-tight line-clamp-2`}>
-              {position}
             </p>
           </div>
         )}
