@@ -206,7 +206,7 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
       {/* Reglas CSS para la impresora térmica Brother QL-810Wc */}
       <style dangerouslySetInnerHTML={{__html: `
         @page {
-          size: ${isHorizontal ? '100mm 62mm landscape' : '62mm 100mm portrait'} !important;
+          size: auto !important;
           margin: 0mm !important;
         }
 
