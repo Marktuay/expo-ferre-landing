@@ -1811,3 +1811,18 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     6. **Pie de Página:** Centrado con fecha, sede (`17 OCTUBRE 2026 • HOTEL CROWNE PLAZA`) y código de respaldo discreto (`ID: ...`).
   - **Soporte de QR Opcional:** En modo horizontal con QR, se divide en 2 columnas (información izquierda + QR derecho de 80px). En modo sin QR (predeterminado), ocupa el 100% del ancho centrado.
   - **Selector de Orientación en Toolbar:** Botones interactivos para alternar al instante entre `🔘 Horizontal (100×62 mm)` y `🔘 Vertical (62×100 mm)`.
+
+### 📱 Escaneo de QR desde Teléfono con Impresión Automática de Gafetes
+- **Fecha:** 16 de Octubre de 2026.
+- **Flujo Operativo de Acreditación Rápida:**
+  1. El asistente llega y presenta en su pantalla móvil su pase digital (recibido por WhatsApp o Email) con su Código QR.
+  2. El staff de bienvenida abre el módulo de **Check-In (`AdminCheckIn.jsx`)** desde el navegador de su teléfono (o tableta/computadora).
+  3. La cámara del teléfono detecta el código QR al instante:
+     - Valida el registro en Firestore (`preregistrations`, `directInvites`, `guests`, `staff`, `speakers`, `users`).
+     - Realiza el Check-In automático con timestamp del servidor.
+     - Confirma estado de alimentación (Invitado VIP con almuerzo vs Asistente General).
+     - **Detona la impresión automática** del gafete térmico en la impresora Brother QL-810W vía AirPrint o Wi-Fi sin necesidad de clics adicionales.
+  4. **Retorno Automático al Escáner:** Al cerrarse el cuadro de diálogo de impresión nativo del teléfono (`window.addEventListener('afterprint')`), el modal del gafete se cierra automáticamente, dejando la cámara lista de inmediato para escanear a la siguiente persona en la fila sin interrupciones.
+- **Commits en Repositorio Oficial (`main`):**
+  - `c4a316a`: *feat: auto print badge on QR scan and auto-close print dialog to resume camera*
+
