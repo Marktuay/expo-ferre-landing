@@ -334,12 +334,28 @@ Contenido del paquete:
     }
   };
 
+  const formatSpeakerForPrint = (s) => {
+    const fullName = `${s.nombre || ''} ${s.apellido || ''}`.trim() || s.name || 'Conferencista VIP';
+    const companyName = s.sponsorCompany || s.empresa || 'ExpoFerre 2026';
+    return {
+      ...s,
+      id: s.id,
+      nombre: fullName,
+      apellido: '',
+      empresa: companyName,
+      cargo: s.cargo || 'Conferencista',
+      roleLabel: 'CONFERENCISTA VIP',
+      isVip: true,
+      collection: 'speakers'
+    };
+  };
+
   if (printItems) {
     return (
       <PrintableBadgeList 
         items={printItems} 
-        roleLabel="Conferencista"
-        colorClass="border-purple-600 text-purple-600"
+        roleLabel="CONFERENCISTA VIP"
+        colorClass="border-amber-500 text-amber-600"
         onClose={() => setPrintItems(null)} 
       />
     );
@@ -372,12 +388,12 @@ Contenido del paquete:
               Invitar Conferencista
             </button>
             <button 
-              onClick={() => setPrintItems(filteredSpeakers)}
+              onClick={() => setPrintItems(filteredSpeakers.map(formatSpeakerForPrint))}
               disabled={filteredSpeakers.length === 0}
-              className="px-4 py-2 bg-secondary text-white border border-secondary rounded-md hover:brightness-110 transition-colors font-label-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              className="px-4 py-2 bg-slate-900 text-amber-400 border border-slate-900 rounded-md hover:bg-black transition-colors font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm cursor-pointer shadow-xs"
             >
               <span className="material-symbols-outlined text-base">print</span>
-              Imprimir Gafetes
+              Imprimir Gafetes VIP ({filteredSpeakers.length})
             </button>
             <button 
               onClick={handleDownloadAllZip}
@@ -583,9 +599,7 @@ Contenido del paquete:
                             <button 
                               onClick={() => {
                                 setSelectedPersonForQR({
-                                  id: speaker.id,
-                                  nombre: speakerName,
-                                  empresa: displaySponsor,
+                                  ...formatSpeakerForPrint(speaker),
                                   email: speaker.email || speaker.correo,
                                   telefono: speaker.telefono,
                                   status: 'approved'
@@ -593,7 +607,7 @@ Contenido del paquete:
                                 setQrModalOpen(true);
                               }}
                               className="p-1.5 text-indigo-600 hover:text-indigo-700 bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors inline-flex items-center justify-center cursor-pointer"
-                              title="Ver Código QR de Acceso"
+                              title="Ver Código QR VIP"
                             >
                               <span className="material-symbols-outlined text-lg">qr_code_2</span>
                             </button>
@@ -612,9 +626,9 @@ Contenido del paquete:
 
                             {/* Imprimir Gafete */}
                             <button 
-                              onClick={() => setPrintItems([speaker])}
+                              onClick={() => setPrintItems([formatSpeakerForPrint(speaker)])}
                               className="p-1.5 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors inline-flex items-center justify-center cursor-pointer"
-                              title="Imprimir Gafete"
+                              title="Imprimir Gafete VIP"
                             >
                               <span className="material-symbols-outlined text-lg">print</span>
                             </button>
@@ -859,8 +873,8 @@ Contenido del paquete:
             setSelectedPersonForQR(null);
           }}
           person={selectedPersonForQR}
-          roleLabel="Conferencista Oficial"
-          onPrintBadge={(s) => setPrintItems([s])}
+          roleLabel="CONFERENCISTA VIP"
+          onPrintBadge={(s) => setPrintItems([formatSpeakerForPrint(s)])}
         />
       )}
 

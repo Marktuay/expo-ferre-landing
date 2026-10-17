@@ -9,17 +9,10 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
   const isPendingInvite = person.isInviteLink || person.status === 'pending';
   
   const effectiveRole = (person.roleLabel || roleLabel || 'ASISTENTE').toUpperCase();
-  const isNonVipRole =
-    person.collection === 'staff' ||
-    person.collection === 'speakers' ||
-    person.collection === 'users' ||
-    effectiveRole.includes('STAFF') ||
-    effectiveRole.includes('CONFERENCISTA') ||
-    effectiveRole.includes('PATROCINADOR') ||
-    effectiveRole.includes('JURADO');
-
-  // ÚNICAMENTE las listas de Invitaciones Directas llevan VIP
-  const isVip = !isNonVipRole && Boolean(
+  const isStaff = person.collection === 'staff' || effectiveRole.includes('STAFF');
+  const isSpeaker = person.collection === 'speakers' || effectiveRole.includes('CONFERENCISTA') || effectiveRole.includes('SPEAKER');
+  const isJury = person.collection === 'invitedJudges' || person.collection === 'juryEvaluations' || person.collection === 'jury' || effectiveRole.includes('JURADO');
+  const isDirectInvite = Boolean(
     person.collection === 'directInvites' ||
     person.isDirectInvite === true ||
     person.type === 'direct_invite' ||
@@ -27,6 +20,14 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
     Boolean(person.inviteToken) ||
     Boolean(person.inviteUrl)
   );
+
+  // ÚNICAMENTE Invitaciones Directas, Conferencistas y Jurados llevan VIP (Staff NO, Asistente NO)
+  const isVip = !isStaff && (isDirectInvite || isSpeaker || isJury);
+  const vipBadgeTitle = isSpeaker
+    ? '★ CONFERENCISTA VIP ★'
+    : isJury
+      ? '★ JURADO VIP ★'
+      : '★ INVITADO VIP ★';
 
   const rawId = person.registeredAttendeeId || person.id || '';
   const cleanId = String(rawId).replace(/^VIP[-_:\s]+/i, '').trim();
@@ -150,7 +151,7 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
                     ? 'bg-black text-amber-300 border border-amber-400 font-black' 
                     : 'bg-slate-200 text-slate-800'
               }`}>
-                {isPendingInvite ? 'Invitación Pendiente' : isVip ? '★ INVITADO VIP ★' : (roleLabel || 'ASISTENTE')}
+                {isPendingInvite ? 'Invitación Pendiente' : isVip ? vipBadgeTitle : (roleLabel || 'ASISTENTE')}
               </span>
               {person.status && (
                 <span className={`text-[11px] font-bold uppercase ${
@@ -193,7 +194,7 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
               ) : (
                 <div className="text-[11px] text-slate-600 bg-slate-100 border border-slate-200 p-2 rounded-lg font-medium flex items-center gap-1.5 mt-2">
                   <span className="material-symbols-outlined text-[16px] text-slate-500 shrink-0">info</span>
-                  <span>Asistente General • Sin pase de alimentos</span>
+                  <span>{isStaff ? 'Personal de Staff • Acreditación de Stand' : 'Asistente General • Sin pase de alimentos'}</span>
                 </div>
               )
             )}
@@ -273,7 +274,7 @@ export default function AdminQRViewModal({ isOpen, onClose, person, roleLabel = 
                   onPrintBadge({
                     ...person,
                     isVip,
-                    roleLabel: isVip ? 'INVITADO VIP' : (person.roleLabel || roleLabel)
+                    roleLabel: isSpeaker ? 'CONFERENCISTA VIP' : isJury ? 'JURADO VIP' : isVip ? 'INVITADO VIP' : (person.roleLabel || roleLabel)
                   });
                 }}
                 className="col-span-1 sm:col-span-2 px-4 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-700 font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"

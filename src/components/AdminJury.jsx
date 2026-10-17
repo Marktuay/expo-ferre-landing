@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Award, Plus, FileSpreadsheet, ArrowLeft, Search, Building2, UserCheck, Sparkles, Copy, Check, MessageSquare, Phone, Mail, CheckCircle2, Clock, ExternalLink, X, Send, Trash2, Trophy, MapPin } from 'lucide-react';
+import { Award, Plus, FileSpreadsheet, ArrowLeft, Search, Building2, UserCheck, Sparkles, Copy, Check, MessageSquare, Phone, Mail, CheckCircle2, Clock, ExternalLink, X, Send, Trash2, Trophy, MapPin, Printer, QrCode } from 'lucide-react';
 import { db, auth } from '../firebase';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 import InviteJudgeModal from './InviteJudgeModal';
+import PrintableBadgeList from './PrintableBadgeList';
+import AdminQRViewModal from './AdminQRViewModal';
 import { notifyAdminJuryCompleted, ADMIN_NOTIFICATION_EMAIL } from '../services/juryEmailService';
 
 export default function AdminJury({ onBack, adminUser }) {
@@ -26,6 +28,9 @@ export default function AdminJury({ onBack, adminUser }) {
   const [copiedSpeechId, setCopiedSpeechId] = useState(null);
   const [sendingEmailId, setSendingEmailId] = useState(null);
   const [emailSuccessId, setEmailSuccessId] = useState(null);
+  const [printItems, setPrintItems] = useState(null);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [selectedPersonForQR, setSelectedPersonForQR] = useState(null);
 
   // Estados para Filtros y WhatsApp en Jurados Invitados
   const [invitedSearch, setInvitedSearch] = useState('');
@@ -542,6 +547,63 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
     }
   };
 
+  // Formatear un Jurado (de invitedJudges o juryEvaluations) para impresión de Gafete VIP
+  const formatJudgeForPrint = (j, collectionName = 'invitedJudges') => {
+    const rawName = j.name || j.judgeName || j.juradoNombre || j.nombre || 'Jurado Calificador';
+    const cleanName = String(rawName).split('<')[0].split('http')[0].trim();
+    // Si tiene empresa en su evaluación asociada, usarla
+    const matchedEval = evaluations.find(ev => {
+      const evName = cleanNorm(ev.judgeName || ev.juradoNombre);
+      const jName = cleanNorm(cleanName);
+      return (j.email && ev.judgeEmail && cleanNorm(j.email) === cleanNorm(ev.judgeEmail)) || (jName && evName && (evName === jName || evName.includes(jName) || jName.includes(evName)));
+    });
+    const companyName = j.company || j.judgeCompany || j.empresa || matchedEval?.judgeCompany || 'Comité Jurado Calificador';
+    return {
+      ...j,
+      id: j.id,
+      nombre: cleanName,
+      apellido: '',
+      empresa: companyName,
+      cargo: j.cargo || 'Jurado Calificador',
+      email: j.email || j.judgeEmail || matchedEval?.judgeEmail || '',
+      telefono: j.phone || j.judgePhone || j.telefono || matchedEval?.judgePhone || '',
+      roleLabel: 'JURADO VIP',
+      isVip: true,
+      collection: collectionName
+    };
+  };
+
+  // Consolidar todos los jurados (invitados + evaluadores que no estén duplicados)
+  const allVipJudges = (() => {
+    const list = invitedJudges.map(j => formatJudgeForPrint(j, 'invitedJudges'));
+    evaluations.forEach(ev => {
+      const evName = cleanNorm(ev.judgeName || ev.juradoNombre);
+      const evEmail = cleanNorm(ev.judgeEmail || ev.juradoEmail);
+      const alreadyExists = list.some(item => {
+        const iName = cleanNorm(item.nombre);
+        const iEmail = cleanNorm(item.email);
+        if (evEmail && iEmail && evEmail === iEmail) return true;
+        if (evName && iName && (evName === iName || evName.includes(iName) || iName.includes(evName))) return true;
+        return false;
+      });
+      if (!alreadyExists && evName) {
+        list.push(formatJudgeForPrint(ev, 'juryEvaluations'));
+      }
+    });
+    return list;
+  })();
+
+  if (printItems) {
+    return (
+      <PrintableBadgeList
+        items={printItems}
+        roleLabel="JURADO VIP"
+        colorClass="border-amber-500 text-amber-600"
+        onClose={() => setPrintItems(null)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-8 pt-40 md:pt-48 font-sans">
       <div className="max-w-7xl mx-auto pb-16">
@@ -573,17 +635,25 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
         </div>
 
         {/* Botones de Acción Superior */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => setIsInviteModalOpen(true)}
-            className="bg-[#f39200] hover:bg-[#d98200] text-black font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-md hover:scale-105 transition-all"
+            className="bg-[#f39200] hover:bg-[#d98200] text-black font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-md hover:scale-105 transition-all cursor-pointer"
           >
             <Plus size={18} /> Invitar Jurado
           </button>
           <button
+            onClick={() => setPrintItems(allVipJudges)}
+            disabled={allVipJudges.length === 0}
+            className="bg-slate-900 hover:bg-black text-amber-400 font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-40"
+            title="Imprimir masivamente los gafetes VIP de todos los jurados calificadores"
+          >
+            <Printer size={18} /> Imprimir Gafetes VIP ({allVipJudges.length})
+          </button>
+          <button
             onClick={handleExportExcel}
             disabled={isExporting}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer"
           >
             <FileSpreadsheet size={18} /> {isExporting ? 'Exportando...' : 'Exportar Excel'}
           </button>
@@ -775,6 +845,34 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                       </span>
                     )}
 
+                    {/* Botón Imprimir Gafete VIP */}
+                    <button
+                      type="button"
+                      onClick={() => setPrintItems([formatJudgeForPrint(ev, 'juryEvaluations')])}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 bg-slate-900 hover:bg-black text-amber-400 shadow-2xs"
+                      title="Imprimir Gafete VIP de este jurado"
+                    >
+                      <Printer size={13} />
+                      <span>Gafete VIP</span>
+                    </button>
+
+                    {/* Botón Ver QR VIP */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedPersonForQR({
+                          ...formatJudgeForPrint(ev, 'juryEvaluations'),
+                          status: 'approved'
+                        });
+                        setQrModalOpen(true);
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 shadow-2xs"
+                      title="Ver Código QR VIP"
+                    >
+                      <QrCode size={13} />
+                      <span>QR VIP</span>
+                    </button>
+
                     {/* Botón para Notificar / Reenviar correo a Karen Torres */}
                     <button
                       type="button"
@@ -885,12 +983,22 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                   Monitorea el estado de entrega del enlace (Correo o WhatsApp) y la recepción de votos de cada jurado.
                 </p>
               </div>
-              <button
-                onClick={() => setIsInviteModalOpen(true)}
-                className="bg-[#f39200] hover:bg-[#d98200] text-black font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all hover:scale-105"
-              >
-                <Plus size={16} /> Nueva Invitación
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setPrintItems(filteredJudges.map(j => formatJudgeForPrint(j, 'invitedJudges')))}
+                  disabled={filteredJudges.length === 0}
+                  className="bg-slate-900 hover:bg-black text-amber-400 font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                  title="Imprimir gafetes VIP de la lista actual de jurados"
+                >
+                  <Printer size={15} /> Imprimir Lista ({filteredJudges.length})
+                </button>
+                <button
+                  onClick={() => setIsInviteModalOpen(true)}
+                  className="bg-[#f39200] hover:bg-[#d98200] text-black font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all hover:scale-105"
+                >
+                  <Plus size={16} /> Nueva Invitación
+                </button>
+              </div>
             </div>
 
             {/* Píldoras de Métricas de Entrega */}
@@ -1079,6 +1187,33 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
                           {/* Botonera de Acciones */}
                           <td className="py-3.5 px-4 text-right">
                             <div className="flex items-center justify-end gap-1.5">
+                              {/* Botón Imprimir Gafete VIP */}
+                              <button
+                                type="button"
+                                onClick={() => setPrintItems([formatJudgeForPrint(j, 'invitedJudges')])}
+                                title={`Imprimir Gafete VIP de ${j.name}`}
+                                className="px-2.5 py-1.5 bg-slate-900 hover:bg-black text-amber-400 rounded-lg text-xs font-bold inline-flex items-center gap-1 shadow-2xs transition-all cursor-pointer"
+                              >
+                                <Printer size={13} />
+                                <span>Gafete</span>
+                              </button>
+
+                              {/* Botón Ver QR VIP */}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedPersonForQR({
+                                    ...formatJudgeForPrint(j, 'invitedJudges'),
+                                    status: 'approved'
+                                  });
+                                  setQrModalOpen(true);
+                                }}
+                                title="Ver Código QR VIP"
+                                className="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg transition-colors cursor-pointer"
+                              >
+                                <QrCode size={14} />
+                              </button>
+
                               {/* Botón WhatsApp */}
                               <button
                                 type="button"
@@ -1489,6 +1624,20 @@ Puedes ingresar a tu portal oficial y confidencial de evaluación y votación aq
             </form>
           </div>
         </div>
+      )}
+
+      {/* Modal QR VIP de Jurado */}
+      {qrModalOpen && selectedPersonForQR && (
+        <AdminQRViewModal
+          isOpen={qrModalOpen}
+          onClose={() => {
+            setQrModalOpen(false);
+            setSelectedPersonForQR(null);
+          }}
+          person={selectedPersonForQR}
+          roleLabel="JURADO VIP"
+          onPrintBadge={(j) => setPrintItems([formatJudgeForPrint(j, j.collection || 'invitedJudges')])}
+        />
       )}
 
       </div>

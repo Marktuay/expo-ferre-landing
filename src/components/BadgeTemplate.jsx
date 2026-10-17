@@ -12,17 +12,10 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF', showQr = fals
   const rawId = data.id || data.registeredAttendeeId || 'N/A';
 
   const effectiveRole = (data.roleLabel || roleLabel || 'ASISTENTE').toUpperCase();
-  const isNonVipRole =
-    data.collection === 'staff' ||
-    data.collection === 'speakers' ||
-    data.collection === 'users' ||
-    effectiveRole.includes('STAFF') ||
-    effectiveRole.includes('CONFERENCISTA') ||
-    effectiveRole.includes('PATROCINADOR') ||
-    effectiveRole.includes('JURADO');
-
-  // ÚNICAMENTE las listas de Invitaciones Directas llevan VIP
-  const isVip = !isNonVipRole && Boolean(
+  const isStaff = data.collection === 'staff' || effectiveRole.includes('STAFF');
+  const isSpeaker = data.collection === 'speakers' || effectiveRole.includes('CONFERENCISTA') || effectiveRole.includes('SPEAKER');
+  const isJury = data.collection === 'invitedJudges' || data.collection === 'juryEvaluations' || data.collection === 'jury' || effectiveRole.includes('JURADO');
+  const isDirectInvite = Boolean(
     data.collection === 'directInvites' ||
     data.isDirectInvite === true ||
     data.type === 'direct_invite' ||
@@ -30,13 +23,20 @@ export default function BadgeTemplate({ data, roleLabel = 'STAFF', showQr = fals
     Boolean(data.inviteToken)
   );
 
-  const displayRole = isVip
-    ? '★ INVITADO VIP ★'
-    : effectiveRole.includes('STAFF')
-      ? 'STAFF'
-      : effectiveRole.includes('VIP')
-        ? 'ASISTENTE'
-        : effectiveRole;
+  // ÚNICAMENTE Invitaciones Directas, Conferencistas y Jurados llevan VIP (Staff NO, Asistente NO)
+  const isVip = !isStaff && (isDirectInvite || isSpeaker || isJury);
+
+  const displayRole = isStaff
+    ? 'STAFF'
+    : isSpeaker
+      ? '★ CONFERENCISTA VIP ★'
+      : isJury
+        ? '★ JURADO VIP ★'
+        : isDirectInvite
+          ? '★ INVITADO VIP ★'
+          : effectiveRole.includes('VIP')
+            ? 'ASISTENTE'
+            : effectiveRole;
   const cleanId = String(rawId).replace(/^VIP[-_:\s]+/i, '').trim();
   const qrValue = isVip ? `VIP-${cleanId}` : cleanId;
   const displayId = isVip ? `VIP - ${cleanId}` : cleanId;

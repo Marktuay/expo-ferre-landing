@@ -149,13 +149,16 @@ export default function AdminCheckIn({ onBack }) {
     { key: 'preregistrations', name: 'Preregistro (General)', path: `${basePath}/preregistrations` },
     { key: 'users', name: 'Patrocinador', path: `users` },
     { key: 'staff', name: 'Staff Técnico', path: `${basePath}/staff` },
-    { key: 'speakers', name: 'Conferencista', path: `${basePath}/speakers` },
+    { key: 'speakers', name: 'Conferencista VIP', path: `${basePath}/speakers` },
+    { key: 'invitedJudges', name: 'Jurado Calificador VIP', path: `${basePath}/invitedJudges` },
+    { key: 'juryEvaluations', name: 'Jurado Calificador VIP', path: `${basePath}/juryEvaluations` },
     { key: 'guests', name: 'Invitado Especial', path: `${basePath}/guests` }
   ];
 
   const determineBadgeRole = (colKey, data) => {
     if (colKey === 'staff') return 'STAFF';
-    if (colKey === 'speakers') return 'CONFERENCISTA';
+    if (colKey === 'speakers') return 'CONFERENCISTA VIP';
+    if (colKey === 'invitedJudges' || colKey === 'juryEvaluations') return 'JURADO VIP';
     if (colKey === 'users' || data.role === 'sponsor') return 'PATROCINADOR';
     if (
       colKey === 'directInvites' ||
@@ -282,7 +285,10 @@ export default function AdminCheckIn({ onBack }) {
       }
 
       const roleLabel = determineBadgeRole(foundColKey, foundData);
-      const isVip = foundColKey !== 'staff' && foundColKey !== 'speakers' && foundColKey !== 'users' && Boolean(
+      const isVip = foundColKey !== 'staff' && foundColKey !== 'users' && Boolean(
+        foundColKey === 'speakers' ||
+        foundColKey === 'invitedJudges' ||
+        foundColKey === 'juryEvaluations' ||
         foundColKey === 'directInvites' ||
         foundData.isDirectInvite === true ||
         foundData.type === 'direct_invite' ||
@@ -290,8 +296,8 @@ export default function AdminCheckIn({ onBack }) {
         Boolean(foundData.inviteToken)
       );
 
-      const attendeeName = foundData.name || `${foundData.nombre || ''} ${foundData.apellido || ''}`.trim() || 'Participante';
-      const attendeeCompany = foundData.company || foundData.empresa || foundData.sponsorName || '';
+      const attendeeName = foundData.name || foundData.judgeName || `${foundData.nombre || ''} ${foundData.apellido || ''}`.trim() || 'Participante';
+      const attendeeCompany = foundData.company || foundData.judgeCompany || foundData.sponsorCompany || foundData.empresa || foundData.sponsorName || '';
       const attendeePosition = foundData.position || foundData.cargo || foundData.puesto || '';
 
       const badgeItem = {
@@ -300,7 +306,7 @@ export default function AdminCheckIn({ onBack }) {
         company: attendeeCompany,
         position: attendeePosition,
         cargo: attendeePosition,
-        roleLabel: isVip ? 'INVITADO VIP' : roleLabel,
+        roleLabel: roleLabel,
         isVip: isVip
       };
 
@@ -311,7 +317,7 @@ export default function AdminCheckIn({ onBack }) {
           message: `El participante ya había ingresado previamente.`,
           name: attendeeName,
           company: attendeeCompany,
-          roleLabel: isVip ? 'INVITADO VIP' : roleLabel,
+          roleLabel: roleLabel,
           isVip: isVip,
           hasMealPass: isVip,
           collection: foundCollectionName,
@@ -343,7 +349,7 @@ export default function AdminCheckIn({ onBack }) {
           message: `Check-in exitoso. Gafete enviado a impresión.`,
           name: attendeeName,
           company: attendeeCompany,
-          roleLabel: isVip ? 'INVITADO VIP' : roleLabel,
+          roleLabel: roleLabel,
           isVip: isVip,
           hasMealPass: isVip,
           collection: foundCollectionName,

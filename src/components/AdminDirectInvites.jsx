@@ -70,6 +70,9 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [standsData, setStandsData] = useState([]);
   const [sponsorsMap, setSponsorsMap] = useState({});
   const [sponsorSettings, setSponsorSettings] = useState({});
+  const [speakersList, setSpeakersList] = useState([]);
+  const [invitedJudgesList, setInvitedJudgesList] = useState([]);
+  const [juryEvaluationsList, setJuryEvaluationsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [printItems, setPrintItems] = useState(null);
 
@@ -369,6 +372,31 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     });
 
     return () => unsubSettings();
+  }, []);
+
+  // 4. Escuchar Conferencistas Oficiales VIP (speakers) y Jurados Calificadores VIP (invitedJudges + juryEvaluations)
+  useEffect(() => {
+    const basePath = getEventBasePath();
+    const unsubSpeakers = onSnapshot(collection(db, `${basePath}/speakers`), (snap) => {
+      const list = [];
+      snap.forEach((d) => list.push({ id: d.id, ...d.data() }));
+      setSpeakersList(list);
+    });
+    const unsubJudges = onSnapshot(collection(db, `${basePath}/invitedJudges`), (snap) => {
+      const list = [];
+      snap.forEach((d) => list.push({ id: d.id, ...d.data() }));
+      setInvitedJudgesList(list);
+    });
+    const unsubEvals = onSnapshot(collection(db, `${basePath}/juryEvaluations`), (snap) => {
+      const list = [];
+      snap.forEach((d) => list.push({ id: d.id, ...d.data() }));
+      setJuryEvaluationsList(list);
+    });
+    return () => {
+      unsubSpeakers();
+      unsubJudges();
+      unsubEvals();
+    };
   }, []);
 
   const getSponsorKey = (name) => {
@@ -4031,6 +4059,173 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                         </td>
                       </tr>
                     )}
+
+                    {/* FILA ESPECIAL VIP: CONFERENCISTAS OFICIALES VIP */}
+                    {(!sponsorSearchTerm.trim() || 'conferencistas oficiales vip speakers ponentes'.includes(sponsorSearchTerm.toLowerCase().trim())) && (
+                      <tr className="bg-purple-50/40 hover:bg-purple-50/70 transition-colors">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-purple-600/15 text-purple-700 flex items-center justify-center font-bold shrink-0">
+                              🎤
+                            </div>
+                            <div>
+                              <div className="font-bold text-on-surface text-base flex items-center gap-1.5">
+                                <span>Conferencistas Oficiales VIP</span>
+                                <span className="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-amber-400 font-black">★ VIP ★</span>
+                              </div>
+                              <p className="text-xs text-secondary">Ponentes y Speakers Oficiales EXPO FERRE 2026</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className="text-xs text-purple-700 font-bold bg-purple-100 px-2 py-0.5 rounded">Auditorio</span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                            ✓ {speakersList.length} Conferencistas Oficiales
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <div className="text-sm font-black text-on-surface">
+                            {speakersList.length} <span className="text-[10px] font-normal text-slate-500">VIP</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-center">
+                          <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                            ★ CONFERENCISTA VIP ★
+                          </span>
+                        </td>
+                        <td className="p-3 pr-6 text-center">
+                          <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap bg-surface-variant/30 p-1.5 rounded-xl border border-outline-variant/60 shadow-2xs">
+                            <button
+                              onClick={() => {
+                                if (speakersList.length === 0) return;
+                                setPrintItems(speakersList.map(s => ({
+                                  id: s.id,
+                                  nombre: `${s.nombre || ''} ${s.apellido || ''}`.trim() || s.name || 'Conferencista VIP',
+                                  apellido: '',
+                                  empresa: s.sponsorCompany || s.empresa || 'ExpoFerre 2026',
+                                  cargo: s.cargo || 'Conferencista',
+                                  roleLabel: 'CONFERENCISTA VIP',
+                                  isVip: true,
+                                  collection: 'speakers'
+                                })));
+                              }}
+                              disabled={speakersList.length === 0}
+                              className="px-3 py-1.5 bg-slate-900 hover:bg-black text-amber-400 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-40 shrink-0"
+                              title={`Imprimir masivamente los ${speakersList.length} gafetes de Conferencistas VIP`}
+                            >
+                              <Printer size={13} />
+                              <span>Imprimir Conferencistas VIP ({speakersList.length})</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+
+                    {/* FILA ESPECIAL VIP: JURADOS CALIFICADORES VIP */}
+                    {(!sponsorSearchTerm.trim() || 'jurados calificadores vip premios excelencia'.includes(sponsorSearchTerm.toLowerCase().trim())) && (() => {
+                      const cleanNormStr = (str) => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+                      const combinedJudges = invitedJudgesList.map(j => {
+                        const rawName = j.name || j.nombre || 'Jurado Calificador';
+                        const cleanName = String(rawName).split('<')[0].split('http')[0].trim();
+                        const matchedEval = juryEvaluationsList.find(ev => {
+                          const evName = cleanNormStr(ev.judgeName || ev.juradoNombre);
+                          const jName = cleanNormStr(cleanName);
+                          return (j.email && ev.judgeEmail && cleanNormStr(j.email) === cleanNormStr(ev.judgeEmail)) || (jName && evName && (evName === jName || evName.includes(jName) || jName.includes(evName)));
+                        });
+                        return {
+                          id: j.id,
+                          nombre: cleanName,
+                          apellido: '',
+                          empresa: j.company || j.empresa || matchedEval?.judgeCompany || 'Comité Jurado Calificador',
+                          cargo: j.cargo || 'Jurado Calificador',
+                          email: j.email || matchedEval?.judgeEmail || '',
+                          roleLabel: 'JURADO VIP',
+                          isVip: true,
+                          collection: 'invitedJudges'
+                        };
+                      });
+                      juryEvaluationsList.forEach(ev => {
+                        const rawName = ev.judgeName || ev.juradoNombre || '';
+                        const cleanName = String(rawName).split('<')[0].split('http')[0].trim();
+                        const evName = cleanNormStr(cleanName);
+                        const evEmail = cleanNormStr(ev.judgeEmail || ev.juradoEmail);
+                        const exists = combinedJudges.some(item => {
+                          const iName = cleanNormStr(item.nombre);
+                          const iEmail = cleanNormStr(item.email);
+                          if (evEmail && iEmail && evEmail === iEmail) return true;
+                          if (evName && iName && (evName === iName || evName.includes(iName) || iName.includes(evName))) return true;
+                          return false;
+                        });
+                        if (!exists && cleanName) {
+                          combinedJudges.push({
+                            id: ev.id,
+                            nombre: cleanName,
+                            apellido: '',
+                            empresa: ev.judgeCompany || 'Comité Jurado Calificador',
+                            cargo: 'Jurado Calificador',
+                            email: ev.judgeEmail || '',
+                            roleLabel: 'JURADO VIP',
+                            isVip: true,
+                            collection: 'juryEvaluations'
+                          });
+                        }
+                      });
+
+                      return (
+                        <tr className="bg-amber-50/60 hover:bg-amber-100/60 transition-colors">
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center font-bold shrink-0">
+                                🏆
+                              </div>
+                              <div>
+                                <div className="font-bold text-on-surface text-base flex items-center gap-1.5">
+                                  <span>Jurados Calificadores VIP</span>
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-amber-400 font-black">★ VIP ★</span>
+                                </div>
+                                <p className="text-xs text-secondary">Comité Oficial Premios a la Excelencia Ferretera</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <span className="text-xs text-amber-800 font-bold bg-amber-100 px-2 py-0.5 rounded">Comité Jurado</span>
+                          </td>
+                          <td className="p-4 text-center">
+                            <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-300">
+                              ✓ {combinedJudges.length} Jurados Calificadores
+                            </span>
+                          </td>
+                          <td className="p-4 text-center">
+                            <div className="text-sm font-black text-on-surface">
+                              {combinedJudges.length} <span className="text-[10px] font-normal text-slate-500">VIP</span>
+                            </div>
+                          </td>
+                          <td className="p-4 text-center">
+                            <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                              ★ JURADO VIP ★
+                            </span>
+                          </td>
+                          <td className="p-3 pr-6 text-center">
+                            <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap bg-surface-variant/30 p-1.5 rounded-xl border border-outline-variant/60 shadow-2xs">
+                              <button
+                                onClick={() => {
+                                  if (combinedJudges.length === 0) return;
+                                  setPrintItems(combinedJudges);
+                                }}
+                                disabled={combinedJudges.length === 0}
+                                className="px-3 py-1.5 bg-slate-900 hover:bg-black text-amber-400 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-40 shrink-0"
+                                title={`Imprimir masivamente los ${combinedJudges.length} gafetes de Jurados VIP`}
+                              >
+                                <Printer size={13} />
+                                <span>Imprimir Jurados VIP ({combinedJudges.length})</span>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })()}
 
                     {/* FILAS DE LOS 27 PATROCINADORES */}
                     {filteredSponsorsList.map((sp) => {

@@ -48,7 +48,7 @@ export default function ScannerModule({ onBack }) {
         const cleanCode = rawCode.replace(/^VIP[-_:\s]+/i, '').trim();
         const candidateCodes = Array.from(new Set([cleanCode, rawCode].filter(Boolean)));
 
-        const collectionsToSearch = ['guests', 'staff', 'speakers', 'preregistrations', 'users'];
+        const collectionsToSearch = ['guests', 'staff', 'speakers', 'invitedJudges', 'juryEvaluations', 'preregistrations', 'users'];
         let foundData = null;
         let foundCollection = '';
 
@@ -71,7 +71,10 @@ export default function ScannerModule({ onBack }) {
         if (foundData) {
           const alreadyCheckedIn = foundData.checkedIn === true;
 
-          const isVip = foundCollection !== 'staff' && foundCollection !== 'speakers' && foundCollection !== 'users' && Boolean(
+          const isVip = foundCollection !== 'staff' && foundCollection !== 'users' && Boolean(
+            foundCollection === 'speakers' ||
+            foundCollection === 'invitedJudges' ||
+            foundCollection === 'juryEvaluations' ||
             foundData.isDirectInvite === true || 
             foundData.type === 'direct_invite' ||
             foundData.source === 'Invitación Directa' ||
@@ -94,7 +97,7 @@ export default function ScannerModule({ onBack }) {
             isVip: isVip,
             message: alreadyCheckedIn 
               ? `¡Atención! Este QR ya fue escaneado anteriormente.` 
-              : `¡Asistencia registrada para ${foundData.nombre || foundData.name}!`,
+              : `¡Asistencia registrada para ${foundData.nombre || foundData.name || foundData.judgeName}!`,
             data: foundData,
             type: foundCollection
           });
@@ -105,25 +108,29 @@ export default function ScannerModule({ onBack }) {
               guests: 'bg-[#f39200]',
               staff: 'bg-red-600',
               speakers: 'bg-purple-600',
+              invitedJudges: 'bg-amber-600',
+              juryEvaluations: 'bg-amber-600',
               preregistrations: 'bg-green-600',
               users: 'bg-blue-600'
             };
             const typeLabels = {
               guests: 'INVITADO VIP',
               staff: 'STAFF',
-              speakers: 'CONFERENCISTA',
-              preregistrations: 'VISITANTE',
+              speakers: 'CONFERENCISTA VIP',
+              invitedJudges: 'JURADO VIP',
+              juryEvaluations: 'JURADO VIP',
+              preregistrations: 'ASISTENTE',
               users: 'PATROCINADOR'
             };
 
             const itemToPrint = {
               id: foundData.id,
-              name: foundData.nombre || foundData.name,
-              nombre: foundData.nombre || foundData.name,
-              company: foundData.empresa || foundData.company || foundData.sponsorName || 'Expo Ferre',
-              empresa: foundData.empresa || foundData.company || foundData.sponsorName || 'Expo Ferre',
+              name: foundData.nombre || foundData.name || foundData.judgeName,
+              nombre: foundData.nombre || foundData.name || foundData.judgeName,
+              company: foundData.empresa || foundData.company || foundData.judgeCompany || foundData.sponsorCompany || foundData.sponsorName || 'Expo Ferre',
+              empresa: foundData.empresa || foundData.company || foundData.judgeCompany || foundData.sponsorCompany || foundData.sponsorName || 'Expo Ferre',
               isVip: isVip,
-              roleLabel: isVip ? 'INVITADO VIP' : typeLabels[foundCollection],
+              roleLabel: foundCollection === 'speakers' ? 'CONFERENCISTA VIP' : (foundCollection === 'invitedJudges' || foundCollection === 'juryEvaluations') ? 'JURADO VIP' : (isVip ? 'INVITADO VIP' : typeLabels[foundCollection]),
               colorClass: typeColors[foundCollection]
             };
             
