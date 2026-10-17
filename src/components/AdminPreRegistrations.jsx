@@ -428,12 +428,19 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
     }
   };
 
+  const normStr = (s) =>
+    String(s || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+
   const filteredRegistrations = registrations.filter(reg => {
-    const term = searchTerm.toLowerCase();
-    const nameMatch = (reg.name || '').toLowerCase().includes(term);
-    const emailMatch = (reg.email || '').toLowerCase().includes(term);
-    const phoneMatch = (reg.phone || '').toLowerCase().includes(term);
-    const companyMatch = (reg.company || '').toLowerCase().includes(term);
+    const term = normStr(searchTerm);
+    const nameMatch = normStr(reg.name).includes(term);
+    const emailMatch = normStr(reg.email).includes(term);
+    const phoneMatch = normStr(reg.phone).includes(term);
+    const companyMatch = normStr(reg.company).includes(term);
     const matchesSearch = !term || nameMatch || emailMatch || phoneMatch || companyMatch;
     
     if (needsFollowUpOnly && !reg.needsFollowUp) {

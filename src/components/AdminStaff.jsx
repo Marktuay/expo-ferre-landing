@@ -153,7 +153,7 @@ export default function AdminStaff({ onBack }) {
       telefono: '',
       email: '',
       sector: 'Comercial',
-      printNow: true
+      printNow: false
     });
     setStaffModalOpen(true);
   };
@@ -272,22 +272,31 @@ export default function AdminStaff({ onBack }) {
     }
   };
 
+  const normSearchStr = (s) =>
+    String(s || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+
   const filteredStaff = useMemo(() => {
+    const q = normSearchStr(searchTerm);
     return staffList.filter(s => {
-      const fullName = `${s.nombre || ''} ${s.apellido || ''}`.toLowerCase();
+      const fullName = normSearchStr(`${s.nombre || ''} ${s.apellido || ''} ${s.name || ''}`);
       const rawSponsorName = sponsorsMap[s.sponsorId] || s.sponsorName || s.empresa || '';
-      const sponsorName = rawSponsorName.toLowerCase();
-      const email = (s.email || '').toLowerCase();
-      const company = (s.empresa || '').toLowerCase();
-      const phone = (s.telefono || '').toLowerCase();
-      const q = searchTerm.trim().toLowerCase();
+      const sponsorName = normSearchStr(rawSponsorName);
+      const email = normSearchStr(s.email);
+      const company = normSearchStr(s.empresa);
+      const phone = normSearchStr(s.telefono);
+      const cargo = normSearchStr(s.cargo);
 
       const matchesSearch = !q ||
         fullName.includes(q) ||
         sponsorName.includes(q) ||
         email.includes(q) ||
         company.includes(q) ||
-        phone.includes(q);
+        phone.includes(q) ||
+        cargo.includes(q);
 
       const matchesSponsor =
         sponsorFilter === 'all' ||
@@ -385,6 +394,19 @@ export default function AdminStaff({ onBack }) {
             >
               <Printer size={16} />
               Imprimir Pendientes ({unprintedFilteredStaff.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (filteredStaff.length === 0) return;
+                setPrintItems(filteredStaff.map(mapStaffForPrint));
+              }}
+              disabled={filteredStaff.length === 0}
+              className="px-4 py-2 bg-[#0284c7] hover:bg-[#0369a1] text-white border border-[#0284c7] rounded-md transition-colors font-bold flex items-center gap-2 cursor-pointer text-sm shadow-xs disabled:opacity-50"
+              title="Imprimir todos los gafetes del filtro actual (incluye pendientes y ya impresos)"
+            >
+              <Printer size={16} />
+              Imprimir Filtrados ({filteredStaff.length})
             </button>
             <button
               onClick={() => {

@@ -346,11 +346,21 @@ export default function AdminAttendanceReport({ onBack }) {
     }
   };
 
+  const normStr = (s) =>
+    String(s || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+
   // Filtered data
   const filteredData = data.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          item.contact.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          item.company.toLowerCase().includes(searchTerm.toLowerCase());
+    const q = normStr(searchTerm);
+    const matchesSearch = !q ||
+                          normStr(item.name).includes(q) || 
+                          normStr(item.contact).includes(q) ||
+                          normStr(item.company).includes(q) ||
+                          normStr(item.position || item.cargo).includes(q);
     
     const matchesCategory = categoryFilter === 'ALL' || item.category === categoryFilter;
     

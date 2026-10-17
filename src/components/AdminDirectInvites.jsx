@@ -3243,9 +3243,16 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     });
   };
 
+  const normStr = (s) =>
+    String(s || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+
   // Filtrar Invitaciones para la vista detallada
   const filteredInvites = invites.filter(inv => {
-    const term = searchTerm.toLowerCase().trim();
+    const term = normStr(searchTerm);
     const matchesStatus = statusFilter === 'all' || inv.status === statusFilter;
     
     let matchesSponsor = true;
@@ -3258,13 +3265,13 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     if (!matchesStatus || !matchesSponsor) return false;
     if (!term) return true;
 
-    const name = (inv.nombre || '').toLowerCase();
-    const comp = (inv.empresa || '').toLowerCase();
-    const mail = (inv.email || '').toLowerCase();
-    const sp = (inv.sponsorName || '').toLowerCase();
-    const regName = (inv.registeredName || '').toLowerCase();
-    const regComp = (inv.registeredCompany || '').toLowerCase();
-    const token = inv.id.toLowerCase();
+    const name = normStr(inv.nombre);
+    const comp = normStr(inv.empresa);
+    const mail = normStr(inv.email);
+    const sp = normStr(inv.sponsorName);
+    const regName = normStr(inv.registeredName);
+    const regComp = normStr(inv.registeredCompany);
+    const token = normStr(inv.id);
 
     return name.includes(term) || comp.includes(term) || mail.includes(term) || sp.includes(term) || regName.includes(term) || regComp.includes(term) || token.includes(term);
   });
