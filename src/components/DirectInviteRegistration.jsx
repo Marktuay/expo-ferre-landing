@@ -3,7 +3,7 @@ import { db } from '../firebase';
 import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getEventBasePath } from '../config/eventConfig';
 import { QRCodeSVG } from 'qrcode.react';
-import { CheckCircle2, AlertCircle, Building2, MapPin, Users, Mail, Phone, User, Send, Check, Download, Home, Share2, Camera, Image as ImageIcon, Printer, Monitor } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Building2, MapPin, Users, Mail, Phone, User, Send, Check, Download, Home, Share2, Camera, Image as ImageIcon, Printer, Monitor, Briefcase } from 'lucide-react';
 
 export default function DirectInviteRegistration({ token: propToken, onClose }) {
   const urlParams = new URLSearchParams(window.location.search);
@@ -20,6 +20,7 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
   const [celular, setCelular] = useState('');
   const [ciudad, setCiudad] = useState('');
   const [empresa, setEmpresa] = useState('');
+  const [cargo, setCargo] = useState('');
   const [personalEmpresa, setPersonalEmpresa] = useState('');
 
   // Submission state
@@ -92,6 +93,7 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
             if (data.email) setEmail(data.email);
             if (data.empresa) setEmpresa(data.empresa);
             if (data.telefono) setCelular(data.telefono);
+            if (data.cargo || data.puesto || data.position) setCargo(data.cargo || data.puesto || data.position);
           }
         }
       } catch (err) {
@@ -345,6 +347,7 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
       const cleanApellido = apellido.trim();
       const cleanEmail = email.trim() ? email.trim().toLowerCase() : '';
       const cleanCelular = celular.trim();
+      const cleanCargo = cargo.trim();
       const cleanCiudad = ciudad.trim();
       const cleanEmpresa = empresa.trim();
 
@@ -355,6 +358,9 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
         email: cleanEmail || null,
         telefono: cleanCelular,
         celular: cleanCelular,
+        cargo: cleanCargo,
+        position: cleanCargo,
+        puesto: cleanCargo,
         ciudad: cleanCiudad,
         empresa: cleanEmpresa,
         personalEmpresa: personalEmpresa,
@@ -389,6 +395,10 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
         registeredName: `${cleanNombre} ${cleanApellido}`,
         registeredEmail: cleanEmail || null,
         registeredPhone: cleanCelular,
+        registeredCargo: cleanCargo,
+        registeredPosition: cleanCargo,
+        cargo: cleanCargo,
+        position: cleanCargo,
         registeredCompany: cleanEmpresa,
         registeredViaChannel: attendeeDoc.registeredViaChannel
       });
@@ -910,28 +920,47 @@ export default function DirectInviteRegistration({ token: propToken, onClose }) 
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-on-surface uppercase tracking-wider mb-1.5">
-                Cantidad de Personal de la Empresa <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Users size={16} className="absolute left-3.5 top-3.5 text-secondary" />
-                <select
-                  required
-                  value={personalEmpresa}
-                  onChange={(e) => setPersonalEmpresa(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-surface border border-outline-variant rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm font-medium appearance-none"
-                >
-                  <option value="" disabled>Selecciona el rango de colaboradores</option>
-                  <option value="1 a 10 colaboradores">1 a 10 colaboradores</option>
-                  <option value="11 a 50 colaboradores">11 a 50 colaboradores</option>
-                  <option value="51 a 100 colaboradores">51 a 100 colaboradores</option>
-                  <option value="101 a 500 colaboradores">101 a 500 colaboradores</option>
-                  <option value="Más de 500 colaboradores">Más de 500 colaboradores</option>
-                </select>
-                <span className="material-symbols-outlined absolute right-3.5 top-3 text-secondary pointer-events-none text-base">
-                  expand_more
-                </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-on-surface uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                  <span>Cargo / Puesto</span>
+                  <span className="text-secondary font-normal text-[11px] normal-case">(Opcional)</span>
+                </label>
+                <div className="relative">
+                  <Briefcase size={16} className="absolute left-3.5 top-3.5 text-secondary" />
+                  <input
+                    type="text"
+                    placeholder="Ej. Gerente, Propietario, etc."
+                    value={cargo}
+                    onChange={(e) => setCargo(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-surface border border-outline-variant rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-on-surface uppercase tracking-wider mb-1.5">
+                  Cantidad de Personal de la Empresa <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Users size={16} className="absolute left-3.5 top-3.5 text-secondary" />
+                  <select
+                    required
+                    value={personalEmpresa}
+                    onChange={(e) => setPersonalEmpresa(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-surface border border-outline-variant rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm font-medium appearance-none"
+                  >
+                    <option value="" disabled>Selecciona el rango de colaboradores</option>
+                    <option value="1 a 10 colaboradores">1 a 10 colaboradores</option>
+                    <option value="11 a 50 colaboradores">11 a 50 colaboradores</option>
+                    <option value="51 a 100 colaboradores">51 a 100 colaboradores</option>
+                    <option value="101 a 500 colaboradores">101 a 500 colaboradores</option>
+                    <option value="Más de 500 colaboradores">Más de 500 colaboradores</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-3.5 top-3 text-secondary pointer-events-none text-base">
+                    expand_more
+                  </span>
+                </div>
               </div>
             </div>
 

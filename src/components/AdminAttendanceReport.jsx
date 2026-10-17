@@ -44,6 +44,8 @@ export default function AdminAttendanceReport({ onBack }) {
           category: isVip ? 'Invitado VIP' : 'Preregistro (General)',
           contact: d.email || d.phone || 'N/A',
           company: d.company || 'N/A',
+          position: d.position || d.cargo || d.puesto || '',
+          cargo: d.position || d.cargo || d.puesto || '',
           checkedIn: !!d.checkedIn,
           checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
           isVip: isVip,
@@ -63,6 +65,8 @@ export default function AdminAttendanceReport({ onBack }) {
             category: 'Invitado VIP',
             contact: d.email || d.telefono || 'N/A',
             company: d.registeredCompany || d.empresa || d.sponsorName || 'N/A',
+            position: d.cargo || d.puesto || d.position || d.registeredPosition || '',
+            cargo: d.cargo || d.puesto || d.position || d.registeredPosition || '',
             checkedIn: !!d.checkedIn,
             checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
             isVip: true,
@@ -90,6 +94,8 @@ export default function AdminAttendanceReport({ onBack }) {
             category: 'Patrocinador',
             contact: d.correo || d.email || d.telefono || 'N/A',
             company: comp || 'N/A',
+            position: d.cargo || d.puesto || 'Patrocinador',
+            cargo: d.cargo || d.puesto || 'Patrocinador',
             checkedIn: !!d.checkedIn,
             checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
             collection: 'users',
@@ -111,6 +117,8 @@ export default function AdminAttendanceReport({ onBack }) {
           category: 'Staff Técnico',
           contact: staffContact,
           company: staffComp,
+          position: d.cargo || d.tipoCargo || 'Staff',
+          cargo: d.cargo || d.tipoCargo || 'Staff',
           checkedIn: !!d.checkedIn,
           checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
           collection: 'staff',
@@ -131,6 +139,8 @@ export default function AdminAttendanceReport({ onBack }) {
           category: 'Conferencista',
           contact: speakerContact,
           company: speakerComp,
+          position: d.cargo || 'Conferencista',
+          cargo: d.cargo || 'Conferencista',
           checkedIn: !!d.checkedIn,
           checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
           collection: 'speakers',
@@ -151,6 +161,8 @@ export default function AdminAttendanceReport({ onBack }) {
           category: 'Invitado VIP',
           contact: guestContact,
           company: guestComp,
+          position: d.cargo || d.position || d.puesto || '',
+          cargo: d.cargo || d.position || d.puesto || '',
           checkedIn: !!d.checkedIn,
           checkInTime: d.checkInTime ? d.checkInTime.toDate() : null,
           isVip: true,
@@ -188,10 +200,13 @@ export default function AdminAttendanceReport({ onBack }) {
     setData(prev => prev.map(d => d.id === item.id ? { ...d, checkedIn: true, checkInTime: d.checkInTime || new Date() } : d));
 
     // 2. Prepare badge item with explicit collection
+    const pos = item.position || item.cargo || item.puesto || item.raw?.cargo || item.raw?.position || item.raw?.puesto || '';
     const badgeItem = {
       id: item.id,
       name: item.name,
       company: item.company !== 'N/A' ? item.company : '',
+      position: pos,
+      cargo: pos,
       email: item.contact && item.contact.includes('@') ? item.contact : '',
       phone: item.contact && !item.contact.includes('@') && item.contact !== 'N/A' ? item.contact : '',
       roleLabel: item.category,
@@ -201,6 +216,8 @@ export default function AdminAttendanceReport({ onBack }) {
       isVip: item.isVip,
       ...(item.raw || {})
     };
+    badgeItem.position = pos;
+    badgeItem.cargo = pos;
 
     setPrintItems([badgeItem]);
   };
