@@ -6,6 +6,7 @@ import BadgeTemplate from './BadgeTemplate';
 
 export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', colorClass, onClose, onPrinted }) {
   const [includeQr, setIncludeQr] = useState(false);
+  const [orientation, setOrientation] = useState('horizontal'); // 'horizontal' (100x62mm) | 'vertical' (62x100mm)
   
   // Detonador de impresión y registro de Check-In automático al montar
   useEffect(() => {
@@ -96,6 +97,8 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
     return () => clearTimeout(timer);
   }, [items, roleLabel, onPrinted]);
 
+  const isHorizontal = orientation === 'horizontal';
+
   return (
     <div className="print-thermal-modal-wrapper fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-xs overflow-y-auto">
       {/* Barra superior de control (oculta en impresión) */}
@@ -108,11 +111,39 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
             </h2>
           </div>
           <p className="text-slate-500 text-xs mt-0.5">
-            Rollo <strong>DK-2205 Continuo (62 mm × 100 mm)</strong> • {items.length} gafete(s) • {includeQr ? 'Con Código QR' : 'Sin QR (Nombres y Empresa más grandes)'}
+            Rollo <strong>DK-2205 Continuo (62 mm)</strong> • Formato: <strong>{isHorizontal ? 'Horizontal (100 mm × 62 mm)' : 'Vertical (62 mm × 100 mm)'}</strong> • {items.length} gafete(s)
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Selector de Orientación: Horizontal vs Vertical */}
+          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-300">
+            <button
+              type="button"
+              onClick={() => setOrientation('horizontal')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+                isHorizontal
+                  ? 'bg-[#0d47a1] text-white shadow-xs'
+                  : 'text-slate-700 hover:text-black'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">crop_landscape</span>
+              Horizontal (100×62 mm)
+            </button>
+            <button
+              type="button"
+              onClick={() => setOrientation('vertical')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+                !isHorizontal
+                  ? 'bg-[#0d47a1] text-white shadow-xs'
+                  : 'text-slate-700 hover:text-black'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">crop_portrait</span>
+              Vertical (62×100 mm)
+            </button>
+          </div>
+
           {/* Toggle de Código QR */}
           <label className="flex items-center gap-2 cursor-pointer bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-300 transition-colors select-none text-xs font-bold text-slate-800">
             <input 
@@ -146,7 +177,7 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
       </div>
 
       {/* Área de Visualización y Contenedor de Impresión */}
-      <div className="max-w-4xl mx-auto py-8 print:p-0 print:m-0 flex flex-wrap justify-center print:justify-start gap-4 print:gap-0 print-thermal-container">
+      <div className="max-w-5xl mx-auto py-8 print:p-0 print:m-0 flex flex-wrap justify-center print:justify-start gap-4 print:gap-0 print-thermal-container">
         {items.map((item, index) => (
           <BadgeTemplate 
             key={item.id || index} 
@@ -154,6 +185,7 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
             roleLabel={item.roleLabel || roleLabel} 
             colorClass={item.colorClass || colorClass} 
             showQr={includeQr}
+            orientation={orientation}
           />
         ))}
       </div>
@@ -161,15 +193,16 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
       {/* Reglas CSS para la impresora térmica Brother QL-810Wc */}
       <style dangerouslySetInnerHTML={{__html: `
         @page {
+          size: ${isHorizontal ? '100mm 62mm landscape' : '62mm 100mm portrait'} !important;
           margin: 0mm !important;
         }
 
         @media print {
           html, body {
-            width: 62mm !important;
-            height: 100mm !important;
-            min-height: 100mm !important;
-            max-height: 100mm !important;
+            width: ${isHorizontal ? '100mm' : '62mm'} !important;
+            height: ${isHorizontal ? '62mm' : '100mm'} !important;
+            min-height: ${isHorizontal ? '62mm' : '100mm'} !important;
+            max-height: ${isHorizontal ? '62mm' : '100mm'} !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
@@ -201,9 +234,9 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
             left: 0 !important;
             right: 0 !important;
             bottom: 0 !important;
-            width: 62mm !important;
-            height: 100mm !important;
-            max-height: 100mm !important;
+            width: ${isHorizontal ? '100mm' : '62mm'} !important;
+            height: ${isHorizontal ? '62mm' : '100mm'} !important;
+            max-height: ${isHorizontal ? '62mm' : '100mm'} !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
@@ -215,9 +248,9 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
             position: absolute !important;
             top: 0 !important;
             left: 0 !important;
-            width: 62mm !important;
-            height: 100mm !important;
-            max-height: 100mm !important;
+            width: ${isHorizontal ? '100mm' : '62mm'} !important;
+            height: ${isHorizontal ? '62mm' : '100mm'} !important;
+            max-height: ${isHorizontal ? '62mm' : '100mm'} !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
@@ -226,17 +259,17 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
           }
 
           .brother-thermal-badge {
-            width: 62mm !important;
-            height: 100mm !important;
-            min-height: 100mm !important;
-            max-height: 100mm !important;
-            max-width: 62mm !important;
+            width: ${isHorizontal ? '100mm' : '62mm'} !important;
+            height: ${isHorizontal ? '62mm' : '100mm'} !important;
+            min-height: ${isHorizontal ? '62mm' : '100mm'} !important;
+            max-height: ${isHorizontal ? '62mm' : '100mm'} !important;
+            max-width: ${isHorizontal ? '100mm' : '62mm'} !important;
             page-break-after: always !important;
             break-after: page !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             margin: 0 !important;
-            padding: 2.5mm 3mm !important;
+            padding: ${isHorizontal ? '2mm 3.5mm' : '2.5mm 3mm'} !important;
             border: none !important;
             border-radius: 0 !important;
             box-shadow: none !important;
@@ -255,4 +288,3 @@ export default function PrintableBadgeList({ items = [], roleLabel = 'Staff', co
     </div>
   );
 }
-

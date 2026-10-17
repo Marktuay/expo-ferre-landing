@@ -1795,3 +1795,19 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   - URL de distribución rápida CDN de GitHub / jsDelivr para evitar demoras por caché: `https://cdn.jsdelivr.net/gh/Marktuay/expo-ferre-landing@main/public/email-header-sabado.png`.
   - Horario programado establecido a las **06:00 AM** para garantizar recepción temprana antes de las actividades (7:30 AM).
   - Incluye speech especial con recordatorio de agenda completa, pase con código QR, acreditación, capacitaciones, alimentación y reconocimientos.
+
+### 🏷️ Formato de Impresión Térmica Horizontal (100 mm × 62 mm) Centrado
+- **Fecha:** 16 de Octubre de 2026.
+- **Objetivo:** Invertir la orientación a **Horizontal (Apaisado)** sobre el rollo continuo DK-2205 (62 mm), con corte automático a 100 mm (10 cm), centrando todos los elementos y garantizando que ningún texto se desborde o corte.
+- **Implementación Técnica (`BadgeTemplate.jsx` & `PrintableBadgeList.jsx`):**
+  - **Dimensiones:** `w-[100mm] h-[62mm] max-w-[100mm] max-h-[62mm]` con corte a 100 mm.
+  - **Regla CSS `@page`:** `size: 100mm 62mm landscape !important; margin: 0mm !important;` (activa automáticamente la orientación horizontal en el navegador).
+  - **Distribución 100% Centrada:**
+    1. **Cabecera:** `EXPO FERRE 2026` centrada a 10px bold.
+    2. **Franja de Rol:** Píldora centrada (`★ INVITADO VIP ★` en fondo negro, o rol respectivo en fondo slate).
+    3. **Nombre del Asistente:** Tipografía adaptativa y dinámica según longitud de caracteres (21px para nombres cortos, 18.5px medianos y 16px para nombres extensos), centrado con `line-clamp-2` y `break-words`.
+    4. **Empresa / Patrocinador:** Recuadro central con fondo `bg-slate-100` y borde superior/inferior, tamaño escalonado (15px / 13.5px / 12px) sin desbordamiento.
+    5. **Cargo / Stand:** Centrado a 9.5px bold si aplica.
+    6. **Pie de Página:** Centrado con fecha, sede (`17 OCTUBRE 2026 • HOTEL CROWNE PLAZA`) y código de respaldo discreto (`ID: ...`).
+  - **Soporte de QR Opcional:** En modo horizontal con QR, se divide en 2 columnas (información izquierda + QR derecho de 80px). En modo sin QR (predeterminado), ocupa el 100% del ancho centrado.
+  - **Selector de Orientación en Toolbar:** Botones interactivos para alternar al instante entre `🔘 Horizontal (100×62 mm)` y `🔘 Vertical (62×100 mm)`.
