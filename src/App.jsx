@@ -72,6 +72,9 @@ const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
 
 export default function App() {
   const [currentView, setCurrentView] = useState(() => {
+    if (window.location.search.includes('view=checkin') || window.location.search.includes('checkin=1') || window.location.search.includes('checkin=true')) {
+      return 'adminCheckIn';
+    }
     if (window.location.search.includes('invite=') || window.location.search.includes('form=invite')) {
       return 'directInviteRegistration';
     }
