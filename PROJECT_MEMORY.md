@@ -1826,3 +1826,19 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
 - **Commits en Repositorio Oficial (`main`):**
   - `c4a316a`: *feat: auto print badge on QR scan and auto-close print dialog to resume camera*
 
+### 📊 Auditoría y Depuración de Asistencia Oficial del Evento (Sábado 17 de Octubre de 2026)
+- **Fecha de Auditoría:** 19 de Octubre de 2026.
+- **Total Inicial de Asistencias Registradas:** 281 registros.
+- **Duplicados Detectados y Depurados (4 registros secundarios):**
+  1. **Fidel Rodriguez:** Registro duplicado en `directInvites` (`inv_mvckurom_rxg32xja` sin empresa) limpiado y marcado como `cancelled_duplicate`. Se conserva el registro oficial `inv_mvchzv2p_a7g4ccnj` (SERCONSSA).
+  2. **Hayder Bermudez:** Registro duplicado en `staff` (`vdR0Dgs3WLzZPFlwImgI` sin correo) desmarcado. Se conserva el registro oficial con email `jbermudez@lafise.com` (`YCNviFWCChb8g4fel0p7`).
+  3. **Enrique Montoya (Mobius Engineering):** Registro duplicado en `directInvites` (`inv_mvcfasbz_rrs77qpw`) limpiado. Se conserva su acreditación oficial como Staff de Stand / Jefe de taller en `staff` (`VtwBwL7qiIrJWqr8WCDR`).
+  4. **Héctor López Aguilar (EATON):** Registro duplicado en `directInvites` (`inv_mvcwnyps_g7gykba7`) limpiado. Se conserva su acreditación oficial como Staff de Stand en `staff` (`Jyr2tevxRkqebKPRtu4i`).
+- **Respaldo:** Todos los registros afectados fueron respaldados previamente en `directInvites_backup` y `staff_backup` con `backupReason: 'duplicate_cleanup_oct19'`.
+- **Cifra Oficial Certificada de Asistentes Únicos:** **277 personas**
+  - 👔 **Staff de Stands y Marcas:** 220
+  - ⭐ **Invitados VIP Directos:** 54
+  - ⚖️ **Jurados Calificadores VIP:** 2
+  - 🎤 **Conferencistas:** 1
+
+
