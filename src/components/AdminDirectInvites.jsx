@@ -536,7 +536,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
             reason: 'Mismo correo',
             matchedValue: inv.email,
             sponsorName: inv.sponsorName || 'Invitación General',
-            status: inv.status === 'used' ? 'Ya Registrado' : 'Invitación Pendiente',
+            status: (inv.status === 'used' || inv.status === 'registered') ? 'Ya Registrado' : 'Invitación Pendiente',
             targetName: inv.nombre,
             targetCompany: inv.empresa
           };
@@ -549,7 +549,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
             reason: 'Mismo teléfono',
             matchedValue: inv.telefono,
             sponsorName: inv.sponsorName || 'Invitación General',
-            status: inv.status === 'used' ? 'Ya Registrado' : 'Invitación Pendiente',
+            status: (inv.status === 'used' || inv.status === 'registered') ? 'Ya Registrado' : 'Invitación Pendiente',
             targetName: inv.nombre,
             targetCompany: inv.empresa
           };
@@ -565,7 +565,7 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
               reason: 'Mismo nombre y empresa',
               matchedValue: `${inv.nombre} (${inv.empresa})`,
               sponsorName: inv.sponsorName || 'Invitación General',
-              status: inv.status === 'used' ? 'Ya Registrado' : 'Invitación Pendiente',
+              status: (inv.status === 'used' || inv.status === 'registered') ? 'Ya Registrado' : 'Invitación Pendiente',
               targetName: inv.nombre,
               targetCompany: inv.empresa
             };
@@ -2126,7 +2126,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       if (!isValidEmailAddress(email)) return false;
 
       // 3. Debe estar en estado pendiente (no registrado)
-      if (inv.status === 'used') return false;
+      if (inv.status === 'used' || inv.status === 'registered') return false;
 
       // 4. Si el filtro es solo nunca enviados
       if (filterType === 'never_sent' && inv.emailSentAt) {
@@ -2252,9 +2252,9 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   const consolidatedRegisteredTargets = useMemo(() => {
     const emailMap = new Map();
 
-    // 1. Invitados Directos ya Registrados (status === 'used')
+    // 1. Invitados Directos ya Registrados (status === 'used' o 'registered')
     invites.forEach(inv => {
-      if (inv.status !== 'used') return;
+      if (inv.status !== 'used' && inv.status !== 'registered') return;
       const rawEmail = (inv.registeredEmail || inv.email || '').trim().toLowerCase();
       if (!isValidEmailAddress(rawEmail)) return;
       if (emailMap.has(rawEmail)) return;
@@ -2669,7 +2669,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     setWatiNotification(null);
 
     try {
-      const isUsed = invite.status === 'used';
+      const isUsed = invite.status === 'used' || invite.status === 'registered';
       let res;
 
       if (isUsed) {
@@ -2767,7 +2767,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       if (!phoneValidation.isValid) return false;
 
       // 3. Debe estar pendiente (no registrado)
-      if (inv.status === 'used') return false;
+      if (inv.status === 'used' || inv.status === 'registered') return false;
 
       // 4. Criterio de Selección:
       if (filterType === 'never_sent') {
@@ -2901,7 +2901,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         Stands_Patrocinador: inv.sponsorStands || 'N/A',
         Asistio: (inv.checkedIn || inv.attended || inv.badgePrinted) ? 'SÍ (IMPRESO)' : 'NO',
         Hora_Impresion: formatPrintDateTimeFull(inv) || 'No impreso',
-        Estado: inv.status === 'used' ? 'REGISTRADO (USADO)' : 'PENDIENTE (DISPONIBLE)',
+        Estado: (inv.status === 'used' || inv.status === 'registered') ? 'REGISTRADO (USADO)' : 'PENDIENTE (DISPONIBLE)',
         Registrado_Nombre: inv.registeredName || '',
         Registrado_Empresa: inv.registeredCompany || '',
         Registrado_Email: inv.registeredEmail || '',
@@ -2981,7 +2981,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
       // 1. Hoja 1: Personas Registradas (Confirmadas con Gafete)
       const registeredList = invites
-        .filter(inv => inv.status === 'used')
+        .filter(inv => inv.status === 'used' || inv.status === 'registered')
         .sort((a, b) => {
           const timeA = a.usedAt ? (a.usedAt instanceof Date ? a.usedAt.getTime() : new Date(a.usedAt).getTime()) : 0;
           const timeB = b.usedAt ? (b.usedAt instanceof Date ? b.usedAt.getTime() : new Date(b.usedAt).getTime()) : 0;
@@ -3008,7 +3008,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
       // 2. Hoja 2: Personas Pendientes de Registro
       const pendingList = invites
-        .filter(inv => inv.status !== 'used')
+        .filter(inv => inv.status !== 'used' && inv.status !== 'registered')
         .sort((a, b) => {
           const spA = (a.sponsorName || 'Invitación General').toLowerCase();
           const spB = (b.sponsorName || 'Invitación General').toLowerCase();
@@ -3039,15 +3039,17 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
       // 3. Hoja 3: Consolidado General (Todos los Invitados)
       const allSortedList = [...invites].sort((a, b) => {
-        if (a.status === 'used' && b.status !== 'used') return -1;
-        if (a.status !== 'used' && b.status === 'used') return 1;
+        const aUsed = a.status === 'used' || a.status === 'registered';
+        const bUsed = b.status === 'used' || b.status === 'registered';
+        if (aUsed && !bUsed) return -1;
+        if (!aUsed && bUsed) return 1;
         const spA = (a.sponsorName || 'Invitación General').toLowerCase();
         const spB = (b.sponsorName || 'Invitación General').toLowerCase();
         return spA.localeCompare(spB);
       });
 
       const consolidatedRows = allSortedList.map((inv, idx) => {
-        const isUsed = inv.status === 'used';
+        const isUsed = inv.status === 'used' || inv.status === 'registered';
         return {
           No: idx + 1,
           Estado_Registro: isUsed ? 'REGISTRADO' : 'PENDIENTE',
@@ -3071,7 +3073,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
       // Fila: General
       const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
-      const genUsed = genInv.filter(i => i.status === 'used').length;
+      const genUsed = genInv.filter(i => i.status === 'used' || i.status === 'registered').length;
       const genPending = genInv.length - genUsed;
       const genWithEmail = genInv.filter(i => isValidEmailAddress(i.email)).length;
       const genSent = genInv.filter(i => i.emailSent || i.emailSentAt).length;
@@ -3080,9 +3082,9 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       const genCoveragePct = genWithEmail > 0 ? Math.round((genSent / genWithEmail) * 100) : 0;
       const genConversionPct = genInv.length > 0 ? Math.round((genUsed / genInv.length) * 100) : 0;
       const genArt = getSponsorArt('general');
-      const genUsedWa = genInv.filter(i => i.status === 'used' && getContactChannel(i).includes('WhatsApp')).length;
-      const genUsedEmail = genInv.filter(i => i.status === 'used' && getContactChannel(i).includes('Correo')).length;
-      const genUsedDirect = genInv.filter(i => i.status === 'used' && getContactChannel(i).includes('Directo')).length;
+      const genUsedWa = genInv.filter(i => (i.status === 'used' || i.status === 'registered') && getContactChannel(i).includes('WhatsApp')).length;
+      const genUsedEmail = genInv.filter(i => (i.status === 'used' || i.status === 'registered') && getContactChannel(i).includes('Correo')).length;
+      const genUsedDirect = genInv.filter(i => (i.status === 'used' || i.status === 'registered') && getContactChannel(i).includes('Directo')).length;
 
       summaryRows.push({
         Patrocinador: 'Invitación General (Comité EXPO FERRE 2026)',
@@ -3106,7 +3108,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       // Filas de cada Patrocinador
       sponsorsList.forEach((sp) => {
         const spInvites = invites.filter(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp)));
-        const spUsed = spInvites.filter(i => i.status === 'used').length;
+        const spUsed = spInvites.filter(i => i.status === 'used' || i.status === 'registered').length;
         const spPending = spInvites.length - spUsed;
         const spWithEmail = spInvites.filter(i => isValidEmailAddress(i.email)).length;
         const spSent = spInvites.filter(i => i.emailSent || i.emailSentAt).length;
@@ -3118,9 +3120,9 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
         const rawStands = sponsorsMap[sp]?.stands?.join(', ') || art.stands || 'N/A';
         const standsDisplay = formatStandsDisplay(rawStands);
 
-        const spUsedWa = spInvites.filter(i => i.status === 'used' && getContactChannel(i).includes('WhatsApp')).length;
-        const spUsedEmail = spInvites.filter(i => i.status === 'used' && getContactChannel(i).includes('Correo')).length;
-        const spUsedDirect = spInvites.filter(i => i.status === 'used' && getContactChannel(i).includes('Directo')).length;
+        const spUsedWa = spInvites.filter(i => (i.status === 'used' || i.status === 'registered') && getContactChannel(i).includes('WhatsApp')).length;
+        const spUsedEmail = spInvites.filter(i => (i.status === 'used' || i.status === 'registered') && getContactChannel(i).includes('Correo')).length;
+        const spUsedDirect = spInvites.filter(i => (i.status === 'used' || i.status === 'registered') && getContactChannel(i).includes('Directo')).length;
 
         summaryRows.push({
           Patrocinador: sp,
@@ -3144,9 +3146,9 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
       // Fila Final de Totales Globales
       const globalEffectiveRate = totalInvitesCount > 0 ? Math.round((totalUsedCount / totalInvitesCount) * 100) : 0;
-      const totalUsedWa = invites.filter(i => i.status === 'used' && getContactChannel(i).includes('WhatsApp')).length;
-      const totalUsedEmail = invites.filter(i => i.status === 'used' && getContactChannel(i).includes('Correo')).length;
-      const totalUsedDirect = invites.filter(i => i.status === 'used' && getContactChannel(i).includes('Directo')).length;
+      const totalUsedWa = invites.filter(i => (i.status === 'used' || i.status === 'registered') && getContactChannel(i).includes('WhatsApp')).length;
+      const totalUsedEmail = invites.filter(i => (i.status === 'used' || i.status === 'registered') && getContactChannel(i).includes('Correo')).length;
+      const totalUsedDirect = invites.filter(i => (i.status === 'used' || i.status === 'registered') && getContactChannel(i).includes('Directo')).length;
 
       summaryRows.push({
         Patrocinador: '=== TOTALES GLOBALES ===',
@@ -3253,7 +3255,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   // Filtrar Invitaciones para la vista detallada
   const filteredInvites = invites.filter(inv => {
     const term = normStr(searchTerm);
-    const matchesStatus = statusFilter === 'all' || inv.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || 
+      (statusFilter === 'used' ? (inv.status === 'used' || inv.status === 'registered') : inv.status === statusFilter);
     
     let matchesSponsor = true;
     if (selectedSponsorFilter === 'general') {
@@ -3284,8 +3287,8 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   }).length + (invites.some(i => !i.sponsorName || i.sponsorId === 'general') ? 1 : 0);
 
   const countSponsorsWithRegistered = sponsorsList.filter(sp => {
-    return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && i.status === 'used');
-  }).length + (invites.some(i => (!i.sponsorName || i.sponsorId === 'general') && i.status === 'used') ? 1 : 0);
+    return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && (i.status === 'used' || i.status === 'registered'));
+  }).length + (invites.some(i => (!i.sponsorName || i.sponsorId === 'general') && (i.status === 'used' || i.status === 'registered')) ? 1 : 0);
 
   const countSponsorsWithPending = sponsorsList.filter(sp => {
     return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && i.status === 'pending');
@@ -3319,7 +3322,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     if (!term) return [];
     return invites.filter(inv => {
       if (!doesInviteMatchSearchTerm(inv, term)) return false;
-      if (sponsorFilterStatus === 'has_registered') return inv.status === 'used';
+      if (sponsorFilterStatus === 'has_registered') return inv.status === 'used' || inv.status === 'registered';
       if (sponsorFilterStatus === 'has_pending') return inv.status === 'pending';
       if (sponsorFilterStatus === 'has_unsent_emails') {
         return inv.status === 'pending' && !inv.emailSent && !inv.emailSentAt && !inv.whatsappSent && !inv.whatsappSentAt;
@@ -3339,7 +3342,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     if (!matchesSponsorOrStand && !matchesPersonInList) return false;
 
     if (sponsorFilterStatus === 'has_invites') return spInvites.length > 0;
-    if (sponsorFilterStatus === 'has_registered') return spInvites.some(i => i.status === 'used');
+    if (sponsorFilterStatus === 'has_registered') return spInvites.some(i => i.status === 'used' || i.status === 'registered');
     if (sponsorFilterStatus === 'has_pending') return spInvites.some(i => i.status === 'pending');
     if (sponsorFilterStatus === 'has_unsent_emails') return spInvites.some(i => i.status === 'pending' && !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt);
 
@@ -3356,7 +3359,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     if (!matchesGeneralTitle && !matchesPersonInGeneral) return false;
 
     if (sponsorFilterStatus === 'has_invites') return genInv.length > 0;
-    if (sponsorFilterStatus === 'has_registered') return genInv.some(i => i.status === 'used');
+    if (sponsorFilterStatus === 'has_registered') return genInv.some(i => i.status === 'used' || i.status === 'registered');
     if (sponsorFilterStatus === 'has_pending') return genInv.some(i => i.status === 'pending');
     if (sponsorFilterStatus === 'has_unsent_emails') return genInv.some(i => i.status === 'pending' && !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt);
 
@@ -3366,7 +3369,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   // Métricas Globales
   const totalInvitesCount = invites.length;
   const totalPendingCount = invites.filter(i => i.status === 'pending').length;
-  const totalUsedCount = invites.filter(i => i.status === 'used').length;
+  const totalUsedCount = invites.filter(i => i.status === 'used' || i.status === 'registered').length;
 
   // Métricas Globales Multicanal (Correo + WhatsApp + Enlace Directo)
   const totalEmailsSent = invites.filter(i => i.emailSent || i.emailSentAt).length;
@@ -3390,7 +3393,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
   const totalWithValidEmail = invites.filter(i => isValidEmailAddress(i.email)).length;
   const totalEmailsPending = invites.filter(i => isValidEmailAddress(i.email) && !i.emailSentAt && i.status === 'pending').length;
   const totalUnregisteredWithEmail = invites.filter(i => isValidEmailAddress(i.email) && i.status === 'pending').length;
-  const totalRegisteredFromEmail = invites.filter(i => (i.emailSent || i.emailSentAt) && i.status === 'used').length;
+  const totalRegisteredFromEmail = invites.filter(i => (i.emailSent || i.emailSentAt) && (i.status === 'used' || i.status === 'registered')).length;
   const totalWithoutValidEmail = totalInvitesCount - totalWithValidEmail;
   const emailCoveragePercent = totalWithValidEmail > 0 ? Math.round((totalEmailsSent / totalWithValidEmail) * 100) : 0;
   const emailConversionPercent = totalEmailsSent > 0 ? Math.round((totalRegisteredFromEmail / (totalEmailsSent || 1)) * 100) : 0;
@@ -3830,7 +3833,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                     </thead>
                     <tbody className="divide-y divide-outline-variant/60">
                       {matchingPeopleFromDirectorySearch.map((inv) => {
-                        const isUsed = inv.status === 'used';
+                        const isUsed = inv.status === 'used' || inv.status === 'registered';
                         const listSponsorFilter = (!inv.sponsorName || inv.sponsorId === 'general' || getSponsorKey(inv.sponsorName) === 'general')
                           ? 'general'
                           : inv.sponsorName;
@@ -4092,7 +4095,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                         <td className="p-4 text-center">
                           {(() => {
                             const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
-                            const genUsed = genInv.filter(i => i.status === 'used').length;
+                            const genUsed = genInv.filter(i => i.status === 'used' || i.status === 'registered').length;
                             const genPending = genInv.length - genUsed;
                             const genEffectiveRate = genInv.length > 0 ? Math.round((genUsed / genInv.length) * 100) : 0;
 
@@ -4289,7 +4292,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                     {/* FILAS DE LOS 27 PATROCINADORES */}
                     {filteredSponsorsList.map((sp) => {
                       const spInvites = invites.filter(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp)));
-                      const spUsed = spInvites.filter(i => i.status === 'used').length;
+                      const spUsed = spInvites.filter(i => i.status === 'used' || i.status === 'registered').length;
                       const spPending = spInvites.length - spUsed;
                       const spWithEmail = spInvites.filter(i => isValidEmailAddress(i.email)).length;
                       const spEmailSent = spInvites.filter(i => i.emailSent || i.emailSentAt).length;
@@ -4679,7 +4682,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                     statusFilter === 'used' ? 'bg-green-600 text-white' : 'bg-surface text-secondary hover:bg-surface-variant'
                   }`}
                 >
-                  Registrados ({filteredInvites.filter(i => i.status === 'used').length})
+                  Registrados ({filteredInvites.filter(i => i.status === 'used' || i.status === 'registered').length})
                 </button>
               </div>
             </div>
@@ -4715,7 +4718,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                       </tr>
                     ) : (
                       filteredInvites.map((inv) => {
-                        const isUsed = inv.status === 'used';
+                        const isUsed = inv.status === 'used' || inv.status === 'registered';
                         const isWaCopied = copiedToken === `wa_${inv.id}`;
                         const isWaRemCopied = copiedToken === `wa_rem_${inv.id}`;
                         const isLinkCopied = copiedToken === `link_${inv.id}`;
@@ -5993,7 +5996,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
                 </div>
                 <div>
                   <h3 className="font-bold text-base flex items-center gap-2">
-                    {whatsAppModal.mode === 'pass' || (!whatsAppModal.mode && whatsAppModal.invite.status === 'used')
+                    {whatsAppModal.mode === 'pass' || (!whatsAppModal.mode && (whatsAppModal.invite.status === 'used' || whatsAppModal.invite.status === 'registered'))
                       ? '🎟️ Pase Oficial y Código QR por WhatsApp'
                       : (whatsAppModal.isReminder ? '🔔 Recordatorio de Registro por WhatsApp' : '📲 Invitación Oficial por WhatsApp')}
                   </h3>
@@ -6012,11 +6015,11 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
 
             {/* Selector de Modo: Pase Oficial vs Invitación Inicial vs Recordatorio */}
             <div className="flex border-b border-outline-variant bg-surface px-6 pt-3 shrink-0 gap-2 overflow-x-auto">
-              {whatsAppModal.invite.status === 'used' && (
+              {(whatsAppModal.invite.status === 'used' || whatsAppModal.invite.status === 'registered') && (
                 <button
                   onClick={() => setWhatsAppModal(prev => ({ ...prev, mode: 'pass', isReminder: false }))}
                   className={`py-2 px-4 font-bold text-xs rounded-t-lg transition-all cursor-pointer flex items-center gap-2 border-b-2 ${
-                    whatsAppModal.mode === 'pass' || (!whatsAppModal.mode && whatsAppModal.invite.status === 'used')
+                    whatsAppModal.mode === 'pass' || (!whatsAppModal.mode && (whatsAppModal.invite.status === 'used' || whatsAppModal.invite.status === 'registered'))
                       ? 'border-[#25D366] text-[#075E54] bg-emerald-50/60'
                       : 'border-transparent text-secondary hover:text-on-surface'
                   }`}
@@ -6028,7 +6031,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
               <button
                 onClick={() => setWhatsAppModal(prev => ({ ...prev, mode: 'invite', isReminder: false }))}
                 className={`py-2 px-4 font-bold text-xs rounded-t-lg transition-all cursor-pointer flex items-center gap-2 border-b-2 ${
-                  whatsAppModal.mode === 'invite' || (!whatsAppModal.mode && !whatsAppModal.isReminder && whatsAppModal.invite.status !== 'used')
+                  whatsAppModal.mode === 'invite' || (!whatsAppModal.mode && !whatsAppModal.isReminder && whatsAppModal.invite.status !== 'used' && whatsAppModal.invite.status !== 'registered')
                     ? 'border-[#25D366] text-[#075E54] bg-emerald-50/60'
                     : 'border-transparent text-secondary hover:text-on-surface'
                 }`}
@@ -6053,7 +6056,7 @@ Hemos reservado para ti un pase preferencial. Para activar tu acceso y recibir t
             <div className="p-6 space-y-5 overflow-y-auto flex-1">
               {(() => {
                 const inv = whatsAppModal.invite;
-                const isPass = whatsAppModal.mode === 'pass' || (!whatsAppModal.mode && inv.status === 'used');
+                const isPass = whatsAppModal.mode === 'pass' || (!whatsAppModal.mode && (inv.status === 'used' || inv.status === 'registered'));
                 const isRem = !isPass && (whatsAppModal.mode === 'reminder' || whatsAppModal.isReminder);
                 const spName = inv.sponsorName || 'general';
                 const art = getSponsorArt(spName);

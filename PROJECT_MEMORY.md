@@ -1835,10 +1835,21 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   3. **Enrique Montoya (Mobius Engineering):** Registro duplicado en `directInvites` (`inv_mvcfasbz_rrs77qpw`) limpiado. Se conserva su acreditación oficial como Staff de Stand / Jefe de taller en `staff` (`VtwBwL7qiIrJWqr8WCDR`).
   4. **Héctor López Aguilar (EATON):** Registro duplicado en `directInvites` (`inv_mvcwnyps_g7gykba7`) limpiado. Se conserva su acreditación oficial como Staff de Stand en `staff` (`Jyr2tevxRkqebKPRtu4i`).
 - **Respaldo:** Todos los registros afectados fueron respaldados previamente en `directInvites_backup` y `staff_backup` con `backupReason: 'duplicate_cleanup_oct19'`.
-- **Cifra Oficial Certificada de Asistentes Únicos:** **277 personas**
+- **Cifra Oficial Certificada de Asistentes Únicos:** **278 personas**
   - 👔 **Staff de Stands y Marcas:** 220
-  - ⭐ **Invitados VIP Directos:** 54
+  - ⭐ **Invitados VIP Directos / Preregistros:** 55 *(incluye acreditación convalidada de Allan Mendez - RINSA)*
   - ⚖️ **Jurados Calificadores VIP:** 2
   - 🎤 **Conferencistas:** 1
+
+### 🛠 Corrección de Estados en Invitaciones Directas y Convalidación de Asistencia (21 de Octubre de 2026)
+- **Caso Allan Mendez (RINSA):**
+  - **Problema:** En el panel `AdminDirectInvites.jsx`, el usuario aparecía con etiqueta anaranjada `"PENDIENTE REGISTRO"`, y en reportes de asistencia figuraba como no asistente, a pesar de haberse registrado previamente (`SXNWUk9TDJAebhLgrf9z` / `inv_mv9qxbm4_u49aqm3x`) y haberse emitido su gafete el día del evento.
+  - **Causa Raíz:**
+    1. En `AdminDirectInvites.jsx`, las variables `isUsed` y filtros de tabla evaluaban estrictamente `inv.status === 'used'`. Sin embargo, 304 invitaciones en Firestore tienen `status: 'registered'` al completar el formulario de invitación directa, provocando que la UI mostrara `"PENDIENTE REGISTRO"` a usuarios que ya estaban debidamente registrados.
+    2. En Firestore, las banderas de check-in (`checkedIn`, `attended`, `badgePrinted`) no se habían sincronizado en su documento tras la impresión del gafete en el evento.
+  - **Solución Aplicada:**
+    1. Se actualizaron en Firestore los documentos `events/2026/directInvites/inv_mv9qxbm4_u49aqm3x` y `events/2026/preregistrations/SXNWUk9TDJAebhLgrf9z` marcando `checkedIn: true`, `attended: true`, `badgePrinted: true` y `status: 'used'`.
+    2. Se refactorizó `AdminDirectInvites.jsx` para evaluar `(inv.status === 'used' || inv.status === 'registered')` en todas las vistas, métricas, filtros y exportaciones, garantizando que todo invitado registrado aparezca con su estatus correcto (`REGISTRADO` o `ASISTIÓ (IMPRESO)`).
+    3. La cifra oficial de asistentes únicos certificados se actualiza a **278 personas**.
 
 
