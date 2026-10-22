@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useDeferredValue } from 'react';
 import { collection, query, getDocs, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getEventBasePath } from '../config/eventConfig';
 import { exportConsolidatedBaseToExcel, exportConsolidatedBaseToCSV } from '../utils/exportConsolidatedExcel';
 import { getPrintDateObj, formatPrintTime, formatPrintDateTimeFull } from '../utils/formatPrintTime';
 import PrintableBadgeList from './PrintableBadgeList';
+
+const normStr = (s) =>
+  String(s || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
 
 export default function AdminAttendanceReport({ onBack }) {
   const [data, setData] = useState([]);
@@ -16,6 +23,9 @@ export default function AdminAttendanceReport({ onBack }) {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [isExportingExcel, setIsExportingExcel] = useState(false);
   const [isExportingCSV, setIsExportingCSV] = useState(false);
+
+  // Rendimiento: Búsqueda no bloqueante
+  const deferredSearchTerm = useDeferredValue(searchTerm);
 
   const basePath = getEventBasePath();
 
@@ -275,6 +285,11 @@ export default function AdminAttendanceReport({ onBack }) {
         return a.name.localeCompare(b.name);
       });
 
+      // Pre-calcular string de búsqueda para búsqueda ultra rápida
+      consolidated.forEach(item => {
+        item._searchStr = normStr(`${item.name || ''} ${item.contact || ''} ${item.company || ''} ${item.position || item.cargo || ''} ${item.id || ''}`);
+      });
+
       setData(consolidated);
     } catch (error) {
       console.error("Error fetching attendance data:", error);
@@ -346,30 +361,26 @@ export default function AdminAttendanceReport({ onBack }) {
     }
   };
 
-  const normStr = (s) =>
-    String(s || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .trim();
+  // Filtered data (Memoizado y de alta velocidad)
+  const filteredData = useMemo(() => {
+    const q = normStr(deferredSearchTerm);
+    return data.filter(item => {
+      const matchesSearch = !q || (item._searchStr ? item._searchStr.includes(q) : (
+        normStr(item.name).includes(q) || 
+        normStr(item.contact).includes(q) || 
+        normStr(item.company).includes(q) || 
+        normStr(item.position || item.cargo).includes(q)
+      ));
+      
+      const matchesCategory = categoryFilter === 'ALL' || item.category === categoryFilter;
+      
+      const matchesStatus = statusFilter === 'ALL' || 
+                            (statusFilter === 'CHECKED_IN' && item.checkedIn) || 
+                            (statusFilter === 'PENDING' && !item.checkedIn);
 
-  // Filtered data
-  const filteredData = data.filter(item => {
-    const q = normStr(searchTerm);
-    const matchesSearch = !q ||
-                          normStr(item.name).includes(q) || 
-                          normStr(item.contact).includes(q) ||
-                          normStr(item.company).includes(q) ||
-                          normStr(item.position || item.cargo).includes(q);
-    
-    const matchesCategory = categoryFilter === 'ALL' || item.category === categoryFilter;
-    
-    const matchesStatus = statusFilter === 'ALL' || 
-                          (statusFilter === 'CHECKED_IN' && item.checkedIn) || 
-                          (statusFilter === 'PENDING' && !item.checkedIn);
-
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+  }, [data, deferredSearchTerm, categoryFilter, statusFilter]);
 
   const exportToExcel = () => {
     const wsData = filteredData.map(item => ({

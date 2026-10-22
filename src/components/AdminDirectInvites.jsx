@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useDeferredValue } from 'react';
 import { collection, query, onSnapshot, doc, setDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, auth, storage } from '../firebase';
@@ -64,6 +64,13 @@ import {
 // Correo de auditoría y respaldo al que se envía copia oculta (BCC) de todas las invitaciones directas
 const INVITE_COPY_NOTIFICATION_EMAIL = 'gerenciaeventoskt@outlook.com';
 
+const normStr = (s) =>
+  String(s || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
 export default function AdminDirectInvites({ onBack, adminUser }) {
   const [invites, setInvites] = useState([]);
   const [registeredGuests, setRegisteredGuests] = useState([]);
@@ -90,6 +97,10 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'used'
   const [selectedSponsorFilter, setSelectedSponsorFilter] = useState('all'); // 'all' | 'general' | sponsorName
+
+  // Rendimiento: Búsqueda no bloqueante con useDeferredValue
+  const deferredSponsorSearch = useDeferredValue(sponsorSearchTerm);
+  const deferredSearchTerm = useDeferredValue(searchTerm);
 
   // Modal para Crear Nueva Invitación Individual
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -245,11 +256,14 @@ export default function AdminDirectInvites({ onBack, adminUser }) {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const results = [];
       snapshot.forEach((doc) => {
+        const d = doc.data();
+        const searchStr = normStr(`${d.nombre || ''} ${d.empresa || ''} ${d.email || ''} ${d.telefono || ''} ${d.sponsorName || ''} ${d.sponsorStands || ''} ${d.registeredName || ''} ${d.registeredCompany || ''} ${d.registeredEmail || ''} ${d.registeredPhone || ''} ${doc.id} ${d.registeredAttendeeId || ''}`);
         results.push({
           id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate() || new Date(),
-          usedAt: doc.data().usedAt?.toDate() || null
+          ...d,
+          _searchStr: searchStr,
+          createdAt: d.createdAt?.toDate ? d.createdAt.toDate() : (d.createdAt ? new Date(d.createdAt) : new Date()),
+          usedAt: d.usedAt?.toDate ? d.usedAt.toDate() : (d.usedAt ? new Date(d.usedAt) : null)
         });
       });
       results.sort((a, b) => b.createdAt - a.createdAt);
@@ -3245,83 +3259,128 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
     });
   };
 
-  const normStr = (s) =>
-    String(s || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .trim();
+  const sponsorsList = useMemo(() => {
+    return Object.keys(sponsorsMap).filter(sp => getSponsorKey(sp) !== 'general').sort();
+  }, [sponsorsMap]);
 
-  // Filtrar Invitaciones para la vista detallada
-  const filteredInvites = invites.filter(inv => {
-    const term = normStr(searchTerm);
-    const matchesStatus = statusFilter === 'all' || 
-      (statusFilter === 'used' ? (inv.status === 'used' || inv.status === 'registered') : inv.status === statusFilter);
-    
-    let matchesSponsor = true;
-    if (selectedSponsorFilter === 'general') {
-      matchesSponsor = !inv.sponsorName || inv.sponsorId === 'general' || getSponsorKey(inv.sponsorName) === 'general';
-    } else if (selectedSponsorFilter !== 'all') {
-      matchesSponsor = isMatchingSponsor(inv.sponsorName, selectedSponsorFilter) || (inv.sponsorId && inv.sponsorId === getSponsorKey(selectedSponsorFilter));
-    }
+  // Pre-computación y Memoización de Estadísticas por Patrocinador (O(1) durante el renderizado)
+  const sponsorStatsMap = useMemo(() => {
+    const map = {};
+    sponsorsList.forEach((sp) => {
+      const spKey = getSponsorKey(sp);
+      const spInvites = invites.filter(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === spKey));
+      const spUsed = spInvites.filter(i => i.status === 'used' || i.status === 'registered').length;
+      const spPending = spInvites.length - spUsed;
+      const spWithEmail = spInvites.filter(i => isValidEmailAddress(i.email)).length;
+      const spEmailSent = spInvites.filter(i => i.emailSent || i.emailSentAt).length;
+      const spWhatsAppSent = spInvites.filter(i => i.whatsappSent || i.whatsappSentAt).length;
+      const spContacted = spInvites.filter(i => i.emailSent || i.emailSentAt || i.whatsappSent || i.whatsappSentAt).length;
+      const spNeverContacted = spInvites.filter(i => !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt && i.status === 'pending').length;
+      const spPendingWithEmail = spInvites.filter(i => i.status === 'pending' && isValidEmailAddress(i.email));
+      const spUnsentEmail = spPendingWithEmail.filter(i => !i.emailSentAt);
+      const countToSend = spUnsentEmail.length > 0 ? spUnsentEmail.length : spPendingWithEmail.length;
+      const spPendingWithPhone = spInvites.filter(i => i.status === 'pending' && cleanPhoneNumber(i.telefono).isValid);
+      const spUnsentPhone = spPendingWithPhone.filter(i => !i.whatsappSent && !i.whatsappSentAt);
+      const countWaToSend = spUnsentPhone.length > 0 ? spUnsentPhone.length : spPendingWithPhone.length;
+      const spCoverage = spInvites.length > 0 ? Math.round((spContacted / spInvites.length) * 100) : 0;
+      const spEffectiveRate = spInvites.length > 0 ? Math.round((spUsed / spInvites.length) * 100) : 0;
 
-    if (!matchesStatus || !matchesSponsor) return false;
-    if (!term) return true;
+      map[sp] = {
+        spInvites,
+        spUsed,
+        spPending,
+        spWithEmail,
+        spEmailSent,
+        spWhatsAppSent,
+        spContacted,
+        spNeverContacted,
+        spPendingWithEmail,
+        spUnsentEmail,
+        countToSend,
+        spPendingWithPhone,
+        spUnsentPhone,
+        countWaToSend,
+        spCoverage,
+        spEffectiveRate
+      };
+    });
 
-    const name = normStr(inv.nombre);
-    const comp = normStr(inv.empresa);
-    const mail = normStr(inv.email);
-    const sp = normStr(inv.sponsorName);
-    const regName = normStr(inv.registeredName);
-    const regComp = normStr(inv.registeredCompany);
-    const token = normStr(inv.id);
+    // Estadísticas lista General
+    const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
+    const genTotal = genInv.length;
+    const genUsed = genInv.filter(i => i.status === 'used' || i.status === 'registered').length;
+    const genPending = genTotal - genUsed;
+    const genWithEmail = genInv.filter(i => isValidEmailAddress(i.email)).length;
+    const genEmailSent = genInv.filter(i => i.emailSent || i.emailSentAt).length;
+    const genWhatsAppSent = genInv.filter(i => i.whatsappSent || i.whatsappSentAt).length;
+    const genContacted = genInv.filter(i => i.emailSent || i.emailSentAt || i.whatsappSent || i.whatsappSentAt).length;
+    const genNeverContacted = genInv.filter(i => !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt && i.status === 'pending').length;
+    const genPendingWithEmail = genInv.filter(i => i.status === 'pending' && isValidEmailAddress(i.email));
+    const genUnsentEmail = genPendingWithEmail.filter(i => !i.emailSentAt);
+    const genCountToSend = genUnsentEmail.length > 0 ? genUnsentEmail.length : genPendingWithEmail.length;
+    const genPendingWithPhone = genInv.filter(i => i.status === 'pending' && cleanPhoneNumber(i.telefono).isValid);
+    const genUnsentPhone = genPendingWithPhone.filter(i => !i.whatsappSent && !i.whatsappSentAt);
+    const genCountWaToSend = genUnsentPhone.length > 0 ? genUnsentPhone.length : genPendingWithPhone.length;
+    const genCoverage = genTotal > 0 ? Math.round((genContacted / genTotal) * 100) : 0;
+    const genEffectiveRate = genTotal > 0 ? Math.round((genUsed / genTotal) * 100) : 0;
 
-    return name.includes(term) || comp.includes(term) || mail.includes(term) || sp.includes(term) || regName.includes(term) || regComp.includes(term) || token.includes(term);
-  });
+    map['general'] = {
+      genInv,
+      genTotal,
+      genUsed,
+      genPending,
+      genWithEmail,
+      genEmailSent,
+      genWhatsAppSent,
+      genContacted,
+      genNeverContacted,
+      genPendingWithEmail,
+      genUnsentEmail,
+      genCountToSend,
+      genPendingWithPhone,
+      genUnsentPhone,
+      genCountWaToSend,
+      genCoverage,
+      genEffectiveRate
+    };
 
-  const sponsorsList = Object.keys(sponsorsMap).filter(sp => getSponsorKey(sp) !== 'general').sort();
+    return map;
+  }, [invites, sponsorsList]);
 
-  // Conteo de patrocinadores según criterios para los chips de filtro
-  const countSponsorsWithInvites = sponsorsList.filter(sp => {
-    return invites.some(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp)));
-  }).length + (invites.some(i => !i.sponsorName || i.sponsorId === 'general') ? 1 : 0);
+  // Filtrar Invitaciones para la vista detallada (Memoizado y de alta velocidad)
+  const filteredInvites = useMemo(() => {
+    const term = normStr(deferredSearchTerm);
+    return invites.filter(inv => {
+      const matchesStatus = statusFilter === 'all' || 
+        (statusFilter === 'used' ? (inv.status === 'used' || inv.status === 'registered') : inv.status === statusFilter);
+      
+      let matchesSponsor = true;
+      if (selectedSponsorFilter === 'general') {
+        matchesSponsor = !inv.sponsorName || inv.sponsorId === 'general' || getSponsorKey(inv.sponsorName) === 'general';
+      } else if (selectedSponsorFilter !== 'all') {
+        matchesSponsor = isMatchingSponsor(inv.sponsorName, selectedSponsorFilter) || (inv.sponsorId && inv.sponsorId === getSponsorKey(selectedSponsorFilter));
+      }
 
-  const countSponsorsWithRegistered = sponsorsList.filter(sp => {
-    return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && (i.status === 'used' || i.status === 'registered'));
-  }).length + (invites.some(i => (!i.sponsorName || i.sponsorId === 'general') && (i.status === 'used' || i.status === 'registered')) ? 1 : 0);
+      if (!matchesStatus || !matchesSponsor) return false;
+      if (!term) return true;
 
-  const countSponsorsWithPending = sponsorsList.filter(sp => {
-    return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && i.status === 'pending');
-  }).length + (invites.some(i => (!i.sponsorName || i.sponsorId === 'general') && i.status === 'pending') ? 1 : 0);
-
-  const countSponsorsWithUnsentInvites = sponsorsList.filter(sp => {
-    return invites.some(i => (isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp))) && i.status === 'pending' && !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt);
-  }).length + (invites.some(i => (!i.sponsorName || i.sponsorId === 'general') && i.status === 'pending' && !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt) ? 1 : 0);
+      return (inv._searchStr || '').includes(term);
+    });
+  }, [invites, deferredSearchTerm, statusFilter, selectedSponsorFilter]);
 
   const doesInviteMatchSearchTerm = (inv, rawTerm) => {
-    const term = (rawTerm || '').toLowerCase().trim();
+    const term = normStr(rawTerm);
     if (!term) return true;
-    const fields = [
-      inv.nombre,
-      inv.registeredName,
-      inv.empresa,
-      inv.registeredCompany,
-      inv.email,
-      inv.registeredEmail,
-      inv.telefono,
-      inv.registeredPhone,
-      inv.id,
-      inv.registeredAttendeeId
-    ];
-    return fields.some(val => val && String(val).toLowerCase().includes(term));
+    if (inv._searchStr) return inv._searchStr.includes(term);
+    return false;
   };
 
-  // Personas encontradas desde el buscador principal del directorio en cualquiera de las listas
-  const matchingPeopleFromDirectorySearch = (() => {
-    const term = sponsorSearchTerm.toLowerCase().trim();
+  // Personas encontradas desde el buscador principal del directorio en cualquiera de las listas (Memoizado)
+  const matchingPeopleFromDirectorySearch = useMemo(() => {
+    const term = normStr(deferredSponsorSearch);
     if (!term) return [];
     return invites.filter(inv => {
-      if (!doesInviteMatchSearchTerm(inv, term)) return false;
+      if (!inv._searchStr || !inv._searchStr.includes(term)) return false;
       if (sponsorFilterStatus === 'has_registered') return inv.status === 'used' || inv.status === 'registered';
       if (sponsorFilterStatus === 'has_pending') return inv.status === 'pending';
       if (sponsorFilterStatus === 'has_unsent_emails') {
@@ -3329,74 +3388,172 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
       }
       return true;
     });
-  })();
+  }, [invites, deferredSponsorSearch, sponsorFilterStatus]);
 
-  // Filtrar lista de patrocinadores para el directorio (Búsqueda + Filtro de Estado)
-  const filteredSponsorsList = sponsorsList.filter(sp => {
-    const term = sponsorSearchTerm.toLowerCase().trim();
-    const stands = (sponsorsMap[sp]?.stands || []).join(' ').toLowerCase();
-    const spInvites = invites.filter(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp)));
-    const matchesSponsorOrStand = !term || sp.toLowerCase().includes(term) || stands.includes(term);
-    const matchesPersonInList = term ? spInvites.some(i => doesInviteMatchSearchTerm(i, term)) : false;
+  // Filtrar lista de patrocinadores para el directorio (Búsqueda + Filtro de Estado) (Memoizado)
+  const filteredSponsorsList = useMemo(() => {
+    const term = normStr(deferredSponsorSearch);
+    return sponsorsList.filter(sp => {
+      const stands = (sponsorsMap[sp]?.stands || []).join(' ').toLowerCase();
+      const stats = sponsorStatsMap[sp];
+      const spInvites = stats?.spInvites || [];
+      const matchesSponsorOrStand = !term || normStr(sp).includes(term) || normStr(stands).includes(term);
+      const matchesPersonInList = term ? spInvites.some(i => (i._searchStr || '').includes(term)) : false;
 
-    if (!matchesSponsorOrStand && !matchesPersonInList) return false;
+      if (!matchesSponsorOrStand && !matchesPersonInList) return false;
 
-    if (sponsorFilterStatus === 'has_invites') return spInvites.length > 0;
-    if (sponsorFilterStatus === 'has_registered') return spInvites.some(i => i.status === 'used' || i.status === 'registered');
-    if (sponsorFilterStatus === 'has_pending') return spInvites.some(i => i.status === 'pending');
-    if (sponsorFilterStatus === 'has_unsent_emails') return spInvites.some(i => i.status === 'pending' && !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt);
+      if (sponsorFilterStatus === 'has_invites') return spInvites.length > 0;
+      if (sponsorFilterStatus === 'has_registered') return (stats?.spUsed || 0) > 0;
+      if (sponsorFilterStatus === 'has_pending') return (stats?.spPending || 0) > 0;
+      if (sponsorFilterStatus === 'has_unsent_emails') return (stats?.spNeverContacted || 0) > 0;
 
-    return true;
-  });
+      return true;
+    });
+  }, [sponsorsList, sponsorsMap, sponsorStatsMap, deferredSponsorSearch, sponsorFilterStatus]);
 
-  // Visibilidad de la fila Especial General según filtros
-  const showGeneralRow = (() => {
-    const term = sponsorSearchTerm.toLowerCase().trim();
-    const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
+  // Visibilidad de la fila Especial General según filtros (Memoizado)
+  const showGeneralRow = useMemo(() => {
+    const term = normStr(deferredSponsorSearch);
+    const genStats = sponsorStatsMap['general'];
+    const genInv = genStats?.genInv || [];
     const matchesGeneralTitle = !term || 'invitacion general expoferre karen torres'.includes(term);
-    const matchesPersonInGeneral = term ? genInv.some(i => doesInviteMatchSearchTerm(i, term)) : false;
+    const matchesPersonInGeneral = term ? genInv.some(i => (i._searchStr || '').includes(term)) : false;
 
     if (!matchesGeneralTitle && !matchesPersonInGeneral) return false;
 
-    if (sponsorFilterStatus === 'has_invites') return genInv.length > 0;
-    if (sponsorFilterStatus === 'has_registered') return genInv.some(i => i.status === 'used' || i.status === 'registered');
-    if (sponsorFilterStatus === 'has_pending') return genInv.some(i => i.status === 'pending');
-    if (sponsorFilterStatus === 'has_unsent_emails') return genInv.some(i => i.status === 'pending' && !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt);
+    if (sponsorFilterStatus === 'has_invites') return (genStats?.genTotal || 0) > 0;
+    if (sponsorFilterStatus === 'has_registered') return (genStats?.genUsed || 0) > 0;
+    if (sponsorFilterStatus === 'has_pending') return (genStats?.genPending || 0) > 0;
+    if (sponsorFilterStatus === 'has_unsent_emails') return (genStats?.genNeverContacted || 0) > 0;
 
     return true;
-  })();
+  }, [sponsorStatsMap, deferredSponsorSearch, sponsorFilterStatus]);
 
-  // Métricas Globales
-  const totalInvitesCount = invites.length;
-  const totalPendingCount = invites.filter(i => i.status === 'pending').length;
-  const totalUsedCount = invites.filter(i => i.status === 'used' || i.status === 'registered').length;
+  // Conteo de patrocinadores para los chips de filtro (O(1) derivado del mapa)
+  const sponsorFilterCounts = useMemo(() => {
+    let withInvites = 0;
+    let withRegistered = 0;
+    let withPending = 0;
+    let withUnsent = 0;
 
-  // Métricas Globales Multicanal (Correo + WhatsApp + Enlace Directo)
-  const totalEmailsSent = invites.filter(i => i.emailSent || i.emailSentAt).length;
-  const totalWhatsAppSent = invites.filter(i => i.whatsappSent || i.whatsappSentAt).length;
+    sponsorsList.forEach(sp => {
+      const stats = sponsorStatsMap[sp];
+      if (!stats) return;
+      if (stats.spInvites.length > 0) withInvites++;
+      if (stats.spUsed > 0) withRegistered++;
+      if (stats.spPending > 0) withPending++;
+      if (stats.spNeverContacted > 0) withUnsent++;
+    });
 
-  // Invitados que han recibido invitación por cualquier canal (Correo O WhatsApp)
-  const totalContacted = invites.filter(i => i.emailSent || i.emailSentAt || i.whatsappSent || i.whatsappSentAt).length;
+    const genStats = sponsorStatsMap['general'];
+    if (genStats) {
+      if (genStats.genTotal > 0) withInvites++;
+      if (genStats.genUsed > 0) withRegistered++;
+      if (genStats.genPending > 0) withPending++;
+      if (genStats.genNeverContacted > 0) withUnsent++;
+    }
 
-  // Contactados que todavía están pendientes de completar su registro
-  const totalPendingContacted = invites.filter(i => (i.emailSent || i.emailSentAt || i.whatsappSent || i.whatsappSentAt) && i.status === 'pending').length;
+    return { withInvites, withRegistered, withPending, withUnsent };
+  }, [sponsorsList, sponsorStatsMap]);
 
-  // Invitados a los que aún no se les ha enviado invitación por ningún canal
-  const totalNeverContacted = invites.filter(i => !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt && i.status === 'pending').length;
+  const countSponsorsWithInvites = sponsorFilterCounts.withInvites;
+  const countSponsorsWithRegistered = sponsorFilterCounts.withRegistered;
+  const countSponsorsWithPending = sponsorFilterCounts.withPending;
+  const countSponsorsWithUnsentInvites = sponsorFilterCounts.withUnsent;
 
-  // Porcentajes Globales Multicanal
-  const globalCoveragePercent = totalInvitesCount > 0 ? Math.round((totalContacted / totalInvitesCount) * 100) : 0;
-  const globalEffectiveRate = totalInvitesCount > 0 ? Math.round((totalUsedCount / totalInvitesCount) * 100) : 0;
-  const contactConversionPct = totalContacted > 0 ? Math.round((totalUsedCount / (totalContacted || 1)) * 100) : 0;
+  // Métricas Globales (1 sola pasada sobre invites con useMemo)
+  const globalMetrics = useMemo(() => {
+    const totalInvitesCount = invites.length;
+    let totalPendingCount = 0;
+    let totalUsedCount = 0;
+    let totalEmailsSent = 0;
+    let totalWhatsAppSent = 0;
+    let totalContacted = 0;
+    let totalPendingContacted = 0;
+    let totalNeverContacted = 0;
+    let totalWithValidEmail = 0;
+    let totalEmailsPending = 0;
+    let totalUnregisteredWithEmail = 0;
+    let totalRegisteredFromEmail = 0;
 
-  // Métricas de Correo (mantenidas para compatibilidad con tablas y exportación)
-  const totalWithValidEmail = invites.filter(i => isValidEmailAddress(i.email)).length;
-  const totalEmailsPending = invites.filter(i => isValidEmailAddress(i.email) && !i.emailSentAt && i.status === 'pending').length;
-  const totalUnregisteredWithEmail = invites.filter(i => isValidEmailAddress(i.email) && i.status === 'pending').length;
-  const totalRegisteredFromEmail = invites.filter(i => (i.emailSent || i.emailSentAt) && (i.status === 'used' || i.status === 'registered')).length;
-  const totalWithoutValidEmail = totalInvitesCount - totalWithValidEmail;
-  const emailCoveragePercent = totalWithValidEmail > 0 ? Math.round((totalEmailsSent / totalWithValidEmail) * 100) : 0;
-  const emailConversionPercent = totalEmailsSent > 0 ? Math.round((totalRegisteredFromEmail / (totalEmailsSent || 1)) * 100) : 0;
+    invites.forEach(i => {
+      const isUsed = i.status === 'used' || i.status === 'registered';
+      const isPending = i.status === 'pending';
+      const hasEmailSent = Boolean(i.emailSent || i.emailSentAt);
+      const hasWhatsAppSent = Boolean(i.whatsappSent || i.whatsappSentAt);
+      const isContacted = hasEmailSent || hasWhatsAppSent;
+      const hasValidEmail = isValidEmailAddress(i.email);
+
+      if (isUsed) totalUsedCount++;
+      if (isPending) totalPendingCount++;
+      if (hasEmailSent) totalEmailsSent++;
+      if (hasWhatsAppSent) totalWhatsAppSent++;
+      if (isContacted) {
+        totalContacted++;
+        if (isPending) totalPendingContacted++;
+      } else if (isPending) {
+        totalNeverContacted++;
+      }
+
+      if (hasValidEmail) {
+        totalWithValidEmail++;
+        if (isPending) {
+          totalUnregisteredWithEmail++;
+          if (!i.emailSentAt) totalEmailsPending++;
+        }
+      }
+      if (hasEmailSent && isUsed) totalRegisteredFromEmail++;
+    });
+
+    const globalCoveragePercent = totalInvitesCount > 0 ? Math.round((totalContacted / totalInvitesCount) * 100) : 0;
+    const globalEffectiveRate = totalInvitesCount > 0 ? Math.round((totalUsedCount / totalInvitesCount) * 100) : 0;
+    const contactConversionPct = totalContacted > 0 ? Math.round((totalUsedCount / (totalContacted || 1)) * 100) : 0;
+    const totalWithoutValidEmail = totalInvitesCount - totalWithValidEmail;
+    const emailCoveragePercent = totalWithValidEmail > 0 ? Math.round((totalEmailsSent / totalWithValidEmail) * 100) : 0;
+    const emailConversionPercent = totalEmailsSent > 0 ? Math.round((totalRegisteredFromEmail / (totalEmailsSent || 1)) * 100) : 0;
+
+    return {
+      totalInvitesCount,
+      totalPendingCount,
+      totalUsedCount,
+      totalEmailsSent,
+      totalWhatsAppSent,
+      totalContacted,
+      totalPendingContacted,
+      totalNeverContacted,
+      globalCoveragePercent,
+      globalEffectiveRate,
+      contactConversionPct,
+      totalWithValidEmail,
+      totalEmailsPending,
+      totalUnregisteredWithEmail,
+      totalRegisteredFromEmail,
+      totalWithoutValidEmail,
+      emailCoveragePercent,
+      emailConversionPercent
+    };
+  }, [invites]);
+
+  const {
+    totalInvitesCount,
+    totalPendingCount,
+    totalUsedCount,
+    totalEmailsSent,
+    totalWhatsAppSent,
+    totalContacted,
+    totalPendingContacted,
+    totalNeverContacted,
+    globalCoveragePercent,
+    globalEffectiveRate,
+    contactConversionPct,
+    totalWithValidEmail,
+    totalEmailsPending,
+    totalUnregisteredWithEmail,
+    totalRegisteredFromEmail,
+    totalWithoutValidEmail,
+    emailCoveragePercent,
+    emailConversionPercent
+  } = globalMetrics;
 
   if (printItems) {
     return (
@@ -4034,13 +4191,13 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                         {/* Métrica: Envíos Multicanal (Correo + WhatsApp) */}
                         <td className="p-4 text-center">
                           {(() => {
-                            const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
-                            const genTotal = genInv.length;
-                            const genEmailSent = genInv.filter(i => i.emailSent || i.emailSentAt).length;
-                            const genWhatsAppSent = genInv.filter(i => i.whatsappSent || i.whatsappSentAt).length;
-                            const genContacted = genInv.filter(i => i.emailSent || i.emailSentAt || i.whatsappSent || i.whatsappSentAt).length;
-                            const genNeverContacted = genInv.filter(i => !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt && i.status === 'pending').length;
-                            const genCoverage = genTotal > 0 ? Math.round((genContacted / genTotal) * 100) : 0;
+                            const genStats = sponsorStatsMap['general'] || {};
+                            const genTotal = genStats.genTotal || 0;
+                            const genEmailSent = genStats.genEmailSent || 0;
+                            const genWhatsAppSent = genStats.genWhatsAppSent || 0;
+                            const genContacted = genStats.genContacted || 0;
+                            const genNeverContacted = genStats.genNeverContacted || 0;
+                            const genCoverage = genStats.genCoverage || 0;
 
                             return (
                               <div className="space-y-1.5 min-w-[140px] max-w-[175px] mx-auto">
@@ -4094,15 +4251,16 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                         {/* Métrica: Registrados vs Pendientes */}
                         <td className="p-4 text-center">
                           {(() => {
-                            const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
-                            const genUsed = genInv.filter(i => i.status === 'used' || i.status === 'registered').length;
-                            const genPending = genInv.length - genUsed;
-                            const genEffectiveRate = genInv.length > 0 ? Math.round((genUsed / genInv.length) * 100) : 0;
+                            const genStats = sponsorStatsMap['general'] || {};
+                            const genTotal = genStats.genTotal || 0;
+                            const genUsed = genStats.genUsed || 0;
+                            const genPending = genStats.genPending || 0;
+                            const genEffectiveRate = genStats.genEffectiveRate || 0;
 
                             return (
                               <div className="space-y-1 min-w-[120px] max-w-[150px] mx-auto">
                                 <div className="text-sm font-black text-on-surface">
-                                  {genInv.length} <span className="text-[10px] font-normal text-slate-500">invitados</span>
+                                  {genTotal} <span className="text-[10px] font-normal text-slate-500">invitados</span>
                                 </div>
                                 <div className="flex items-center justify-center gap-2 text-xs font-bold">
                                   <span className="text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200" title="Gafetes Emitidos">
@@ -4112,7 +4270,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                     ⏳ {genPending}
                                   </span>
                                 </div>
-                                {genInv.length > 0 && (
+                                {genTotal > 0 && (
                                   <div className="text-[10px] text-slate-500">
                                     <span className="font-bold text-slate-700">{genEffectiveRate}%</span> efectividad
                                   </div>
@@ -4178,14 +4336,13 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                         {/* Acciones */}
                         <td className="p-3 pr-6 text-center">
                           {(() => {
-                            const genInv = invites.filter(i => !i.sponsorName || i.sponsorId === 'general' || getSponsorKey(i.sponsorName) === 'general');
-                            const genPendingWithEmail = genInv.filter(i => i.status === 'pending' && isValidEmailAddress(i.email));
-                            const genUnsentEmail = genPendingWithEmail.filter(i => !i.emailSentAt);
-                            const countToSend = genUnsentEmail.length > 0 ? genUnsentEmail.length : genPendingWithEmail.length;
-
-                            const genPendingWithPhone = genInv.filter(i => i.status === 'pending' && cleanPhoneNumber(i.telefono).isValid);
-                            const genUnsentPhone = genPendingWithPhone.filter(i => !i.whatsappSent && !i.whatsappSentAt);
-                            const countGenWaToSend = genUnsentPhone.length > 0 ? genUnsentPhone.length : genPendingWithPhone.length;
+                            const genStats = sponsorStatsMap['general'] || {};
+                            const genTotal = genStats.genTotal || 0;
+                            const genPendingWithEmail = genStats.genPendingWithEmail || [];
+                            const genUnsentEmail = genStats.genUnsentEmail || [];
+                            const countToSend = genStats.genCountToSend || 0;
+                            const genPendingWithPhone = genStats.genPendingWithPhone || [];
+                            const countGenWaToSend = genStats.genCountWaToSend || 0;
 
                             return (
                               <div className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap bg-surface-variant/30 p-1.5 rounded-xl border border-outline-variant/60 shadow-2xs">
@@ -4258,10 +4415,10 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                     setViewMode('invites');
                                   }}
                                   className="px-2 py-1.5 bg-white border border-outline-variant hover:bg-surface text-on-surface rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs shrink-0"
-                                  title={`Ver los ${genInv.length} invitados de la lista General`}
+                                  title={`Ver los ${genTotal} invitados de la lista General`}
                                 >
                                   <Users size={13} />
-                                  <span>Ver ({genInv.length})</span>
+                                  <span>Ver ({genTotal})</span>
                                 </button>
 
                                 {/* Plantilla */}
@@ -4276,7 +4433,7 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
                                 {/* Exportar */}
                                 <button
                                   onClick={() => handleExportExcel('general')}
-                                  disabled={genInv.length === 0}
+                                  disabled={genTotal === 0}
                                   className="p-1.5 bg-[#217346] hover:bg-[#1a5c37] text-white rounded-lg text-xs transition-colors disabled:opacity-40 cursor-pointer shadow-2xs shrink-0"
                                   title="Exportar a Excel los invitados de la lista General"
                                 >
@@ -4291,24 +4448,20 @@ Aún estás a tiempo de confirmar tu asistencia y recibir tu *Gafete Oficial con
 
                     {/* FILAS DE LOS 27 PATROCINADORES */}
                     {filteredSponsorsList.map((sp) => {
-                      const spInvites = invites.filter(i => isMatchingSponsor(i.sponsorName, sp) || (i.sponsorId && i.sponsorId === getSponsorKey(sp)));
-                      const spUsed = spInvites.filter(i => i.status === 'used' || i.status === 'registered').length;
-                      const spPending = spInvites.length - spUsed;
-                      const spWithEmail = spInvites.filter(i => isValidEmailAddress(i.email)).length;
-                      const spEmailSent = spInvites.filter(i => i.emailSent || i.emailSentAt).length;
-                      const spWhatsAppSent = spInvites.filter(i => i.whatsappSent || i.whatsappSentAt).length;
-                      const spContacted = spInvites.filter(i => i.emailSent || i.emailSentAt || i.whatsappSent || i.whatsappSentAt).length;
-                      const spNeverContacted = spInvites.filter(i => !i.emailSent && !i.emailSentAt && !i.whatsappSent && !i.whatsappSentAt && i.status === 'pending').length;
-                      const spPendingWithEmail = spInvites.filter(i => i.status === 'pending' && isValidEmailAddress(i.email));
-                      const spUnsentEmail = spPendingWithEmail.filter(i => !i.emailSentAt);
-                      const countToSend = spUnsentEmail.length > 0 ? spUnsentEmail.length : spPendingWithEmail.length;
-                      
-                      const spPendingWithPhone = spInvites.filter(i => i.status === 'pending' && cleanPhoneNumber(i.telefono).isValid);
-                      const spUnsentPhone = spPendingWithPhone.filter(i => !i.whatsappSent && !i.whatsappSentAt);
-                      const countWaToSend = spUnsentPhone.length > 0 ? spUnsentPhone.length : spPendingWithPhone.length;
-                      
-                      const spCoverage = spInvites.length > 0 ? Math.round((spContacted / spInvites.length) * 100) : 0;
-                      const spEffectiveRate = spInvites.length > 0 ? Math.round((spUsed / spInvites.length) * 100) : 0;
+                      const spStats = sponsorStatsMap[sp] || {};
+                      const spInvites = spStats.spInvites || [];
+                      const spUsed = spStats.spUsed || 0;
+                      const spPending = spStats.spPending || 0;
+                      const spEmailSent = spStats.spEmailSent || 0;
+                      const spWhatsAppSent = spStats.spWhatsAppSent || 0;
+                      const spContacted = spStats.spContacted || 0;
+                      const spNeverContacted = spStats.spNeverContacted || 0;
+                      const spPendingWithEmail = spStats.spPendingWithEmail || [];
+                      const countToSend = spStats.countToSend || 0;
+                      const spPendingWithPhone = spStats.spPendingWithPhone || [];
+                      const countWaToSend = spStats.countWaToSend || 0;
+                      const spCoverage = spStats.spCoverage || 0;
+                      const spEffectiveRate = spStats.spEffectiveRate || 0;
 
                       const art = getSponsorArt(sp);
                       const rawStands = sponsorsMap[sp]?.stands?.join(', ') || art.stands || 'N/A';

@@ -1852,4 +1852,15 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
     2. Se refactorizó `AdminDirectInvites.jsx` para evaluar `(inv.status === 'used' || inv.status === 'registered')` en todas las vistas, métricas, filtros y exportaciones, garantizando que todo invitado registrado aparezca con su estatus correcto (`REGISTRADO` o `ASISTIÓ (IMPRESO)`).
     3. La cifra oficial de asistentes únicos certificados se actualiza a **278 personas**.
 
+### ⚡ Optimización de Rendimiento y Eliminación de Congelamientos en Búsqueda (21 de Octubre de 2026)
+- **Problema Reportado:** Al escribir en los buscadores de contactos (tanto el día del evento como posteriormente), la interfaz de usuario se congelaba, se pegaba y no respondía fluidamente al teclear.
+- **Causas Raíz Detectadas:**
+  1. **Recálculos síncronos masivos en el ciclo de renderizado:** En `AdminDirectInvites.jsx`, por cada letra ingresada en el buscador, se ejecutaban más de 330 filtros síncronos sobre la lista completa de 709 invitados (12 filtros por cada uno de los 27 patrocinadores directamente en el JSX), ejecutando cientos de miles de normalizaciones con expresiones regulares (`normalize('NFD')`, `.replace()`) en el hilo principal de JavaScript.
+  2. **Ausencia de memoización (`useMemo`):** La lista filtrada de patrocinadores, las personas encontradas y las métricas globales se recalculaban desde cero en cada pulsación de tecla, sin importar si los datos subyacentes habían cambiado.
+  3. **Ausencia de concurrencia / diferimiento:** Los inputs actualizaban el estado de forma inmediata y bloqueante, sin priorizar la captura de eventos del teclado (`useDeferredValue`).
+- **Solución Implementada:**
+  1. **`useDeferredValue` en React 19:** Implementado en `AdminDirectInvites.jsx`, `AdminPreRegistrations.jsx` y `AdminAttendanceReport.jsx`, permitiendo que el input del teclado responda con 0 ms de latencia (hilo interactivo inmediato) mientras el filtrado pesado ocurre en segundo plano de manera no bloqueante.
+  2. **Pre-indexación de cadenas de búsqueda (`_searchStr`):** Se precalcula una cadena normalizada única por registro al recibir los datos de Firestore. Las búsquedas ahora ejecutan un único `.includes(term)` instantáneo ($O(1)$) en lugar de 8-10 normalizaciones pesadas por registro.
+  3. **Extracción y Memoización de Estadísticas (`sponsorStatsMap`):** Las métricas de cada patrocinador (total, usados, pendientes, contactados, etc.) se calculan una sola vez con `useMemo([invites, sponsorsList])`. Durante el renderizado de la tabla, las filas acceden directamente a las métricas en tiempo constante ($O(1)$) sin filtrar la lista completa.
+
 

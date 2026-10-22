@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, deleteDoc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth, firebaseConfig } from '../firebase';
 import { initializeApp } from "firebase/app";
@@ -9,12 +9,22 @@ import AdminQRViewModal from './AdminQRViewModal';
 import PrintableBadgeList from './PrintableBadgeList';
 import { formatPrintTime, formatPrintDateTimeFull } from '../utils/formatPrintTime';
 
+const normStr = (s) =>
+  String(s || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
 export default function AdminPreRegistrations({ onBack, adminUser }) {
   const [registrations, setRegistrations] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'approved' | 'pending' | 'no_show' | 'migrated'
   const [loading, setLoading] = useState(true);
   const [printItems, setPrintItems] = useState(null);
+
+  // Rendimiento: Búsqueda no bloqueante
+  const deferredSearchTerm = useDeferredValue(searchTerm);
   
   // On-Site / Door Registration States
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -67,9 +77,12 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
         const employeesVal = d.employees || d.empleados || (d.personalEmpresa ? `${d.personalEmpresa} pers.` : '');
         const positionVal = d.position || d.cargo || d.puesto || '';
 
+        const searchStr = normStr(`${fullName} ${companyName} ${emailAddr} ${phoneNum} ${positionVal} ${doc.id}`);
+
         results.push({
           id: doc.id,
           ...d,
+          _searchStr: searchStr,
           name: fullName,
           company: companyName,
           email: emailAddr,
@@ -428,40 +441,41 @@ export default function AdminPreRegistrations({ onBack, adminUser }) {
     }
   };
 
-  const normStr = (s) =>
-    String(s || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .trim();
-
-  const filteredRegistrations = registrations.filter(reg => {
-    const term = normStr(searchTerm);
-    const nameMatch = normStr(reg.name).includes(term);
-    const emailMatch = normStr(reg.email).includes(term);
-    const phoneMatch = normStr(reg.phone).includes(term);
-    const companyMatch = normStr(reg.company).includes(term);
-    const matchesSearch = !term || nameMatch || emailMatch || phoneMatch || companyMatch;
-    
-    if (needsFollowUpOnly && !reg.needsFollowUp) {
-      return false;
-    }
-
-    if (statusFilter !== 'all') {
-      if (statusFilter === 'pending') {
-        const isPending = reg.status !== 'approved' && reg.status !== 'no_show' && reg.status !== 'migrated';
-        if (!isPending) return false;
-      } else if (reg.status !== statusFilter) {
+  const filteredRegistrations = useMemo(() => {
+    const term = normStr(deferredSearchTerm);
+    return registrations.filter(reg => {
+      const matchesSearch = !term || (reg._searchStr || '').includes(term);
+      
+      if (needsFollowUpOnly && !reg.needsFollowUp) {
         return false;
       }
-    }
 
-    return matchesSearch;
-  });
+      if (statusFilter !== 'all') {
+        if (statusFilter === 'pending') {
+          const isPending = reg.status !== 'approved' && reg.status !== 'no_show' && reg.status !== 'migrated';
+          if (!isPending) return false;
+        } else if (reg.status !== statusFilter) {
+          return false;
+        }
+      }
 
-  const totalCount = registrations.length;
-  const approvedCount = registrations.filter(reg => reg.status === 'approved').length;
-  const pendingCount = registrations.filter(reg => reg.status !== 'approved' && reg.status !== 'no_show' && reg.status !== 'migrated').length;
+      return matchesSearch;
+    });
+  }, [registrations, deferredSearchTerm, needsFollowUpOnly, statusFilter]);
+
+  const { totalCount, approvedCount, pendingCount } = useMemo(() => {
+    let approved = 0;
+    let pending = 0;
+    registrations.forEach(reg => {
+      if (reg.status === 'approved') approved++;
+      else if (reg.status !== 'no_show' && reg.status !== 'migrated') pending++;
+    });
+    return {
+      totalCount: registrations.length,
+      approvedCount: approved,
+      pendingCount: pending
+    };
+  }, [registrations]);
 
   if (printItems) {
     return (
