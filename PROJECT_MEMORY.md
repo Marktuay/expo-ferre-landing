@@ -1863,4 +1863,65 @@ Piezas de interfaz que se reciclan en distintas partes de la aplicación.
   2. **Pre-indexación de cadenas de búsqueda (`_searchStr`):** Se precalcula una cadena normalizada única por registro al recibir los datos de Firestore. Las búsquedas ahora ejecutan un único `.includes(term)` instantáneo ($O(1)$) en lugar de 8-10 normalizaciones pesadas por registro.
   3. **Extracción y Memoización de Estadísticas (`sponsorStatsMap`):** Las métricas de cada patrocinador (total, usados, pendientes, contactados, etc.) se calculan una sola vez con `useMemo([invites, sponsorsList])`. Durante el renderizado de la tabla, las filas acceden directamente a las métricas en tiempo constante ($O(1)$) sin filtrar la lista completa.
 
+---
+
+## 📐 Principios de Arquitectura y Buenas Prácticas para Futuros Desarrollos
+
+A partir de las eventualidades, incidencias en vivo y lecciones aprendidas durante la edición 2026, se establecen como **estándar obligatorio** las siguientes directrices técnicas para cualquier nuevo desarrollo, módulo o futura edición:
+
+### 1. Manejo Estricto del Ciclo de Vida y Estados Duales
+* **El Problema:** Un registro de invitación directa puede estar en `pending`, `registered` (formulario completado por el invitado) o `used` (gafete impreso / check-in realizado en el evento). Tratar únicamente `used` como estado válido de registro causaba que invitados confirmados aparecieran erróneamente como `"PENDIENTE REGISTRO"`.
+* **Regla Obligatoria:** 
+  - Todo chequeo de "usuario registrado" DEBE evaluar explícitamente:
+    ```js
+    const isRegistered = inv.status === 'registered' || inv.status === 'used';
+    ```
+  - `pending` = Invitación generada pero aún no llenada por el invitado.
+  - `registered` = Formulario completado exitosamente con datos del asistente.
+  - `used` = Asistente acreditado / Gafete emitido en el evento.
+
+### 2. Sincronización Atómica y Bidireccional de Check-in y Asistencia
+* **El Problema:** La acreditación e impresión de gafetes puede dispararse desde múltiples módulos (`AdminPreRegistrations`, `AdminDirectInvites`, `AdminAttendanceReport`, `AdminCheckIn`). Si solo se actualiza la colección local, los registros vinculados quedan desfasados (ej. convalidado en prerregistros pero no en invitaciones directas).
+* **Regla Obligatoria:**
+  - Toda operación de check-in / impresión DEBE sincronizar atómicamente:
+    ```js
+    {
+      checkedIn: true,
+      checkInTime: serverTimestamp(),
+      badgePrinted: true,
+      badgePrintedAt: serverTimestamp(),
+      attended: true,
+      attendedAt: serverTimestamp(),
+      status: 'used' // si proviene de invitaciones directas
+    }
+    ```
+  - Si un registro en `preregistrations` tiene `inviteToken` o proviene de `directInvites`, debe actualizarse en simultáneo el documento correspondiente en `directInvites`.
+  - Si se realiza desde `directInvites`, debe sincronizarse el documento hermano en `preregistrations` mediante `registeredAttendeeId`.
+
+### 3. Rendimiento en Interfaces con Alto Volumen de Datos (Zero-Freeze UI)
+* **El Problema:** Al escribir en buscadores sobre tablas con 700+ registros y decenas de categorías, el renderizado síncrono bloqueaba el hilo principal de JavaScript, congelando la interfaz y provocando retrasos severos al teclear.
+* **Regla Obligatoria:**
+  - **Uso Obligatorio de `useDeferredValue`:** En React 19, todo campo de búsqueda sobre listas masivas debe utilizar `const deferredSearch = useDeferredValue(searchTerm);` para priorizar la respuesta del teclado con 0 ms de latencia.
+  - **Prohibido Filtrar dentro del JSX:** Nunca ejecutar `.filter()`, `.forEach()` o cálculos de agregación dentro de los bucles de renderizado `.map((item) => ...)` del JSX. 
+  - **Mapas de Métricas Precomputadas (`useMemo`):** Los contadores y estadísticas por grupo o categoría deben calcularse una sola vez mediante mapas en memoria ($O(1)$) usando `useMemo`.
+  - **Pre-indexación de Cadenas de Búsqueda (`_searchStr`):** Precalcular un campo `_searchStr` normalizado al recibir los datos de Firestore. Las búsquedas deben resolver con un simple `item._searchStr.includes(term)` evitando normalizaciones repetitivas de regex en cada pulsación.
+
+### 4. Búsqueda Tolerante a Tildes, Mayúsculas y Caracteres Especiales
+* **El Problema:** Búsquedas por "Méndez" no encontraban "Mendez", o viceversa, dificultando la atención ágil en recepción el día del evento.
+* **Regla Obligatoria:**
+  - Toda búsqueda o comparación de texto debe normalizarse eliminando marcas diacríticas (acentos/tildes) y convirtiendo a minúsculas:
+    ```js
+    export const normalizeText = (text) => {
+      return (text || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    };
+    ```
+
+### 5. Respaldo Previo ante Depuración de Duplicados
+* **Regla Obligatoria:** Cualquier script o procedimiento que limpie, desmarque o consolide registros duplicados debe respaldar primero el documento original en colecciones `*_backup` con timestamp y `backupReason`, garantizando trazabilidad y auditoría total.
+
 
